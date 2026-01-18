@@ -15,11 +15,20 @@ class CSV extends CSV_Custom
 {
 	public bool $ofx_balance_as_transaction = false;
 	protected ?string $account_number = null;
+	protected ?string $bank = null;
+	protected ?array $skip_until = null;
+	protected ?array $stop_at = null;
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
-		parent::__construct($session, $key);
 		$this->cache_properties[] = 'account_number';
+		$this->cache_properties[] = 'bank';
+		parent::__construct($session, $key);
+
+		if ($this->bank === 'CM') {
+			$this->skip_until = ['Date', 'Valeur', 'Libellé', 'Débit', 'Crédit'];
+			$this->stop_at = ['', '', ''];
+		}
 	}
 
 	public function loadFile(string $path, ?string $file_name = null): void
@@ -34,15 +43,21 @@ class CSV extends CSV_Custom
 		}
 		else {
 			parent::loadFile($path, $file_name);
+		}
 
-			// Try to set translation table automatically, this might work in some cases
-			if (!$this->translation) {
-				try {
-					$this->setTranslationTableAuto();
-				}
-				catch (UserException $e) {
-					// Ignore any error, this just means the user will have to choose columns
-				}
+		// XLSX from Crédit Mutuel
+		if (isset($this->sheets)
+			&& count($this->sheets) >= 2
+			&& $this->sheets[0] === 'Vos comptes') {
+			$this->bank = 'CM';
+			$this->setTranslationTable(['date', null, 'label', 'debit', 'credit', null, null]);
+			$this->skip(0);
+
+			// Remove first sheet, it's just a list of accounts
+			unset($this->rows[0], $this->sheets[0]);
+
+			if (count($this->sheets) === 1) {
+				$this->sheet = 1;
 			}
 		}
 
@@ -54,26 +69,21 @@ class CSV extends CSV_Custom
 	 */
 	protected function parseLine(int $line, array &$row): int
 	{
-		static $bank = null, $skip_until = null, $stop_at = null;
-
-		// Reset parser
-		if ($line === 1) {
-			$bank = $skip_until = $stop_at = null;
-		}
-
-		if (null !== $skip_until) {
-			foreach ($skip_until as $key => $value) {
+		//$this->clear();
+		if (null !== $this->skip_until) {
+			foreach ($this->skip_until as $key => $value) {
 				if (!array_key_exists($key, $row) || $row[$key] !== $value) {
 					return 0;
 				}
 			}
 
-			$skip_until = null;
+			$this->skip_until = null;
+			return 0;
 		}
-		elseif (null !== $stop_at) {
+		elseif (null !== $this->stop_at) {
 			$stop = true;
 
-			foreach ($stop_at as $key => $value) {
+			foreach ($this->stop_at as $key => $value) {
 				if (!array_key_exists($key, $row) || $row[$key] !== $value) {
 					$stop = false;
 					break;
@@ -85,20 +95,11 @@ class CSV extends CSV_Custom
 			}
 		}
 
-		// XLSX Crédit Mutuel
-		if ($line === 1
-			&& false !== stripos($row[0], 'Votre situation financière au')) {
-			$bank = 'CM';
-			$skip_until = ['Date', 'Valeur', 'Libellé', 'Débit', 'Crédit'];
-			$stop_at = ['', '', ''];
-			$this->setTranslationTable(['date', null, 'label', 'debit', 'credit', null, null]);
-			$this->skip(1);
-		}
-		elseif (null === $skip_until) {
+		if (null === $this->skip_until) {
 			return 1;
 		}
-		// Find account number
-		elseif ($bank === 'CM'
+		// Crédit mutuel : fill account number
+		elseif ($this->bank === 'CM'
 			&& preg_match('/R.I.B. : ([\d\s]+)/', $row[0], $match)) {
 			$this->account_number = preg_replace('/\s+/', '', $match[1]);
 		}
@@ -122,6 +123,7 @@ class CSV extends CSV_Custom
 
 		$this->setTranslationTable($table);
 		$this->skip(0);
+		$this->sheet = 0;
 		$date_format = 'Y-m-d';
 
 		foreach ($transactions as $t) {
@@ -164,6 +166,7 @@ class CSV extends CSV_Custom
 
 			$this->setTranslationTable($table);
 			$this->skip(0);
+			$this->sheet = 0;
 			$date_format = 'Y-m-d';
 
 			// This is to alert if account number doesn't match current account

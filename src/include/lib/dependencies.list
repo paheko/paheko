@@ -30,6 +30,8 @@ KD2/I18N/TimeZones.php
 KD2/Mail_Message.php
 KD2/Office/QIFParser.php
 KD2/Office/OFXParser.php
+KD2/Office/Calc/Reader.php
+KD2/Office/Excel/Reader.php
 KD2/Office/ToText.php
 KD2/OpenIDConnect.php
 KD2/Security.php

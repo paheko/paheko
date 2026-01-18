@@ -32,6 +32,7 @@ if ($account->type !== $account::TYPE_BANK) {
 
 $csrf_key = 'acc_import_' . $account->id();
 $csv = new CSV($session, 'acc_import_account');
+$csv->toggleSheetSelection(true);
 $transactions = null;
 $import = $_POST['t']['import'] ?? null;
 
@@ -52,15 +53,7 @@ $columns = [
 
 $csv->setColumns($columns, $columns);
 $csv->setMandatoryColumns(['date', 'label', ['amount', ['debit', 'credit']]]);
-
-$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv) {
-	$csv->upload($_FILES['file']);
-}, $csrf_key, Utils::getSelfURI());
-
-$form->runIf('set_columns', function () use ($csv) {
-	$csv->skip(intval($_POST['skip_first_line'] ?? 0));
-	$csv->setTranslationTable($_POST['translation_table'] ?? []);
-}, $csrf_key, Utils::getSelfURI());
+$csv->runForm($form, $csrf_key);
 
 if ($csv->ready()) {
 	$transactions = $account->matchImportTransactions($year, $csv, $_POST['t'] ?? null);

@@ -6,22 +6,94 @@ use Paheko\Users\Session;
 use Paheko\Files\Conversion;
 use Paheko\Files\Files;
 
+use KD2\Office\Calc\Reader as ODS_Reader;
+use KD2\Office\Excel\Reader as XLSX_Reader;
+
+/**
+ * Allows to parse CSV/spreadsheet files and select matching columns
+ * Step 1: load CSV/XLSX/ODS file
+ * Step 2: if the file has more than one sheet (XLSX/ODS), select sheet
+ * Step 3: set columns matching
+ * Step 4: iterate over CSV
+ *
+ * The file and settings are stored in static file cache between steps.
+ */
 class CSV_Custom
 {
 	protected ?Session $session;
 	protected ?string $key;
-	protected ?array $csv = null;
-	protected ?array $translation = null;
+
+	/**
+	 * List of sheets (should be NULL for CSV)
+	 * (int) index => (string) label
+	 */
+	protected ?array $sheets = null;
+
+	/**
+	 * List of rows, each index is an integer matching the sheet
+	 * (int) => (array) [(array) row1, (array) row2...]
+	 */
+	protected ?array $rows = null;
+
+	/**
+	 * List of columns that can be used
+	 * key => label, eg. 'amount' => 'Transaction amount'
+	 */
 	protected array $columns;
+
 	protected array $columns_defaults;
+
+	/**
+	 * List of mandatory columns (just the key, eg. ['amount'])
+	 */
 	protected array $mandatory_columns = [];
+
+	/**
+	 * Selected sheet index
+	 */
+	protected ?int $sheet = null;
+
+	/**
+	 * Translation table between CSV columns and columns keys
+	 */
+	protected ?array $translation = null;
+
+	/**
+	 * Number of lines to skip at the beginning of the file
+	 */
 	protected int $skip = 1;
+
+	/**
+	 * Modifier callback, will be used to modify each line
+	 */
 	protected $modifier = null;
-	protected ?array $_default = null;
-	protected ?string $cache_key = null;
-	protected int $max_file_size = 1024*1024*10;
+
+	/**
+	 * Max file size
+	 * This is mostly to avoid exhausting the memory
+	 */
+	protected int $max_file_size = 1024*1024*15;
+
+	/**
+	 * Name of the loaded file
+	 */
 	protected ?string $file_name = null;
-	protected array $cache_properties = ['csv', 'translation', 'skip', 'file_name'];
+
+	/**
+	 * Whether to allow or forbid the selection of a sheet
+	 * If false, then the first sheet will be used
+	 * This is mostly because some existing forms don't have the necessary code for selecting
+	 * a sheet after file upload.
+	 */
+	protected bool $sheet_selection = false;
+
+	/**
+	 * List of object properties that need to be cached between steps
+	 */
+	protected array $cache_properties = ['rows', 'translation', 'skip', 'file_name', 'sheets', 'sheet'];
+
+	protected ?string $cache_key = null;
+	protected ?array $_default = null;
 
 	public function __construct(?Session $session = null, ?string $key = null)
 	{
@@ -42,7 +114,7 @@ class CSV_Custom
 
 	public function __destruct()
 	{
-		if ($this->session && $this->cache_key && ($this->csv || $this->translation || $this->skip !== 1)) {
+		if ($this->session && $this->cache_key && ($this->rows || $this->translation || $this->skip !== 1)) {
 			$data = [];
 
 			foreach ($this->cache_properties as $key) {
@@ -54,6 +126,9 @@ class CSV_Custom
 		}
 	}
 
+	/**
+	 * Upload a file from the browser
+	 */
 	public function upload(?array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
@@ -62,11 +137,18 @@ class CSV_Custom
 
 		$path = $file['tmp_name'];
 
+		if (!is_uploaded_file($path)) {
+			throw new \LogicException('Not an uploaded file: ' . $path);
+		}
+
 		$this->loadFile($path, $file['name']);
 
 		@unlink($path);
 	}
 
+	/**
+	 * Load from a file in the local file storage
+	 */
 	public function loadFromStoredFile(string $path): void
 	{
 		$file = Files::get($path);
@@ -90,12 +172,55 @@ class CSV_Custom
 		return Conversion::canConvertToCSV();
 	}
 
+	/**
+	 * Load XLSX / ODS file, including support for multiple sheets
+	 */
+	public function loadSpreadsheetFile(string $type, string $path, ?string $file_name = null): void
+	{
+		$class = sprintf('\\KD2\\Office\\%s\\Reader', $type);
+		$s = new $class;
+		$s->openFile($path);
+
+		$sheets = $s->listSheets();
+
+		if (count($sheets) > 1) {
+			$this->sheets = $sheets;
+		}
+
+		$this->rows = [];
+
+		foreach ($sheets as $i => $name) {
+			$this->rows[$i] = iterator_to_array($s->iterate($i));
+		}
+
+		if (!$this->sheet_selection) {
+			$this->sheet = 0;
+		}
+
+		unset($s);
+	}
+
+	/**
+	 * Load CSV file
+	 */
 	public function loadFile(string $path, ?string $file_name = null): void
 	{
-		$ext = strtolower(substr($file_name, -4));
+		if (filesize($path) > $this->max_file_size) {
+			throw new UserException(sprintf('Ce fichier est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
+		}
 
-		// Automatically convert from XLSX/XLS/ODS/etc.
-		if ($ext !== '.csv' && $this->canConvert()) {
+		$ext = substr($file_name, strrpos($file_name, '.')+1);
+
+		$this->rows = null;
+		$this->sheets = null;
+		$this->sheet = null;
+
+		if ($ext === 'xlsx' || $ext === 'ods') {
+			$this->loadSpreadsheetFile($ext === 'xlsx' ? 'Excel' : 'Calc', $path, $file_name);
+			return;
+		}
+		// Automatically convert from legacy XLS files
+		elseif ($ext === 'xls' && $this->canConvert()) {
 			$path = Conversion::toCSVAuto($path);
 		}
 
@@ -103,44 +228,29 @@ class CSV_Custom
 			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
 		}
 
-		if (filesize($path) > $this->max_file_size) {
-			throw new UserException(sprintf('Ce fichier CSV est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
-		}
-
-		$this->csv = null;
 		$rows = [];
-		$prev = null;
-		$i = 1;
 
 		foreach (CSV::iterate($path) as $line => $row) {
-			$r = $this->parseLine($line, $row);
-
-			if (-1 === $r) {
-				break;
-			}
-			elseif (0 === $r) {
-				continue;
-			}
-
-			if (null !== $prev
-				&& count($prev) !== count($row)) {
+			if ($line > 1
+				&& count($rows[$line - 1]) !== count($row)) {
 				throw new UserException(sprintf('Ligne %d : le nombre de colonne diffère de la ligne précédente, cela peut indiquer un fichier corrompu ou comportant plusieurs feuilles différentes', $line));
 			}
 
-			$rows[$i++] = $row;
-			$prev = $row;
+			$rows[$line] = $row;
 		}
 
 		if (!count($rows)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
 		}
 
-		$this->csv = $rows;
+		// Only one sheet
+		$this->rows = [$rows];
+		$this->sheet = 0;
 		$this->file_name = $file_name;
 	}
 
 	/**
-	 * Allow for special parsing, here nothing is done
+	 * Allow for special parsing of lines (in iterate), here nothing is done
 	 * @return int 1 for adding row to output, -1 to stop the loop, 0 to ignore the line
 	 */
 	protected function parseLine(int $line, array &$row): int
@@ -148,28 +258,38 @@ class CSV_Custom
 		return 1;
 	}
 
+	/**
+	 * Add a new line to the current sheet
+	 */
 	public function append(array $row): void
 	{
-		if (empty($this->csv)) {
+		if (empty($this->rows[$this->sheet])) {
 			// Start array at one, not zero
-			$this->csv = [1 => $row];
+			$this->rows[$this->sheet] = [1 => $row];
 		}
 		else {
-			$this->csv[] = $row;
+			$this->rows[$this->sheet][] = $row;
 		}
 	}
 
+	/**
+	 * Add a new line at the beginning of the current sheet,
+	 * this will re-number all the lines
+	 */
 	public function prepend(array $row): void
 	{
-		array_unshift($this->csv, $row);
+		array_unshift($this->rows[$this->sheet], $row);
 
 		// Re-number array to start at one, not zero
-		$this->csv = array_combine(range(1, count($this->csv)), array_values($this->csv));
+		$this->rows[$this->sheet] = array_combine(range(1, count($this->rows[$this->sheet])), array_values($this->rows[$this->sheet]));
 	}
 
+	/**
+	 * Iterate over each line of the current sheet
+	 */
 	public function iterate(): \Generator
 	{
-		if (empty($this->csv)) {
+		if (empty($this->rows[$this->sheet])) {
 			throw new \LogicException('No file has been loaded');
 		}
 
@@ -179,8 +299,17 @@ class CSV_Custom
 
 		$i = 0;
 
-		foreach ($this->csv as $line => $row) {
+		foreach ($this->rows[$this->sheet] as $line => $row) {
 			if ($i++ < $this->skip) {
+				continue;
+			}
+
+			$r = $this->parseLine($line, $row);
+
+			if ($r === -1) {
+				break;
+			}
+			elseif ($r === 0) {
 				continue;
 			}
 
@@ -188,14 +317,17 @@ class CSV_Custom
 		}
 	}
 
+	/**
+	 * Return a specific line of the sheet, transformed with keys and default values
+	 */
 	public function getLine(int $i, ?array $row = null): ?\stdClass
 	{
-		if (!isset($this->csv[$i])) {
+		if (null === $row && !isset($this->rows[$this->sheet][$i])) {
 			return null;
 		}
 
 		$this->_default ??= array_fill_keys($this->translation, null);
-		$row ??= $this->csv[$i];
+		$row ??= $this->rows[$this->sheet][$i];
 		$row_with_defaults = $this->_default;
 
 		foreach ($row as $col => $value) {
@@ -220,13 +352,16 @@ class CSV_Custom
 		return $row;
 	}
 
+	/**
+	 * Return first line (raw)
+	 */
 	public function getFirstLine(): array
 	{
 		if (!$this->loaded()) {
 			throw new \LogicException('No file has been loaded');
 		}
 
-		return current($this->csv);
+		return current($this->rows[$this->sheet]);
 	}
 
 	public function setModifier(callable $callback): void
@@ -245,6 +380,10 @@ class CSV_Custom
 		return array_search($str, $columns, true);
 	}
 
+	/**
+	 * Return list of columns with the match, either because it has been selected
+	 * by the user, or because the name or the key is matching (auto-magic)
+	 */
 	public function getSelectedTable(?array $source = null): array
 	{
 		if (null === $source && isset($_POST['translation_table'])) {
@@ -287,12 +426,18 @@ class CSV_Custom
 		return $this->translation;
 	}
 
+	/**
+	 * Try to automatically set translation table by matching labels and keys, if possible
+	 */
 	public function setTranslationTableAuto(): void
 	{
 		$sel = $this->getSelectedTable([]);
 		$this->setTranslationTable($sel);
 	}
 
+	/**
+	 * Save translation table
+	 */
 	public function setTranslationTable(array $table): void
 	{
 		if (!count($table)) {
@@ -316,6 +461,9 @@ class CSV_Custom
 		$this->setIndexedTable($translation);
 	}
 
+	/**
+	 * Return true if a column (from its key) has been selected in the translation table
+	 */
 	public function hasSelectedColumn(string $column): bool
 	{
 		return in_array($column, $this->translation, true);
@@ -359,7 +507,9 @@ class CSV_Custom
 
 	public function clear(): void
 	{
-		$this->csv = null;
+		$this->rows = null;
+		$this->sheets = null;
+		$this->sheet = 0;
 		$this->translation = null;
 		$this->skip = 1;
 
@@ -368,19 +518,32 @@ class CSV_Custom
 		}
 	}
 
+	/**
+	 * Return true if the CSV is loaded
+	 */
 	public function loaded(): bool
 	{
-		return null !== $this->csv;
+		return null !== $this->rows;
 	}
 
+	/**
+	 * Return true if the CSV is ready for processing: loaded, sheet selected, and translation table set
+	 */
 	public function ready(): bool
 	{
-		return $this->loaded() && !empty($this->translation);
+		return $this->loaded() && $this->isSheetSelected() && !empty($this->translation);
 	}
 
-	public function count(): ?int
+	public function isSheetSelected(): bool
 	{
-		return null !== $this->csv ? count($this->csv) : null;
+		return isset($this->sheet);
+	}
+
+	public function count(?int $sheet = null): ?int
+	{
+		$sheet ??= $this->sheet;
+
+		return null !== $this->rows ? count($this->rows[$sheet]) : null;
 	}
 
 	public function skip(int $count): void
@@ -526,7 +689,7 @@ class CSV_Custom
 			return null;
 		}
 
-		return reset($this->csv) ?: null;
+		return reset($this->rows[$this->sheet]) ?: null;
 	}
 
 	public function hasRawHeaderColumn(string $label): bool
@@ -534,6 +697,9 @@ class CSV_Custom
 		return in_array($label, $this->getRawHeader(), true);
 	}
 
+	/**
+	 * Reorder with a specific column
+	 */
 	public function orderBy(string $column): void
 	{
 		$col = array_search($column, $this->translation, true);
@@ -542,14 +708,53 @@ class CSV_Custom
 			throw new \InvalidArgumentException('Unknown column: ' . $column);
 		}
 
-		$header = array_slice($this->csv, 0, $this->skip);
-		$rows = array_slice($this->csv, $this->skip);
+		$header = array_slice($this->rows[$this->sheet], 0, $this->skip);
+		$rows = array_slice($this->rows[$this->sheet], $this->skip);
 
 		usort($rows, fn($a, $b) => strcmp($a[$col] ?? '', $b[$col] ?? ''));
 
 		$rows = $header + $rows;
 
 		// Renumber array
-		$this->csv = array_combine(range(1, count($rows)), array_values($rows));
+		$this->rows[$this->sheet] = array_combine(range(1, count($rows)), array_values($rows));
+	}
+
+	public function listSheets(): array
+	{
+		return $this->sheets ?? [];
+	}
+
+	public function setSheet(int $i): void
+	{
+		if (!array_key_exists($i, $this->sheets)) {
+			throw new \InvalidArgumentException('Unknown sheet #' . $i);
+		}
+
+		$this->sheet = $i;
+	}
+
+	public function toggleSheetSelection(bool $enable): void
+	{
+		$this->sheet_selection = $enable;
+	}
+
+	public function runForm(Form $form, string $csrf_key): void
+	{
+		$url = Utils::getSelfURI();
+
+		$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () {
+			$this->upload($_FILES['file']);
+		}, $csrf_key, $url);
+
+		if ($this->sheet_selection) {
+			$form->runIf('set_sheet', function () {
+				$this->setSheet(intval($_POST['sheet'] ?? 0));
+			}, $csrf_key, $url);
+		}
+
+		$form->runIf('set_columns', function () {
+			$this->skip(intval($_POST['skip_first_line'] ?? 0));
+			$this->setTranslationTable($_POST['translation_table'] ?? []);
+		}, $csrf_key, $url);
 	}
 }
