@@ -1114,10 +1114,10 @@ namespace Paheko;
  * Ces outils sont utilisés pour convertir les documents d'un format à l'autre.
  * Cette fonctionnalité est utilisée :
  * - pour extraire le texte des documents PDF, XLS, DOC, EPUB et l'indexer
- *   dans la recherche de documents
+ *   dans la recherche de documents (les fichiers OpenDocument, DOCX, XLSX et PPTX sont gérés en natif)
  * - pour générer les images miniatures des documents (dans les listes de documents)
- * - pour convertir les fichiers XLSX, XLS ou ODS pour l'import de membres,
- *   d'écritures etc. (sinon seul CSV est accepté)
+ * - pour convertir les fichiers XLS (vieux Excel) pour l'import de membres,
+ *   d'écritures etc. (sinon seuls les fichiers CSV, ODS et XLSX sont acceptés)
  *
  * Les outils supportés sont :
  * - collabora : serveur Collabora externe, via l'API HTTP de conversion,
@@ -1134,7 +1134,7 @@ namespace Paheko;
  *
  * Si un outil permettant la conversion de documents bureautique est
  * spécifié (collabora, unoconvert, unocov, onlyoffice), alors il sera
- * possible d'importer des fichiers XLSX, XLS et ODS en plus du CSV
+ * possible d'importer des fichiers XLS (vieil Excel) en plus du CSV, ODS et XLSX
  * (par exemple pour les imports de membres ou d'écritures comptables).
  *
  * Paheko utilisera automatiquement en priorité l'outil le plus performant :

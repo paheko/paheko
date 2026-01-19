@@ -492,7 +492,7 @@ Mais cette fonction permet également d'appeler une API Paheko distante, dans ce
 
 ## csv
 
-Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selon la configuration de Paheko), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.
+Permet de demander à l'utilisateur de charger un fichier CSV, XLSX (Excel) ou ODS (LibreOffice), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |

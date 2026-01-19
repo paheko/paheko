@@ -89,8 +89,10 @@ class CommonFunctions
 			$accept = $attributes['accept'] ?? null;
 
 			if ($accept === 'csv' || $accept === 'csv+ofx+qif') {
-				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT';
-				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT'
+					. ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV, LibreOffice Calc (ODS), Excel (XLSX)';
 
 				if ($accept === 'csv+ofx+qif') {
 					$help .= ', relevé bancaire (OFX, QIF)';
@@ -98,10 +100,7 @@ class CommonFunctions
 				}
 
 				if (Conversion::canConvertToCSV()) {
-					$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
-					$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
-						. ',.xls,.XLS,application/vnd.ms-excel'
-						. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+					$attributes['accept'] .= ',.xls,.XLS,application/vnd.ms-excel';
 				}
 			}
 			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
