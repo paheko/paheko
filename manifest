@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\stypo
-D 2026-01-19T22:15:24.013
+C Make\ssure\swe\skeep\sspreadsheets\sthat\screate\san\serror,\sfor\sdebug
+D 2026-01-19T22:15:45.181
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -108,7 +108,7 @@ F src/include/lib/Paheko/AdvancedSearch.php 84a0ca41e50c059988202de5c0ac26805a6f
 F src/include/lib/Paheko/Backup.php 9dda54b065bc127f37c54e0e9af7f14b67371485ff84f5ed20e1652934dc721c
 F src/include/lib/Paheko/CLI.php ca68d5b66ccbb95b6400d5c92a28b817a64393494e2811057599045173ae19ee
 F src/include/lib/Paheko/CSV.php e99e1759193d6f4dfc6f8d62e6872c600662985bc18ef8ece150ce5a0cfcd7a4
-F src/include/lib/Paheko/CSV_Custom.php 84b36fabddd7f86f7c7898f1542b01ff2f8aeea4bb22428ed4c4927644001324
+F src/include/lib/Paheko/CSV_Custom.php 43ded975b6678b3e6dc90dc91be9dbb959910bd6985ae526842c114bf2cde39b
 F src/include/lib/Paheko/Config.php 23fd08c9874c557f856c3b71e6f40c40080bf77ab7a79a9f7baba80cd3d9097f
 F src/include/lib/Paheko/DB.php 8ff30df18a06597a319b054b12fa8e2f26feda0f0b9f1b0ed82a731ee44f6316
 F src/include/lib/Paheko/DynamicList.php 88256da48fb170f7c139bd6c5a25cb39ae32f8e577f9e3646b1fef797c7715d7
@@ -837,24 +837,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 63d9b6463047810207a34c1d2f864c014ddf3073225c7fd8c54a039d328bfee4
-R 8fb2b8e47a7da7120cf520fd60c95215
+P fa1eb09dd7288288e8fda1e57368a45ed2b0eba1539989b45e22aaf8d70defe6
+R 762c013b8113ef0835f2cb0c4a0b79b8
 U bohwaz
-Z fb78bcea4167d5f21b03c1959385797a
+Z 7d1b093cb3bbbf526ce3c97622f40063
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlurPwACgkQksnacbiI
-6jSvRQ/9HMoDfPeAvu5S1w36ES+aiUdX4T6BfEOeb9GQBwY9pCXbAJ1CRUx3Fy4g
-5EXMY46tfbRf3pQ6G8SVG8GXKRtrEFk6U9dXmIo810dd38pe3epM2EB0e29HCwcF
-SNHtA+j7b6B7OURRozIX5YTajroxQ28rggScY2prw0AaVrEf6RwY2VfgMgxHuY45
-smi7+vepJvqDOQSF6TL6BjKUUR1od1Up2v1ft6movfo34L3DhEAHhddvUeJ7vsxS
-kOihq+XQmrLgaSp840Chqm7Xp4X9Y6vTygEpIem4dmkrcJr//PVEUGO8YaGfy4rR
-0EBgkydzZEBsYYN/lAu2HMQ0//ZiHdk3h3S8VxlkHBQtGuhcf3nzwujMuN6JqDIU
-EAo0JEjpMNJ4UdIOFaxAFhyvzzeIsWzGsi+X7y5YzXBpzEF2XxBoVEu8hMRIahpp
-W+DA0EyneTiNGBFuLrP/s3SSqR7jSRDL1Dh7Qzgx5SnZf9KP/n1ZSsjPcsHJL/5j
-J3iDhbkkRRvmPMgsLrLXxI70k+s60bNwFrDR/qfy+51o6Weaw9Ph0vCCdYz6wgOP
-z6TOl05JGUBIMZDe4QUPRRBSBNT7TxCkVhV1ea8UmStoTIOuy+QpCwSNE+lugZb6
-PTW14aG5NXYi8EVbko/xJ4eJxd4Lf0EddaNIYPZGgFzO2hH5mII=
-=p+q8
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlurREACgkQksnacbiI
+6jScVQ//R+CEgH7B01QcBqQO8CZ5tCQgFGEooT2wjwYI5YxxTImT22VsKzucp4AW
+uiPGXt3SYUatUZpwIEAS1xnur/Sj1Eh1U66ACe8Un9EiG3sXH+3IELpARoz907SD
+Ua8Nszo315IgtXp6CJqNeluu2taaTGYcn9QkJ23ziWgJVGjzP7g59XsQrP3pSIav
+M0XkrHU/XuaAN1v210Mp5djciz8yQqIqJv0+In9CaBANS+k9TkiumagEd2Y26SPP
+ixsvzZRLP5Ify9E+zk2uHKo3Y8gAqZ2rXhat8vGEUZzUukjVaWvV2CUWd1zRn4gn
+wgi7qxXwA6d0Upf8Aq2pfD37Bxz9GIMwvPbq7vk4soT+I6/WB/EixyzsNU/VsDg6
+mJ6/GZoSbiHwedAEuUdEeXhcOjxyPpUMmBpicGUHbROAxAkaDfs3g/zrkN+p12R4
+Hml/HZR/pVcIfmWU+D5DxUzWNJgwaHrNC8M1aRjdQXSW9pXqmrEaVDr1dnfQ9OTG
+EcffRPgk2AfhtLt1fdLpzrRIOJctyeEHn/fhzqbwMDp+/x4wB+daJBEtp29Sd/Eg
+vYgVwrUICiaef3YiSHWe7AyBUdsZajLeST9SCMGCtlESGYn0UB9Jl62XAatfz5lU
+lUDhN35/dkuETWYvr37RrQ8/XmzAsQ0l0dJgicJBmuU4q9GyiRE=
+=hX2+
 -----END PGP SIGNATURE-----

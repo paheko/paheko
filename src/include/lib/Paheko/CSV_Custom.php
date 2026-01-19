@@ -178,19 +178,27 @@ class CSV_Custom
 	public function loadSpreadsheetFile(string $type, string $path, ?string $file_name = null): void
 	{
 		$class = sprintf('\\KD2\\Office\\%s\\Reader', $type);
-		$s = new $class;
-		$s->openFile($path);
 
-		$sheets = $s->listSheets();
+		try {
+			$s = new $class;
+			$s->openFile($path);
 
-		if (count($sheets) > 1) {
-			$this->sheets = $sheets;
+			$sheets = $s->listSheets();
+
+			if (count($sheets) > 1) {
+				$this->sheets = $sheets;
+			}
+
+			$this->rows = [];
+
+			foreach ($sheets as $i => $name) {
+				$this->rows[$i] = iterator_to_array($s->iterate($i));
+			}
 		}
-
-		$this->rows = [];
-
-		foreach ($sheets as $i => $name) {
-			$this->rows[$i] = iterator_to_array($s->iterate($i));
+		catch (\Exception $e) {
+			// FIXME: remove debug copy
+			copy($path, sys_get_temp_dir() . '/spreadsheet_error_' . date('Ymd_His'));
+			throw $e;
 		}
 
 		if (!$this->sheet_selection) {
