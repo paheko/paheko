@@ -111,7 +111,8 @@ class User extends Entity
 		$this->reloadProperties();
 	}
 
-	public function set(string $key, $value) {
+	public function set(string $key, $value)
+	{
 		if ($this->_loading && $value === null) {
 			$this->$key = $value;
 			return;
@@ -497,6 +498,16 @@ class User extends Entity
 			}
 
 			$source[$f->name] .= ' ' . ($source[$f->name . '_time'] ?? '');
+		}
+
+		foreach (DynamicFields::getInstance()->fieldsByType('number') as $f) {
+			if (!isset($source[$f->name])) {
+				continue;
+			}
+
+			if (!ctype_digit($source[$f->name])) {
+				throw new UserException(sprintf('"%s" : la valeur "%s" n\'est pas un nombre entier', $f->label, $source[$f->name]));
+			}
 		}
 
 		return parent::importForm($source);
