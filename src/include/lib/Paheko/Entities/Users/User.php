@@ -500,16 +500,6 @@ class User extends Entity
 			$source[$f->name] .= ' ' . ($source[$f->name . '_time'] ?? '');
 		}
 
-		foreach (DynamicFields::getInstance()->fieldsByType('number') as $f) {
-			if (!isset($source[$f->name])) {
-				continue;
-			}
-
-			if (!ctype_digit($source[$f->name])) {
-				throw new UserException(sprintf('"%s" : la valeur "%s" n\'est pas un nombre entier', $f->label, $source[$f->name]));
-			}
-		}
-
 		return parent::importForm($source);
 	}
 
