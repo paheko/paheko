@@ -165,7 +165,12 @@ abstract class AdvancedSearch
 					$values = array_map(['Paheko\Utils', 'normalizePhoneNumber'], $values);
 				}
 				elseif ($column['type'] == 'money') {
-					$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
+					try {
+						$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
+					}
+					catch (\InvalidArgumentException $e) {
+						throw new UserException($e->getMessage(), 0, $e);
+					}
 				}
 				elseif ($column['type'] === 'integer') {
 					$values = array_map('intval', $values);

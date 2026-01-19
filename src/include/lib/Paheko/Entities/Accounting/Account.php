@@ -1072,7 +1072,13 @@ class Account extends Entity
 				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
 			}
 
-			$row->amount = Utils::moneyToInteger($row->amount);
+			try {
+				$row->amount = Utils::moneyToInteger($row->amount, false);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new UserException($e->getMessage(), 0, $e);
+			}
+
 
 			$transaction = EM::findOne(Transaction::class,
 				'SELECT t.* FROM @TABLE t
