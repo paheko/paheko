@@ -52,10 +52,10 @@ class AssistedReconciliation
 				$line->amount = $line->credit ?: '-' . ltrim($line->debit, '- \t\r\n');
 			}
 
-			$line->amount = Utils::moneyToInteger($line->amount ?? 0);
+			$line->amount = Utils::moneyToInteger($line->amount ?? 0, false);
 
 			if (!empty($line->balance)) {
-				$line->balance = (substr($line->balance, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->balance);
+				$line->balance = (substr($line->balance, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->balance, false);
 			}
 
 			if (!empty($line->amount)

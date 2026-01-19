@@ -1073,12 +1073,11 @@ class Account extends Entity
 			}
 
 			try {
-				$row->amount = Utils::moneyToInteger($row->amount, false);
+				$row->amount = Utils::moneyToInteger($row->amount, true);
 			}
 			catch (\InvalidArgumentException $e) {
-				throw new UserException($e->getMessage(), 0, $e);
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
 			}
-
 
 			$transaction = EM::findOne(Transaction::class,
 				'SELECT t.* FROM @TABLE t
