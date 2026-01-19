@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Also\savoid\serrors\sin\sassisted\sreconciliation
-D 2026-01-19T00:18:33.720
+C add\smissing\stemplate\sfor\sselecting\sODS/XLSX\ssheet
+D 2026-01-19T00:20:36.416
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -322,6 +322,7 @@ F src/templates/acc/years/split.tpl 17b6aa72db6c14525bcd04602eed3d94d855fe8dfba6
 F src/templates/acc/years/unlock.tpl ca1ba9bdba8c87f41b2434b5ec45032d4e64a1da13a451bb7bfb55724734b9a5
 F src/templates/common/_csv_help.tpl 134beea1e9483c09382ecbe38c1b6123e86636ef9441d56fbb47d134641ec97b
 F src/templates/common/_csv_match_columns.tpl 6521792eefaafde6d1c7ad9901d4ede47dfab964bd4d5eb0a4adc9863d0d1b79
+F src/templates/common/_csv_select_sheet.tpl 87c5a2d0e261af1b0b186350ad82c64fe8dc6368f2d8349abcbc97a3f8dcae8d
 F src/templates/common/_sql_table.tpl c361e988d8163383ff52ba5b3e7bc735ad8187d7b8da1aa1796793faaa4f12ec
 F src/templates/common/delete_form.tpl d0d845ada2b1b9c79c636160e5b7c0a08168a59fcad753f1c4dd7588eb1688d6
 F src/templates/common/dynamic_list_head.tpl 4a809f0e1604fcc37eef64dc1a81b1600ac9d22a092d7141929ce8260e5f4d74
@@ -836,24 +837,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 062742e6c338f69e3cbac7364771e46bab479239ef28c66119e8c65c9685a9c8
-R 117faf0d78f06ddbc3afadaab0f891c1
+P b92c4b54365f960c6a983504e5292c23baf56205117fdbedef78d0a17e67dd01
+R 28a9645b8136f6190a86c9b7ec1a2730
 U bohwaz
-Z 6a79dfd995de87867680d51fdabb5f6f
+Z 7ec4edfca71631045ab9ae6396f10cb4
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlteFkACgkQksnacbiI
-6jSCkQ/9FnL+GuLL+swptsdxzpZUw9Yy3WUexg5u9Z9+0ZcMTEdpICUFCfPfw0jI
-yCsoGzd0YjzDMKCVJDPwbiJxXxjqCfPUKKv45afOQW/lDb5TqHJhcn9FwFSWCSkF
-VdVlc+RIU+DS43Wn9dkRCOyDyy5NnW+zfEkqdp/vEqbXIsFEec+X6EwgDTRGjZi3
-gfZLtrmjP9fNNobImfIJOsSpW3+bd32ruFjZegpM8pHFAnJRENmBw0JVn9dUCzfK
-Tp3knk/wAXyB5vOvgmnNv+gT5qpTJsQLeIHE6NOOqWe3iw5L50fYSAdJ2JCcQPc4
-kXdoHpx3+HSBXLAzsRNmystWNFPz/ie9mDq2iPfTCK32xP8WGNmD8SLOJHtvp6gk
-sUUASRMFiS1/Y9SqarBLIjc8iiiNSYtps2QDYy58BqxKx/7nfxL/AniRqfmhVNFY
-Pr6qinsPtPj8ZSW2auzZJloPpxDwKOHz0DsKWK9O5akooYZBT4x1HDbrGrCqN4jg
-K2RnArCUBIIDON3zrtUhJRSow7qNxmVmjp0jg25h+6T35Lv0lxSQbhBfa4erCtpn
-L78xwNdv2H/qj1cwMi/KTTI/nSMncxNm7Ob/yYNdsBFfryXzbasnMj9sBuO+pW2n
-NPFVacS+sMaK2DS2Q21OT7sy2WXsCMedVmUMoasRII+ELHE+GGs=
-=4uGD
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmlteNQACgkQksnacbiI
+6jQdDA/9FliJUN61hyyvBS4QdzwZJLvI85bOQPHbRFWqcgOuxz5PHTgKDkY8004k
+eyU4NLd/p05KDVTxgpKsfgTQNyqG08F+RFnR7qSv5//vJsHIWWBGQry9bNN0yzzq
+CcMzmHFDV6qBPovx9W3t8e93U+bYTuRYik2km59fv+xnovBtr2vXdxB0SUWtahdO
+eKpwhIf47nzEX+PEycQ7Z2h1mRao0b2jHEiBQp7eNLPQAolJVRmZGTI9iFEqI6tW
+VWng1/O1b5VVZ2DsgLOwl4WbiJBb3uQlJ9U8mKl6Kd4l+YH5YW/zBUxRKVepPV4W
+V3kQu8vqhYvxzZQHDywX59uAOceCONC9W3VcNqjqyYUqdkmD2qKY/4d7+8bTDj0q
+UmnpCz9o4qUl9sWQPYKlOShbM4P9RSlll/Xl+n+KP3eEOIG6hwzT/g+KRkOs7k6x
+OaQ6IR2mYCDa/MhrzVsIOxU5ZHDgyHwDOBna9FJd2pGS2UFtmLxC2uoq1fZi1SLs
+Cdrhky1hJDr94uQDvIQBKWrlaUcE4pRLQddRFvVYkVK+Ku+plgPx+oQt96dLVupQ
+/kecRVV83QAP09mbmQTMIO2PLkVH6/pURbXDniYfEuTLxKJwBBKx9/1cx6UG0jpZ
+hQQJ7zbmh7F1OODg4NyduOahElu8m5pdevAKQVQF+ryOhazne2k=
+=Lr39
 -----END PGP SIGNATURE-----
