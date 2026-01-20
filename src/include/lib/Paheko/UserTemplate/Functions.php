@@ -274,14 +274,15 @@ class Functions
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
 		$replace = !empty($params['replace']);
+		$result = null;
 
 		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'],
 			$params['validate_only'], $params['replace']);
 
-		if ($key === 'config') {
+		if ($key === 'config' && !$replace) {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
-		else {
+		elseif ($key !== 'config') {
 			static $modules_tables = [];
 
 			// Don't try to create table for each save statement
@@ -298,9 +299,6 @@ class Functions
 
 			if ($field && !$replace) {
 				$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
-			}
-			else {
-				$result = null;
 			}
 		}
 
