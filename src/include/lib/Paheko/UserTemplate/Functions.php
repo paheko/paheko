@@ -409,6 +409,10 @@ class Functions
 			}
 		}
 
+		if (!count($where)) {
+			throw new Brindille_Exception('Missing parameters for delete');
+		}
+
 		$where = implode(' AND ', $where);
 		$db->delete($table, $where, $args);
 	}
