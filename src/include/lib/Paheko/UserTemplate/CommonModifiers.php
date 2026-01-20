@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate;
 
 use Paheko\Config;
+use Paheko\TemplateException;
 use Paheko\Utils;
 use Paheko\UserException;
 
@@ -189,7 +190,7 @@ class CommonModifiers
 			$format = str_replace('DATE_', '', $format);
 
 			if (!defined('DateTime::' . $format)) {
-				throw new UserException('Invalid format: ' . $format);
+				throw new TemplateException('Invalid format: ' . $format);
 			}
 
 			$format = constant('DateTime::' . $format);

@@ -394,6 +394,10 @@ class APIException extends \LogicException
 {
 }
 
+class TemplateException extends \RuntimeException
+{
+}
+
 // activer le gestionnaire d'erreurs/exceptions
 ErrorManager::setEnvironment(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION | ErrorManager::CLI_DEVELOPMENT);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');

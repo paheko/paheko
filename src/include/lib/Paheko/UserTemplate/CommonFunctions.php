@@ -5,6 +5,7 @@ namespace Paheko\UserTemplate;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Template;
+use Paheko\TemplateException;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
@@ -49,7 +50,7 @@ class CommonFunctions
 		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
-			throw new \RuntimeException('Missing name or type');
+			throw new TemplateException('Missing name or type');
 		}
 
 		$max_file_size ??= null;
@@ -166,7 +167,7 @@ class CommonFunctions
 
 		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
 			if (!isset($value)) {
-				throw new \RuntimeException('radio/checkbox has no "value" parameter');
+				throw new TemplateException('radio/checkbox has no "value" parameter');
 			}
 
 			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
@@ -337,7 +338,7 @@ class CommonFunctions
 			}
 
 			if (!isset($options)) {
-				throw new \RuntimeException('Missing "options" parameter');
+				throw new TemplateException('Missing "options" parameter');
 			}
 
 			foreach ($options as $_key => $_value) {
@@ -511,7 +512,7 @@ class CommonFunctions
 		}
 
 		if (!isset($params['shape']) && !isset($params['url'])) {
-			throw new \RuntimeException('Missing parameter: shape or url');
+			throw new TemplateException('Missing parameter: shape or url');
 		}
 
 		$html = '';
@@ -728,7 +729,7 @@ class CommonFunctions
 	static public function delete_form(array $params): string
 	{
 		if (!isset($params['legend'], $params['warning'], $params['csrf_key'])) {
-			throw new \InvalidArgumentException('Missing parameter: legend, warning and csrf_key are required');
+			throw new TemplateException('Missing parameter: legend, warning and csrf_key are required');
 		}
 
 		$tpl = Template::getInstance();
@@ -745,20 +746,20 @@ class CommonFunctions
 			$name = $params['name'] ?? $params['key'] ?? null;
 
 			if (null === $name) {
-				throw new \RuntimeException('Missing "name" parameter');
+				throw new TemplateException('Missing "name" parameter');
 			}
 
 			$field = DynamicFields::get($name);
 		}
 
 		if (!($field instanceof DynamicField)) {
-			throw new \LogicException('This field does not exist.');
+			throw new TemplateException('This field does not exist.');
 		}
 
 		$context = $params['context'] ?? 'module';
 
 		if (!in_array($context, ['user_edit', 'admin_new', 'admin_edit', 'module'])) {
-			throw new \InvalidArgumentException('Invalid "context" parameter value: ' . $context);
+			throw new TemplateException('Invalid "context" parameter value: ' . $context);
 		}
 
 		$source = $params['user'] ?? $params['source'] ?? null;
@@ -920,14 +921,14 @@ class CommonFunctions
 			$name = $params['name'] ?? $params['key'] ?? null;
 
 			if (null === $name) {
-				throw new \RuntimeException('Missing "name" parameter');
+				throw new TemplateException('Missing "name" parameter');
 			}
 
 			$field = DynamicFields::get($name);
 		}
 
 		if ($field && !($field instanceof DynamicField)) {
-			throw new \LogicException('This field does not exist.');
+			throw new TemplateException('This field does not exist.');
 		}
 
 		$v = $params['value'] ?? null;
@@ -1023,7 +1024,7 @@ class CommonFunctions
 	static public function dropdown(array $params): string
 	{
 		if (!isset($params['options'], $params['title'])) {
-			throw new \InvalidArgumentException('Missing parameter for "dropdown"');
+			throw new TemplateException('Missing parameter for "dropdown"');
 		}
 
 		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
@@ -1036,7 +1037,7 @@ class CommonFunctions
 			$content = $option['html'] ?? htmlspecialchars($option['label'] ?? '');
 
 			if ('' === $content) {
-				throw new \InvalidArgumentException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
+				throw new TemplateException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
 			}
 
 			if (isset($option['aside'])) {

@@ -10,6 +10,7 @@ use KD2\Translate;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Plugins;
+use Paheko\TemplateException;
 use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\Users\DynamicFields;
@@ -458,7 +459,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
-			$is_user_code = !$this->path;
+			$is_user_code = $this->file ? true : false;
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
@@ -725,6 +726,7 @@ class UserTemplate extends \KD2\Brindille
 
 		while ($p = $p->getPrevious()) {
 			if (!($p instanceof Brindille_Exception)
+				&& !($p instanceof TemplateException)
 				&& !($p instanceof UserException)) {
 				throw $p;
 			}
