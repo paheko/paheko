@@ -356,8 +356,18 @@ class Functions
 		}
 
 		$document = $value;
+
 		if (!$result) {
-			$db->insert($table, compact('id', 'document', 'key'));
+			// If replacing, delete then insert
+			if ($replace) {
+				$db->begin();
+				$db->delete($table, $field . ' = ?', $where_value);
+				$db->insert($table, compact('id', 'document', 'key'));
+				$db->commit();
+			}
+			else {
+				$db->insert($table, compact('id', 'document', 'key'));
+			}
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
