@@ -188,6 +188,9 @@ class CSV_Custom
 			if (count($sheets) > 1) {
 				$this->sheets = $sheets;
 			}
+			else {
+				$this->sheet = 0;
+			}
 
 			$this->rows = [];
 
