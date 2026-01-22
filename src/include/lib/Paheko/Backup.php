@@ -612,11 +612,16 @@ class Backup
 			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Paheko.');
 		}
 
-		$version = DB::getVersion($db);
+		try {
+			$version = DB::getVersion($db);
+		}
+		catch (\LogicException $e) {
+			$version = null;
+		}
 
 		// We can't possibly handle any old version
-		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<')) {
-			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
+		if (!$version || version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<')) {
+			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version ?? 'inconnue'));
 		}
 
 		if ($version && version_compare($version, paheko_version(), '>')) {
