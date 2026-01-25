@@ -40,7 +40,7 @@ class CommonModifiers
 		'intval' => [null],
 		'floatval' => [null],
 		'strval' => [null],
-		'substr' => ['string+', 'int', 'int'],
+		'substr' => ['string+', 'bool|int', 'bool|int'],
 		'http_build_query' => ['array', 'string', '?string', 'int'],
 	];
 
