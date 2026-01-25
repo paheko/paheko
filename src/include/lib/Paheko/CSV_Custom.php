@@ -372,6 +372,10 @@ class CSV_Custom
 			throw new \LogicException('No file has been loaded');
 		}
 
+		if (empty($this->rows[$this->sheet])) {
+			throw new \LogicException(sprintf('Sheet #%s has no rows', $this->sheet));
+		}
+
 		return current($this->rows[$this->sheet]);
 	}
 
