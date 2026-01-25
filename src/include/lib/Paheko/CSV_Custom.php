@@ -197,15 +197,15 @@ class CSV_Custom
 			foreach ($sheets as $i => $name) {
 				$this->rows[$i] = iterator_to_array($s->iterate($i));
 			}
+
+			if (!$this->sheet_selection) {
+				$this->sheet = $s->getActiveSheet();
+			}
 		}
 		catch (\Exception $e) {
 			// FIXME: remove debug copy
 			copy($path, sys_get_temp_dir() . '/spreadsheet_error_' . date('Ymd_His'));
 			throw $e;
-		}
-
-		if (!$this->sheet_selection) {
-			$this->sheet = 0;
 		}
 
 		unset($s);
