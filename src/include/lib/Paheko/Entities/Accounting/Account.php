@@ -424,7 +424,16 @@ class Account extends Entity
 			return 0 === strpos($this->code, $code) && strlen($this->code) > strlen($code);
 		}
 		else {
-			return $this->code === $code;
+			if ($this->code === $code) {
+				return true;
+			}
+			// Allow for matching 890000 === 890
+			elseif (substr($this->code, 0, strlen($code)) === $code
+				&& trim(substr($this->code, strlen($code)), '0') === '') {
+				return true;
+			}
+
+			return false;
 		}
 	}
 
