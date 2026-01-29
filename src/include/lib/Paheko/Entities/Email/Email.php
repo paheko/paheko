@@ -83,6 +83,7 @@ class Email extends Entity
 			return false;
 		}
 
+		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
 				return (bool) $r->accepts_mailings;
