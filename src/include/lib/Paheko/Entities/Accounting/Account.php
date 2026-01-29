@@ -1077,6 +1077,10 @@ class Account extends Entity
 		foreach ($csv->iterate() as $i => $row) {
 			$row->date = Utils::parseDateTime($row->date, Date::class);
 
+			if (!$row->date) {
+				continue;
+			}
+
 			if (isset($row->credit)) {
 				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
 			}

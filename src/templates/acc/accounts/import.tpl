@@ -7,7 +7,7 @@
 
 {form_errors}
 
-{if $csv->ready()}
+{if $csv->ready() && $transactions !== null}
 	<form method="post" action="{$self_url}">
 		<table class="list import">
 			<thead>

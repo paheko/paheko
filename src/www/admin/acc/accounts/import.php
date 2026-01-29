@@ -56,7 +56,13 @@ $csv->setMandatoryColumns(['date', 'label', ['amount', ['debit', 'credit']]]);
 $csv->runForm($form, $csrf_key);
 
 if ($csv->ready()) {
-	$transactions = $account->matchImportTransactions($year, $csv, $_POST['t'] ?? null);
+	try {
+		$transactions = $account->matchImportTransactions($year, $csv, $_POST['t'] ?? null);
+	}
+	catch (UserException $e) {
+		$csv->clear();
+		$form->addError($e->getMessage());
+	}
 
 	$form->runIf('save', function () use ($transactions, $csv) {
 		$db = DB::getInstance();
