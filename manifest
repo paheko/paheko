@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\sphpstan\sstub\sconfig
-D 2026-01-30T12:18:06.403
+C Fix\sduplicate\susers\sin\sacc_transactions_users\safter\simport
+D 2026-01-30T17:28:04.916
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -219,7 +219,8 @@ F src/include/migrations/1.3/1.3.17.php 1f8b7a1b23a82238c3b10f62200f4425252eb477
 F src/include/migrations/1.3/1.3.17.sql 5c559fc8a0e296aa5224115d2347289a9fc64cac43754937b660ca4e3678b7ee
 F src/include/migrations/1.3/1.3.18.php 1f16e996703a1d5a1ee49e8f443692fbd82baf209dcaff1245d65ee514174bb8
 F src/include/migrations/1.3/1.3.18.sql d36104e159c4e1277e1cf86bce559ed09d92c2de6148762881bc5cdfe15e3e29
-F src/include/migrations/1.3/1.3.19.php 7a8a8a1148f62563e990f3907ede63e4b23be81c48d166fb033b0e09baa0a18e
+F src/include/migrations/1.3/1.3.19.php 98e7cf2439d8c59742ce2ec27aa3ff9cbe4ad53dfc6d7f0080081a44dbeff283
+F src/include/migrations/1.3/1.3.19.sql fcedb1c12087068962798e70d95001e9c7cb43af995cbafc2e47ddf05d7fd9cb
 F src/include/migrations/1.3/1.3.2.sql 3a81504a4d49d8226aba81aadf40a0bc1955fcecd3ab5d009186080c70ce4318
 F src/include/migrations/1.3/1.3.3.sql 765f1b91b165f2d806c00e2673491a76be9c78b37eaf82b2da06691443e403d6
 F src/include/migrations/1.3/1.3.5.sql 0f6116f331fe383330e803d0261b16e0abf3123e088de8c9e427c85ba7899af6
@@ -228,7 +229,7 @@ F src/include/migrations/1.3/1.3.8.php d75f960b815fcf4487e979abd86eb2191eb295727
 F src/include/migrations/1.3/1.3.8.sql fa48aee2ee55d3eeec09c0a5b0b5ac8ff099af3c2a16e6f929b0c215810f67c7
 F src/include/migrations/1.3/1.3.9.php b518754e6a65425e466f1f5810e5b607458d999e344e8ecbb3ee0334ea2d874f
 F src/include/migrations/1.3/1.3.9.sql e73d94df7284fd1690727f1ba62d0fd3c973e11b0460685f6306ada6f1f298f0
-F src/include/migrations/1.3/schema.sql 3fa52501ce1f4a3f85ada71183fd11412a3b1cb461ec4650dd8b3addb1e7f003
+F src/include/migrations/1.3/schema.sql aa3e3a506f2b3c651a91a1cb6df1f8919098f0169013b164b760904fc74fadad
 F src/include/test_required.php c6f0ed3e109ac18830198f85d04b563fcedd8a003a94ffbeedd27ba59e8975b0
 F src/index.php 3633bc39287a8bc3e4fc60b80287a12b61710f6e
 F src/pubkey.asc e8974cff9c91a4a2e6dc1749dfe79cc46ecd3750b57a829945aa748a932eb54a
@@ -837,24 +838,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P a80183b2568210659d59b4f6a44f087239713eeb2f2a887320d175807317a8cc
-R c6f2b4e18dfee69cc9aaa284af17d23f
+P bbbfbda5ee406d062818d47e6171989bcd49eee6f3487887fcac6fa5e1ccfb6c
+R 378c985b8233d5762f286675608c764d
 U bohwaz
-Z 55733b85ee3e99dbeee1eadcc9055ceb
+Z f40ba3c8f6b210ca708aee63c89df6f9
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAml8oX4ACgkQksnacbiI
-6jRPmRAAqf8puniz5JxLG8JxCU3QGtlRs5NCKMWE4xdHQy/Z8aW9+jbxNkMJuC73
-iOsZfOq9bQCUW7VQk4UKYJ6oz5zNWK0O1IYnTT2oqrO7bPpJyJk7MQVf9pIWmAcf
-mENxAc7d8gIEVWFG0ofwWFF+V2C6kfFdpJe+wbFnmuwtrk4tPsoMAKHH+pOM2lhR
-ep5s4m4Yp4BZo0dQRxsvpnFucX7lAIAzjn0sUotsAfJVbt/TUaB489VHbzqMZMgX
-ukxxdDD0AFC5iE55/OHQDoSNHFHfW24gqC9Z//ZyKBee1JaJy9/h/8MjYpWE7Ktu
-qp1KdnNg6NeVlc033rKSs/mqM9kfcaf8TNqnNQboJ0hePdIneuslsgIXarCjDAqC
-bHdBHWiqqsosLOnyhTYdR/mlwFUO9qtkHf3Ytqaz6v04ubtQED1OhYWD9KI5OPLA
-1aYMgU8JnR9Ze7XZiR+T8JUUOI5xF4xkcfsb6VOzdWW0eUh2ARI65O5PP/RQrsrs
-+DwRLu9fDA6RQhlxtFvvp412fmGBcwkEWe3FIOWrJZld/l1/aBZ1zzZh8pWGxZOB
-0wVcEh6eK7/VigdDiL7xUAbAyIgYx3vcSntQ9dOsrLDegHQiKOuToLMEu9VZTB0D
-FzbT9sIHNsXz3dUpj9hI2CxLb+WG4DtrnEBDca2KoB+oxktWAV8=
-=7CYy
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAml86iQACgkQksnacbiI
+6jQgiw//e8h4Kmv+gVxZ0lCakHdqlcpHArt04aybi/RzLW+27bi3iUhVbzPv3ugQ
+dvJ2Hd8KTrHQr4ctiBH6nETCi3ZE3t/plrxYlN5fwRFnhfRH58MbI31PwHKN+bCp
+utflipONe/eEW6ZcQg6L8DsDJHetLxWNunpyY/069nx50Qvpjh4P/n7T0PJYtBiE
+UdU+K4tNhwS29mrwKlIUlCVnRLKBpcA26GNwBOorI2cWIl+UARulCpZGsQrPymGP
+BEIX2vbWYP9L+D7WMUpCvNQDVslRQRYg0UuVsW+/kChqwwcu7uhgBa0FaLlmOK9J
+cNm+KZURlqaGQyh1xDtQSHq7KbaAW46TZwCY6Byiwsxg4VRBKGVAFdWBBP3mEgSw
+1sY7T579tQCqRBF7BVfhAinz2lDJTZYFwxlo5wDl5X3lvF08I+jZvsNOkr14vDZ/
+UFh1JFIkqCgqzfNwC4zzEyMdSFqlsGdNYD0nIpVVYU1TGV2IANRgNm65NFjfE1J/
+FRJqcZ94WU4PdEEhr1ZYUzyID9JBBgb4O55TGW8zZC8PBx6B4Zkc9EwSixgub2kA
+dWQLLLluSULjP7D9zZrdmJd+abm3zs8SNZ0EIHAaGxkikh6SnbhL8c/a7rRj9Wyu
+rYeYc3lieEcEmWcO8fpjLtg4RpLKCn3fvE4q9JqmJk0pp0K9ZWI=
+=3XQg
 -----END PGP SIGNATURE-----

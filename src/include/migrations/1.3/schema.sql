@@ -531,6 +531,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_users (id_service_user);
+CREATE UNIQUE INDEX IF NOT EXISTS acc_transactions_users_unique ON acc_transactions_users (id_user, id_transaction, COALESCE(id_service_user, 0));
 
 ---------- FILES ----------------
 
