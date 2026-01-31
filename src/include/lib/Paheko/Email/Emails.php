@@ -220,11 +220,16 @@ class Emails
 		$html = null;
 		$ids = [];
 
+		$markdown = $context === self::CONTEXT_BULK;
+
 		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
 		// this avoids calling the markdown parser for each recipient
-		if (!$is_system && !$template) {
+		if ($markdown && !$template) {
 			$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
 			$content = Render::render(Render::FORMAT_PLAINTEXT, null, $text);
+		}
+		elseif (!$template) {
+			$html = Utils::linkifyURLs(nl2br(htmlspecialchars($text)));
 		}
 
 		foreach ($recipients as $recipient => $r) {
@@ -243,10 +248,15 @@ class Emails
 				$template->setEscapeType(null);
 				$content = $template->fetch();
 
-				// Render Markdown to HTML
-				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
-				// Remove markdown code from plaintext email
-				$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
+				if ($markdown) {
+					// Render Markdown to HTML
+					$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+					// Remove markdown code from plaintext email
+					$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
+				}
+				else {
+					$content_html = Utils::linkifyURLs(nl2br(htmlspecialchars($content)));
+				}
 			}
 			else {
 				$content_html = $html;
