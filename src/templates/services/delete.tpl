@@ -8,6 +8,6 @@
 	confirm_text=$confirm_text
 	warning="Êtes-vous sûr de vouloir supprimer l'activité « %s » et toutes les inscriptions ?"|args:$service.label
 	error="Attention, cela supprimera également les tarifs, les inscriptions des membres à cette activité, ainsi que les rappels associés !"
-	info="Les écritures comptables liées à l'historique des membres inscrits à cette activité ne seront pas supprimées, et la comptabilité demeurera inchangée."}
+	info="Les écritures comptables créées par les inscriptions à cette activité ne seront pas supprimées : la comptabilité demeurera inchangée."}
 
 {include file="_foot.tpl"}
