@@ -13,7 +13,7 @@ $csrf_key = 'users_new';
 $user = Users::create();
 $is_duplicate = null;
 
-$user->importForm($_GET);
+$user->importForm(!empty($_POST) ? $_POST : $_GET);
 
 $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
 	$id_category = (int)f('id_category');
@@ -39,6 +39,15 @@ $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
 			json_encode($user->name())
 		);
 		exit;
+	}
+	elseif (!empty($_GET['redirect'])) {
+		$url = str_replace(WWW_URL, '', $_GET['redirect']);
+
+		// Basic protection against redirect outside of context
+		if (!preg_match('!^\s*(?://|[a-z]+:)!', $url)) {
+			$url = str_replace('%d', $user->id(), $url);
+			Utils::redirect($url);
+		}
 	}
 
 	Utils::redirect('!users/details.php?id=' . $user->id());
