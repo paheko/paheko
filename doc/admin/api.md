@@ -203,6 +203,22 @@ Notes :
 * il n'est pas possible de modifier des membres ayant accès à la configuration
 * seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur
 
+### user/{ID}/subscribe (POST)
+
+_(Depuis la version 1.3.19)_
+
+Inscrit un membre à une activité.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID` | `int` | Identifiant unique du membre (différent du numéro). |
+| `id_service` | `int` | Identifiant de l'activité. |
+| `id_fee` | `int` (facultatif) | Identifiant du tarif de l'activité. |
+| `paid` | `bool` (facultatif) | Si l'inscription doit être marquée comme réglée ou non. |
+| `date` | `string` (facultatif) | Date de l'inscription à l'activité. |
+| `expiry_date` | `string` (facultatif) | Date de l'expiration de l'inscription à l'activité. Si non spécifié, sera calculé à partir de l'activité. N'aura aucun effet si l'activité est ponctuelle. |
+| `expected_amount` | `string` (facultatif) | Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : `42,99`). Si non spécifié, il sera calculé à partir du tarif fourni. |
+
 ### user/import (PUT)
 
 Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.
