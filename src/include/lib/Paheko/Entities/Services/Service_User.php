@@ -7,6 +7,7 @@ use Paheko\Entity;
 use Paheko\Form;
 use Paheko\UserException;
 use Paheko\ValidationException;
+use Paheko\Utils;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
 use Paheko\Users\Users;
@@ -86,15 +87,21 @@ class Service_User extends Entity
 			$service = $this->_service = Services::get((int) $source['id_service']);
 
 			if (!$service) {
-				throw new \LogicException('The requested service is not found');
+				throw new UserException('The requested service is not found');
 			}
 
 			$multiple = intval($source['multiple'] ?? 1);
+			$date = null;
+
+			if (isset($source['date'])) {
+				$date = Utils::parseDateTime($source['date'], Date::class);
+			}
+
+			$date ??= new Date;
 
 			if ($service->duration) {
-				$dt = new Date;
-				$dt->modify(sprintf('+%d days', $service->duration * $multiple));
-				$this->set('expiry_date', $dt);
+				$date->modify(sprintf('+%d days', $service->duration * $multiple));
+				$this->set('expiry_date', $date);
 			}
 			elseif ($service->end_date) {
 				if ($multiple > 1) {

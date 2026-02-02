@@ -201,6 +201,16 @@ class Services_User
 		}
 	}
 
+	static public function create(int $id_user, int $id_service, ?int $id_fee): Service_User
+	{
+		$su = new Service_User;
+		$su->set('id_user', $id_user);
+		$su->set('id_service', $id_service);
+		$su->set('id_fee', $id_fee);
+		$su->set('date', new Date);
+		return $su;
+	}
+
 	static public function import(CSV_Custom $csv): void
 	{
 		$db = DB::getInstance();
