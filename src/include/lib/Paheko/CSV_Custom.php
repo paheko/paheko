@@ -180,8 +180,8 @@ class CSV_Custom
 		$class = sprintf('\\KD2\\Office\\%s\\Reader', $type);
 		$debug_path = null;
 
-		if (true) {
-			$debug_path = sys_get_temp_dir() . '/spreadsheet_error_' . date('Ymd_His') . '_' . $type;
+		if (true) { // FIXME: debug, disable when XLSX/ODS reader is more stable
+			$debug_path = CACHE_ROOT . '/spreadsheet_error_' . date('Ymd_His') . '_' . $type;
 			copy($path, $debug_path);
 		}
 
