@@ -101,13 +101,7 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 		$params = '?__from=' . md5($hash . 'from' . SECRET_KEY);
 	}
 
-	if (\PahekoCloud\ENV_DEV) {
-		$url = 'http';
-	}
-	else {
-		$url = 'https';
-	}
-
+	$url = !empty($_POST['HTTPS']) ? 'https' : 'http';
 	$url .= '://demo-' . $hash . '.' . DEMO_PARENT_DOMAIN . '/admin/' . $params;
 
 	header('Location: ' . $url);

@@ -4,7 +4,7 @@ namespace Paheko;
 
 use KD2\Security;
 
-require_once __DIR__ . '/demo/src/include/lib/KD2/Security.php';
+require_once __DIR__ . '/src/paheko/src/include/lib/KD2/Security.php';
 $error = false;
 
 if (isset($_POST['c'], $_POST['h'])
