@@ -50,6 +50,14 @@ class Security
 			throw new \LogicException('The "sodium" PHP extension is required');
 		}
 
+		if (strlen($encrypted_data) === 0) {
+			return null;
+		}
+
+		if (!ctype_xdigit($encrypted_data)) {
+			return null;
+		}
+
 		$password ??= LOCAL_SECRET_KEY;
 
 		$encrypted_data = sodium_hex2bin($encrypted_data);
