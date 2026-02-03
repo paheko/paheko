@@ -178,34 +178,37 @@ class CSV_Custom
 	public function loadSpreadsheetFile(string $type, string $path, ?string $file_name = null): void
 	{
 		$class = sprintf('\\KD2\\Office\\%s\\Reader', $type);
+		$debug_path = null;
 
-		try {
-			$s = new $class;
-			$s->openFile($path);
-
-			$sheets = $s->listSheets();
-
-			if (count($sheets) > 1) {
-				$this->sheets = $sheets;
-			}
-			else {
-				$this->sheet = 0;
-			}
-
-			$this->rows = [];
-
-			foreach ($sheets as $i => $name) {
-				$this->rows[$i] = iterator_to_array($s->iterate($i));
-			}
-
-			if (!$this->sheet_selection) {
-				$this->sheet = $s->getActiveSheet();
-			}
+		if (true) {
+			$debug_path = sys_get_temp_dir() . '/spreadsheet_error_' . date('Ymd_His') . '_' . $type;
+			copy($path, $debug_path);
 		}
-		catch (\Exception $e) {
-			// FIXME: remove debug copy
-			copy($path, sys_get_temp_dir() . '/spreadsheet_error_' . date('Ymd_His'));
-			throw $e;
+
+		$s = new $class;
+		$s->openFile($path);
+
+		$sheets = $s->listSheets();
+
+		if (count($sheets) > 1) {
+			$this->sheets = $sheets;
+		}
+		else {
+			$this->sheet = 0;
+		}
+
+		$this->rows = [];
+
+		foreach ($sheets as $i => $name) {
+			$this->rows[$i] = iterator_to_array($s->iterate($i));
+		}
+
+		if (!$this->sheet_selection) {
+			$this->sheet = $s->getActiveSheet();
+		}
+
+		if ($debug_path) {
+			@unlink($debug_path);
 		}
 
 		unset($s);
