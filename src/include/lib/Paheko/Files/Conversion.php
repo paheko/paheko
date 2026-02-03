@@ -206,6 +206,8 @@ class Conversion
 	/**
 	 * Extract PNG thumbnail from odt/ods/odp/odg ZIP archives.
 	 * This is the most efficient way to get a thumbnail.
+	 *
+	 * @return bool FALSE if the file doesn't have a thumbnail
 	 */
 	static public function extractFileThumbnail(File $file, string $destination): bool
 	{
@@ -222,7 +224,13 @@ class Conversion
 				$zip->setPointer($pointer);
 			}
 			else {
-				$zip->open($file->getLocalFilePath());
+				$path = $file->getLocalFilePath();
+
+				if (!$path) {
+					return false;
+				}
+
+				$zip->open($path);
 			}
 
 			$i = 0;
