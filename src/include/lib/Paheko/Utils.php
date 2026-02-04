@@ -388,6 +388,8 @@ class Utils
 			$sign = 1;
 		}
 
+		$value = preg_replace('/[^\d.]/', '', $value);
+
 		$parts = explode('.', $value);
 
 		if (count($parts) > 2
