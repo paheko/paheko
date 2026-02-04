@@ -14,6 +14,8 @@ clone:
 		fossil clone --nested https://fossil.kd2.org/kd2fw/; \
 		fossil clone --nested https://fossil.kd2.org/paheko-plugins/; \
 		fossil clone --nested https://fossil.kd2.org/paheko-modules/
+	# Fix symlinks
+	cd src/paheko && fossil settings allow-symlinks on && fossil revert
 
 sync:
 	cd src/paheko && fossil sync && fossil uv sync

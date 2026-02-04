@@ -4,7 +4,7 @@ namespace Paheko;
 
 function create_demo(?string $example = null, ?string $source = null, ?int $user_id = null): void
 {
-	if (in_array($example, EXAMPLE_ORGANIZATIONS, true)) {
+	if (array_key_exists($example, EXAMPLE_ORGANIZATIONS)) {
 		$source = EXAMPLE_ORGANIZATIONS[$example];
 	}
 

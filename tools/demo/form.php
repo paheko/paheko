@@ -9,19 +9,7 @@ $error = false;
 
 if (isset($_POST['c'], $_POST['h'])
 	&& Security::checkCaptcha(SECRET_KEY, $_POST['h'], $_POST['c'])) {
-	$mode = $_POST['mode'] ?? null;
-
-	if ($mode === 'example' && file_exists(EXAMPLE_SOURCE_PATH)) {
-		$source = EXAMPLE_SOURCE_PATH;
-	}
-	elseif ($mode === 'bike' && file_exists(BIKE_EXAMPLE_SOURCE_PATH)) {
-		$source = BIKE_EXAMPLE_SOURCE_PATH;
-	}
-	else {
-		$source = null;
-	}
-
-	create_demo($source);
+	create_demo($_POST['source'] ?? null);
 }
 elseif (isset($_POST['c'])) {
 	$error = true;
