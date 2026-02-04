@@ -16,8 +16,9 @@ Always replace `.../` with the path where you have installed this demo.
 
 ## Initial setup
 
-1. Run `make clone`
+1. Run `make clone` 
 2. Copy `config.dist.php` to `config.local.php` to suit your needs
+3. Run `make update`
 
 ## Cron job
 
