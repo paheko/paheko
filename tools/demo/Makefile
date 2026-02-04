@@ -29,5 +29,5 @@ update:
 	cd src/paheko-modules && fossil update ${DEMO_MODULES_VERSION}
 	ln -sf ${PWD}/src/kd2fw/src/lib/KD2 src/paheko/src/include/lib/KD2
 	ln -sf ${PWD}/config.paheko.php src/paheko/src/config.local.php
-	ln -sf ${PWD}/src/modules src/paheko/src/modules
 	rm -rf src/paheko/src/modules
+	ln -sf ${PWD}/src/paheko-modules src/paheko/src/modules
