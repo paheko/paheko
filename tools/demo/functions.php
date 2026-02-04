@@ -4,8 +4,11 @@ namespace Paheko;
 
 function create_demo(?string $example = null, ?string $source = null, ?int $user_id = null): void
 {
-	if (array_key_exists($example, EXAMPLE_ORGANIZATIONS)) {
+	if ($example && array_key_exists($example, EXAMPLE_ORGANIZATIONS)) {
 		$source = EXAMPLE_ORGANIZATIONS[$example];
+	}
+	else {
+		$example = null;
 	}
 
 	if ($source && !file_exists($source . '/association.sqlite')) {
@@ -78,7 +81,7 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 		$db->exec('COMMIT;');
 
 		// Force login and password
-		if (in_array($example, EXAMPLE_ORGANIZATIONS, true)) {
+		if ($example) {
 			// Overwrite
 			$user_id = (int) $db->querySingle('SELECT id FROM users WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = 9 AND perm_users = 9 AND perm_connect = 1) ORDER BY id LIMIT 1;', false);
 			$db->exec('UPDATE users SET password = \'' . $db->escapeString(password_hash('paheko', PASSWORD_DEFAULT)) . '\', email = \'demo@' . DEMO_PARENT_DOMAIN . '\' WHERE id = ' . $user_id . ';');
@@ -101,7 +104,7 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 		$params = '?__from=' . md5($hash . 'from' . SECRET_KEY);
 	}
 
-	$url = !empty($_POST['HTTPS']) ? 'https' : 'http';
+	$url = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
 	$url .= '://demo-' . $hash . '.' . DEMO_PARENT_DOMAIN . '/admin/' . $params;
 
 	header('Location: ' . $url);

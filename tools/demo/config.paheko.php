@@ -32,6 +32,7 @@ require __DIR__ . '/functions.php';
 /** Paheko config **/
 
 const SHOW_ERRORS = false;
+const USE_CRON = true;
 
 const PLUGINS_ROOT = __DIR__ . '/src/plugins';
 
