@@ -33,7 +33,7 @@ require __DIR__ . '/functions.php';
 
 const SHOW_ERRORS = false;
 
-const PLUGINS_ROOT = __DIR__ . '/../src/plugins';
+const PLUGINS_ROOT = __DIR__ . '/src/plugins';
 
 const ENABLE_TECH_DETAILS = false;
 const ENABLE_UPGRADES = false;
