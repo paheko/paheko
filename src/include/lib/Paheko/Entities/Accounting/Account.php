@@ -1081,8 +1081,11 @@ class Account extends Entity
 				continue;
 			}
 
-			if (isset($row->credit)) {
+			if (isset($row->credit, $row->debit)) {
 				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
+			}
+			elseif (!isset($row->amount)) {
+				throw new \LogicException('No amount column found in: ' . json_encode($row));
 			}
 
 			try {
