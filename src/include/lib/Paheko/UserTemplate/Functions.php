@@ -842,16 +842,13 @@ class Functions
 		if (empty($ut->module)) {
 			throw new Brindille_Exception('Module could not be found');
 		}
-
 		$tpl = Template::getInstance();
 
-		if (!isset($params['edit'])) {
-			$params['edit'] = false;
-		}
+		$tpl_params = [
+			'edit' => $params['edit'] ?? false,
+		];
 
-		if (!isset($params['upload'])) {
-			$params['upload'] = $params['edit'];
-		}
+		$tpl_params['upload'] ??= $params['edit'];
 
 		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
 			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
@@ -859,7 +856,12 @@ class Functions
 
 		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
 
-		$tpl->assign($params);
+		if (!$ut->module->restrict_section
+			&& 0 !== strpos($path, 'public')) {
+			throw new Brindille_Exception('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
+		}
+
+		$tpl->assign($tpl_params);
 		$tpl->assign('path', $ut->module->storage_root() . $path);
 		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
 	}

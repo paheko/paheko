@@ -1423,7 +1423,7 @@ Sans "!", l'adresse générée sera relative au contexte d'appel (module/plugin 
 <p>Mais si le module stocke des fichiers liés à un document JSON (par exemple dans un sous-répertoire pour chaque module), c'est au code du module de s'assurer que les fichiers seront supprimés lors de la suppression du document.</p>
 <p>Par défaut, tous les fichiers des modules sont en accès restreint : ils ne peuvent être vus et modifiés que par les membres connectés qui sont au niveau d'accès indiqué dans les paramètres <code>restrict_section</code> et <code>restrict_level</code> du fichier <code>module.ini</code>.</p>
 <p>Pour qu'un fichier soit visible publiquement aux personnes non connectées, il faut le placer dans le sous-répertoire <code>public</code> du module.</p>
-<p>Attention : de par ce fonctionnement, <strong>tous les fichiers</strong> d'un module sont potentiellement accessibles par <strong>tous les membres ayant accès au module</strong> et connaissant le nom du fichier.</p>
+<p>Attention : de par ce fonctionnement, <strong>tous les fichiers</strong> d'un module sont potentiellement accessibles par <strong>tous les membres ayant accès au module</strong> et connaissant le nom du fichier, indépendamment des fonctions <code>admin_files</code> et <code>delete_file</code> !</p>
 <p>Il est donc recommandé de ne pas utiliser ce mécanisme pour stocker des données personnelles ou des données sensibles.</p>
 <h2 id="admin_files">admin_files</h2>
 <p>Affiche (dans le contexte de l'administration) la liste des fichiers dans un sous-répertoire, et éventuellement la possibilité d'en ajouter ou de les supprimer.</p>
@@ -1444,12 +1444,12 @@ Sans "!", l'adresse générée sera relative au contexte d'appel (module/plugin 
 <tr>
 <td style="text-align: left;"><code>upload</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Booléen. Si <code>true</code>, l'utilisateur pourra ajouter des fichiers. (Défaut : <code>false</code>)</td>
+<td style="text-align: left;">Booléen. Si <code>true</code>, le bouton pour ajouter des fichiers sera affiché. (Défaut : <code>false</code>)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>edit</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Booléen. Si <code>true</code>, l'utilisateur pourra modifier ou supprimer les fichiers existants. (Défaut : <code>false</code>)</td>
+<td style="text-align: left;">Booléen. Si <code>true</code>, le bouton pour modifier ou supprimer les fichiers existants sera affiché. (Défaut : <code>false</code>)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>use_trash</code></td>
