@@ -37,7 +37,7 @@
 	</p>
 
 	<form method="post" action="" data-focus="1">
-		{include file="common/dynamic_list_head.tpl" check=true list=$journal}
+		{include file="common/dynamic_list_head.tpl" check=true list=$journal use_buttons=true}
 
 		{foreach from=$journal->iterate() item="line"}
 				<tr>

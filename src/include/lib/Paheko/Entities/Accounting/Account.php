@@ -795,7 +795,7 @@ class Account extends Entity
 		$list->setModifier(function (&$row) use (&$sum, $checked) {
 			$sum += ($row->credit - $row->debit);
 			$row->running_sum = $sum;
-			$row->checked = array_key_exists($row->id, $checked);
+			$row->checked = in_array($row->id_line, $checked);
 		});
 
 		return $list;
