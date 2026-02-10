@@ -724,12 +724,15 @@ class Transaction extends Entity
 				throw new ValidationException('Le compte spécifié n\'existe pas.');
 			}
 
-			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
+			if ($this->type === self::TYPE_EXPENSE && $l->account_position === Account::REVENUE) {
 				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de produit (%s) à une dépense', $i+1, $l->account_code));
 			}
-
-			if ($this->type == self::TYPE_REVENUE && $l->account_position == Account::EXPENSE) {
+			elseif ($this->type === self::TYPE_REVENUE && $l->account_position === Account::EXPENSE) {
 				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de charge (%s) à une recette', $i+1, $l->account_code));
+			}
+			// There is no reference for debt/credit transactions
+			elseif ($this->type === self::TYPE_DEBT || $this->type === self::TYPE_CREDIT) {
+				$line->set('reference', null);
 			}
 
 			try {
