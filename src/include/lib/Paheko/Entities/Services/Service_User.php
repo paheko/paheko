@@ -42,6 +42,10 @@ class Service_User extends Entity
 		$this->assert($this->id_user, 'Aucun membre spécifié');
 		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre, ce tarif et cette date');
 
+		if ($this->expiry_date) {
+			$this->assert($this->expiry_date >= $this->date, 'La date d\'expiration ne peut être avant la date d\'inscription à l\'activité');
+		}
+
 		$db = DB::getInstance();
 		// don't allow an id_fee that does not match a service
 		if (null !== $this->id_fee && !$db->test(Fee::TABLE, 'id = ? AND id_service = ?', $this->id_fee, $this->id_service)) {
