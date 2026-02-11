@@ -229,6 +229,15 @@ class CSV_Custom
 		$this->sheets = null;
 		$this->sheet = null;
 
+		$type = mime_content_type($path);
+
+		if ($type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+			$ext = 'xlsx';
+		}
+		elseif ($type === 'application/vnd.oasis.opendocument.spreadsheet') {
+			$ext = 'ods';
+		}
+
 		if ($ext === 'xlsx' || $ext === 'ods') {
 			$this->loadSpreadsheetFile($ext === 'xlsx' ? 'Excel' : 'Calc', $path, $file_name);
 			return;
@@ -236,9 +245,10 @@ class CSV_Custom
 		// Automatically convert from legacy XLS files
 		elseif ($ext === 'xls' && $this->canConvert()) {
 			$path = Conversion::toCSVAuto($path);
+			// $path will be NULL if conversion failed
 		}
 
-		if (!$path) {
+		if (!$path || 0 !== strpos($type, 'text/')) {
 			throw new UserException('Ce fichier n\'est pas dans un format accepté.');
 		}
 
