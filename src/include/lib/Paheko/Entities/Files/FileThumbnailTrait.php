@@ -92,7 +92,7 @@ trait FileThumbnailTrait
 			$size .= 'px';
 		}
 
-		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
+		$size = isset($size) && array_key_exists($size, self::ALLOWED_THUMB_SIZES) ? $size : key(self::ALLOWED_THUMB_SIZES);
 		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
 
 		if ($with_hash) {
