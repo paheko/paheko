@@ -8,6 +8,7 @@ use Paheko\Files\Files;
 
 use KD2\Office\Calc\Reader as ODS_Reader;
 use KD2\Office\Excel\Reader as XLSX_Reader;
+use KD2\ErrorManager;
 
 /**
  * Allows to parse CSV/spreadsheet files and select matching columns
@@ -185,26 +186,34 @@ class CSV_Custom
 			copy($path, $debug_path);
 		}
 
-		$s = new $class;
-		$s->openFile($path);
+		try {
+			$s = new $class;
+			$s->openFile($path);
 
-		$sheets = $s->listSheets();
+			$sheets = $s->listSheets();
 
-		if (count($sheets) > 1) {
-			$this->sheets = $sheets;
+			if (count($sheets) > 1) {
+				$this->sheets = $sheets;
+			}
+			else {
+				$this->sheet = 0;
+			}
+
+			$this->rows = [];
+
+			foreach ($sheets as $i => $name) {
+				$this->rows[$i] = iterator_to_array($s->iterate($i));
+			}
+
+			if (!$this->sheet_selection) {
+				$this->sheet = $s->getActiveSheet();
+			}
 		}
-		else {
-			$this->sheet = 0;
-		}
-
-		$this->rows = [];
-
-		foreach ($sheets as $i => $name) {
-			$this->rows[$i] = iterator_to_array($s->iterate($i));
-		}
-
-		if (!$this->sheet_selection) {
-			$this->sheet = $s->getActiveSheet();
+		catch (\RuntimeException|\LogicException $e) {
+			$this->sheet = null;
+			$this->rows = null;
+			ErrorManager::reportExceptionSilent($e);
+			throw new UserException('Erreur dans le fichier : ' . $e->getMessage(), 0, $e);
 		}
 
 		if ($debug_path) {
