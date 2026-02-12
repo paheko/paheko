@@ -211,8 +211,6 @@ class Backup
 	 */
 	static public function make(?string $destination): string
 	{
-		// Acquire lock
-		$version = \SQLite3::version();
 		$db = DB::getInstance();
 
 		// Use a temporary file so that if BACKUPS_ROOT is on NFS,
@@ -220,7 +218,7 @@ class Backup
 		$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
 
 		// use VACUUM INTO when SQLite 3.27+ is available
-		if ($version['versionNumber'] >= 3027000) {
+		if ($db->hasFeatures('vacuum_into')) {
 			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
 			// which is restricted for security reasons, so we disable the authorizer
 			DB::toggleAuthorizer($db, false);
@@ -228,7 +226,10 @@ class Backup
 			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($tmp)));
 
 			DB::toggleAuthorizer($db, true);
+
+			// Make sure the backup file has DELETE journal mode so the WAL file is squashed
 			$dest_db = new \SQLite3($tmp);
+			$dest_db->exec('PRAGMA journal_mode = DELETE;');
 		}
 		else {
 			// use ::backup since PHP 7.4.0+
@@ -236,12 +237,15 @@ class Backup
 			$dest_db = new \SQLite3($tmp);
 			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
+			// Make sure the backup file has DELETE journal mode so the WAL file is squashed
+			$dest_db->exec('PRAGMA journal_mode = DELETE;');
+
 			$db->backup($dest_db);
+
+			// Make sure we reduce the final backup
+			$dest_db->exec('VACUUM;');
 		}
 
-		// Make sure the backup file has DELETE journal mode so the WAL file is squashed
-		$dest_db->exec('PRAGMA journal_mode = DELETE;');
-		$dest_db->exec('VACUUM;');
 		$dest_db->close();
 
 		if (null !== $destination) {
