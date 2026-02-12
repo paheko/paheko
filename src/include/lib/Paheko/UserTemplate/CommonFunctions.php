@@ -1044,7 +1044,7 @@ class CommonFunctions
 				$aside = sprintf('<small>%s</small>', htmlspecialchars($option['aside']));
 			}
 
-			if (isset($option['value']) && $option['value'] == $params['value']) {
+			if (isset($option['value'], $params['value']) && $option['value'] === $params['value']) {
 				$selected = 'aria-selected="true" class="selected"';
 			}
 
