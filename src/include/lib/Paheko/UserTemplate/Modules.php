@@ -80,10 +80,7 @@ class Modules
 		foreach ($existing as $name) {
 			try {
 				$f = self::get($name);
-				$f->updateFromINI();
-				$f->selfCheck();
-				$f->save();
-				$f->updateTemplates();
+				$f->refresh(false);
 			}
 			catch (ValidationException $e) {
 				$errors[] = $name . ': ' . $e->getMessage();
@@ -105,14 +102,7 @@ class Modules
 		$db->begin();
 
 		foreach (self::list() as $module) {
-			try {
-				$module->updateFromINI();
-				$module->save();
-				$module->updateTemplates();
-			}
-			catch (ValidationException $e) {
-				// Ignore errors here
-			}
+			$module->refresh(true);
 		}
 
 		$db->commit();
@@ -265,7 +255,13 @@ class Modules
 			return null;
 		}
 
-		return EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
+		$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
+
+		if ($module) {
+			$module->refreshIfNeeded();
+		}
+
+		return $module;
 	}
 
 	static public function isEnabled(string $name): bool
@@ -300,6 +296,7 @@ class Modules
 		}
 
 		$module->assertIsValid();
+		$module->refreshIfNeeded();
 
 		return $module;
 	}

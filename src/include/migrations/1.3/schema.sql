@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS modules
 	config TEXT NULL,
 	enabled INTEGER NOT NULL DEFAULT 0,
 	web INTEGER NOT NULL DEFAULT 0,
-	system INTEGER NOT NULL DEFAULT 0
+	system INTEGER NOT NULL DEFAULT 0,
+	last_updated TEXT NULL CHECK (last_updated IS NULL OR datetime(last_updated) = last_updated)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);

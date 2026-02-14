@@ -19,6 +19,8 @@ use KD2\ZipWriter;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
 
+use DateTime;
+
 use const Paheko\{ROOT, WWW_URL, BASE_URL};
 
 class Module extends Entity
@@ -76,11 +78,51 @@ class Module extends Entity
 	 */
 	protected bool $system;
 
+	protected ?DateTime $last_updated = null;
+
 	protected bool $_table_exists;
 
 	protected ?\stdClass $_ini;
 
 	protected ?string $_broken_message = null;
+
+	public function refreshIfNeeded(): void
+	{
+		// We only need to refresh modules from the local filesystem
+		// as they're the ones that might have their code updated
+		// but the DB would be out of sync
+		if (!$this->hasDist()) {
+			return;
+		}
+
+		$ini_updated = filemtime($this->distPath(self::META_FILE));
+
+		if ($this->last_updated
+			&& $ini_updated <= $this->last_updated->getTimestamp()) {
+			return;
+		}
+
+		$this->refresh(true);
+	}
+
+	public function refresh(bool $suppress_errors = false): void
+	{
+		if ($this->isModified()) {
+			throw new \LogicException('Cannot refresh a modified module');
+		}
+
+		try {
+			$this->updateFromINI();
+			$this->save();
+			$this->updateTemplates();
+		}
+		catch (ValidationException $e) {
+			// Ignore self-check errors here, or it might block module actions
+			if (!$suppress_errors) {
+				throw $e;
+			}
+		}
+	}
 
 	public function assertIsValid(): void
 	{
@@ -241,6 +283,8 @@ class Module extends Entity
 		if (!empty($ini->system)) {
 			$this->set('system', true);
 		}
+
+		$this->set('last_updated', new DateTime);
 
 		return true;
 	}
