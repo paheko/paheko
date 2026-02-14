@@ -40,6 +40,15 @@ class CommonFunctions
 		'dropdown',
 	];
 
+	static protected function getIconFromShape(string $shape): string
+	{
+		if (!array_key_exists($shape, Utils::ICONS)) {
+			throw new TemplateException('Unknown icon shape: ' . $shape);
+		}
+
+		return Utils::ICONS[$shape];
+	}
+
 	static public function input(array $params)
 	{
 		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist', 'html_label'];
@@ -508,7 +517,7 @@ class CommonFunctions
 	static public function icon(array $params): string
 	{
 		if (isset($params['shape']) && isset($params['html']) && !$params['html']) {
-			return Utils::iconUnicode($params['shape']);
+			return self::getIconFromShape($params['shape']);
 		}
 
 		if (!isset($params['shape']) && !isset($params['url'])) {
@@ -661,7 +670,7 @@ class CommonFunctions
 	static protected function setIconAttribute(array &$params): void
 	{
 		if (isset($params['shape'])) {
-			$params['data-icon'] = Utils::iconUnicode($params['shape']);
+			$params['data-icon'] = self::getIconFromShape($params['shape']);
 		}
 
 		unset($params['shape']);
@@ -716,7 +725,7 @@ class CommonFunctions
 				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
 				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
-			Utils::iconUnicode($params['shape']),
+			self::getIconFromShape($params['shape']),
 			htmlspecialchars($params['label'])
 		);
 

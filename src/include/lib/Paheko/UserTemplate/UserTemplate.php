@@ -457,7 +457,7 @@ class UserTemplate extends \KD2\Brindille
 		try {
 			$return = $this->displayUsingCache([$this, 'fetchCode'], $compiled_path, $this->modified);
 		}
-		catch (Brindille_Exception $e) {
+		catch (TemplateException | Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
 			$is_user_code = $this->file || $path === 'code' ? true : false;
 

@@ -463,7 +463,8 @@ class Utils
 		return $out;
 	}
 
-	static public function money_format($number, ?string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
+	static public function money_format($number, ?string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string
+	{
 		if ($number == 0) {
 			return $zero_if_empty ? '0' : '0,00';
 		}
@@ -1225,15 +1226,6 @@ class Utils
 		}
 
 		return $url;
-	}
-
-	static public function iconUnicode(string $shape): string
-	{
-		if (!isset(self::ICONS[$shape])) {
-			throw new \UnexpectedValueException('Unknown icon shape: ' . $shape);
-		}
-
-		return self::ICONS[$shape];
 	}
 
 	static public function array_transpose(?array $array): array
