@@ -731,6 +731,7 @@ class UserTemplate extends \KD2\Brindille
 			if (!($p instanceof Brindille_Exception)
 				&& !($p instanceof TemplateException)
 				&& !($p instanceof UserException)) {
+				// FIXME: this shouldn't be useful anymore
 				throw new \RuntimeException('Invalid Brindille Exception', 0, $e);
 			}
 		}
