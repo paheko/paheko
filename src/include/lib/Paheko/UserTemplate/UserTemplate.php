@@ -459,7 +459,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			$path = $this->file ? $this->file->path : ($this->code ? 'code' : str_replace(ROOT, '…', $this->path));
-			$is_user_code = $this->file ? true : false;
+			$is_user_code = $this->file || $path === 'code' ? true : false;
 
 			$message = sprintf("Erreur dans '%s' :\n%s", $path, $e->getMessage());
 
@@ -471,6 +471,9 @@ class UserTemplate extends \KD2\Brindille
 				// Report error to admin with the highlighted line
 				$this->error($e, $message);
 				return;
+			}
+			elseif ($path === 'code') {
+				throw $e;
 			}
 			else {
 				// Only report error

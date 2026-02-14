@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\Email\Mailings;
+use KD2\Brindille_Exception;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -22,14 +23,25 @@ if ($view === 'code') {
 	$tpl->display('users/mailing/preview.tpl');
 }
 elseif ($view === 'text') {
-	$text = $mailing->getPreview(null, false);
+	try {
+		$text = $mailing->getPreview(null, false);
+	}
+	catch (Brindille_Exception $e) {
+		$text = "/!\ Erreur dans le code du message !!!\n" . $e->getMessage();
+	}
+
 	$text = htmlspecialchars($text);
 	$text = Utils::linkifyURLs($text);
 	$tpl->assign('code', $text);
 	$tpl->display('users/mailing/preview.tpl');
 }
 else {
-	$text = $mailing->getHTMLPreview((int)qg('preview') ?: null, true);
+	try {
+		$text = $mailing->getHTMLPreview((int)qg('preview') ?: null, true);
+	}
+	catch (\KD2\Brindille_Exception $e) {
+		$text = sprintf('<div style="margin: 10px auto; background: #fcc; padding: 10px; max-width: 600px; font-size: 1.2em"><h2>Erreur dans le code du message</h2>%s</div>', htmlspecialchars($e->getMessage()));
+	}
 
 	if ($view === 'handheld') {
 		$text = preg_replace_callback('/<body[^>]*style="[^"]*"/', function ($match) {
