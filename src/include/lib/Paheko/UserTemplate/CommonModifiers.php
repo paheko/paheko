@@ -39,12 +39,12 @@ class CommonModifiers
 		'boolval' => [null],
 		'intval' => [null],
 		'floatval' => [null],
-		'strval' => [null],
 		'substr' => ['string+', 'bool|int', 'bool|int'],
 		'http_build_query' => ['array', 'string', '?string', 'int'],
 	];
 
 	const MODIFIERS_LIST = [
+		'strval' => [null],
 		'protect_contact' => ['string+', '?string'],
 		'markdown' => ['?string+'],
 		'money' => ['?numeric', 'bool', 'bool', 'bool'],
@@ -69,6 +69,15 @@ class CommonModifiers
 		'get_country_name' => ['callback' => [Utils::class, 'getCountryName']],
 		'str_getcsv' => ['string+', 'string', 'string', 'string'],
 	];
+
+	static public function strval($value): string
+	{
+		if (!is_scalar($value)) {
+			return '';
+		}
+
+		return strval($value);
+	}
 
 	static public function protect_contact(?string $contact, ?string $type = null): string
 	{
