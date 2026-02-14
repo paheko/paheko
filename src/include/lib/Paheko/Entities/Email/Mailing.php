@@ -351,6 +351,10 @@ class Mailing extends Entity
 
 	public function getPreview(?int $id = null, bool $html = true): string
 	{
+		if (!isset($this->body)) {
+			return '';
+		}
+
 		$body = $this->body;
 
 		// The message is sent, we no longer have personal data,
