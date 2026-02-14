@@ -80,6 +80,7 @@
 				<li><a href="#user-id-get">user/{ID} (GET)</a></li>
 				<li><a href="#user-id-delete">user/{ID} (DELETE)</a></li>
 				<li><a href="#user-id-post">user/{ID} (POST)</a></li>
+				<li><a href="#user-id-subscribe-post">user/{ID}/subscribe (POST)</a></li>
 				<li><a href="#user-import-put">user/import (PUT)</a></li>
 				<li><a href="#user-import-post">user/import (POST)</a></li>
 				<li><a href="#user-import-preview-put">user/import/preview (PUT)</a></li>
@@ -219,6 +220,55 @@
 <li>il n'est pas possible de modifier des membres ayant accès à la configuration</li>
 <li>seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur</li>
 </ul>
+<h3 id="user-id-subscribe-post">user/{ID}/subscribe (POST)</h3>
+<p><em>(Depuis la version 1.3.19)</em></p>
+<p>Inscrit un membre à une activité.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>ID</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant unique du membre (différent du numéro).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_service</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Identifiant de l'activité.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>id_fee</code></td>
+<td style="text-align: left;"><code>int</code> (facultatif)</td>
+<td style="text-align: left;">Identifiant du tarif de l'activité.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>paid</code></td>
+<td style="text-align: left;"><code>bool</code> (facultatif)</td>
+<td style="text-align: left;">Si l'inscription doit être marquée comme réglée ou non.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>date</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Date de l'inscription à l'activité.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>expiry_date</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Date de l'expiration de l'inscription à l'activité. Si non spécifié, sera calculé à partir de l'activité. N'aura aucun effet si l'activité est ponctuelle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>expected_amount</code></td>
+<td style="text-align: left;"><code>string</code> (facultatif)</td>
+<td style="text-align: left;">Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : <code>42,99</code>). Si non spécifié, il sera calculé à partir du tarif fourni.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="user-import-put">user/import (PUT)</h3>
 <p>Permet d'importer un fichier de tableur (CSV/XLSX/ODS) de la liste des membres, comme si c'était fait depuis l'interface de Paheko.</p>
 <p>Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.</p>

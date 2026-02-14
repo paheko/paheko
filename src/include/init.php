@@ -206,6 +206,7 @@ static $default_config = [
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'NONE',
 	'SMTP_HELO_HOSTNAME'    => null,
+	'SMTP_MAX_MESSAGES_PER_SESSION' => 50,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
@@ -390,6 +391,10 @@ class ValidationException extends UserException
 }
 
 class APIException extends \LogicException
+{
+}
+
+class TemplateException extends \RuntimeException
 {
 }
 

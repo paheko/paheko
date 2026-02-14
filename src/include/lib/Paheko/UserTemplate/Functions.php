@@ -35,7 +35,6 @@ class Functions
 	const FUNCTIONS_LIST = [
 		'include',
 		'http',
-		'debug',
 		'error',
 		'read',
 		'save',
@@ -275,14 +274,15 @@ class Functions
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
 		$replace = !empty($params['replace']);
+		$result = null;
 
 		unset($params['key'], $params['id'], $params['assign_new_id'], $params['validate_schema'],
 			$params['validate_only'], $params['replace']);
 
-		if ($key == 'config') {
+		if ($key === 'config' && !$replace) {
 			$result = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', Module::TABLE), $tpl->module->name);
 		}
-		else {
+		elseif ($key !== 'config') {
 			static $modules_tables = [];
 
 			// Don't try to create table for each save statement
@@ -299,9 +299,6 @@ class Functions
 
 			if ($field && !$replace) {
 				$result = $db->firstColumn(sprintf('SELECT document FROM %s WHERE %s;', $table, ($field . ' = ?')), $where_value);
-			}
-			else {
-				$result = null;
 			}
 		}
 
@@ -351,14 +348,24 @@ class Functions
 
 		$value = json_encode($params);
 
-		if ($key == 'config') {
+		if ($key === 'config') {
 			$db->update(Module::TABLE, ['config' => $value], 'name = :name', ['name' => $tpl->module->name]);
 			return;
 		}
 
 		$document = $value;
+
 		if (!$result) {
-			$db->insert($table, compact('id', 'document', 'key'));
+			// If replacing, delete then insert
+			if ($replace) {
+				$db->begin();
+				$db->delete($table, $field . ' = ?', $where_value);
+				$db->insert($table, compact('id', 'document', 'key'));
+				$db->commit();
+			}
+			else {
+				$db->insert($table, compact('id', 'document', 'key'));
+			}
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
@@ -408,6 +415,10 @@ class Functions
 				$args['value_' . $i] = $value;
 				$i++;
 			}
+		}
+
+		if (!count($where)) {
+			throw new Brindille_Exception('Missing parameters for delete');
 		}
 
 		$where = implode(' AND ', $where);
@@ -580,7 +591,7 @@ class Functions
 		if (!empty($params['notification'])) {
 			$context = Emails::CONTEXT_NOTIFICATION;
 		}
-		elseif (count($params['to']) == 1) {
+		elseif (count($params['to']) === 1) {
 			$context = Emails::CONTEXT_PRIVATE;
 		}
 		else {
@@ -593,23 +604,6 @@ class Functions
 			$internal += $internal_count;
 			$external_count += $external_count;
 		}
-	}
-
-	static public function debug(array $params, UserTemplate $tpl)
-	{
-		if (!count($params)) {
-			$params = $tpl->getAllVariables();
-		}
-
-		$dump = htmlspecialchars(ErrorManager::dump($params));
-
-		// Show objects as arrays
-		$dump = str_replace('object(stdClass) (', 'array(', $dump);
-
-		// FIXME: only send back HTML when content-type is text/html, or send raw text
-		$out = sprintf('<pre style="background: yellow; color: black; padding: 5px; overflow: auto">%s</pre>', $dump);
-
-		return $out;
 	}
 
 	static public function error(array $params, UserTemplate $tpl, int $line)
@@ -719,7 +713,7 @@ class Functions
 
 		$params['included_from'] = array_merge($from, [$path]);
 
-		$include->assignArray(array_merge($ut->getAllVariables(), $params));
+		$include->assignArray(array_merge($ut->getAllVariables(), $params), null, false);
 
 		if (!empty($params['capture'])) {
 			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
@@ -848,16 +842,13 @@ class Functions
 		if (empty($ut->module)) {
 			throw new Brindille_Exception('Module could not be found');
 		}
-
 		$tpl = Template::getInstance();
 
-		if (!isset($params['edit'])) {
-			$params['edit'] = false;
-		}
+		$tpl_params = [
+			'edit' => $params['edit'] ?? false,
+		];
 
-		if (!isset($params['upload'])) {
-			$params['upload'] = $params['edit'];
-		}
+		$tpl_params['upload'] ??= $params['edit'];
 
 		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
 			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
@@ -865,7 +856,12 @@ class Functions
 
 		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
 
-		$tpl->assign($params);
+		if (!$ut->module->restrict_section
+			&& 0 !== strpos($path, 'public')) {
+			throw new Brindille_Exception('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
+		}
+
+		$tpl->assign($tpl_params);
 		$tpl->assign('path', $ut->module->storage_root() . $path);
 		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
 	}

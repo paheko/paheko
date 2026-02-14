@@ -7,6 +7,7 @@ use Paheko\CSV;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
+use Paheko\Form;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
@@ -17,6 +18,8 @@ use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
 use Paheko\Entities\Users\DynamicField;
+
+use KD2\Brindille_Exception;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
@@ -56,6 +59,13 @@ class Mailing extends Entity
 
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
+
+		try {
+			$this->getPreview();
+		}
+		catch (Brindille_Exception $e) {
+			$this->assert(false, 'Erreur dans le code du message : ' . $e->getMessage());
+		}
 
 		if (isset($this->sender_name) || isset($this->sender_email)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
@@ -341,6 +351,10 @@ class Mailing extends Entity
 
 	public function getPreview(?int $id = null, bool $html = true): string
 	{
+		if (!isset($this->body)) {
+			return '';
+		}
+
 		$body = $this->body;
 
 		// The message is sent, we no longer have personal data,
@@ -366,12 +380,7 @@ class Mailing extends Entity
 					$body->assignArray($r, null, false);
 				}
 
-				try {
-					$body = $body->fetch();
-				}
-				catch (\KD2\Brindille_Exception $e) {
-					throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
-				}
+				$body = $body->fetch();
 			}
 		}
 
@@ -461,7 +470,13 @@ class Mailing extends Entity
 			return [];
 		}
 
-		$html = $this->getPreview();
+		try {
+			$html = $this->getPreview();
+		}
+		catch (Brindille_Exception $e) {
+			return [];
+		}
+
 		$out = [];
 
 		$regexp = sprintf('/\bhref="(?!%s|%s)/', preg_quote(WWW_URL, '/'), preg_quote(ADMIN_URL, '/'));

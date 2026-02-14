@@ -962,6 +962,9 @@ class DynamicFields
 				if ($field->isVirtual() && $field->isModified('sql')) {
 					$rebuild_view = true;
 				}
+				elseif ($field->isModified('type')) {
+					$rebuild = true;
+				}
 
 				$field->save();
 			}

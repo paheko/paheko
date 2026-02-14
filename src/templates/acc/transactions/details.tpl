@@ -104,9 +104,11 @@
 			<dt>Numéro pièce comptable</dt>
 			<dd>{if $transaction.reference}<mark>{$transaction.reference}</mark>{else}—{/if}</dd>
 
-			{if $transaction.type != $transaction::TYPE_ADVANCED}
-				<dt>Référence de paiement</dt>
-				<dd>{if $ref = $transaction->getPaymentReference()}<mark>{$ref}</mark>{else}—{/if}</dd>
+			{if $transaction.type !== $transaction::TYPE_ADVANCED}
+				{if $transaction.type !== $transaction::TYPE_CREDIT && $transaction.type !== $transaction::TYPE_DEBT}
+					<dt>Référence de paiement</dt>
+					<dd>{if $ref = $transaction->getPaymentReference()}<mark>{$ref}</mark>{else}—{/if}</dd>
+				{/if}
 				<dt>Projet</dt>
 				<dd>
 				{if $project = $transaction->getProject()}

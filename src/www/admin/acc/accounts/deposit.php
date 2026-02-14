@@ -61,6 +61,10 @@ if (!empty($_POST['mark']) || !empty($_POST['create'])) {
 	}
 
 	$form->runIf('confirm_mark', function () use ($account, $checked) {
+		if (empty($_POST['yes'])) {
+			throw new UserException('Merci de bien vouloir cocher la case pour confirmer l\'action');
+		}
+
 		$account->markLinesAsDeposited($checked);
 	}, $csrf_key, '!acc/accounts/deposit.php?marked&id=' . $account->id());
 

@@ -112,7 +112,8 @@ table.list td {
     display: block;
 }
 
-td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
+td.actions *, nav.tabs, .icn-btn, .pagination, a.icn, p.actions,
+table thead label, table tfoot label, table thead button span {
     display: none !important;
 }
 
@@ -144,6 +145,12 @@ details summary::after {
 
 .transaction-details-container {
     max-width: initial;
+    display: block;
+}
+
+.transaction-details-container aside {
+    columns: 2;
+    gap: 1em;
 }
 
 span.tag {

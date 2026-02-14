@@ -22,9 +22,9 @@ $types = [
 	Transaction::TYPE_ADVANCED => 'Avancées',
 ];
 
-$type = qg('type');
+$type = intval(qg('type') ?? key($types));
 
-if (null === $type || !array_key_exists($type, $types)) {
+if (!array_key_exists($type, $types)) {
 	$type = key($types);
 }
 

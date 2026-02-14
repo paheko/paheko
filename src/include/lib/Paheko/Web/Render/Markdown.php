@@ -15,10 +15,10 @@ class Markdown_Parser extends KD2_Markdown
 	/**
 	 * Add typo modifier to text
 	 */
-	protected function inlineText($text)
+	protected function lineElements($text, $nonNestables = array())
 	{
 		$text = CommonModifiers::typo($text);
-		return parent::inlineText($text);
+		return parent::lineElements($text, $nonNestables);
 	}
 }
 

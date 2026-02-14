@@ -70,7 +70,7 @@ class Email extends Entity
 		return $url;
 	}
 
-	static public function acceptsThisMessage(\stdClass $r)
+	static public function acceptsThisMessage(\stdClass $r): bool
 	{
 		// We allow system emails to be sent to any address, even if it is invalid
 		if ($r->context === Emails::CONTEXT_SYSTEM) {
@@ -83,14 +83,15 @@ class Email extends Entity
 			return false;
 		}
 
+		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
-				return $r->accepts_mailings === false ? false : true;
+				return (bool) $r->accepts_mailings;
 			case Emails::CONTEXT_REMINDER:
 			case Emails::CONTEXT_NOTIFICATION:
-				return $r->accepts_reminders === false ? false : true;
+				return (bool) $r->accepts_reminders;
 			default:
-				return $r->accepts_messages === false ? false : true;
+				return (bool) $r->accepts_messages;
 		}
 	}
 

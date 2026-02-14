@@ -14,6 +14,10 @@
 			En cliquant sur le bouton ci-dessous, les lignes cochées seront marquées comme ayant été déposées.<br /><strong>Il ne sera pas possible de les remettre dans la liste des écritures à déposer en banque.</strong>
 		</p>
 
+		<dl>
+			{input type="checkbox" name="yes" value=1 label="Je confirme vouloir supprimer ces lignes de la liste des dépôts en banque, il ne sera plus possible de revenir en arrière" required=true}
+		</dl>
+
 		<p class="submit">
 			{csrf_field key=$csrf_key}
 			<input type="hidden" name="mark" value="1" />

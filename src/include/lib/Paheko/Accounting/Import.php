@@ -459,7 +459,7 @@ class Import
 			return $id_account;
 		}
 
-		if (!$account || !$options->auto_create_accounts) {
+		if (!$account && !$options->auto_create_accounts) {
 			throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $account));
 		}
 

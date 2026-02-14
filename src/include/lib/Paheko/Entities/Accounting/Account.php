@@ -2,8 +2,6 @@
 
 namespace Paheko\Entities\Accounting;
 
-use DateTime;
-use KD2\DB\Date;
 use Paheko\Config;
 use Paheko\CSV_Custom;
 use Paheko\DB;
@@ -14,6 +12,11 @@ use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Charts;
+
+use KD2\DB\Date;
+use KD2\DB\EntityManager as EM;
+
+use DateTime;
 
 class Account extends Entity
 {
@@ -154,13 +157,18 @@ class Account extends Entity
 	 * Codes that should be enforced according to type (and vice-versa)
 	 * Note: order is important! eg. for BE, putting TYPE_EXPENSE before TYPE_POSITIVE_RESULT
 	 * would make the account an expense instead of a result account.
+	 *
+	 * Warning: common account types (see above) matching will only work if account code
+	 * has at least one more character than the code passed here.
+	 *
+	 * Eg: self::TYPE_INTERNAL => '58' will match '580' but not '58'!
 	 */
 	const LOCAL_TYPES = [
 		'FR' => [
 			self::TYPE_BANK => '512',
 			self::TYPE_CASH => '53',
 			self::TYPE_OUTSTANDING => '511',
-			self::TYPE_INTERNAL => '580',
+			self::TYPE_INTERNAL => '58',
 			self::TYPE_THIRD_PARTY => '4',
 			self::TYPE_EXPENSE => '6',
 			self::TYPE_REVENUE => '7',
@@ -404,20 +412,29 @@ class Account extends Entity
 			$country = $this->getCountry();
 		}
 
-		$pattern = self::LOCAL_TYPES[$country][$type] ?? null;
+		$code = self::LOCAL_TYPES[$country][$type] ?? null;
 
-		if (!$pattern) {
+		if ($code === null) {
 			return false;
 		}
 
+		// Common types will not match the parent account, only the children
+		// eg. self::TYPE_INTERNAL => '58' will not match '58', but only '580' and so on
 		if (in_array($type, self::COMMON_TYPES)) {
-			$pattern = sprintf('/^%s.+/', $pattern);
+			return 0 === strpos($this->code, $code) && strlen($this->code) > strlen($code);
 		}
 		else {
-			$pattern = sprintf('/^%s$/', $pattern);
-		}
+			if ($this->code === $code) {
+				return true;
+			}
+			// Allow for matching 890000 === 890
+			elseif (substr($this->code, 0, strlen($code)) === $code
+				&& trim(substr($this->code, strlen($code)), '0') === '') {
+				return true;
+			}
 
-		return (bool) preg_match($pattern, $this->code);
+			return false;
+		}
 	}
 
 	public function setLocalRules(?string $country = null): void
@@ -450,7 +467,7 @@ class Account extends Entity
 	{
 		$country = $this->getCountry();
 
-		if ($country === 'FR') {
+		if ($country === 'FR' && !$this->exists()) {
 			$classe = substr($this->code, 0, 1);
 			$this->assert($classe >= 1 && $classe <= 8, 'Seuls les comptes de classe 1 à 8 sont autorisés dans le plan comptable français');
 		}
@@ -566,7 +583,6 @@ class Account extends Entity
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(*)');
 		$list->setPageSize(null); // Because with paging we can't calculate the running sum
 		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
 			if (property_exists($row, 'sum')) {
@@ -779,7 +795,7 @@ class Account extends Entity
 		$list->setModifier(function (&$row) use (&$sum, $checked) {
 			$sum += ($row->credit - $row->debit);
 			$row->running_sum = $sum;
-			$row->checked = array_key_exists($row->id, $checked);
+			$row->checked = in_array($row->id_line, $checked);
 		});
 
 		return $list;
@@ -1054,4 +1070,86 @@ class Account extends Entity
 		return $t;
 	}
 
+	public function matchImportTransactions(Year $year, CSV_Custom $csv, ?array $source = null): array
+	{
+		$out = [];
+
+		foreach ($csv->iterate() as $i => $row) {
+			$row->date = Utils::parseDateTime($row->date, Date::class);
+
+			if (!$row->date) {
+				continue;
+			}
+
+			if (isset($row->credit, $row->debit)) {
+				$row->amount = $row->credit ? $row->credit : '-' . trim($row->debit, '-');
+			}
+			elseif (!isset($row->amount)) {
+				throw new \LogicException('No amount column found in: ' . json_encode($row));
+			}
+
+			try {
+				$row->amount = Utils::moneyToInteger($row->amount, true);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()), 0, $e);
+			}
+
+			$transaction = EM::findOne(Transaction::class,
+				'SELECT t.* FROM @TABLE t
+				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+				WHERE l.id_account = ? AND t.date = ? AND t.id_year = ?
+				GROUP BY t.id
+				HAVING SUM(l.debit - l.credit) = ?
+				LIMIT 1;',
+				$this->id(),
+				$row->date,
+				$year->id(),
+				$row->amount,
+			);
+
+			if (null === $transaction) {
+				$transaction = new Transaction;
+				$transaction->id_year = $year->id();
+				$transaction->importForm((array) $row);
+
+				$line = new Line;
+				$line->id_account = $this->id();
+				$line2 = null;
+
+				// Inverted, as this is a bank account
+				$line->credit = $row->amount < 0 ? abs($row->amount) : 0;
+				$line->debit = $row->amount > 0 ? abs($row->amount) : 0;
+
+				if (!empty($source[$i])) {
+					$transaction->importForm($source[$i]);
+					$line->importForm([
+						'reconciled' => !empty($source[$i]['reconcile']),
+						'reference'  => $source[$i]['payment_ref'] ?? null,
+					]);
+
+					$line2 = new Line;
+					$line2->credit = $line->debit;
+					$line2->debit = $line->credit;
+					$line2->id_account = isset($source[$i]['account']) ? (int)key($source[$i]['account']) : null;
+				}
+				else {
+					$line->reference = $row->p_reference ?? null;
+					$line->reconciled = true;
+				}
+
+				$transaction->addLine($line);
+
+				if ($line2) {
+					$transaction->addLine($line2);
+				}
+
+				$transaction->type = $transaction->findTypeFromAccounts();
+			}
+
+			$out[$i] = $transaction;
+		}
+
+		return $out;
+	}
 }

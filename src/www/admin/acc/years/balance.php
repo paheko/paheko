@@ -88,13 +88,13 @@ if ($previous_year) {
 		$chart = $year->chart();
 		if ($chart->isOfficial()) {
 			// This should not happen
-			throw new \LogicException('Official chart does not have a result account for type='.$type);
+			\KD2\ErrorManager::reportExceptionSilent(new \LogicException('Official chart does not have a result account for type='.$type));
 		}
 
 		$account = (object) [
 			'id'    => null,
 			'code'  => null,
-			'label' => null,
+			'label' => 'Résultat de l\'exercice',
 		];
 	}
 

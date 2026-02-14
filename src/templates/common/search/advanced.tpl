@@ -13,7 +13,7 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 </p>
 {/if}
 
-<fieldset>
+<fieldset class="noprint">
 {if $s.type !== $s::TYPE_JSON}
 	{if !$can_sql}
 		<legend>Recherche enregistrée</legend>

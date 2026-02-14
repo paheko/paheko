@@ -244,7 +244,7 @@ Résultat :
 
 ### Tableaux
 
-Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (`|`, obtenu avec les touches [AltGr + 6](https://fr.wikipedia.org/wiki/Barre_verticale#Saisie)).
+Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (`|`, obtenu avec les touches [AltGr + 6](https://fr.wikipedia.org/wiki/Barre_verticale#Saisie)). Il doit y avoir une ligne vide avant le tableau, et une autre ligne vide après le tableau.
 
 La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.
 

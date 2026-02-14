@@ -78,6 +78,10 @@ class Router
 		if ($uri === 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
+		// Redirect to PIM plugin
+		elseif ($uri === '.well-known/caldav' || $uri === '.well-known/carddav') {
+			Utils::redirect('/p/pim/');
+		}
 		elseif ($uri === 'favicon.ico') {
 			http_response_code(301);
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);

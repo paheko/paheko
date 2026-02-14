@@ -206,6 +206,8 @@ class Conversion
 	/**
 	 * Extract PNG thumbnail from odt/ods/odp/odg ZIP archives.
 	 * This is the most efficient way to get a thumbnail.
+	 *
+	 * @return bool FALSE if the file doesn't have a thumbnail
 	 */
 	static public function extractFileThumbnail(File $file, string $destination): bool
 	{
@@ -222,7 +224,13 @@ class Conversion
 				$zip->setPointer($pointer);
 			}
 			else {
-				$zip->open($file->getLocalFilePath());
+				$path = $file->getLocalFilePath();
+
+				if (!$path) {
+					return false;
+				}
+
+				$zip->open($path);
 			}
 
 			$i = 0;
@@ -321,6 +329,7 @@ class Conversion
 			&& in_array($extension, self::GNUMERIC_FORMATS, true)) {
 			// format=automatic *should* produce YYYY/MM/DD format
 			// locale=fr_FR will make sure numbers are correctly formatted
+			// sheet='$sheet_name' extracts only this sheet
 			$cmd = 'ssconvert --export-type="Gnumeric_stf:stf_assistant" -O "format=automatic locale=fr_FR.UTF-8" %s %s %s 2>&1';
 		}
 
@@ -519,7 +528,7 @@ class Conversion
 	 * 2. OnlyOffice downloads the URL and converts the document, then returns a new URL pointing to the converted document
 	 * 3. We download the converted document from the supplied URL
 	 *
-	 * @see https://api1.onlyoffice.com/editors/conversionapi
+	 * @see https://api.onlyoffice.com/docs/docs-api/additional-api/conversion-api/request/
 	 */
 	static public function onlyoffice(string $source, string $destination, string $format, string $ext): bool
 	{

@@ -12,11 +12,6 @@ if (!$mailing) {
 	throw new UserException('Invalid mailing ID');
 }
 
-if (qg('preview') !== null) {
-	echo $mailing->getHTMLPreview((int)qg('preview') ?: null, true);
-	return;
-}
-
 $hints = $mailing->sent ? null : $mailing->getDelivrabilityHints();
 $tpl->assign(compact('mailing', 'hints'));
 

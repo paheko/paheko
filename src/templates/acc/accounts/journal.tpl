@@ -47,17 +47,17 @@
 	<nav class="tabs">
 		<aside>
 		{if !$filter.start && !$filter.end}
-			{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+			{linkbutton shape="calendar" href="?start=1" label="Filtrer par date" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
 		{/if}
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{exportmenu}
-		{/if}
-			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
+			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id:$account.code label="Rechercher"}
 		{if $year.id == CURRENT_YEAR_ID}
 			{if $account.type == $account::TYPE_BANK}
-				{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+				{linkbutton label="Rapprocher" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 			{/if}
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
+		{/if}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			{exportmenu right=true}
 		{/if}
 		</aside>
 	</nav>

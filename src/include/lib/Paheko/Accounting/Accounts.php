@@ -365,7 +365,6 @@ class Accounts
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('balance', false);
 		$list->groupBy('u.id');
-		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
 		$list->setExportCallback(function (&$row) use ($only_third_party) {
 			$row->balance = Utils::money_format($row->balance, '.', '', false);

@@ -175,6 +175,10 @@ class Year extends Entity
 			throw new ValidationException('La date de fin ne correspond pas à l\'exercice cible choisi.');
 		}
 
+		if ($this->id_chart !== $target->id_chart) {
+			throw new ValidationException('Les deux exercices doivent utiliser le même plan comptable');
+		}
+
 		DB::getInstance()->preparedQuery('UPDATE acc_transactions
 			SET id_year = ?
 			WHERE id_year = ? AND date >= ? AND date <= ?;',

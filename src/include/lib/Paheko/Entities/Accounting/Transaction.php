@@ -144,30 +144,85 @@ class Transaction extends Entity
 		}
 	}
 
+	/**
+	 * Guess transaction type from lines
+	 */
 	public function findTypeFromAccounts(): int
 	{
-		if (count($this->getLines()) != 2) {
+		if (count($this->getLines()) !== 2) {
 			return self::TYPE_ADVANCED;
 		}
 
 		$types = [];
+		$lines = $this->getLinesWithAccounts();
 
-		foreach ($this->getLinesWithAccounts() as $line) {
-			if ($line->account_position == Account::REVENUE && $line->credit) {
-				$types[] = self::TYPE_REVENUE;
+		$pay_accounts = [
+			Account::TYPE_CASH,
+			Account::TYPE_BANK,
+			Account::TYPE_OUTSTANDING,
+		];
+
+		$transfer_accounts = $pay_accounts;
+		$transfer_accounts[] = Account::TYPE_INTERNAL;
+
+		$revenue = null;
+		$expense = null;
+		$thirdparty = null;
+		$other = [];
+
+		foreach ($lines as $i => $line) {
+			if ($line->account_type === Account::TYPE_REVENUE) {
+				$revenue = $line;
 			}
-			elseif ($line->account_position == Account::EXPENSE && $line->debit) {
-				$types[] = self::TYPE_EXPENSE;
+			elseif ($line->account_type === Account::TYPE_EXPENSE) {
+				$expense = $line;
+			}
+			elseif ($line->account_type === Account::TYPE_THIRD_PARTY) {
+				$thirdparty = $line;
+			}
+			else {
+				$other[] = $line;
 			}
 		}
 
-		// Did not find a expense/revenue account: fall back to advanced
-		// (or if one line is expense and the other is revenue)
-		if (count($types) != 1) {
+		if ($revenue
+			&& $revenue->credit
+			&& count($other) === 1
+			&& in_array($other[0]->account_type, $pay_accounts, true)
+			&& $other[0]->debit) {
+			return self::TYPE_REVENUE;
+		}
+		elseif ($expense
+			&& $expense->debit
+			&& count($other) === 1
+			&& in_array($other[0]->account_type, $pay_accounts, true)
+			&& $other[0]->credit) {
+			return self::TYPE_EXPENSE;
+		}
+		elseif ($thirdparty
+			&& $thirdparty->credit
+			&& count($other) === 1
+			&& in_array($other[0]->account_type, $pay_accounts, true)
+			&& $other[0]->debit) {
+			return self::TYPE_DEBT;
+		}
+		elseif ($thirdparty
+			&& $thirdparty->debit
+			&& count($other) === 1
+			&& in_array($other[0]->account_type, $pay_accounts, true)
+			&& $other[0]->credit) {
+			return self::TYPE_CREDIT;
+		}
+		elseif (count($other) === 2
+			&& in_array($other[0]->account_type, $transfer_accounts, true)
+			&& ($other[0]->credit - $other[1]->debit) === 0
+			&& in_array($other[1]->account_type, $transfer_accounts, true)) {
+			return self::TYPE_TRANSFER;
+		}
+		else {
+			// Did not find a expense/revenue account: fall back to advanced
 			return self::TYPE_ADVANCED;
 		}
-
-		return current($types);
 	}
 
 	public function getLinesWithAccounts(bool $as_array = false, bool $amount_as_int = true): array
@@ -180,7 +235,7 @@ class Transaction extends Entity
 		$lines_with_accounts = [];
 
 		foreach ($this->getLines() as $line) {
-			if (!array_key_exists($line->id_account, $this->_accounts)) {
+			if (!isset($line->id_account) || !array_key_exists($line->id_account, $this->_accounts)) {
 				$accounts[] = $line->id_account;
 			}
 
@@ -193,7 +248,7 @@ class Transaction extends Entity
 		$accounts = array_filter($accounts);
 
 		if (count($accounts)) {
-			$sql = sprintf('SELECT id, label, code, position FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
+			$sql = sprintf('SELECT id, label, code, position, type FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
 			// Don't use array_merge here or keys will be lost
 			$this->_accounts = $this->_accounts + $db->getGrouped($sql);
 		}
@@ -204,11 +259,21 @@ class Transaction extends Entity
 
 		foreach ($this->getLines() as &$line) {
 			$l = $line->asArray();
-			$l['account_code'] = $this->_accounts[$line->id_account]->code ?? null;
-			$l['account_label'] = $this->_accounts[$line->id_account]->label ?? null;
-			$l['account_position'] = $this->_accounts[$line->id_account]->position ?? null;
-			$l['project_name'] = $line->id_project ? $projects[$line->id_project] : null;
-			$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
+			$l['account_code'] = null;
+			$l['account_label'] = null;
+			$l['account_position'] = null;
+			$l['account_type'] = null;
+			$l['account_selector'] = null;
+
+			if (isset($line->id_account) && isset($this->_accounts[$line->id_account])) {
+				$l['account_code'] = $this->_accounts[$line->id_account]->code;
+				$l['account_label'] = $this->_accounts[$line->id_account]->label;
+				$l['account_position'] = $this->_accounts[$line->id_account]->position;
+				$l['account_type'] = $this->_accounts[$line->id_account]->type;
+				$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
+			}
+
+			$l['project_name'] = $line->id_project ? ($projects[$line->id_project] ?? null) : null;
 			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
@@ -601,6 +666,37 @@ class Transaction extends Entity
 		return $sum;
 	}
 
+	public function getSumForAccount(int $id): int
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			if ($line->id_account !== $id) {
+				continue;
+			}
+
+			$sum += $line->credit;
+			$sum -= $line->debit;
+		}
+
+		return $sum;
+	}
+
+	public function listAccountsAssoc(?int $except_id_account = null): array
+	{
+		$out = [];
+
+		foreach ($this->getLinesWithAccounts() as $line) {
+			if ($line->id_account === $except_id_account) {
+				continue;
+			}
+
+			$out[$line->id_account] = sprintf('%s — %s', $line->account_code, $line->account_label);
+		}
+
+		return $out;
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		if ($this->type == self::TYPE_DEBT || $this->type == self::TYPE_CREDIT) {
@@ -628,12 +724,15 @@ class Transaction extends Entity
 				throw new ValidationException('Le compte spécifié n\'existe pas.');
 			}
 
-			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
+			if ($this->type === self::TYPE_EXPENSE && $l->account_position === Account::REVENUE) {
 				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de produit (%s) à une dépense', $i+1, $l->account_code));
 			}
-
-			if ($this->type == self::TYPE_REVENUE && $l->account_position == Account::EXPENSE) {
+			elseif ($this->type === self::TYPE_REVENUE && $l->account_position === Account::EXPENSE) {
 				throw new ValidationException(sprintf('Line %d : il n\'est pas possible d\'attribuer un compte de charge (%s) à une recette', $i+1, $l->account_code));
+			}
+			// There is no reference for debt/credit transactions
+			elseif ($this->type === self::TYPE_DEBT || $this->type === self::TYPE_CREDIT) {
+				$line->set('reference', null);
 			}
 
 			try {
@@ -858,7 +957,7 @@ class Transaction extends Entity
 		// or we won't be able to create project-less transactions
 		// from plugins etc.
 		if (self::TYPE_ADVANCED === $this->type
-			&& $config->analytical_mandatory) {
+			&& $config->get('analytical_mandatory')) {
 			$has_project = false;
 
 			foreach ($this->getLines() as $line) {

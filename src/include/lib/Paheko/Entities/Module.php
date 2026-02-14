@@ -108,6 +108,7 @@ class Module extends Entity
 
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
+			$this->assert(!DB::getInstance()->test(Plugin::TABLE, 'name = ?', $this->name), 'Un plugin existe déjà avec ce nom unique');
 		}
 	}
 
@@ -234,10 +235,8 @@ class Module extends Entity
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 
-		if (($ini->allow_user_restrict ?? true) == false) {
-			$this->set('restrict_section', $restrict_section);
-			$this->set('restrict_level', $restrict_level);
-		}
+		$this->set('restrict_section', $restrict_section);
+		$this->set('restrict_level', $restrict_level);
 
 		if (!empty($ini->system)) {
 			$this->set('system', true);
@@ -362,6 +361,11 @@ class Module extends Entity
 	public function hasLocalFile(string $path): bool
 	{
 		return Files::exists($this->path($path));
+	}
+
+	public function hasLocalDir(string $path): bool
+	{
+		return Files::getType($this->path($path)) === File::TYPE_DIRECTORY;
 	}
 
 	public function hasDistFile(string $path): bool

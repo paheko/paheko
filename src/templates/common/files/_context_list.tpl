@@ -11,7 +11,7 @@ $use_trash ??= true;
 
 if ($edit
 	&& $upload
-	&& Entities\Files\File::canCreate($path . '/')) {
+	&& Entities\Files\File::canCreate($path)) {
 	$can_upload = true;
 }
 

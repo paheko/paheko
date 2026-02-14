@@ -30,7 +30,7 @@ use KD2\HTML\CSSParser;
 class Emails
 {
 	const RENDER_FORMATS = [
-		null => 'Texte brut',
+		'' => 'Texte brut',
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 	];
 
@@ -220,11 +220,16 @@ class Emails
 		$html = null;
 		$ids = [];
 
+		$markdown = $context === self::CONTEXT_BULK;
+
 		// If E-Mail does not have placeholders, we can render the MarkDown just once for HTML
 		// this avoids calling the markdown parser for each recipient
-		if (!$is_system && !$template) {
+		if ($markdown && !$template) {
 			$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
 			$content = Render::render(Render::FORMAT_PLAINTEXT, null, $text);
+		}
+		elseif (!$template) {
+			$html = Utils::linkifyURLs(nl2br(htmlspecialchars($text)));
 		}
 
 		foreach ($recipients as $recipient => $r) {
@@ -240,13 +245,18 @@ class Emails
 				$template->assignArray((array) $data, null, false);
 
 				// Disable HTML escaping for plaintext emails
-				$template->setEscapeDefault(null);
+				$template->setEscapeType(null);
 				$content = $template->fetch();
 
-				// Render Markdown to HTML
-				$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
-				// Remove markdown code from plaintext email
-				$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
+				if ($markdown) {
+					// Render Markdown to HTML
+					$content_html = Render::render(Render::FORMAT_MARKDOWN, null, $content);
+					// Remove markdown code from plaintext email
+					$content = Render::render(Render::FORMAT_PLAINTEXT, null, $content);
+				}
+				else {
+					$content_html = Utils::linkifyURLs(nl2br(htmlspecialchars($content)));
+				}
 			}
 			else {
 				$content_html = $html;
@@ -287,7 +297,7 @@ class Emails
 
 		// Use the last recipient content to forward to MAIL_TEST_RECIPIENTS, just change the recipient
 		if (MAIL_TEST_RECIPIENTS
-			&& $context === self::CONTEXT_BULK
+			&& ($context === self::CONTEXT_BULK || $context === self::CONTEXT_NOTIFICATION || $context === self::CONTEXT_REMINDER)
 			&& count($ids)) {
 			$recipient_pgp_key = null;
 

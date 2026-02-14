@@ -111,7 +111,8 @@ class User extends Entity
 		$this->reloadProperties();
 	}
 
-	public function set(string $key, $value) {
+	public function set(string $key, $value)
+	{
 		if ($this->_loading && $value === null) {
 			$this->$key = $value;
 			return;
