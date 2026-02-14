@@ -719,7 +719,7 @@ class UserTemplate extends \KD2\Brindille
 	 * Because we want to give the admin enough information on the issue
 	 * so they can fix the issue in the code.
 	 */
-	public function error(\Exception $e, string $message)
+	public function error(Brindille_Exception $e, string $message)
 	{
 		// Make sure we report exceptions outside of Brindille templates
 		$p = $e;
@@ -728,7 +728,7 @@ class UserTemplate extends \KD2\Brindille
 			if (!($p instanceof Brindille_Exception)
 				&& !($p instanceof TemplateException)
 				&& !($p instanceof UserException)) {
-				throw $p;
+				throw new \RuntimeException('Invalid Brindille Exception', 0, $e);
 			}
 		}
 
