@@ -357,10 +357,10 @@ class User extends Entity
 		}
 	}
 
-	public function category(): ?Category
+	public function category(): Category
 	{
 		if (!$this->id_category) {
-			return null;
+			throw new \LogicException('This user has no category');
 		}
 
 		$this->_category ??= Categories::get($this->id_category);
