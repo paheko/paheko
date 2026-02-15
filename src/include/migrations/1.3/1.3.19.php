@@ -4,6 +4,8 @@ namespace Paheko;
 use Paheko\Accounting\Charts;
 
 $db->beginSchemaUpdate();
+$db->import(__DIR__ . '/1.3.19.sql');
+
 // Make sure 120 and 129 do exist
 Charts::updateInstalled('fr_pcc_2020');
 

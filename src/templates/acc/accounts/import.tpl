@@ -119,7 +119,7 @@
 		<h3>Cette page permet d'importer un relevé bancaire provenant du site de votre banque.</h3>
 		<p>Les opérations présentes dans le relevé pourront être transformées en écritures comptables.</p>
 		<p>Cela permet de créer rapidement toutes les écritures liées au compte bancaire.</p>
-		{*<p>Pour automatiser la reconnaissance des écritures, il est aussi possible de <a href="">définir des règles d'import</a>.</p>*}
+		<p>Pour automatiser la reconnaissance des écritures, il est aussi possible de <a href="rules/">définir des règles d'import</a>.</p>
 	</div>
 
 	<form method="post" action="{$self_url}" enctype="multipart/form-data">
@@ -130,6 +130,9 @@
 				{input type="file" name="file" label="Fichier à importer" accept="csv+ofx+qif" required=true}
 				{include file="common/_csv_help.tpl" csv=$csv more_text="Si le fichier comporte des écritures dont la date est en dehors de l'exercice courant, elles seront ignorées."}
 			</dl>
+			<p>
+				{linkbutton shape="settings" label="Configurer les règles d'import" href="rules/"}
+			</p>
 		</fieldset>
 
 		<p class="help">

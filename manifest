@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Add\smigration
-D 2026-02-14T23:51:36.490
+C Merge\simport\srules\sbranch
+D 2026-02-15T00:02:38.107
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -100,6 +100,7 @@ F src/include/lib/Paheko/Accounting/Charts.php a8aa6a7042d74b87656cc6c5421e613e8
 F src/include/lib/Paheko/Accounting/Export.php 9c0d0b2d3f834d95efecc211be213460cdbedab23dcaa619b65b88c7d4329058
 F src/include/lib/Paheko/Accounting/Graph.php 3d82a0886a4a1772ab5f809c9b830c0b10c4353574c523ceae87a6e8e707886b
 F src/include/lib/Paheko/Accounting/Import.php 17cec44a35114228e4c1b4e0571d101cca759d0dc54350ce40e08f4726323b98
+F src/include/lib/Paheko/Accounting/ImportRules.php 26ee5e4c07d6575cc5dccf329a687281432328345052b702892372556590584f
 F src/include/lib/Paheko/Accounting/Projects.php 55237d8031a279f751edf8365da112186e1fa8cbb5e08d25c924ea9e2e395aa3
 F src/include/lib/Paheko/Accounting/Reports.php 9bb34a8d38f91e6338593afa291c62aabc74913cd7407d1a78a693b945e59dda
 F src/include/lib/Paheko/Accounting/Transactions.php 9320d121e77d7f11c6bacf4e584f799bd1b8276f99c5bb66a00cdf9389674525
@@ -118,6 +119,7 @@ F src/include/lib/Paheko/Email/Templates.php 27ef4c8eab50ad2557a75073e355e7d3f49
 F src/include/lib/Paheko/Entities/API_Credentials.php af3482891c625853a9f38fe2a17f7deb9f6b51fc0eb2539c3c2f9391e04e8e68
 F src/include/lib/Paheko/Entities/Accounting/Account.php e2d21c07d2569f2533b4b1afddfd151e5ab1656e44c8c378b5116d328e931325
 F src/include/lib/Paheko/Entities/Accounting/Chart.php 2fb100f7aec42853b14cb3f8288296e21ae98b078716dc580f2f1b2a69d451b6
+F src/include/lib/Paheko/Entities/Accounting/ImportRule.php a7d51f59d0f22cf45abc9651bc8715d87a16171d571ca433b2f4789dd066942a
 F src/include/lib/Paheko/Entities/Accounting/Line.php 1f33c612eafd1c1f541794d6e366c34d8e54f6b1bafc3b3fefa1b0f16748bbe8
 F src/include/lib/Paheko/Entities/Accounting/Project.php f221f56feec52d958a4df736b080dce528af7ac466ec799967365619b5fefed5
 F src/include/lib/Paheko/Entities/Accounting/Transaction.php 70b32ec59b91eb0c06ef014516f2292655ee74ccba793d9c80af4edf9f800d9d
@@ -177,7 +179,7 @@ F src/include/lib/Paheko/Services/Services.php 9b2da0bf5f80fc44fea9db1b3103d2607
 F src/include/lib/Paheko/Services/Services_User.php bce1a79ae247f483c5e8821391b3124e2a4237e87954fa437e2f08fc7bc63c24
 F src/include/lib/Paheko/Static_Cache.php 447386e95463f265dc3cf16cbecf76f0580884f888ae6216532060a2813e1d1a
 F src/include/lib/Paheko/Template.php 82eda5ad4c71af5978c920baf278ba9708aa3b02952cfd4000ac1dc1816d550c
-F src/include/lib/Paheko/Upgrade.php 8d803a4dae73a9268e2187f1d6ea64f8022b456a3e00084f2d2ba01bfacb8e6a
+F src/include/lib/Paheko/Upgrade.php 9b0c18086270a46534f155be0b5415bdb4e3da213826015e915a7a423ee2fc3b
 F src/include/lib/Paheko/UserException.php 0d120a73a311bbca1847271a05c2ac7ebed2335e4a6fcaf75d0ab3320f97a98e
 F src/include/lib/Paheko/UserTemplate/CommonFunctions.php 4dfea359da6e080cffd44fdccc63146c87de6be6ce1449467a605a58e3c2c331
 F src/include/lib/Paheko/UserTemplate/CommonModifiers.php a98a39ceb6052162677ec7e9fc13056f836da200eca4cc18c3ce2202cc93ebc9
@@ -219,10 +221,11 @@ F src/include/migrations/1.3/1.3.17.php 1f8b7a1b23a82238c3b10f62200f4425252eb477
 F src/include/migrations/1.3/1.3.17.sql 5c559fc8a0e296aa5224115d2347289a9fc64cac43754937b660ca4e3678b7ee
 F src/include/migrations/1.3/1.3.18.php 1f16e996703a1d5a1ee49e8f443692fbd82baf209dcaff1245d65ee514174bb8
 F src/include/migrations/1.3/1.3.18.sql d36104e159c4e1277e1cf86bce559ed09d92c2de6148762881bc5cdfe15e3e29
-F src/include/migrations/1.3/1.3.19.php 98e7cf2439d8c59742ce2ec27aa3ff9cbe4ad53dfc6d7f0080081a44dbeff283
+F src/include/migrations/1.3/1.3.19.php fa6d2360b39cef75aca56bc39bf40a9c8cc120495bdedef4ab2f3b740c0465ec
 F src/include/migrations/1.3/1.3.19.sql d19c00d8d8d87c902b0c2eff6d1c974ba9cbd486c9eb7d0e0f9501cf100e1b67
 F src/include/migrations/1.3/1.3.2.sql 3a81504a4d49d8226aba81aadf40a0bc1955fcecd3ab5d009186080c70ce4318
-F src/include/migrations/1.3/1.3.20.sql d56a9ae59c0357f59a067d5eced41a89c2d9f8b8431082d549c64e34ad267637
+F src/include/migrations/1.3/1.3.20.php fd32468e8137a19d00496e10eda83ba1aa779517608d36e87cfb54e456c28e0f
+F src/include/migrations/1.3/1.3.20.sql 5aff2381db81c3f8aa5d0ba8fc2f75872f104ee4fa6c976c78985befab560ad0
 F src/include/migrations/1.3/1.3.3.sql 765f1b91b165f2d806c00e2673491a76be9c78b37eaf82b2da06691443e403d6
 F src/include/migrations/1.3/1.3.5.sql 0f6116f331fe383330e803d0261b16e0abf3123e088de8c9e427c85ba7899af6
 F src/include/migrations/1.3/1.3.7.sql 0b05b535a239bfb3c5a202911399f4487e4ae85bd1f65e7a2d03d414c019b593
@@ -230,7 +233,7 @@ F src/include/migrations/1.3/1.3.8.php d75f960b815fcf4487e979abd86eb2191eb295727
 F src/include/migrations/1.3/1.3.8.sql fa48aee2ee55d3eeec09c0a5b0b5ac8ff099af3c2a16e6f929b0c215810f67c7
 F src/include/migrations/1.3/1.3.9.php b518754e6a65425e466f1f5810e5b607458d999e344e8ecbb3ee0334ea2d874f
 F src/include/migrations/1.3/1.3.9.sql e73d94df7284fd1690727f1ba62d0fd3c973e11b0460685f6306ada6f1f298f0
-F src/include/migrations/1.3/schema.sql 3c2f88f6fff90b2facd8c3090911e6459acd03562b7c655581622347778184d7
+F src/include/migrations/1.3/schema.sql 191338c250c3cd852152d0cf085bd16c5cd7f206d61997aeb94c893f49817fa1
 F src/include/test_required.php c6f0ed3e109ac18830198f85d04b563fcedd8a003a94ffbeedd27ba59e8975b0
 F src/index.php 3633bc39287a8bc3e4fc60b80287a12b61710f6e
 F src/pubkey.asc e8974cff9c91a4a2e6dc1749dfe79cc46ecd3750b57a829945aa748a932eb54a
@@ -250,11 +253,13 @@ F src/templates/acc/accounts/_nav.tpl f7cb612b3d9ceeec87fd735f44e0bb9392efd46fba
 F src/templates/acc/accounts/all.tpl c4dad13f7505b5bae27ba530bbaba00fe4437fe967d2aaf664cb1dcae7898d98
 F src/templates/acc/accounts/deposit.tpl d2079f26115b7c6e0da660ec613f295f4f0df40d08b48edf4481a8f085b9ba72
 F src/templates/acc/accounts/deposit_form.tpl 91afa681dee2a075ffdb18bfffeec8ffdbb07f320ae76e9a289c998a825318a0
-F src/templates/acc/accounts/import.tpl 4fa519214088a1a7d8127cfb686af241ad8463fe1b289fde9a89a243719b3cb3
+F src/templates/acc/accounts/import.tpl ba62e4140a1f1843d9e747b79b0aee6c7b008535f2e70e0854567ae26f0f4b13
 F src/templates/acc/accounts/index.tpl 6ddf2cdbc5c5bcca617d1761a4c435bc7cb2e5a4490bb2312a86f8a840a25105
 F src/templates/acc/accounts/journal.tpl d72e11a6502178b048e9c0f7fe59feaa2d063d6c6e0534550c1efa9da3fa118a
 F src/templates/acc/accounts/reconcile.tpl e4c4ba3a3b5b2692e3ba956b5a58b64e4ad9bc75bd2738e92470a8824bde2c82
 F src/templates/acc/accounts/reconcile_assist.tpl 00143f3015683120e330417e35cf5b1ba1c1b7f7a24dfbb4c26f11948a84a5a9
+F src/templates/acc/accounts/rules/edit.tpl a88aacd19d93ef8573cbb941b677b91989fb82ad09f6ae12b16042142150f1fc
+F src/templates/acc/accounts/rules/index.tpl c311239d4a1c05b720e8686949ee1fb968582819298e332d3a911a7f4e162097
 F src/templates/acc/accounts/simple.tpl 27ef650d5990a128d1eee0799a21ee61d29badb2e50e8c5e05cf65338c809656
 F src/templates/acc/accounts/users.tpl 8098d38f0a9c958cbefa9f534cffc6982d9789ddf49c56e1402112c31afc4b9f
 F src/templates/acc/charts/_country_input.tpl 287d91ed7a1ac2e1545d22d02e53b22199b0e198211a3149e799bff4ecc6e017
@@ -515,6 +520,8 @@ F src/www/admin/acc/accounts/index.php 8e62e8fe2f71623c366d26527a6933d03687b1bed
 F src/www/admin/acc/accounts/journal.php 46417e1962ce3866facb248885b6dbafd92e0f7172d1ba5844ee9439ffb9c0a6
 F src/www/admin/acc/accounts/reconcile.php 7f63a4621f57e5a2836c4d850385c8c7a68e3bbade7951430ef4dc18141f0208
 F src/www/admin/acc/accounts/reconcile_assist.php c43d413538453eadd47a12497f7e5d0e95fc0603326984c816e399be6eda720f
+F src/www/admin/acc/accounts/rules/edit.php f0a48d87b8ebb61276dcf82224c1e6932cf017052fa2be495d2e84d80754fccc
+F src/www/admin/acc/accounts/rules/index.php 328c956ff5c7f57fea05bf7f3ea5838f257c250bed065d90e61501073c89d272
 F src/www/admin/acc/accounts/simple.php 292a55a8e927d8f34e8ec7f6d05ee8d6bcacbab040c8ba39c7b40e05614736b4
 F src/www/admin/acc/accounts/users.php 210c364b5e3ebcfea92127db0a3d0fae8bae6080376d6d8971e8ee535a3cda4a
 F src/www/admin/acc/charts/accounts/_inc.php 58ead67c4adecb1684593d397144748adc1fa9bb7d3d90c3ca77cd91b0bdf28e
@@ -845,24 +852,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 195b7ae3a4f695e8f61de9e986fb51b19a9f9d3ffa68ce6e904fd8b9012b41f6
-R cb5f6c0df499397ee5576f3f51087f21
+P ad03c89b1772c2a88c71f001ce6eb42d8987639377b8a0c4579bed0f7b663495 36af4f994713f2f31de3be1398ce8deb83ddcea4e9c75fa66d6f34bc55b0e269
+R 6e5c31e65843cc47bd0120ee3ffb231d
 U bohwaz
-Z 6443d2ef89b5d32594578ef0c5c6f3eb
+Z f98a2706d882134d73ca9e17988653f9
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmRCogACgkQksnacbiI
-6jSAoA//U6iKVPc357R6QNiqcq3Hy9rSAbzx92feCD/SWqVIcJXySyz1tvFced3W
-NKH5JdUOYLUODTZ9lXEp0pIT/M62DFd6u+hkYtPvN8iqdvvy/7b/4kdSLNii7BD8
-ILaxUdEm+2xEAK1feb5wyynxW2iCcZ6VhXbPI6yXEt7gW/Obgcl6h1OFf6q5qDhj
-SV3xkc0JKquD0UWkgV8QoJzCGD0DIjiY90GmFQcDWDkCLndWpLtCGU1MAyb2pzZM
-KSKuVs8fYh14blnv9iNCc4jyFuaf7u4xAthYOxxm6nzC6rk/enBbIHhcHrNpyN+Y
-/0dOQKAW55nQqmFNO0GKn9eOofsfoS6DuqV+HcMHLEZnmto53bz0ahorGMSjwLmZ
-/33YrFeVqjj42rwiWQyamNBwNOWDAMvLKejAMBymK4962agoq/JfLEkJYkHZHKnF
-TSynEN25eNcPEl2CnpFEq/8GRIxB1OcAzZe0nl6EQuALVSmj/7GtmSeh5vLXhZrz
-Hp4odC0EjgwhTVkAaCgSR82Om8whsee0R0OZ5/U9RooTzzTJDmXKzdI0C9KWwYjY
-YTaSoKuMea5adHN/dkrincQXt68+YD+yAnW2cbKNM4iGlYHbd7L7PMLjNaOTec7q
-VOprSBKly5Zo4hTAO2hgazqqzfvfzGmGBXXNXW6Yz8SxUKEdHc8=
-=AEVZ
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmRDR4ACgkQksnacbiI
+6jT3Mw/+Mut4Yd8OeKknXX4Uc5ZxwTXK9g+j1CLb0Cf4XCBGEwswCFd1pq2rV0XU
+zUUKHcobWzmdV6260lQXvF+h2dRGMPxzMpUH2D4cKrOL1ynTRSwbuEv0Ity8L0T6
+modBpV+6nyJ7p8FccPoVCKCdcK72W4La/oKqfITPAX6VTnRZrPU3radt6bqAmXcq
+oAOrx1NXIIFDE/rLXLPJM0HKdmGNFteg5gDfQhaEFEG+6TUWrKKyhQIfT41QNUNq
+0Fy8r9E5uZ2Ojk1c/3iaIqVGn6V5mSb/GMBJtVjc1xHvLY2y2viId/Kue7iZjl6V
+wu6k00h2CL//HgGUUxgeg9fAGcbrwQ/X69LUIEd93hfqKLDqjKG8HjrVx4iYQ2/6
+rg+p8siW/QdAYLEv4aJ/IBzgLeBRaUd+9ffoDRfdtlH/YVXksavgX5njZlkDYdIH
+alNg3VQVbxlxZK64CXCpmAP0/ZfUXiI4ZKb1FIlk4Jmdr/oFNwyC9bi0Q4A1QR4V
+8u3Pb1+e6yJj3JKlVnvCK+SFMv/Sa7I82of23Sx5NVZ1wO0k6a4PEzqFRaVTcO7q
+8EqZvU3n0KjFiVpsdp/ON0Ws0BhwhysrW8tLNfmoCtbAQXushR9RTsV1NYZuKhAQ
+xLQzrdtjwbj3sbydSHbZiqIALF/MbJuHtjztbLz2rwQ0aBxifkE=
+=PqxS
 -----END PGP SIGNATURE-----
