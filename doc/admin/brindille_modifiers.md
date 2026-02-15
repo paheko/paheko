@@ -16,8 +16,6 @@ Ces filtres viennent directement de PHP et utilisent donc les mêmes paramètres
 
 | Nom | Description | Documentation PHP |
 | :- | :- | :- |
-| `htmlentities` | Convertit tous les caractères éligibles en entités HTML | [Documentation PHP](https://www.php.net/htmlentities) |
-| `htmlspecialchars` | Convertit les caractères spéciaux en entités HTML | [Documentation PHP](https://www.php.net/htmlspecialchars) |
 | `trim` | Supprime les espaces et lignes vides au début et à la fin d'un texte | [Documentation PHP](https://www.php.net/trim) |
 | `ltrim` | Supprime les espaces et lignes vides au début d'un texte | [Documentation PHP](https://www.php.net/ltrim) |
 | `rtrim` | Supprime les espaces et lignes vides à la fin d'un texte | [Documentation PHP](https://www.php.net/rtrim) |
@@ -81,6 +79,26 @@ c =
  color2 = darkgreen
 ```
 
+## flip
+
+Remplace les clés du tableau par les valeurs, et les valeurs par les clés.
+
+```
+{{:assign var="table1" a="bleu" b="orange"}}
+{{:debug table2=$table1}}
+```
+
+Donnera :
+
+```
+table1:
+ a = bleu
+ b = orange
+table2:
+ bleu = a
+ orange = b
+```
+
 ## has
 
 Renvoie vrai si le tableau contient l'élément passé en paramètre.
@@ -116,9 +134,20 @@ Renvoie vrai si le tableau contient la clé passée en paramètre.
 {{/if}}
 ```
 
+## key
+
+Renvoie la clé du tableau correspondant à la valeur passée en paramètre, ou NULL si la valeur n'est pas trouvée.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{$table|key:"orange"}}
+```
+
+Affichera `b`, soit la clé correspondant à la valeur `orange`.
+
 ## key_in
 
-Renvoie vrai si la clé fait partie du tableau passé en paramètre.
+Renvoie `true` si la clé fait partie du tableau passé en paramètre.
 
 C'est exactement la même chose que `has_key`, mais exprimé à l'envers.
 
@@ -144,6 +173,17 @@ Donnera :
 ```
 a,b
 ```
+
+## value
+
+Renvoie la valeur du tableau correspondant à la clé passée en paramètre, ou NULL si la clé n'est pas trouvée.
+
+```
+{{:assign var="table" a="bleu" b="orange"}}
+{{$table|value:"b"}}
+```
+
+Affichera `orange`, soit la valeur correspondant à la clé `b`.
 
 ## values
 
@@ -330,7 +370,24 @@ Compte le nombre de mots dans un texte.
 
 ## escape
 
-Échappe le contenu pour un usage dans un document HTML. Ce filtre est appliqué par défaut à tout ce qui est affiché (variables, etc.) sauf à utiliser le filtre `raw` (voir plus bas).
+Échappe le texte, par défaut pour un document HTML. Ce filtre est appliqué par défaut à tout ce qui est affiché (variables, etc.) sauf à utiliser le filtre `raw` (voir plus bas).
+
+Il est possible de spécifier le type d'échappement :
+
+* `html` : échappe les caractères `<` `>` `'` `"` et `&` pour les documents HTML (équivalent de [htmlspecialchars](https://www.php.net/htmlspecialchars) en PHP)
+* `entities` : échappe tous les caractères spéciaux de `html`, et aussi tous les caractères accentuées pour les documents HTML (équivalent de [htmlentities](https://www.php.net/htmlentities) en PHP)
+* `xml` : échappe les caractères spéciaux pour le XML
+* `cdata` : échappe uniquement également le tag `]]>` si présent, pour inclusion dans un tag XML `<![CDATA[…]]>`
+* `url` : échappe une URL (équivalent de [rawurlencode](https://www.php.net/rawurlencode) en PHP)
+* `json` ou `js` : transforme en chaîne javascript (équivalent de [json_encode](https://www.php.net/json_encode) en PHP)
+
+Exemple :
+
+```
+<script>
+var value = {{$table|escape:"json"}};
+</script>
+```
 
 ## excerpt
 
@@ -477,23 +534,11 @@ Formatte un texte selon les règles typographiques françaises : ajoute des espa
 
 ## url_encode
 
-Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `rawurlencode` en PHP).
+Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `rawurlencode` en PHP). Équivalent de `|escape:'url'`.
 
 ## url_decode
 
 Décode une chaîne de texte venant d'une URL (alias de `rawurldecode` en PHP).
-
-## cdata_escape
-
-Échappe le contenu pour un usage dans une balise `<![CDATA[…]]>` d'un document XML.
-
-## xml_escape
-
-Échappe le contenu pour un usage dans un document XML.
-
-## entities_escape
-
-Échappe le contenu avec des entités HTML, équivalent de `htmlentities` en PHP.
 
 ## Autres filtres de texte
 

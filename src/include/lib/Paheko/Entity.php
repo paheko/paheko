@@ -30,12 +30,7 @@ class Entity extends AbstractEntity
 	{
 		$source ??= $_POST;
 
-		try {
-			return $this->import($source);
-		}
-		catch (\UnexpectedValueException $e) {
-			throw new ValidationException($e->getMessage(), 0, $e);
-		}
+		return $this->import($source);
 	}
 
 	protected function filterUserValue(string $type, $value, string $key)

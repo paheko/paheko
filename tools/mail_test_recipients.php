@@ -17,6 +17,7 @@ $arg = $argv[3] ?? null;
 
 $r = TestMailbox::all($cfg);
 
+/*
 if ($arg) {
 	$r = find_message($r, $arg);
 }
@@ -33,14 +34,34 @@ elseif ($cmd === 'body' && $arg) {
 elseif ($cmd === 'export' && $arg) {
 	echo $r->headers . "\r\n\r\n" . $r->body;
 }
-else {
-	foreach ($r as $address => $messages) {
-		echo "--- $address ---\n";
+*/
 
-		foreach ($messages as $msg) {
-			display_message_report($msg, false);
-		}
+$current = null;
+$errors = [];
+
+foreach ($r as $msg) {
+	if ($current !== $msg->recipient) {
+		$current = $msg->recipient;
+		echo "\n\n--- $current ---\n";
 	}
+
+	if ($msg->status === 'inbox') {
+		color('green', 'i');
+	}
+	elseif ($msg->status === 'junk') {
+		color('red', 'J');
+		$errors[] = $msg;
+	}
+	elseif ($msg->status === 'promotional') {
+		color('yellow', 'P');
+		$errors[] = $msg;
+	}
+}
+
+echo "\n\n";
+
+foreach ($errors as $msg) {
+	display_message_report($msg, false);
 }
 
 function display_message_report(stdClass $msg)
@@ -56,7 +77,7 @@ function display_message_report(stdClass $msg)
 
 	echo '] ' . $msg->subject . "\n";
 
-	printf("  From: %s\n  Date: %s\n  Message-ID: %s\n  Flags: %s\n  Local ID: %s\n", $msg->from, $msg->date, $msg->message_id, implode(' ', $msg->flags), $msg->id);
+	printf("  To: %s\n  From: %s\n  Date: %s\n  Message-ID: %s\n  Flags: %s\n  Local ID: %s\n", $msg->recipient, $msg->from, $msg->date, $msg->message_id, implode(' ', $msg->flags), $msg->id);
 
 	if ($msg->status !== 'inbox') {
 		echo "  Diagnostic headers:\n";
@@ -104,6 +125,7 @@ class TestMailbox
 		'QUARANTAINE',
 		// Yahoo.fr = Bulk Mail
 		'Bulk Mail',
+		'Bulk',
 		// Most others
 		'Junk',
 		'Spam',
@@ -125,7 +147,7 @@ class TestMailbox
 	protected stdClass $config;
 	protected Mailbox $mailbox;
 
-	static public function all(string $file, ?DateTime $since = null): array
+	static public function all(string $file, ?DateTime $since = null): \Generator
 	{
 		$ini = parse_ini_file($file, true);
 
@@ -137,8 +159,6 @@ class TestMailbox
 			'move_if_spam'      => true,
 		];
 
-		$reports = [];
-
 		foreach ($ini as $address => $config) {
 			$config = (object) array_merge($defaults, $config);
 			$config->address = $address;
@@ -146,18 +166,62 @@ class TestMailbox
 			$config->provider ??= substr($address, strrpos($address, '@')+1);
 
 			$t = new self($config);
-			$reports[$address] = $t->report($since);
+			yield from $t->report($since);
 		}
-
-		return $reports;
 	}
 
 	public function __construct(stdClass $config)
 	{
+		if (isset($config->oauth_refresh_token)) {
+			if (!isset($config->oauth_refresh_url, $config->oauth_client_id)) {
+				throw new \LogicException('Missing option: oauth_refresh_url or oauth_client_id');
+			}
+
+			$file = $_SERVER['XDG_CONFIG_HOME'] ?? ($_SERVER['HOME'] . '/.config');
+			$file .= '/test_mailboxes.json';
+			$data = [];
+
+			if (file_exists($file)) {
+				$data = json_decode(file_get_contents($file), true);
+			}
+
+			$d = $data[$config->address] ?? null;
+
+			// Refresh oauth token if necessary
+			if (!isset($d['expiry'])
+				|| empty($d['access_token'])
+				|| $d['expiry'] <= time()) {
+				$c = curl_init($config->oauth_refresh_url);
+				curl_setopt($c, CURLOPT_POST, true);
+				curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($c, CURLOPT_POSTFIELDS, http_build_query([
+					'grant_type'    => 'refresh_token',
+					'refresh_token' => $d['refresh_token'] ?? $config->oauth_refresh_token,
+					'client_id'     => $config->oauth_client_id,
+					'client_secret' => $config->oauth_client_secret ?? '',
+				]));
+				$r = curl_exec($c);
+				$d = json_decode($r, true);
+
+				if (!$d) {
+					throw new \RuntimeException('Cannot fetch OAuth token: ' . $r);
+				}
+
+				$d['expiry'] = time() + $d['expires_in'];
+				$data[$config->address] = $d;
+
+				// Save current token
+				@mkdir(dirname($file), fileperms(__FILE__), true);
+				file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+			}
+
+			$config->token = $d['access_token'];
+		}
+
 		$this->config = $config;
 	}
 
-	public function report(?DateTime $since = null): array
+	public function report(?DateTime $since = null): \Generator
 	{
 		$m = $this->mailbox = new Mailbox($this->config->imap);
 		//$m->setLogFilePointer(STDOUT);
@@ -165,44 +229,56 @@ class TestMailbox
 		$this->config->password = null;
 		$this->config->token = null;
 		$folders = $m->listFolders();
-		$report = [];
+
+		echo $this->config->address . "\n";
+		$this->config->inbox = null;
 
 		foreach ($folders as $key => $folder) {
-			if (in_array('Junk', $folder->flags)
-				|| $key === 'INBOX'
+			if (strtoupper($key) === 'INBOX') {
+				$this->config->inbox = $key;
+				break;
+			}
+		}
+
+		if (!$this->config->inbox) {
+			throw new \LogicException('Cannot find inbox folder');
+		}
+
+		foreach ($folders as $key => $folder) {
+			if (in_array('\\Junk', $folder->flags)
+				|| $key === $this->config->inbox
 				|| in_array($key, self::JUNK_FOLDER_NAMES)) {
-				$this->exploreFolder($key, $since, $report);
+				yield from $this->exploreFolder($key, $since);
 			}
 			else {
 				// Not interested
 				continue;
 			}
 		}
-
-		return $report;
 	}
 
-	protected function exploreFolder(string $folder, ?DateTime $since, array &$report)
+	protected function exploreFolder(string $folder, ?DateTime $since): \Generator
 	{
-		$since ??= new \DateTime('30 days ago');
+		$since ??= new \DateTime('15 days ago');
 
-		foreach ($this->mailbox->listMessages($folder, ['since' => $since], ['X-Is-Recipient']) as $msg) {
+		// Some IMAP servers don't support SEARCH for custom header and cannot return custom headers either (ie. Yahoo)
+		foreach ($this->mailbox->listMessages($folder, ['since' => $since]) as $msg) {
 			// Not one of our messages
-			if (false === strpos($msg->headers, 'X-Is-Recipient:')) {
+			if (0 === strpos($msg->message_id, 'pko.')) {
 				continue;
 			}
 
 			$status = null;
 
 			// Identify messages marked as promo (SFR/Laposte)
-			if ($folder === 'INBOX'
+			if ($folder === $this->config->inbox
 				&& in_array(self::PROMO_FLAGS, $msg->flags)) {
 				$status = 'promotional';
 			}
-			elseif ($folder !== 'INBOX') {
+			elseif ($folder !== $this->config->inbox) {
 				$status = 'junk';
 			}
-			elseif ($folder === 'INBOX') {
+			elseif ($folder === $this->config->inbox) {
 				$status = 'inbox';
 			}
 
@@ -221,13 +297,13 @@ class TestMailbox
 				'uid'        => $msg->uid,
 				'message_id' => $msg->message_id,
 				'from'       => $msg->from->address,
-				'sender'     => $msg->sender->address,
+				'sender'     => $msg->sender->address ?? null,
 				'recipient'  => $this->config->address,
 				'provider'   => $this->config->provider,
 				'flags'      => $msg->flags,
 				'diagnostic' => $spam_headers,
 				'headers'    => $parts[0],
-				'body'       => $parts[1],
+				'body'       => $parts[1] ?? '',
 				'size'       => strlen($raw),
 				'actions'    => null,
 			];
@@ -245,10 +321,11 @@ class TestMailbox
 					$actions[] = 'Moved to "Important" folder';
 				}
 			}
-			elseif ($status === 'junk' && $this->config->move_if_spam) {
+
+			if ($status === 'junk' && $this->config->move_if_spam) {
 				$actions[] = $this->removeFlagsFromMessage($r, ['\Junk', 'Junk', 'Spam']);
-				$this->mailbox->move($folder, $msg->uid, 'INBOX');
-				$actions[] = 'Moved to INBOX';
+				$this->mailbox->move($folder, $msg->uid, $this->config->inbox);
+				$actions[] = 'Moved to ' . $this->config->inbox;
 			}
 			elseif ($status === 'promotional' && $this->config->move_if_spam) {
 				$actions[] = $this->removeFlagsFromMessage($r, self::PROMO_FLAGS);
@@ -257,10 +334,8 @@ class TestMailbox
 			$actions = array_filter($actions);
 			$r->actions = $actions;
 
-			$report[$r->id] = $r;
+			yield $r->id => $r;
 		}
-
-		return $report;
 	}
 
 	protected function removeFlagsFromMessage(stdClass $msg, array $flags): ?string

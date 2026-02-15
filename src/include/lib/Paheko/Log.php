@@ -241,7 +241,6 @@ class Log
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('created', true);
-		$list->setCount('COUNT(l.id)');
 		$list->setModifier(function (&$row) {
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];

@@ -244,7 +244,7 @@ Résultat :
 
 ### Tableaux
 
-Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (`|`, obtenu avec les touches [AltGr + 6](https://fr.wikipedia.org/wiki/Barre_verticale#Saisie)).
+Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (`|`, obtenu avec les touches [AltGr + 6](https://fr.wikipedia.org/wiki/Barre_verticale#Saisie)). Il doit y avoir une ligne vide avant le tableau, et une autre ligne vide après le tableau.
 
 La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.
 
@@ -390,135 +390,6 @@ Paheko propose des extensions au langage MarkDown, qui n'existent pas dans les a
 
 Toutes ces extensions se présentent sous la forme d'un code situé entre deux signes **inférieur à** (`<<`) et deux signes **supérieur à** (`>>`), à ne pas confondre avec les guillements français (`«` et `»`).
 
-## Images jointes
-
-Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :
-
-```
-<<image|Nom_fichier.jpg|Alignement|Légende|Lien>>
-```
-
-* `Nom_fichier.jpg` : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)
-* `Alignement` : remplacer par l'alignement :
-  * `gauche` ou `left` : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;
-  * `droite` ou `right` : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;
-  * `centre` ou `center` : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.
-* Légende : indiquer ici une courte description de l'image.
-
-Exemple :
-
-```
-<<image|mon_image.png|center|Ceci est une belle image>>
-```
-
-Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
-
-Note : cette extension ne fonctionne que dans les pages du site web.
-
-### Utilisation avancée
-
-Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :
-
-* `src` : nom du fichier de l'image (obligatoire)
-* `align` : alignement de l'image
-* `caption` : légende qui apparaîtra en dessous de l'image
-* `href` : adresse du lien de l'image
-* `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
-
-Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
-
-```
-<<image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/">>
-```
-
-## Galerie d'images
-
-Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise `<<gallery` qui contient la liste des images à mettre dans la galerie :
-
-```
-<<gallery
-Nom_fichier.jpg
-Nom_fichier_2.jpg
->>
-```
-
-Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :
-
-```
-<<gallery>>
-```
-
-Il est également possible de rajouter une légende à chaque image :
-
-```
-<<gallery
-Nom_fichier.jpg|Joli dessin
-Nom_fichier_2.jpg|Photo du lavoir
->>
-```
-
-Note : **cette extension ne fonctionne que dans les pages du site web.**
-
-Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :
-
-```
-<<gallery center
-Nom_fichier.jpg
-Nom_fichier_2.jpg
->>
-```
-
-### Diaporama d'images
-
-On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.
-
-La syntaxe est la même, mais on ajoute le mot `slideshow` après le mot `gallery` :
-
-```
-<<gallery slideshow
-Nom_fichier.jpg
-Nom_fichier_2.jpg
->>
-```
-
-Cette extension ne fonctionne que dans les pages du site web.
-
-## Fichiers joints
-
-Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
-
-```
-<<file|Nom_fichier.ext|Libellé>>
-```
-
-* `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
-* `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
-
-Cette extension ne fonctionne que dans les pages du site web.
-
-## Vidéos
-
-Pour inclure un lecteur vidéo dans la page web à partir d'un fichier vidéo joint à la page, il faut utiliser le code suivant :
-
-```
-<<video|Nom_du_fichier.ext>>
-```
-
-On peut aussi spécifier d'autres paramètres :
-
-* `file` : nom du fichier vidéo
-* `poster` : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue
-* `subtitles` : nom d'un fichier de sous-titres au format VTT ou SRT
-* `width` : largeur de la vidéo (en pixels)
-* `height` : hauteur de la vidéo (en pixels)
-
-Exemple :
-
-```
-<<video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt">>
-```
-
-Cette extension ne fonctionne que dans les pages du site web.
 
 ## Sommaire / table des matières automatique
 
@@ -683,9 +554,18 @@ D
 
 Noter que dans ce cas on doit utiliser la notation `short="…"` pour pouvoir utiliser les autres paramètres.
 
-Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre `align` (équivalent de la propriété CSS [`align-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)).
+Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre `valign` (équivalent de la propriété CSS [`align-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)), ou horizontalement avec le paramètre `align` (équivalent de [`justify-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self)).
 
+Il est aussi possible d'utiliser d'autres propriétés CSS :
 
+* `color` pour la couleur du texte
+* `bgcolor` pour la couleur du fond
+* `border` pour ajouter une bordure
+* `border-radius` pour ajuster l'arrondi de la bordure
+* `padding` pour les marges intérieures
+* `text-align` pour l'alignement du texte
+
+Note : cette syntaxe est limitée dans les messages collectifs : on ne peut utiliser que la notation `short` pour définir les colonnes, et les paramètres `column`, `row`, `align` et `gap` ne sont pas supportés. Ceci est dû au fait que la plupart des clients mail sont très limités.
 
 ## Alignement du texte
 
@@ -767,3 +647,129 @@ Avec des paragraphes
 Il est possible d'utiliser les couleurs avec [leur nom](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color) ou leur code hexadécimal (exemple : `#ff0000` pour rouge).
 
 **Attention : cette fonctionnalité est rigolote mais doit être utilisé avec parcimonie, en effet cela risque de rendre le texte illisible, notamment pour les personnes daltoniennes.**
+
+## Extensions pour le site web
+
+Les extensions suivantes ne fonctionnent que sur le site web, et pas par exemple dans les messages collectifs.
+
+### Images jointes
+
+Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :
+
+```
+<<image|Nom_fichier.jpg|Alignement|Légende|Lien>>
+```
+
+* `Nom_fichier.jpg` : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)
+* `Alignement` : remplacer par l'alignement :
+  * `gauche` ou `left` : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;
+  * `droite` ou `right` : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;
+  * `centre` ou `center` : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.
+* Légende : indiquer ici une courte description de l'image.
+
+Exemple :
+
+```
+<<image|mon_image.png|center|Ceci est une belle image>>
+```
+
+Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.
+
+#### Utilisation avancée
+
+Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :
+
+* `src` : nom du fichier de l'image (obligatoire)
+* `align` : alignement de l'image
+* `caption` : légende qui apparaîtra en dessous de l'image
+* `href` : adresse du lien de l'image
+* `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
+
+Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
+
+```
+<<image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/">>
+```
+
+### Galerie d'images
+
+Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise `<<gallery` qui contient la liste des images à mettre dans la galerie :
+
+```
+<<gallery
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
+Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :
+
+```
+<<gallery>>
+```
+
+Il est également possible de rajouter une légende à chaque image :
+
+```
+<<gallery
+Nom_fichier.jpg|Joli dessin
+Nom_fichier_2.jpg|Photo du lavoir
+>>
+```
+
+Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :
+
+```
+<<gallery center
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
+### Diaporama d'images
+
+On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.
+
+La syntaxe est la même, mais on ajoute le mot `slideshow` après le mot `gallery` :
+
+```
+<<gallery slideshow
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+>>
+```
+
+### Fichiers joints
+
+Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :
+
+```
+<<file|Nom_fichier.ext|Libellé>>
+```
+
+* `Nom_fichier.ext` : remplacer par le nom du fichier  (parmi les fichiers joints à la page)
+* `Libellé` : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché
+
+### Vidéos
+
+Pour inclure un lecteur vidéo dans la page web à partir d'un fichier vidéo joint à la page, il faut utiliser le code suivant :
+
+```
+<<video|Nom_du_fichier.ext>>
+```
+
+On peut aussi spécifier d'autres paramètres :
+
+* `file` : nom du fichier vidéo
+* `poster` : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue
+* `subtitles` : nom d'un fichier de sous-titres au format VTT ou SRT
+* `width` : largeur de la vidéo (en pixels)
+* `height` : hauteur de la vidéo (en pixels)
+
+Exemple :
+
+```
+<<video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt">>
+```
+
+Note : cette extension ne fonctionne que dans les pages du site web.

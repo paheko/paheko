@@ -112,7 +112,8 @@ class User extends Entity
 		$this->reloadProperties();
 	}
 
-	public function set(string $key, $value) {
+	public function set(string $key, $value)
+	{
 		if ($this->_loading && $value === null) {
 			$this->$key = $value;
 			return;
@@ -791,7 +792,7 @@ class User extends Entity
 	{
 		$id_field = DynamicFields::getNameFieldsSQL();
 		$db = DB::getInstance();
-		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s = ?;', self::TABLE, $id_field), $this->name()) ?: null;
+		return $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s LIKE ? COLLATE U_NOCASE;', self::TABLE, $id_field), $this->name()) ?: null;
 	}
 
 	public function getPreference(string $key)
@@ -1066,6 +1067,12 @@ class User extends Entity
 
 	public function setPermissions(array $permissions): void
 	{
-		$this->_permissions = $permissions;
+		$all_permissions = [];
+
+		foreach (Category::PERMISSIONS as $perm => $data) {
+			$all_permissions[$perm] = $permissions[$perm] ?? Session::ACCESS_NONE;
+		}
+
+		$this->_permissions = $all_permissions;
 	}
 }

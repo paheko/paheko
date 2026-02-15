@@ -92,7 +92,7 @@ trait FileThumbnailTrait
 			$size .= 'px';
 		}
 
-		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
+		$size = isset($size) && array_key_exists($size, self::ALLOWED_THUMB_SIZES) ? $size : key(self::ALLOWED_THUMB_SIZES);
 		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
 
 		if ($with_hash) {
@@ -220,6 +220,19 @@ trait FileThumbnailTrait
 		file_put_contents($destination, $out);
 	}
 
+	public function isImageTooLarge(Image $i): bool
+	{
+		list($w, $h) = $i->getSize();
+
+		// Don't allow super large images: > 6000x6000
+		// as they can cause memory issues, eg. 'cache resources exhausted'
+		if ($w >= 6000 || $h >= 6000) {
+			return true;
+		}
+
+		return false;
+	}
+
 	protected function createThumbnail(string $size, string $destination): bool
 	{
 		$operations = self::ALLOWED_THUMB_SIZES[$size];
@@ -232,6 +245,10 @@ trait FileThumbnailTrait
 		$i = $this->asImageObject();
 
 		if (!$i) {
+			return false;
+		}
+
+		if ($this->isImageTooLarge($i)) {
 			return false;
 		}
 

@@ -76,17 +76,17 @@ class AdvancedSearch extends A_S
 			],
 			'debit' => [
 				'label'    => 'Débit',
-				'type'     => 'text',
+				'type'     => 'money',
 				'null'     => false,
 				'select'   => 'l.debit',
-				'normalize' => 'money',
+				'input'    => 'text',
 			],
 			'credit' => [
 				'label'    => 'Crédit',
-				'type'     => 'text',
+				'type'     => 'money',
 				'null'     => false,
 				'select'   => 'l.credit',
-				'normalize' => 'money',
+				'input'    => 'text',
 			],
 			'line_label' => [
 				'label'    => 'Libellé ligne',

@@ -46,12 +46,16 @@ class Services_User
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
+			AND s.archived = 0
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
 	{
 		$columns = [
+			'archived' => [
+				'select' => 's.archived',
+			],
 			'id' => [
 				'select' => 'su.id',
 			],
@@ -119,7 +123,6 @@ class Services_User
 
 		$list->orderBy('date', true);
 		$list->groupBy('su.id');
-		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
 	}
 
@@ -196,6 +199,16 @@ class Services_User
 				throw $e;
 			}
 		}
+	}
+
+	static public function create(int $id_user, int $id_service, ?int $id_fee): Service_User
+	{
+		$su = new Service_User;
+		$su->set('id_user', $id_user);
+		$su->set('id_service', $id_service);
+		$su->set('id_fee', $id_fee);
+		$su->set('date', new Date);
+		return $su;
 	}
 
 	static public function import(CSV_Custom $csv): void

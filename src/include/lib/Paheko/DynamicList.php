@@ -255,6 +255,11 @@ class DynamicList implements \Countable
 		}
 	}
 
+	public function hasColumn(string $key)
+	{
+		return array_key_exists($key, $this->columns);
+	}
+
 	public function addTables(string $tables)
 	{
 		$this->tables .= ' ' . ltrim($tables);
@@ -299,7 +304,7 @@ class DynamicList implements \Countable
 	public function count(): int
 	{
 		if (null === $this->count_result) {
-			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->count_tables ?? $this->tables, $this->conditions);
+			$sql = $this->SQL(true);
 			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
@@ -328,11 +333,6 @@ class DynamicList implements \Countable
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
 		$url = Utils::getSelfURI($query);
 		return $url;
-	}
-
-	public function setCount(string $count)
-	{
-		$this->count = $count;
 	}
 
 	public function setCountTables(string $tables)
@@ -510,7 +510,7 @@ class DynamicList implements \Countable
 		return null;
 	}
 
-	public function SQL()
+	public function SQL(bool $count = false)
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$db = DB::getInstance();
@@ -556,12 +556,27 @@ class DynamicList implements \Countable
 		}
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
+		$tables = null;
 
-		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
-			$select, $this->tables, $this->conditions, $group, $order);
+		if ($count) {
+			$select = '1';
+			$tables = $this->count_tables;
+		}
 
-		if (null !== $this->per_page) {
-			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
+		$tables ??= $this->tables;
+
+		$sql = sprintf('SELECT %s FROM %s WHERE %s %s',
+			$select, $tables, $this->conditions, $group);
+
+		if ($count) {
+			$sql = sprintf('SELECT %s FROM (%s);', $this->count, $sql);
+		}
+		else {
+			$sql .= sprintf(' ORDER BY %s', $order);
+
+			if (null !== $this->per_page) {
+				$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
+			}
 		}
 
 		return $sql;

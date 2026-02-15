@@ -19,7 +19,7 @@
 	</dd>
 	{foreachelse}
 	<dd>
-		Ce membre n'est inscrit à aucune activité ou cotisation.
+		Ce membre n'est actuellement inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
@@ -74,8 +74,10 @@
 		{if $user->isHidden()}
 			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
 		{/if}
-		<dt>Droits</dt>
-		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
+		{if ENABLE_PERMISSIONS}
+			<dt>Droits</dt>
+			<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
+		{/if}
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
@@ -97,7 +99,7 @@
 				{/if}
 			{/if}
 		</dd>
-		{if $can_change_password}
+		{if $can_change_password || $logged_user.id == $user.id}
 			<dd>
 			{if $logged_user.id == $user.id}
 				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
@@ -109,12 +111,12 @@
 			</dd>
 		{/if}
 		{if $can_login}
-		<dd>
-			<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
-				{csrf_field key=$csrf_key}
-				{button name="login_as" type="submit" shape="login" label="Se connecter à sa place"}
-			</form>
-		</dd>
+			<dd>
+				<form method="post" action="" onsubmit="return confirm(&quot;Cela va vous déconnecter et vous reconnecter comme si vous étiez ce membre. Continuer ?&quot);">
+					{csrf_field key=$csrf_key}
+					{button name="login_as" type="submit" shape="login" label="Se connecter à sa place"}
+				</form>
+			</dd>
 		{/if}
 	</dl>
 </aside>

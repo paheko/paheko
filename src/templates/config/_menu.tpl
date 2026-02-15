@@ -21,7 +21,7 @@
 		<ul class="sub">
 			<li{if !$sub_current} class="current"{/if}><a href="{$admin_url}config/users/">Préférences</a></li>
 			<li{if $sub_current == 'fields'} class="current"{/if}><a href="{$admin_url}config/fields/">Fiche de membre</a></li>
-			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories &amp; droits des membres</a></li>
+			<li{if $sub_current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">{if ENABLE_PERMISSIONS}Catégories &amp; droits des membres{else}Catégories{/if}</a></li>
 		</ul>
 	{elseif $current == 'advanced'}
 		<ul class="sub">

@@ -69,7 +69,7 @@ class Address extends Entity
 	protected \DateTime $added;
 	protected ?\DateTime $last_sent;
 
-	static public function acceptsThisMessage(\stdClass $r)
+	static public function acceptsThisMessage(\stdClass $r): bool
 	{
 		// We allow system emails to be sent to any address, even if it is invalid
 		if ($r->context === Emails::CONTEXT_SYSTEM) {
@@ -82,13 +82,15 @@ class Address extends Entity
 			return false;
 		}
 
+		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
-				return $r->accepts_mailings === false ? false : true;
-			case Emails::CONTEXT_REMINDER;
-				return $r->accepts_reminders === false ? false : true;
+				return (bool) $r->accepts_mailings;
+			case Emails::CONTEXT_REMINDER:
+			case Emails::CONTEXT_NOTIFICATION:
+				return (bool) $r->accepts_reminders;
 			default:
-				return $r->accepts_messages === false ? false : true;
+				return (bool) $r->accepts_messages;
 		}
 	}
 
@@ -187,7 +189,7 @@ class Address extends Entity
 		}
 	}
 
-	static public function validateAddress(string $email, bool $mx_check = true): void
+	static public function validateAddress(string $email, bool $mx_check = true, bool $block_captcha_proxies = false): void
 	{
 		$pos = strrpos($email, '@');
 
@@ -228,15 +230,6 @@ class Address extends Entity
 			return;
 		}
 
-		self::checkMX($host);
-	}
-
-	static public function checkMX(string $host)
-	{
-		if (PHP_OS_FAMILY == 'Windows') {
-			return;
-		}
-
 		static $results = [];
 
 		if (array_key_exists($host, $results)) {
@@ -264,7 +257,7 @@ class Address extends Entity
 		if ($r === 'empty') {
 			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
-		elseif ($r === 'blocked') {
+		elseif ($r === 'blocked' && $block_captcha_proxies) {
 			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
 		}
 	}
@@ -365,16 +358,25 @@ class Address extends Entity
 		$this->appendFailLog(implode(" ; ", $log));
 	}
 
-	public function setOptout(int $context): void
+	public function setOptout(?int $context): void
 	{
 		if ($context === Emails::CONTEXT_BULK) {
 			$this->set('accepts_mailings', false);
 		}
-		elseif ($context === Emails::CONTEXT_REMINDER) {
+		elseif ($context === Emails::CONTEXT_REMINDER
+			|| $context === Emails::CONTEXT_NOTIFICATION) {
 			$this->set('accepts_reminders', false);
 		}
-		else {
+		elseif ($context === Emails::CONTEXT_PRIVATE) {
 			$this->set('accepts_messages', false);
+		}
+		elseif ($context === null) {
+			$this->set('accepts_reminders', false);
+			$this->set('accepts_messages', false);
+			$this->set('accepts_mailings', false);
+		}
+		else {
+			throw new \LogicException('Invalid optout context: ' . $context);
 		}
 	}
 

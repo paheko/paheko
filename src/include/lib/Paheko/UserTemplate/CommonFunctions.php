@@ -5,6 +5,7 @@ namespace Paheko\UserTemplate;
 use Paheko\Config;
 use Paheko\DB;
 use Paheko\Template;
+use Paheko\TemplateException;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\Users\DynamicFields;
@@ -39,6 +40,15 @@ class CommonFunctions
 		'dropdown',
 	];
 
+	static protected function getIconFromShape(string $shape): string
+	{
+		if (!array_key_exists($shape, Utils::ICONS)) {
+			throw new TemplateException('Unknown icon shape: ' . $shape);
+		}
+
+		return Utils::ICONS[$shape];
+	}
+
 	static public function input(array $params)
 	{
 		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'max_file_size', 'copy', 'suffix', 'prefix_title', 'prefix_help', 'prefix_required', 'datalist', 'html_label'];
@@ -49,7 +59,7 @@ class CommonFunctions
 		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
-			throw new \RuntimeException('Missing name or type');
+			throw new TemplateException('Missing name or type');
 		}
 
 		$max_file_size ??= null;
@@ -57,7 +67,7 @@ class CommonFunctions
 
 		if ($type === 'datetime') {
 			$type = 'date';
-			$tparams = func_get_arg(0);
+			$tparams = $params;
 			$tparams['type'] = 'time';
 			$tparams['name'] = sprintf('%s_time', $name);
 			unset($tparams['label']);
@@ -86,16 +96,21 @@ class CommonFunctions
 		}
 		elseif ($type === 'file') {
 			$max_file_size ??= Utils::return_bytes(Utils::getMaxUploadSize());
+			$accept = $attributes['accept'] ?? null;
 
-			if (isset($attributes['accept']) && $attributes['accept'] == 'csv') {
-				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT';
-				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+			if ($accept === 'csv' || $accept === 'csv+ofx+qif') {
+				$attributes['accept'] = '.csv,text/csv,application/csv,.CSV,.txt,.TXT'
+					. ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
+					. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV, LibreOffice Calc (ODS), Excel (XLSX)';
+
+				if ($accept === 'csv+ofx+qif') {
+					$help .= ', relevé bancaire (OFX, QIF)';
+					$attributes['accept'] .= ',.ofx,OFX,application/x-ofx,.qif,.QIF';
+				}
 
 				if (Conversion::canConvertToCSV()) {
-					$help .= ', LibreOffice Calc (ODS), ou Excel (XLSX)';
-					$attributes['accept'] .= ',.ods,.ODS,application/vnd.oasis.opendocument.spreadsheet'
-						. ',.xls,.XLS,application/vnd.ms-excel'
-						. ',.xlsx,.XLSX,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+					$attributes['accept'] .= ',.xls,.XLS,application/vnd.ms-excel';
 				}
 			}
 			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
@@ -118,7 +133,15 @@ class CommonFunctions
 		elseif (isset($source) && is_array($source) && isset($source[$source_name])) {
 			$current_value = $source[$source_name];
 		}
-		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
+		elseif ($type === 'checkbox') {
+			if (isset($_POST[$name . '_present']) || isset($_POST[$name])) {
+				$current_value = !empty($_POST[$name]) ? $params['value'] : null;
+			}
+			elseif (isset($default)) {
+				$current_value = $default;
+			}
+		}
+		elseif (isset($default)) {
 			$current_value = $default;
 		}
 
@@ -153,7 +176,7 @@ class CommonFunctions
 
 		if ($type == 'radio' || $type == 'checkbox' || $type == 'radio-btn') {
 			if (!isset($value)) {
-				throw new \RuntimeException('radio/checkbox has no "value" parameter');
+				throw new TemplateException('radio/checkbox has no "value" parameter');
 			}
 
 			$attributes['id'] .= '_' . (strlen($value) > 30 ? md5($value) : preg_replace('![^a-z0-9_-]!i', '', $value));
@@ -324,7 +347,7 @@ class CommonFunctions
 			}
 
 			if (!isset($options)) {
-				throw new \RuntimeException('Missing "options" parameter');
+				throw new TemplateException('Missing "options" parameter');
 			}
 
 			foreach ($options as $_key => $_value) {
@@ -407,13 +430,21 @@ class CommonFunctions
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', htmlspecialchars($attributes['id']), $button, $values);
 		}
-		elseif ($type === 'money') {
+		elseif ($type === 'money' || $type === 'money-no-currency') {
 			if (null !== $current_value && !$current_value_from_user) {
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
-			$currency = Config::getInstance()->currency;
-			$input = sprintf('<nobr><input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars((string) $current_value), $currency);
+			$input = sprintf(
+				'<input type="text" pattern="\s*-?[0-9 ]+([.,][0-9]{1,2})?\s*" inputmode="decimal" size="8" %s value="%s" class="money" />',
+				$attributes_string,
+				htmlspecialchars((string) $current_value)
+			);
+
+			if ($type !== 'money-no-currency') {
+				$currency = Config::getInstance()->currency;
+				$input = sprintf('<nobr>%s<b>%s</b></nobr>', $input, $currency);
+			}
 		}
 		else {
 			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
@@ -428,7 +459,7 @@ class CommonFunctions
 			$input = sprintf('<input type="hidden" name="%s" value="1" />', preg_replace('/(?=\[|$)/', '_present', $name, 1)) . $input;
 		}
 		elseif (!empty($copy)) {
-			$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', $params['name']);
+			$input .= '<input type="button" onclick="var a = this.previousElementSibling; a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />';
 		}
 
 		$input .= $suffix;
@@ -486,11 +517,11 @@ class CommonFunctions
 	static public function icon(array $params): string
 	{
 		if (isset($params['shape']) && isset($params['html']) && !$params['html']) {
-			return Utils::iconUnicode($params['shape']);
+			return self::getIconFromShape($params['shape']);
 		}
 
 		if (!isset($params['shape']) && !isset($params['url'])) {
-			throw new \RuntimeException('Missing parameter: shape or url');
+			throw new TemplateException('Missing parameter: shape or url');
 		}
 
 		$html = '';
@@ -639,7 +670,7 @@ class CommonFunctions
 	static protected function setIconAttribute(array &$params): void
 	{
 		if (isset($params['shape'])) {
-			$params['data-icon'] = Utils::iconUnicode($params['shape']);
+			$params['data-icon'] = self::getIconFromShape($params['shape']);
 		}
 
 		unset($params['shape']);
@@ -694,7 +725,7 @@ class CommonFunctions
 				<b data-icon="%s" class="btn" ondblclick="this.parentNode.querySelector(\'a, button\').click();" onclick="this.parentNode.classList.toggle(\'active\');">%s</b>
 				<span><span>',
 			htmlspecialchars($params['class'] ?? ''),
-			Utils::iconUnicode($params['shape']),
+			self::getIconFromShape($params['shape']),
 			htmlspecialchars($params['label'])
 		);
 
@@ -707,7 +738,7 @@ class CommonFunctions
 	static public function delete_form(array $params): string
 	{
 		if (!isset($params['legend'], $params['warning'], $params['csrf_key'])) {
-			throw new \InvalidArgumentException('Missing parameter: legend, warning and csrf_key are required');
+			throw new TemplateException('Missing parameter: legend, warning and csrf_key are required');
 		}
 
 		$tpl = Template::getInstance();
@@ -724,20 +755,20 @@ class CommonFunctions
 			$name = $params['name'] ?? $params['key'] ?? null;
 
 			if (null === $name) {
-				throw new \RuntimeException('Missing "name" parameter');
+				throw new TemplateException('Missing "name" parameter');
 			}
 
 			$field = DynamicFields::get($name);
 		}
 
 		if (!($field instanceof DynamicField)) {
-			throw new \LogicException('This field does not exist.');
+			throw new TemplateException('This field does not exist.');
 		}
 
 		$context = $params['context'] ?? 'module';
 
 		if (!in_array($context, ['user_edit', 'admin_new', 'admin_edit', 'module'])) {
-			throw new \InvalidArgumentException('Invalid "context" parameter value: ' . $context);
+			throw new TemplateException('Invalid "context" parameter value: ' . $context);
 		}
 
 		$source = $params['user'] ?? $params['source'] ?? null;
@@ -865,7 +896,7 @@ class CommonFunctions
 			if ($field->default_value === 'NOW()') {
 				$params['default'] = new \DateTime;
 			}
-			elseif (!empty($field->default_value)) {
+			elseif (isset($field->default_value) && $field->default_value !== '') {
 				$params['default'] = $field->default_value;
 			}
 		}
@@ -899,22 +930,22 @@ class CommonFunctions
 			$name = $params['name'] ?? $params['key'] ?? null;
 
 			if (null === $name) {
-				throw new \RuntimeException('Missing "name" parameter');
+				throw new TemplateException('Missing "name" parameter');
 			}
 
 			$field = DynamicFields::get($name);
 		}
 
 		if ($field && !($field instanceof DynamicField)) {
-			throw new \LogicException('This field does not exist.');
+			throw new TemplateException('This field does not exist.');
 		}
 
 		$v = $params['value'] ?? null;
-
 		$out = '';
+		$linkify = $field && (!$field->isName() || ($params['context'] ?? '') !== 'list');
 
 		if (!$field) {
-			$out = htmlspecialchars((string)$v);
+			$out = (string) $v;
 		}
 		elseif ($field->type === 'checkbox'
 			|| $field->type === 'boolean') {
@@ -971,13 +1002,13 @@ class CommonFunctions
 		elseif ($field->type === 'password') {
 			$out = '*****';
 		}
-		elseif ($field->type === 'email' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'email' && $linkify) {
 			$out = '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 		}
-		elseif ($field->type === 'tel' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'tel' && $linkify) {
 			$out = '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars(CommonModifiers::format_phone_number($v)) . '</a>';
 		}
-		elseif ($field->type === 'url' && empty($params['link_name_id'])) {
+		elseif ($field->type === 'url' && $linkify) {
 			$out ='<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 		}
 		elseif ($field->type === 'number' || $field->type === 'decimal') {
@@ -1002,7 +1033,7 @@ class CommonFunctions
 	static public function dropdown(array $params): string
 	{
 		if (!isset($params['options'], $params['title'])) {
-			throw new \InvalidArgumentException('Missing parameter for "dropdown"');
+			throw new TemplateException('Missing parameter for "dropdown"');
 		}
 
 		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
@@ -1015,14 +1046,14 @@ class CommonFunctions
 			$content = $option['html'] ?? htmlspecialchars($option['label'] ?? '');
 
 			if ('' === $content) {
-				throw new \InvalidArgumentException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
+				throw new TemplateException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
 			}
 
 			if (isset($option['aside'])) {
 				$aside = sprintf('<small>%s</small>', htmlspecialchars($option['aside']));
 			}
 
-			if (isset($option['value']) && $option['value'] == $params['value']) {
+			if (isset($option['value'], $params['value']) && $option['value'] === $params['value']) {
 				$selected = 'aria-selected="true" class="selected"';
 			}
 
@@ -1063,10 +1094,12 @@ class CommonFunctions
 			$params['color'] = self::TAG_PRESETS[$p][1];
 		}
 
+		$label = htmlspecialchars($params['label'] ?? '');
+
 		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
 			!empty($params['small']) ? ' small' : '',
 			htmlspecialchars($params['color'] ?? '#999'),
-			htmlspecialchars($params['label'] ?? '')
+			$label
 		);
 	}
 }

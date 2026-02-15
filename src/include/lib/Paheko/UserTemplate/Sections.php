@@ -314,8 +314,8 @@ class Sections
 		return '<?php } '
 			// Prepend function name to error
 			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
-			// Always remove current context variables even if return was used
-			. 'finally { array_pop($this->_variables); } '
+			// Always remove current context variables even if return was used (should not be necessary anymore) FIXME
+			//. 'finally { array_pop($this->_variables); } '
 			. '}); ?>';
 	}
 
@@ -435,7 +435,7 @@ class Sections
 		}
 
 		unset($params['module']);
-		$params['tables'] = $table;
+		$params['tables'] = sprintf('%s AS a', $table);
 
 		// Cannot use json_each with authorizer before SQLite 3.41.0
 		// @see https://sqlite.org/forum/forumpost/d28110be11
@@ -448,11 +448,12 @@ class Sections
 				$t, $table, $db->quote('$.' . trim($params['each']))
 			));
 
-			$params['tables'] = $t;
+			$params['tables'] = $t . ' AS a';
 			$params['select'] = 'value';
 			unset($params['each']);
 		}
 		elseif (isset($params['each'])) {
+			$params['select'] = 'value';
 			$params['tables'] = sprintf('%s AS a, json_each(a.document, %s)', $table, $db->quote('$.' . trim($params['each'])));
 			unset($params['each']);
 		}
@@ -500,7 +501,7 @@ class Sections
 			unset($params[$key]);
 		}
 
-		$s = 'id, key, document AS json';
+		$s = 'a.id, a.key, a.document AS json';
 
 		if (isset($params['select'])) {
 			$params['select'] = $s . ', ' . self::_moduleReplaceJSONExtract($params['select'], $table);
@@ -540,7 +541,7 @@ class Sections
 			}
 
 			if (isset($assign)) {
-				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -708,10 +709,6 @@ class Sections
 
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
-		}
-
-		if (isset($params['count'])) {
-			$list->setCount(self::_moduleReplaceJSONExtract($params['count'], $table));
 		}
 
 		if (isset($params['group'])) {
@@ -1047,9 +1044,9 @@ class Sections
 			$params['group'] = 's.id';
 		}
 
-		// Hide archived subscriptions (FIXME Paheko 1.4!)
+		// Hide archived subscriptions
 		if (($params['archived'] ?? null) === false) {
-			$params['where'] .= ' AND (s.end_date IS NULL OR s.end_date >= date())';
+			$params['where'] .= ' AND s.archived = 0';
 		}
 
 		if (empty($params['order'])) {
@@ -1351,8 +1348,8 @@ class Sections
 				$page->load($data);
 				$listed[] = $page->id;
 
-				if (isset($row['snippet'])) {
-					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet']);
+				if (array_key_exists('snippet', $row)) {
+					$row['snippet'] = preg_replace('!</mark>(\s*)<mark>!', '$1', $row['snippet'] ?? '');
 					if (preg_match('!<mark>(.*?)</mark>!', $row['snippet'], $match)) {
 						$row['url_highlight'] = $page->url() . '#:~:text=' . rawurlencode($match[1]);
 					}
@@ -1365,7 +1362,7 @@ class Sections
 			}
 
 			if ($assign) {
-				$tpl::__assign(['var' => $assign, 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $assign, 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;
@@ -1607,26 +1604,39 @@ class Sections
 				}
 			}
 
-			// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
-			if (!empty($params['count'])) {
-				$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
-				$params['order'] = '1';
+			$group = '';
+
+			if (isset($params['group'])) {
+				$group .= 'GROUP BY ' . $params['group'];
+			}
+
+			if (isset($params['having'])) {
+				$group .= ' HAVING ' . $params['having'];
 			}
 
 			if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
 				$params['where'] = ' AND ' . $params['where'];
 			}
 
-			$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
-				$params['select'],
-				$params['tables'],
-				$params['where'] ?? '',
-				isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
-				isset($params['having']) ? 'HAVING ' . $params['having'] : '',
-				$params['order'],
-				$params['begin'],
-				$params['limit']
-			);
+			// If count=true or count=1, then wrap query and return count
+			if (!empty($params['count'])) {
+				$sql = sprintf('SELECT COUNT(*) AS count FROM (SELECT 1 FROM %s WHERE 1 %s %s);',
+					$params['tables'],
+					$params['where'] ?? '',
+					$group
+				);
+			}
+			else {
+				$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
+					$params['select'],
+					$params['tables'],
+					$params['where'] ?? '',
+					$group,
+					$params['order'],
+					$params['begin'],
+					$params['limit']
+				);
+			}
 		}
 
 		if (isset($tpl->module->name)) {
@@ -1678,7 +1688,7 @@ class Sections
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
-				$tpl::__assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
+				$tpl::_assign(['var' => $params['assign'], 'value' => $row], $tpl, $line);
 			}
 
 			yield $row;

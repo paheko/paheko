@@ -316,7 +316,7 @@
 			}
 			else if (values)
 			{
-				prev.value = values[i];
+				prev.value = values[i] ?? '';
 			}
 		}
 
@@ -363,7 +363,7 @@
 		}
 		else
 		{
-			var field = this.buildInput(column.type, '', column);
+			var field = this.buildInput(column.input ?? column.type, '', column);
 		}
 
 		field = targetParent.insertBefore(field, prev ? prev.nextSibling : null);
@@ -378,7 +378,7 @@
 
 	qb.prototype.buildInput = function (type, label, column) {
 		var i = document.createElement('input');
-		i.type = type == 'integer' ? 'number' : type;
+		i.type = type;
 		i.value = label;
 		return i;
 	};

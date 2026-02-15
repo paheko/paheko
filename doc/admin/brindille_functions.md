@@ -492,7 +492,7 @@ Mais cette fonction permet également d'appeler une API Paheko distante, dans ce
 
 ## csv
 
-Permet de demander à l'utilisateur de charger un fichier CSV (ou XLSX/ODS, selon la configuration de Paheko), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.
+Permet de demander à l'utilisateur de charger un fichier CSV, XLSX (Excel) ou ODS (LibreOffice), et ensuite d'associer les colonnes pour permettre d'utiliser ces données dans une boucle.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
@@ -1035,7 +1035,7 @@ Par défaut, tous les fichiers des modules sont en accès restreint : ils ne peu
 
 Pour qu'un fichier soit visible publiquement aux personnes non connectées, il faut le placer dans le sous-répertoire `public` du module.
 
-Attention : de par ce fonctionnement, **tous les fichiers** d'un module sont potentiellement accessibles par **tous les membres ayant accès au module** et connaissant le nom du fichier.
+Attention : de par ce fonctionnement, **tous les fichiers** d'un module sont potentiellement accessibles par **tous les membres ayant accès au module** et connaissant le nom du fichier, indépendamment des fonctions `admin_files` et `delete_file` !
 
 Il est donc recommandé de ne pas utiliser ce mécanisme pour stocker des données personnelles ou des données sensibles.
 
@@ -1046,8 +1046,8 @@ Affiche (dans le contexte de l'administration) la liste des fichiers dans un sou
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
 | `path` | optionnel | Chemin du sous-répertoire où sont stockés les fichiers |
-| `upload` | optionnel | Booléen. Si `true`, l'utilisateur pourra ajouter des fichiers. (Défaut : `false`) |
-| `edit` | optionnel | Booléen. Si `true`, l'utilisateur pourra modifier ou supprimer les fichiers existants. (Défaut : `false`) |
+| `upload` | optionnel | Booléen. Si `true`, le bouton pour ajouter des fichiers sera affiché. (Défaut : `false`) |
+| `edit` | optionnel | Booléen. Si `true`, le bouton pour modifier ou supprimer les fichiers existants sera affiché. (Défaut : `false`) |
 | `use_trash` | optionnel | Booléen. Si `false`, le fichier sera supprimé, sans passer par la corbeille. Défaut : `true` |
 
 Exemple pour afficher la liste des fichiers du sous-répertoire `facture43` et permettre de rajouter de nouveaux fichiers :

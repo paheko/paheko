@@ -21,7 +21,7 @@ $form->runIf('create', function () {
 
 
 $types = [0 => 'Module normal', 1 => 'Site web'];
-$sections = [null => '— Pas de restriction —'];
+$sections = ['' => '— Pas de restriction —'];
 
 foreach (Category::PERMISSIONS as $section => $details) {
 	$sections[$details['label']] = [];

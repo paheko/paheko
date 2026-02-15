@@ -160,13 +160,16 @@ abstract class AdvancedSearch
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
 
-				if (!empty($column['normalize'])) {
-					if ($column['normalize'] == 'tel') {
-						// Normaliser le numéro de téléphone
-						$values = array_map(['Paheko\Utils', 'normalizePhoneNumber'], $values);
-					}
-					elseif ($column['normalize'] == 'money') {
+				if ($column['type'] == 'tel') {
+					// Normaliser le numéro de téléphone
+					$values = array_map(['Paheko\Utils', 'normalizePhoneNumber'], $values);
+				}
+				elseif ($column['type'] == 'money') {
+					try {
 						$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
+					}
+					catch (\InvalidArgumentException $e) {
+						throw new UserException($e->getMessage(), 0, $e);
 					}
 				}
 				elseif ($column['type'] === 'integer') {

@@ -100,7 +100,8 @@ class Plugins
 
 		header('Content-Type: ' .$mime);
 		header('Cache-Control: public, max-age=3600');
-		header('Last-Modified: ' . date(DATE_RFC7231, filemtime($path)));
+		// DATE_RFC7231 is deprecated in PHP 8.5
+		header('Last-Modified: ' . date("D, d M Y H:i:s \\G\\M\\T", filemtime($path)));
 
 		// Don't return Content-Length on OVH, as their HTTP 2.0 proxy is buggy
 		// @see https://fossil.kd2.org/paheko/tktview/8b342877cda6ef7023b16277daa0ec8e39d949f8

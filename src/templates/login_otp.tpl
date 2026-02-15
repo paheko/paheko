@@ -7,7 +7,7 @@
 	<fieldset>
 		<legend>Double authentification (second facteur TOTP)</legend>
 		<dl>
-			{input type="text" class="otp" minlength=6 maxlength=6 label="Code TOTP" name="code" help="Entrez ici le code donné par l'application de de double authentification." required=true}
+			{input type="text" class="otp" minlength=6 maxlength=6 label="Code TOTP" name="code" help="Entrez ici le code donné par l'application de de double authentification." required=true pattern="\d{6}" inputmode="numeric" autocomplete="one-time-code"}
 			<dd class="help">Si vous avez perdu votre téléphone, vous pouvez indiquer un code de secours à la place.</dd>
 		</dl>
 	</fieldset>

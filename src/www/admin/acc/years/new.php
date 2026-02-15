@@ -10,7 +10,8 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
-// FIXME: remove in 1.3.15 (move to upgrade)
+// Install new accounting charts
+// FIXME: remove in 2028+
 Charts::migrateTo2025();
 
 $year = new Year;
@@ -25,7 +26,16 @@ $year->start_date = $new_dates[0];
 $year->end_date = $new_dates[1];
 $year->label = sprintf('Exercice %s', $year->label_years());
 
-$tpl->assign(compact('year'));
+$chart_selector_default = null;
+
+if (Charts::hasActiveCustomCharts()) {
+	$chart_selector_default = 'Sélectionner un plan comptable';
+}
+elseif ($id = Charts::getDefaultChartId(Config::getInstance()->country)) {
+	$year->id_chart = $id;
+}
+
+$tpl->assign(compact('year', 'chart_selector_default'));
 
 $tpl->assign('charts', Charts::listByCountry(true));
 

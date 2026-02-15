@@ -19,68 +19,68 @@ use KD2\Brindille_Exception;
 class Modifiers
 {
 	const MODIFIERS_LIST = [
-		'replace',
-		'regexp_replace',
-		'regexp_match',
-		'match',
-		'truncate' => [Smartyer::class, 'truncate'],
-		'excerpt',
-		'atom_date',
-		'xml_escape',
-		'cdata_escape',
-		'json_decode',
-		'json_encode',
-		'minify',
-		'remove_leading_number',
-		'get_leading_number',
-		'spell_out_number',
-		'parse_date',
-		'parse_datetime',
-		'parse_time',
-		'math',
-		'money_int' => [Utils::class, 'moneyToInteger'],
-		'array_transpose' => [Utils::class, 'array_transpose'],
-		'check_siret_number' => [Utils::class, 'checkSIRET'],
-		'check_email',
-		'gettype',
-		'arrayval',
-		'explode',
-		'implode',
-		'keys',
-		'values',
-		'has',
-		'has_key',
-		'in',
-		'key_in',
-		'sort',
-		'ksort',
-		'reverse',
+		'replace' => ['scalar+=', 'array=|scalar+=', 'scalar+'],
+		'regexp_replace' => ['scalar+=', 'string+=', 'scalar+='],
+		'regexp_match' => ['scalar+=', 'string+='],
+		'match' => ['scalar+=', 'scalar+='],
+		'truncate' => ['scalar+=', 'numeric', 'string+', 'bool+'],
+		'excerpt' => ['string+', 'numeric'],
+		'atom_date' => ['?DateTimeInterface|string|int'],
+		'xml_escape' => ['string+'],
+		'cdata_escape' => ['string+'],
+		'entities_escape' => ['string+'],
+		'json_decode' => ['string+'],
+		'json_encode' => [null],
+		'minify' => ['string+', 'string+'],
+		'remove_leading_number' => ['string+'],
+		'get_leading_number' => ['string+'],
+		'spell_out_number' => ['numeric', '?string', '?string'],
+		'parse_date' => ['?DateTimeInterface|scalar'],
+		'parse_datetime' => ['?DateTimeInterface|scalar', '?string'],
+		'parse_time' => ['?DateTimeInterface|scalar'],
+		'math' => ['scalar+', '...' => 'scalar+'],
+		'money_int' => ['scalar+='],
+		'array_transpose' => ['callback' => [Utils::class, 'array_transpose'], 'types' => ['?array']],
+		'check_siret_number' => ['callback' => [Utils::class, 'checkSIRET'], 'types' => ['scalar+=']],
+		'check_email' => ['scalar+='],
+		'gettype' => [null],
+		'arrayval' => [null],
+		'explode' => ['scalar+', 'scalar+'],
+		'implode' => ['?array|string', 'scalar+'],
+		'flip' => ['?array'],
+		'key' => ['?array', 'scalar+'],
+		'keys' => ['?array'],
+		'value' => ['?array', 'scalar+'],
+		'values' => ['?array'],
+		'has' => ['?array', 'scalar+'],
+		'has_key' => ['?array', 'scalar+'],
+		'in' => ['scalar+', '?array'],
+		'key_in' => ['scalar+', '?array'],
+		'sort' => ['?array'],
+		'ksort' => ['?array'],
+		'reverse' => ['?array'],
+		'filter' => ['?array'],
 		'max',
 		'min',
-		'array_to_list',
-		'quote_sql_identifier',
-		'quote_sql',
+		'array_to_list' => ['?array'],
+		'quote_sql_identifier' => ['scalar+', 'scalar+'],
+		'quote_sql' => ['scalar+'],
 		'sql_where',
 		'sql_user_fields',
-		'url_encode',
-		'url_decode',
-		'urlencode' => [self::class, 'url_encode'],
-		'count_words',
-		'or',
-		'uuid',
-		'key',
-		'filter',
+		'url_encode' => ['scalar+'],
+		'url_decode' => ['scalar+'],
+		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
+		'count_words' => ['scalar+'],
+		'uuid' => [],
+		'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
+		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
 	];
 
-	const MODIFIERS_WITH_INSTANCE_LIST = [
-		'call',
-		'map',
-	];
-
-	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
+	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s+|\s*[.\)]\s*)/';
 
 	/**
 	 * Call a user-defined function
+	 * EXPERIMENTAL! DO NOT USE YET! FIXME
 	 * @example {{$variable|call:"my_test_function":$param1|escape}}
 	 */
 	static public function call(UserTemplate $tpl, int $line, $src, string $name, ...$params)
@@ -97,23 +97,23 @@ class Modifiers
 		return $r;
 	}
 
-	static public function replace($str, $find, $replace = null): string
+	static public function replace(string $str, $find, string $replace = ''): string
 	{
-		if (is_array($find) && null === $replace) {
+		if (is_array($find) && '' === $replace) {
 			return strtr($str, $find);
 		}
 
-		return str_replace((string)$find, (string)$replace, (string)$str);
+		return str_replace((string)$find, $replace, $str);
 	}
 
-	static public function regexp_replace($str, $pattern, $replace)
+	static public function regexp_replace(string $str, string $pattern, string $replace)
 	{
-		return preg_replace((string) $pattern, (string) $replace, (string) $str);
+		return preg_replace($pattern, $replace, $str);
 	}
 
-	static public function regexp_match($str, $pattern)
+	static public function regexp_match(string $str, string $pattern)
 	{
-		return (int) preg_match((string) $pattern, (string) $str);
+		return (int) preg_match($pattern, $str);
 	}
 
 	static public function match($str, $pattern)
@@ -137,6 +137,11 @@ class Modifiers
 		return true;
 	}
 
+	static public function truncate(string $str, $length = 80, string $placeholder = '…', bool $strict_cut = false): string
+	{
+		return Smartyer::truncate($str, (int) $length, $placeholder, $strict_cut);
+	}
+
 	static public function excerpt($str, $length = 600): string
 	{
 		$str = strip_tags($str);
@@ -150,14 +155,28 @@ class Modifiers
 		return Utils::date_fr($date, DATE_ATOM);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	static public function xml_escape($str)
 	{
 		return htmlspecialchars((string)$str, ENT_XML1 | ENT_QUOTES);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	static public function cdata_escape($str)
 	{
 		return str_replace(']]>', ']]]]><![CDATA[>', (string)$str);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	static public function entities_escape($str)
+	{
+		return htmlentities((string)$str);
 	}
 
 	static public function json_decode($str)
@@ -239,7 +258,7 @@ EOS;
 
 	static public function spell_out_number($number, string $locale = 'fr_FR', string $currency = 'euros'): string
 	{
-		$number = str_replace(',', '.', $number);
+		$number = str_replace(',', '.', (string)$number);
 		$number = strtok($number, '.');
 		$decimals = strtok('');
 
@@ -337,7 +356,17 @@ EOS;
 		return sprintf('%02d:%02d', $t[0], $t[1]);
 	}
 
-	static public function math(string $expression, ... $params)
+	static public function money_int($value): int
+	{
+		try {
+			return Utils::moneyToInteger($value, true);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new UserException($e->getMessage(), 0, $e);
+		}
+	}
+
+	static public function math($expression, ... $params)
 	{
 		static $tokens_list = [
 			'function'  => '(?:round|ceil|floor|cos|sin|tan|asin|acos|atan2?|deg2rad|sinh|cosh|tanh|abs|max|min|exp|sqrt|log10|log|pi|random_int)\(',
@@ -348,6 +377,10 @@ EOS;
 			'separator' => ',',
 			'space'     => '\s+',
 		];
+
+		if (is_array($expression) || is_object($expression) || trim((string)$expression) === '') {
+			throw new Brindille_Exception('Invalid empty or array value passed to math modifier');
+		}
 
 		// Treat comma as dot in strings
 		foreach ($params as &$param) {
@@ -414,6 +447,9 @@ EOS;
 		}
 	}
 
+	/**
+	 * EXPERIMENTAL! DO NOT USE!
+	 */
 	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
 	{
 		if (!is_array($array)) {
@@ -482,7 +518,23 @@ EOS;
 		return array_keys((array)$array);
 	}
 
-	static public function key($array, $key)
+	static public function flip($array)
+	{
+		return array_flip((array)$array);
+	}
+
+	static public function key($array, $value)
+	{
+		$key = array_search($value, $array, true);
+
+		if ($key === false) {
+			return null;
+		}
+
+		return $key;
+	}
+
+	static public function value($array, $key)
 	{
 		return $array[$key] ?? null;
 	}
@@ -531,14 +583,14 @@ EOS;
 		return array_reverse((array)$value, true);
 	}
 
-	static public function max($value)
+	static public function max(...$values)
 	{
-		return max((array)$value);
+		return max(...$values);
 	}
 
-	static public function min($value)
+	static public function min(...$values)
 	{
-		return min((array)$value);
+		return min(...$values);
 	}
 
 	static public function array_to_list($value, int $i = 0): string
@@ -648,15 +700,6 @@ EOS;
 	static public function count_words($str): int
 	{
 		return preg_match_all('/\S+/u', $str);
-	}
-
-	static public function or($in, $else)
-	{
-		if (empty($in) || (is_string($in) && trim($in) === '')) {
-			return $else;
-		}
-
-		return $in;
 	}
 
 	static public function uuid()

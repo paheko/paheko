@@ -59,13 +59,16 @@ class Transactions
 		$db->begin();
 
 		try {
-			$ids = [];
+			$transactions_ids = [];
+			$lines_ids = [];
+
 			foreach ($journal as $row) {
 				if (!in_array($row->id_line, $checked)) {
 					continue;
 				}
 
-				$ids[] = (int)$row->id;
+				$transactions_ids[] = (int)$row->id;
+				$lines_ids[] = $row->id_line;
 
 				$line = new Line;
 				$line->importForm([
@@ -81,8 +84,8 @@ class Transactions
 			}
 
 			$transaction->save();
-			$transaction->updateLinkedTransactions($ids);
-			$account->markTransactionsAsDeposited($ids);
+			$transaction->updateLinkedTransactions($transactions_ids);
+			$account->markLinesAsDeposited($lines_ids);
 			$db->commit();
 		}
 		catch (\Exception $e) {
@@ -152,7 +155,6 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
@@ -210,7 +212,19 @@ class Transactions
 			unset($columns['locked']);
 		}
 
-		$columns['line_reference']['label'] = 'Réf. paiement';
+		$types_with_ref = [
+			Transaction::TYPE_REVENUE,
+			Transaction::TYPE_EXPENSE,
+			Transaction::TYPE_TRANSFER,
+		];
+
+		if (in_array($type, $types_with_ref)) {
+			$columns['line_reference']['label'] = 'Réf. paiement';
+		}
+		else {
+			unset($columns['line_reference']);
+		}
+
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
 		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'))';
@@ -248,7 +262,6 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(t.id)');
 		$list->setCountTables('acc_transactions t');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {

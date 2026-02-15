@@ -6,6 +6,7 @@ use Paheko\Config;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
+use Paheko\Form;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
@@ -15,6 +16,8 @@ use Paheko\Users\Users;
 
 use Paheko\Entities\Email\Message;
 use Paheko\Entities\Users\DynamicField;
+
+use KD2\Brindille_Exception;
 
 use const Paheko\{WWW_URL, ADMIN_URL, MAIL_SENDER};
 
@@ -59,6 +62,13 @@ class Mailing extends Entity
 		$this->assert(mb_strlen($this->subject) <= 100, 'Le sujet ne peut faire plus de 100 caractères.');
 		$this->assert(mb_strlen($this->subject) >= 6, 'Le sujet ne peut faire moins de 6 caractères.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
+
+		try {
+			$this->getPreview();
+		}
+		catch (Brindille_Exception $e) {
+			$this->assert(false, 'Erreur dans le code du message : ' . $e->getMessage());
+		}
 
 		$this->assert(!isset($this->preheader) || mb_strlen($this->preheader) <= 80, 'L\'extrait du message doit faire moins de 100 caractères.');
 
@@ -423,7 +433,13 @@ class Mailing extends Entity
 			return [];
 		}
 
-		$html = $this->getMessage()->getHTMLBody();
+		try {
+			$html = $this->getMessage()->getHTMLBody();
+		}
+		catch (Brindille_Exception $e) {
+			return [];
+		}
+
 		$out = [];
 
 		$regexp = sprintf('/\bhref="(?!%s|%s)/', preg_quote(WWW_URL, '/'), preg_quote(ADMIN_URL, '/'));

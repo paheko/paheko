@@ -118,11 +118,12 @@ class Config extends Entity
 	];
 
 	protected string $org_name;
-	protected ?string $org_infos;
+	protected ?string $org_infos = null;
 	protected string $org_email;
-	protected ?string $org_address;
-	protected ?string $org_phone;
-	protected ?string $org_web;
+	protected ?string $org_address = null;
+	protected ?string $org_address_public = null;
+	protected ?string $org_phone = null;
+	protected ?string $org_web = null;
 
 	protected string $currency;
 	protected string $country;
@@ -133,14 +134,14 @@ class Config extends Entity
 	protected ?bool $show_has_children_column = true;
 	protected bool $show_category_in_list = true;
 
-	protected ?int $backup_frequency;
-	protected ?int $backup_limit;
+	protected ?int $backup_frequency = null;
+	protected ?int $backup_limit = null;
 
-	protected ?int $last_chart_change;
-	protected ?string $last_version_check;
+	protected ?int $last_chart_change = null;
+	protected ?string $last_version_check = null;
 
-	protected ?string $color1;
-	protected ?string $color2;
+	protected ?string $color1 = null;
+	protected ?string $color2 = null;
 
 	protected array $files = [];
 
@@ -302,7 +303,7 @@ class Config extends Entity
 		$tzlist = TimeZones::listForCountry($this->country);
 
 		// Make sure we set a valid timezone
-		if (!array_key_exists($this->timezone, $tzlist)) {
+		if (!$this->timezone || !array_key_exists($this->timezone, $tzlist)) {
 			$this->set('timezone', key($tzlist));
 		}
 
@@ -400,28 +401,36 @@ class Config extends Entity
 
 			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);
-				throw new UserException('Le fichier n\'est pas une image.');
+				throw new UserException('Le fichier n\'est pas une image (formats autorisés : PNG, JPEG, GIF, WEBP).');
+			}
+
+			$i = null;
+
+			if ($type === 'image') {
+				$i = $f->asImageObject();
+
+				if ($f->isImageTooLarge($i)) {
+					$this->setFile($key, null);
+					throw new UserException('Cette image est trop grande. Taille maximale : 6000x6000.');
+				}
 			}
 
 			try {
 				// Force favicon format
 				if ($key === 'favicon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(32, 32);
 					$f->setContent($i->output($format, true));
 				}
 				// Force icon format
 				else if ($key === 'icon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(512, 512);
 					$f->setContent($i->output($format, true));
 				}
 				// Force signature size
 				else if ($key === 'signature') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->resize(200, 200);
 					$f->setContent($i->output($format, true));
 				}

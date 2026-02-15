@@ -147,6 +147,8 @@ class Queue
 		$html = null;
 		$ids = [];
 
+		$markdown = $context === self::CONTEXT_BULK;
+
 		foreach ($recipients as $recipient => $r) {
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
@@ -178,7 +180,7 @@ class Queue
 
 		// Use the last recipient content to forward to MAIL_TEST_RECIPIENTS, just change the recipient
 		if (MAIL_TEST_RECIPIENTS
-			&& $context === self::CONTEXT_BULK
+			&& ($context === self::CONTEXT_BULK || $context === self::CONTEXT_NOTIFICATION || $context === self::CONTEXT_REMINDER)
 			&& count($ids)) {
 			$recipient_pgp_key = null;
 
@@ -245,7 +247,6 @@ class Queue
 		$count = 0;
 		$all_attachments = [];
 
-		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// See if we need to avoid this recipient
 			if (!Email::acceptsThisMessage($row)) {
@@ -322,14 +323,13 @@ class Queue
 		// Update emails list and send count
 		// then delete messages from queue
 		$db->begin();
-		$db->exec(sprintf('
-			UPDATE emails_queue SET sending = 2 WHERE %s;
-			INSERT OR IGNORE INTO %s (hash) SELECT recipient_hash FROM emails_queue WHERE sending = 2;
-			UPDATE %2$s SET sent_count = sent_count + 1, last_sent = datetime()
-				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
-			DELETE FROM emails_queue WHERE sending = 2;',
-			$db->where('id', $ids),
-			Email::TABLE));
+		$db->exec(sprintf('UPDATE emails_queue SET sending = 2 WHERE %s;', $db->where('id', $ids)));
+		$db->exec(sprintf('INSERT OR IGNORE INTO %s (hash) SELECT recipient_hash FROM emails_queue WHERE sending = 2;', Email::TABLE));
+		$sql = sprintf('UPDATE %s SET sent_count = sent_count + 1, last_sent = ?
+				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);',
+			Email::TABLE);
+		$db->preparedQuery($sql, new \DateTime);
+		$db->exec('DELETE FROM emails_queue WHERE sending = 2;');
 		$db->commit();
 
 		$unused_attachments = array_diff($all_attachments, $db->getAssoc('SELECT id, path FROM emails_queue_attachments;'));
@@ -380,9 +380,6 @@ class Queue
 	 */
 	static protected function listQueue(?int $context = null): array
 	{
-		// Clean-up the queue from reject emails
-		self::purgeQueueFromRejected();
-
 		// Reset messages that failed during the queue run
 		self::resetFailed();
 

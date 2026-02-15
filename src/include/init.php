@@ -206,6 +206,7 @@ static $default_config = [
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'NONE',
 	'SMTP_HELO_HOSTNAME'    => null,
+	'SMTP_MAX_MESSAGES_PER_SESSION' => 50,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
@@ -237,6 +238,8 @@ static $default_config = [
 	'OIDC_CLIENT_SECRET'    => null,
 	'OIDC_CLIENT_MATCH_EMAIL' => true,
 	'OIDC_CLIENT_DEFAULT_PERMISSIONS' => null,
+	'OIDC_CLIENT_CALLBACK'  => null,
+	'ENABLE_PERMISSIONS'    => true,
 	'LEGAL_HOSTING_DETAILS' => null,
 	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
@@ -389,6 +392,10 @@ class ValidationException extends UserException
 }
 
 class APIException extends \LogicException
+{
+}
+
+class TemplateException extends \RuntimeException
 {
 }
 

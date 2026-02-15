@@ -23,6 +23,7 @@ use Paheko\Files\Files;
 
 use KD2\ErrorManager;
 use KD2\DB\DB_Exception;
+use KD2\DB\Date;
 
 class API
 {
@@ -270,6 +271,30 @@ class API
 				throw new APIException('The requested user ID does not exist', 404);
 			}
 
+			if ($fn2 === 'subscribe') {
+				if ($this->method !== 'POST') {
+					throw new APIException('Wrong request method', 400);
+				}
+
+				$this->requireAccess(Session::ACCESS_WRITE);
+
+				if (!$this->hasParam('id_service')) {
+					throw new APIException('Missing "id_service" parameter', 400);
+				}
+
+				$params = $this->params;
+				unset($params['id_user']);
+				$id_service = intval($this->params['id_service']);
+				$id_fee = intval($this->params['id_fee'] ?? 0) ?: null;
+
+				$su = Services_User::create($user->id(), $id_service, $id_fee);
+				$su->importForm($params);
+				$su->save();
+				return $su->asArray(true);
+			}
+			elseif (!empty($fn2)) {
+				throw new APIException('Unknown route', 404);
+			}
 			if ($this->method === 'POST') {
 				$this->requireAccess(Session::ACCESS_WRITE);
 

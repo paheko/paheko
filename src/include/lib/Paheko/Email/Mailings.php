@@ -35,7 +35,6 @@ class Mailings
 		$list = new DynamicList($columns, $tables);
 		$list->groupBy('m.id');
 		$list->orderBy('sent', true);
-		$list->setCount('COUNT(DISTINCT m.id)');
 		return $list;
 	}
 

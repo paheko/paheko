@@ -1,8 +1,11 @@
 <?php
 
 namespace Paheko;
+use Paheko\Accounting\Charts;
 
 $db->beginSchemaUpdate();
+Charts::updateInstalled('fr_pca_2025');
+
 $db->import(__DIR__ . '/1.3.18.sql');
 
 foreach ($db->iterate('SELECT id, fail_log FROM emails WHERE fail_log IS NOT NULL;') as $row) {
@@ -49,8 +52,8 @@ foreach (glob(DATA_ROOT . '/*.sqlite-wal') as $file) {
 }
 
 // Move backups to new subdirectory, and rename them to new naming schema
-foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
-	$file = Utils::basename($file);
+foreach (glob(DATA_ROOT . '/*.sqlite') as $src) {
+	$file = Utils::basename($src);
 
 	if ($file === basename(DB_FILE)) {
 		continue;
@@ -69,7 +72,7 @@ foreach (glob(DATA_ROOT . '/*.sqlite') as $file) {
 		$name = Backup::UPGRADE_PREFIX . $match[1];
 	}
 	elseif (preg_match('/^auto\.(\d+)$/', $name, $match)) {
-		$name = Backup::AUTO_PREFIX . date('YmdHis', filemtime($file));
+		$name = Backup::AUTO_PREFIX . date('YmdHis', filemtime($src));
 	}
 
 	$name = Backup::PREFIX . $name . Backup::SUFFIX;

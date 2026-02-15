@@ -300,22 +300,24 @@ class Message extends Entity
 		}
 
 		// System messages don't have any rendering
-		if ($this->context === self::CONTEXT_SYSTEM) {
-			$this->_rendered = true;
-			return;
+		$markdown = in_array($this->context, [self::CONTEXT_BULK, self::CONTEXT_PRIVATE]);
+
+		if ($markdown) {
+			// Force grid to output as tables in emails
+			$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
+			$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
+
+			// Render to HTML
+			$html = Render::render(Render::FORMAT_MARKDOWN, null, $body);
+
+			// Remove some of markdown code from plaintext email
+			$body = Render::render(Render::FORMAT_PLAINTEXT, null, $body);
+		}
+		else {
+			$html = Utils::linkifyURLs(nl2br(htmlspecialchars($body)));
 		}
 
-		// Force grid to output as tables in emails
-		$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
-		$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
-
-		// Render to HTML
-		$html = Render::render(Render::FORMAT_MARKDOWN, null, $body);
-
 		$this->set('body_html', $html);
-
-		// Remove some of markdown code from plaintext email
-		$text = Render::render(Render::FORMAT_PLAINTEXT, null, $body);
 		$this->set('body', $body);
 
 		$this->_rendered = true;

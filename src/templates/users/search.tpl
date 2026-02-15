@@ -24,7 +24,7 @@
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="name" item="label"}
 				<td>
-					{user_field name=$name value=$row->$name link_name_id=$row.id files_href="!users/details.php?id=%d"|args:$row.id}
+					{user_field name=$name value=$row->$name link_name_id=$row.id context="list" files_href="!users/details.php?id=%d"|args:$row.id}
 				</td>
 			{/foreach}
 			<td class="actions">
@@ -93,7 +93,7 @@
 				<td>
 					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column] link_name_id=$id}
+						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column] link_name_id=$id context="list"}
 					{else}
 						{$value}
 					{/if}
