@@ -4,12 +4,8 @@
 	{if $target == 'users'}
 		{include file="users/_nav.tpl" current="saved_searches"}
 	{else}
-		<nav class="tabs">
-			<ul>
-				<li><a href="search.php">Recherche</a></li>
-				<li class="current"><a href="saved_searches.php">Recherches enregistrées</a></li>
-			</ul>
-		</nav>
+		{include file="acc/_year_select.tpl"}
+		{include file="acc/transactions/_nav.tpl" current="saved_searches"}
 	{/if}
 {/if}
 

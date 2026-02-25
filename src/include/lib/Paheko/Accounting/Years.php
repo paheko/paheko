@@ -6,8 +6,10 @@ use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Line;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Entities\Accounting\Year;
+use Paheko\Users\Session;
 use Paheko\Utils;
 use Paheko\DB;
+
 use KD2\DB\EntityManager;
 use KD2\DB\Date;
 
@@ -16,6 +18,51 @@ class Years
 	static public function get(int $year_id)
 	{
 		return EntityManager::findOneById(Year::class, $year_id);
+	}
+
+	static public function checkExists(int $id): bool
+	{
+		return DB::getInstance()->test(Year::TABLE, 'id = ?', $id);
+	}
+
+	static public function getUserSelectedYearId(): ?int
+	{
+		$user = Session::getLoggedUser();
+		$id_year = $user->getPreference('accounting_year');
+
+		if (!empty($_GET['set_year'])) {
+			$id_year = (int)$_GET['set_year'];
+
+			if (self::checkExists($id_year)) {
+				$user->setPreference('accounting_year', $id_year);
+				$user->savePreferences();
+			}
+			else {
+				$id_year = null;
+			}
+		}
+		// Check that preference year still exists
+		elseif (!self::checkExists($id_year)) {
+			$user->setPreference('accounting_year', null);
+			$user->savePreferences();
+			$id_year = null;
+		}
+
+		return $id_year;
+	}
+
+	static public function getUserSelectedYear(): ?Year
+	{
+		$year = null;
+
+		if ($id = self::getUserSelectedYearId()) {
+			$year = self::get($id);
+		}
+
+		// Or just select the first open year
+		$year ??= Years::getFirstYear();
+
+		return $year;
 	}
 
 	static public function getFirstYear(): ?Year

@@ -1,11 +1,8 @@
 {include file="_head.tpl" title=$title current="acc"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$self_url}">Recherche</a></li>
-		<li><a href="saved_searches.php">Recherches enregistrées</a></li>
-	</ul>
-</nav>
+{include file="acc/_year_select.tpl"}
+
+{include file="acc/transactions/_nav.tpl" current="search"}
 
 <form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
 
