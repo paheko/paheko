@@ -110,7 +110,6 @@ if (ALERT_MESSAGE && !$dialog) {
 				<li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_uri}acc/transactions/new.php" accesskey="N">Saisie</a></li>
 			{/if}
 				<li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_uri}acc/accounts/">Comptes</a></li>
-				<li class="{if $current == 'acc/simple'} current{/if}"><a href="{$admin_uri}acc/accounts/simple.php">Suivi des écritures</a></li>
 				<li class="{if $current == 'acc/years'} current{/if}"><a href="{$admin_uri}acc/years/">Exercices &amp; rapports</a></li>
 			</ul>
 			</li>

@@ -1,18 +1,59 @@
 <?php use Paheko\Entities\Accounting\Transaction; ?>
-{include file="_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
+{include file="_head.tpl" title=$types[$type] current="acc"}
 
 {include file="acc/_year_select.tpl"}
+
+<div class="help block hidden" id="search-help">
+	<h3>Recherche rapide d'écriture comptable</h3>
+	<p>La recherche peut porter sur :</p>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Élément</th>
+				<th scope="col">Exemple</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th scope="row">un numéro de compte</th>
+				<td><code>512A</code></td>
+			</tr>
+			<tr>
+				<th scope="row">un numéro d'écriture</th>
+				<td><code>#1234</code></td>
+			</tr>
+			<tr>
+				<th scope="row">une date</th>
+				<td><code>JJ/MM/AAAA</code></td>
+			</tr>
+			<tr>
+				<th scope="row">un montant exact</th>
+				<td><code>=13,12</code></td>
+			</tr>
+			<tr>
+				<th scope="row">un montant minimum</th>
+				<td><code>&gt;=13,37</code></td>
+			</tr>
+			<tr>
+				<th scope="row">un montant maximum</th>
+				<td><code>&lt;=99,42</code></td>
+			</tr>
+		</tbody>
+	</table>
+	<p>Tout autre texte entré sera recherché dans le libellé et le numéro de pièce comptable des écritures.</p>
+</div>
+
+{include file="./_nav.tpl" current="index"}
 
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		{exportmenu href="?type=%d"|args:$type}
+		{exportmenu href="?type=%d"|args:$type right=true}
 	{/if}
-		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>
-	<ul>
+	<ul class="sub">
 		{foreach from=$types key="key" item="label"}
-		<li{if $type == $key} class="current"{/if}><a href="?type={$key}">{$label}</a></li>
+			{tabitem selected=$type name=$key href="?type=%d"|args:$key label=$label}
 		{/foreach}
 	</ul>
 </nav>

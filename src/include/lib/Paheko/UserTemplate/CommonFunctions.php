@@ -36,8 +36,9 @@ class CommonFunctions
 		'delete_form',
 		'edit_user_field',
 		'user_field',
-		'tag',
 		'dropdown',
+		'tabitem',
+		'tag',
 	];
 
 	static protected function getIconFromShape(string $shape): string
@@ -1039,11 +1040,12 @@ class CommonFunctions
 		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
 			htmlspecialchars($params['title']));
 
-		foreach ($params['options'] as $option) {
+		foreach ($params['options'] as $key => $option) {
 			$selected = '';
 			$link = '';
 			$aside = '';
 			$content = $option['html'] ?? htmlspecialchars($option['label'] ?? '');
+			$value = $option['value'] ?? $key;
 
 			if ('' === $content) {
 				throw new TemplateException('dropdown: missing "html" or "label" parameter for option: ' . json_encode($option));
@@ -1053,7 +1055,7 @@ class CommonFunctions
 				$aside = sprintf('<small>%s</small>', htmlspecialchars($option['aside']));
 			}
 
-			if (isset($option['value'], $params['value']) && $option['value'] === $params['value']) {
+			if (isset($params['value']) && $value === $params['value']) {
 				$selected = 'aria-selected="true" class="selected"';
 			}
 
@@ -1072,6 +1074,19 @@ class CommonFunctions
 
 		$out .= '</ul></nav>';
 		return $out;
+	}
+
+	static public function tabitem(array $params): string
+	{
+		$selected = $params['selected'] ?? null;
+		$name = $params['name'] ?? null;
+		$label = htmlspecialchars($params['label'] ?? '');
+
+		if (isset($params['href'])) {
+			$label = sprintf('<a href="%s">%s</a>', htmlspecialchars(Utils::getLocalUrl($params['href'])), $label);
+		}
+
+		return sprintf('<li%s>%s</li>', $selected === $name ? ' class="current"' : '', $label);
 	}
 
 	const TAG_PRESETS = [

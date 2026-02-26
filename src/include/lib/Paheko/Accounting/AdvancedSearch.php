@@ -324,13 +324,17 @@ class AdvancedSearch extends A_S
 
 	public function defaults(): \stdClass
 	{
+		$id_year = intval(qg('year')) ?: null;
+		$id_year ??= Years::getUserSelectedYearId();
+		$id_year ??= Years::getCurrentOpenYearId();
+
 		$group = [
 			'operator' => 'AND',
 			'conditions' => [
 				[
 					'column'   => 'id_year',
 					'operator' => '= ?',
-					'values'   => [(int)qg('year') ?: Years::getCurrentOpenYearId()],
+					'values'   => [$id_year],
 				],
 				[
 					'column'   => 'label',

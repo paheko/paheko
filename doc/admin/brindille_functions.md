@@ -788,7 +788,6 @@ Liste des choix possibles pour `current` :
 * `acc` : menu Comptabilité
 * `acc/new` : sous-menu "Saisie" de Comptabilité
 * `acc/accounts` : sous-menu "Comptes"
-* `acc/simple` : sous-menu "Suivi des écritures"
 * `acc/years` : sous-menu "Exercices et rapports"
 * `docs` : menu Documents
 * `web` : menu Site web

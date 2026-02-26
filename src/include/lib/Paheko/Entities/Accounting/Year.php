@@ -2,8 +2,6 @@
 
 namespace Paheko\Entities\Accounting;
 
-use KD2\DB\EntityManager;
-use KD2\DB\Date;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Log;
@@ -14,6 +12,9 @@ use Paheko\Accounting\Accounts;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Users\Session;
+
+use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 class Year extends Entity
 {
