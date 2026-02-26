@@ -458,10 +458,10 @@ code,label,description,position,bookmark
 722,Production immobilisée corporelle,,Produit,
 73,Concours publics,,Produit,
 730,Concours publics,Contribution d’un organisme public en application d’une disposition réglementaire ou législative (différent d’une subvention).,Produit,
-74,Subventions d’exploitation,,Produit,
-740,Subventions reçues,,Produit,Favori
+74,Subventions,,Produit,
+741,Subventions d’exploitation,,Produit,Favori
+742,Subventions d’équilibre,,Produit,
 747,Quote-part des subventions d’investissement virée au résultat de l’exercice,,Produit,
-748,Subventions d'exploitation diverses,,Produit,
 75,Autres produits de gestion courante,,Produit,
 751,"Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires",,Produit,
 7511,"Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques",,Produit,
