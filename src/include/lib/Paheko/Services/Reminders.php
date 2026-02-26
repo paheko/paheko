@@ -112,7 +112,10 @@ class Reminders
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
 			WHERE
-				date() > date(su.expiry_date, sr.delay || \' days\')
+				-- Reminder due date should be between now and last sent reminder
+				date(su.expiry_date, sr.delay || \' days\')
+					BETWEEN COALESCE((SELECT MAX(sent_date) FROM services_reminders_sent), date(\'now\', \'-15 days\'))
+					AND date(\'now\', \'+1 day\')
 				AND (srs.id IS NULL OR srs.due_date < date(su.expiry_date, (sr.delay - 1) || \' days\'))
 				AND %s
 			GROUP BY su.id_user, sr.id_service

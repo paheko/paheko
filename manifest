@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Add\scomments\sto\sdepreciate\s.tar.gz\ssupport
-D 2026-02-26T12:23:10.365
+C Restrict\sreminder\ssending\sto\slast\s15\sdays\sif\sthere\shas\sbeen\sno\ssending
+D 2026-02-26T18:19:15.895
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -172,7 +172,7 @@ F src/include/lib/Paheko/Plugins.php cb5c7c83934d4d9f8acaa63b313873f6aca19b11f53
 F src/include/lib/Paheko/Search.php 47ba63f16e55a31cdc9f24faaf9b6bf3b9e454aeac625c5cabf1af64c6d9b234
 F src/include/lib/Paheko/Security.php 0acd3e28319dde138377ee7dbaf090e31d976061b8d1364bc0e6df45eaded74a
 F src/include/lib/Paheko/Services/Fees.php 11d23de591f5b9fc2e662400308c630a15c88a6b572c499a22241d0d18019cb9
-F src/include/lib/Paheko/Services/Reminders.php 4a5aab4a2848560d2103b4b532f823bb452ec6b9bdbda957c832c6829bd3ed31
+F src/include/lib/Paheko/Services/Reminders.php 7e894f43d43c14cafb5866941ac35efe312a113fa03797ce01c37eb95d3a165f
 F src/include/lib/Paheko/Services/Services.php 9b2da0bf5f80fc44fea9db1b3103d2607979196baaf78345c216d79a3fc8e3ca
 F src/include/lib/Paheko/Services/Services_User.php bce1a79ae247f483c5e8821391b3124e2a4237e87954fa437e2f08fc7bc63c24
 F src/include/lib/Paheko/Static_Cache.php 447386e95463f265dc3cf16cbecf76f0580884f888ae6216532060a2813e1d1a
@@ -844,24 +844,27 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 58e1fbf23304ef7344020465bb40c2105a5a12c0c8ab422f8f70ed06db52e01f
-R 46e47f893ffdc342172d02f1c32c4836
+P 08895bef54af57b03a1d2855cf10a017d524d574157b6043b7da64700cfd3212
+R 4b61567b1975732da604f029d8b63e93
+T *branch * reminders-restrict-dates
+T *sym-reminders-restrict-dates *
+T -sym-trunk *
 U bohwaz
-Z 29508694c9175d37e006bf798d07b365
+Z 43402d4c96d69ad5d2ffffc04e298ea7
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmgOy4ACgkQksnacbiI
-6jRDig/+Le9wSvAS8AFNDJ+pj98LwccYa2kU6w3hoqZqYSNiSq4U9w2T0KY9pXjZ
-D84i+d4v4tBcujhQLFaK3tB2Z5DTZzw0GhvHN3MpT5fieUPharCf7+FtyOAwHYSX
-XTsQoQpoZkz63m9DjtwezMmAqNGHLPaXqpgGiUoeBZv8bPG3nvL0JuTL/p0zZDp4
-NZ09ekfxPP5oCRdOG7LAx3LZ2h+bSbhA4uleAVPhQ6j5W2pwk4r63ND4PwM5MTSs
-10HOioqwGQCwgBlNoZB2qQjVw3HURjgkbOorsfg0t60v5ISCYpTiN8vbkANJxnJn
-UiodGy909X361Nivq2w2qgQChoZlvIBsUXaf/2QGlX1Tq1z2/N61POa2qv5DOImf
-nchbcn+15FHRVxf6FUq0MPCfEVFQFWbjWzbDxAS6aMCjyJ+6zk4XEMXDaadWXdQp
-FQJm6YTmWRdj9STrn3F1ej4bdOcSSMBq4IkmAG2eFliVnVPs2Nz3MWmZEJs4rPf+
-wyw6M9mn3CpsfkQ04kKsfYEzFN0IDZ3H4jLSaze6Cv65xw+B1iYaieezWUtUkb05
-WejD/DsYubr1B+Lo4PtlRU5+w6hVJhepI33C5Z9OI6Xpt4NbaS7EmA+/yKmqB4ao
-Nw6tHEuF3SsPQn6LBkfFe0bq0sxG+Qc0Y2vRfA7boUgrCTLCpNw=
-=8l1+
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmgjqMACgkQksnacbiI
+6jSSnQ//d8cY+npg0KWxVvPxk3KjVtyD38uEwNq6K6P/uPCMKQF0U0p+ZnjnLe0V
+ZdDbSOuQ8aTxoULQ6OZwEx/qVBfMdLfY7X+U6M5lp6CSNUDc/AXu5zeBtyFQaEso
+Oli9iBLCHY1mE1rflAXVKpnavVyFrfpo+anwR2hIcdHDfBHuYZIjS9CNBwIcs7Aq
+JBHoMKxbJuaj0glEEYdxh+g+hDyubQ6sGP5HHJ9esltTZF7jr6NadEJ+tyUOK9e6
+M5PTPAOEfwDVg7iiv4lK4N/7t8n7vx8JxN6zomkj+L4DupREyfX7uZ/nZUtxgKb9
+fzKE0CNgjP4z5KXyjZs1T1o/B2y8ALa/qepFL2imdxkTvZhFF6oUB87SqE3DlDvQ
+suEUfhl9lo40E/wafpouch048xps0U07N70a+x7stBl19y3F0S+xuePpn/gWys1G
+C1jW4TmPSv1kFTOtzba6QcyO17SKgM5LRe1aPG8rE6nx5Eet0+IeGHjoMaSyQnT7
+Rstf3BE3qPFNd8ry63YmfL0kGSXnyCsOyustGeWNXW4fbNGaRlm/3U6WJO3IgbGc
+pSOi7cm+HjA3DR4kDp3K57YifpjhGjHey8R+n/YX6KxBM8+x+qeoNAaBxAQ1yOdm
+XWiMYkyq1U9weMBRhSB9P8RfXwmZ41fCjZft90X2EG5cXtAJU/Q=
+=/EOi
 -----END PGP SIGNATURE-----
