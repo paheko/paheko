@@ -16,7 +16,7 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Web\Router;
 
-use const Paheko\{LOCAL_SECRET_KEY};
+use const Paheko\{LOCAL_SECRET_KEY, WWW_URL};
 
 class Storage extends AbstractStorage
 {
@@ -101,6 +101,32 @@ class Storage extends AbstractStorage
 	 */
 	public function get(string $uri): ?array
 	{
+		$file = $this->getFile($uri);
+
+		if (!$file) {
+			return null;
+		}
+
+		$file->serve();
+		return ['stop' => true];
+	}
+
+	/**
+	 * @extends
+	 */
+	public function fetch(string $uri): ?string
+	{
+		$file = $this->getFile($uri);
+
+		if (!$file) {
+			return null;
+		}
+
+		return $file->fetch();
+	}
+
+	protected function getFile(string $uri): ?File
+	{
 		$file = $this->load($uri);
 
 		if (!$file) {
@@ -118,8 +144,7 @@ class Storage extends AbstractStorage
 			return null;
 		}
 
-		$file->serve();
-		return ['stop' => true];
+		return $file;
 	}
 
 	/**
@@ -181,14 +206,20 @@ class Storage extends AbstractStorage
 				return $this->nextcloud->getDirectDownloadURL($uri, $this->session::getUserId());
 			case NextCloud::PROP_NC_RICH_WORKSPACE:
 				return '';
+			// fileId is required by NextCloud desktop client
+			case NextCloud::PROP_OC_FILEID:
+				$id = $file->id;
+				// Root directory doesn't have a ID, give something random instead
+				$id ??= 10000000;
+				return $id;
 			case NextCloud::PROP_OC_ID:
-				// fileId is required by NextCloud desktop client
-				if (!isset($file->id)) {
-					// Root directory doesn't have a ID, give something random instead
-					return 10000000;
-				}
+				$id = $file->id;
+				// Root directory doesn't have a ID, give something random instead
+				$id ??= 10000000;
 
-				return $file->id;
+				// ID = fileid (padded with zeros to be at least 8 characters long) + instanceid
+				$id = str_pad((string)$id, 8, '0', STR_PAD_LEFT) . sha1(WWW_URL);
+				return $id;
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
 					NextCloud::PERM_READ => $file->canRead($this->session),
@@ -227,7 +258,7 @@ class Storage extends AbstractStorage
 		}
 
 		if (null === $properties) {
-			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID]);
+			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID, NextCloud::PROP_OC_FILEID]);
 		}
 
 		$out = [];
@@ -299,7 +330,7 @@ class Storage extends AbstractStorage
 		rewind($pointer);
 
 		if ($new) {
-			Files::createFromPointer($uri, $pointer);
+			Files::createFromPointer($uri, $pointer, $this->session);
 		}
 		else {
 			$target->store(compact('pointer'));
@@ -390,7 +421,7 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('Impossible de créer un répertoire ici', 403);
 		}
 
-		if (!File::canCreateDir($uri)) {
+		if (!File::canCreateDir($uri, $this->session)) {
 			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer un répertoire ici', 403);
 		}
 

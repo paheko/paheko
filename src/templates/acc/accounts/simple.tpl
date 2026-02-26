@@ -45,8 +45,10 @@
 				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.change|abs|raw|money}</td>
 				<td>{$line.reference}</td>
-				<th>{$line.label}</th>
+				<th scope="row">{$line.label}</th>
+				{if $list->hasColumn('line_reference')}
 				<td>{$line.line_reference}</td>
+				{/if}
 				<td class="num">{foreach from=$line.project_code item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}&amp;year={$year.id}">{$code}</a> {/foreach}</td>
 				{if isset($line.locked)}
 				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>

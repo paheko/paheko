@@ -102,7 +102,7 @@ class Fee extends Entity
 		if ($this->amount) {
 			return $this->amount;
 		}
-		elseif ($this->formula) {
+		elseif (null !== $this->formula) {
 			$db = DB::getInstance();
 			return (int) $db->firstColumn($this->getFormulaSQL(), $user_id);
 		}
@@ -159,6 +159,7 @@ class Fee extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $identity,
+				'order' => '_user_name_index %s',
 			],
 			'paid' => [
 				'label' => 'Payé ?',
@@ -173,10 +174,28 @@ class Fee extends Entity
 				'label' => 'Date',
 				'select' => 'su.date',
 			],
+			'_user_name_index' => [
+				'select' => DynamicFields::getNameFieldsSearchableSQL('us'),
+			],
 		];
+
+		$db = DB::getInstance();
+
+		foreach (DynamicFields::getInstance()->all() as $field) {
+			if ($field->isNumber() || $field->isName() || $field->isPassword() || $field->isVirtual()) {
+				continue;
+			}
+
+			$columns['u_' . $field->name] = [
+				'label'  => $field->label,
+				'select' => 'u.' . $db->quote($field->name),
+				'export' => true,
+			];
+		}
 
 		$tables = 'services_users su
 			INNER JOIN users u ON u.id = su.id_user
+			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN services s ON s.id = sf.id_service
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) AS su2 ON su2.id = su.id
@@ -191,7 +210,6 @@ class Fee extends Entity
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
 		$list->orderBy('paid', true);
-		$list->setCount('COUNT(DISTINCT su.id_user)');
 
 		$list->setExportCallback(function (&$row) {
 			$row->paid_amount = $row->paid_amount ? Utils::money_format($row->paid_amount, '.', '', false) : null;

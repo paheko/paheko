@@ -22,7 +22,7 @@
 		{/foreach}
 
 		<p class="block alert">
-			{{%n membre sélectionné.}{%n membres sélectionnés} n=$count}
+			{{%n membre sélectionné.}{%n membres sélectionnés.} n=$count}
 		</p>
 
 		{if $action == 'move'}

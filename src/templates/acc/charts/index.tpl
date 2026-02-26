@@ -10,7 +10,7 @@
 	<table class="list">
 		<thead>
 			<td>Pays</td>
-			<th>Libellé</th>
+			<th scope="col">Libellé</th>
 			<td>Type</td>
 			<td>Archivé</td>
 			<td></td>
@@ -19,7 +19,7 @@
 			{foreach from=$list item="item"}
 				<tr{if $item.archived} class="disabled"{/if}>
 					<td>{if $item.country}{$item.country|get_country_name}{else}-Autre-{/if}</td>
-					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
+					<th scope="row"><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td class="actions">

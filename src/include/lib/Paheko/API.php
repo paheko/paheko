@@ -17,10 +17,13 @@ use Paheko\Services\Services_User;
 use Paheko\Users\Categories;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
+use Paheko\Users\Export as UsersExport;
+use Paheko\Users\Import as UsersImport;
 use Paheko\Files\Files;
 
 use KD2\ErrorManager;
 use KD2\DB\DB_Exception;
+use KD2\DB\Date;
 
 class API
 {
@@ -34,7 +37,7 @@ class API
 
 	protected array $allowed_methods = ['GET', 'POST', 'PUT', 'DELETE'];
 
-	public function __construct(string $method, string $path, array $params)
+	public function __construct(string $method, string $path, array $params, bool $is_http_client = false)
 	{
 		if (!in_array($method, $this->allowed_methods)) {
 			throw new APIException('Invalid request method: ' . $method, 405);
@@ -43,6 +46,16 @@ class API
 		$this->path = trim($path, '/');
 		$this->method = $method;
 		$this->params = $params;
+		$this->is_http_client = $is_http_client;
+	}
+
+	public function requireHttpClient(): void
+	{
+		if ($this->is_http_client) {
+			return;
+		}
+
+		throw new APIException('This request is not yet supported in Brindille', 501);
 	}
 
 	public function __destruct()
@@ -203,7 +216,7 @@ class API
 
 	protected function user(string $uri): ?array
 	{
-		$fn = strtok($uri, '/');
+		$fn = (string) strtok($uri, '/');
 		$fn2 = strtok('/');
 		strtok('');
 
@@ -215,7 +228,7 @@ class API
 			$format = strtok('');
 
 			try {
-				Users::exportCategory($format ?: 'json', $id, true);
+				UsersExport::exportCategory($format ?: 'json', $id, true);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new APIException($e->getMessage(), 400, $e);
@@ -258,6 +271,30 @@ class API
 				throw new APIException('The requested user ID does not exist', 404);
 			}
 
+			if ($fn2 === 'subscribe') {
+				if ($this->method !== 'POST') {
+					throw new APIException('Wrong request method', 400);
+				}
+
+				$this->requireAccess(Session::ACCESS_WRITE);
+
+				if (!$this->hasParam('id_service')) {
+					throw new APIException('Missing "id_service" parameter', 400);
+				}
+
+				$params = $this->params;
+				unset($params['id_user']);
+				$id_service = intval($this->params['id_service']);
+				$id_fee = intval($this->params['id_fee'] ?? 0) ?: null;
+
+				$su = Services_User::create($user->id(), $id_service, $id_fee);
+				$su->importForm($params);
+				$su->save();
+				return $su->asArray(true);
+			}
+			elseif (!empty($fn2)) {
+				throw new APIException('Unknown route', 404);
+			}
 			if ($this->method === 'POST') {
 				$this->requireAccess(Session::ACCESS_WRITE);
 
@@ -288,6 +325,8 @@ class API
 			return $user->exportAPI();
 		}
 		elseif ($fn === 'import') {
+			$this->requireHttpClient();
+
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -347,7 +386,7 @@ class API
 				}
 
 				if ($fn2 === 'preview') {
-					$report = Users::importReport($csv, $mode);
+					$report = UsersImport::report($csv, $mode);
 
 					$report['unchanged'] = array_map(
 						fn($user) => ['id' => $user->id(), 'name' => $user->name()],
@@ -376,7 +415,7 @@ class API
 					return $report;
 				}
 				else {
-					Users::import($csv, $mode);
+					UsersImport::import($csv, $mode);
 					return null;
 				}
 			}
@@ -647,8 +686,14 @@ class API
 				strtok($p2, '/');
 				$type = strtok('.');
 				$format = strtok('');
-				Export::export($year, $format, $type);
-				return null;
+
+				try {
+					Export::export($year, $format, $type);
+					return null;
+				}
+				catch (\InvalidArgumentException $e) {
+					throw new APIException($e->getMessage(), 400, $e);
+				}
 			}
 			elseif ($p2 === 'account/journal') {
 				$a = $year->chart()->accounts();
@@ -688,6 +733,8 @@ class API
 
 		// CSV import
 		if ($fn === 'subscriptions' && $fn2 === 'import') {
+			$this->requireHttpClient();
+
 			if ($this->method === 'PUT') {
 				$params = $this->params;
 			}
@@ -870,8 +917,7 @@ class API
 		http_response_code(200);
 
 		try {
-			$api = new self($method, $uri, $params);
-			$api->is_http_client = true;
+			$api = new self($method, $uri, $params, true);
 
 			if ($method === 'PUT') {
 				$api->setFilePointer(fopen('php://input', 'rb'));

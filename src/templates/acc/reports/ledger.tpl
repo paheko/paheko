@@ -2,7 +2,7 @@
 	{include file="_head.tpl" title="Grand livre analytique" current="acc/years" prefer_landscape=true}
 	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique" allow_filter=true}
 {else}
-	{include file="_head.tpl" title="%sGrand livre"|args:$project_title current="acc/years" prefer_landscape=true}
+	{include file="_head.tpl" title="%sGrand livre"|args:$title current="acc/years" prefer_landscape=true}
 	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre" allow_filter=true}
 {/if}
 
@@ -35,7 +35,7 @@
 	{if $table_export}
 		<thead>
 			<tr>
-				<th colspan="{if !empty($criterias.projects_only)}9{else}8{/if}"><h2 class="ruler">{if $account.code}{$account.code} — {/if}{$account.label}</h2></th>
+				<th scope="col" colspan="{if !empty($criterias.projects_only)}9{else}8{/if}"><h2 class="ruler">{if $account.code}{$account.code} — {/if}{$account.label}</h2></th>
 			</tr>
 		</thead>
 	{else}
@@ -63,7 +63,7 @@
 						<td>N° pièce</td>
 						<td>Réf. ligne</td>
 						<td>Date</td>
-						<th>Intitulé</th>
+						<th scope="col">Intitulé</th>
 						<td class="money">Débit</td>
 						<td class="money">Crédit</td>
 						<td class="money">Solde</td>
@@ -82,7 +82,7 @@
 				<td data-spreadsheet-type="string">{$line.reference}</td>
 				<td data-spreadsheet-type="string">{$line.line_reference}</td>
 				<td data-spreadsheet-type="date" data-spreadsheet-value="{$line.date|date:'Y-m-d'}">{$line.date|date_short}</td>
-				<th data-spreadsheet-type="string">{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
+				<th scope="row" data-spreadsheet-type="string">{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
 				<td class="money">{$line.debit|raw|money}</td>
 				<td class="money">{$line.credit|raw|money}</td>
 				<td class="money">{$line.running_sum|raw|money:false}</td>
@@ -93,7 +93,7 @@
 		<tfoot>
 			<tr>
 				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
-				<th>Solde final</th>
+				<th scope="row">Solde final</th>
 				<td class="money">{$account.debit|raw|money}</td>
 				<td class="money">{$account.credit|raw|money}</td>
 				<td class="money">{$account.sum|raw|money:false}</td>
@@ -102,7 +102,7 @@
 			{if $table_export && isset($account->all_debit)}
 			<tr>
 				<td colspan="{if !empty($criterias.projects_only)}5{else}4{/if}"></td>
-				<th><strong>Totaux</strong></th>
+				<th scope="row"><strong>Totaux</strong></th>
 				<td class="money">{$account.all_debit|raw|money:false}</td>
 				<td class="money">{$account.all_credit|raw|money:false}</td>
 				<td></td>

@@ -10,6 +10,11 @@ require_once __DIR__ . '/../../_inc.php';
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $id = (int)qg('id');
+
+if (!$id) {
+	throw new UserException('Missing parameter in URL');
+}
+
 $user = (int)qg('user');
 $self_url = sprintf('!acc/transactions/service_user.php?id=%d&user=%d', $id, $user);
 

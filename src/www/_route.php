@@ -31,26 +31,62 @@ if (PHP_SAPI === 'cli-server' && $uri !== '/' && file_exists(__DIR__ . $uri)) {
 // (eg. $uri)
 (function () { require(__DIR__ . '/../include/init.php'); })();
 
-// Handle __un__subscribe URL: .../?un=XXXX
+// Handle __un__subscribe URL: .../?un=XXXX / re-subscribe
 if ((empty($uri) || $uri === '/') && !empty($_GET['un'])) {
-	$params = array_intersect_key($_GET, ['un' => null, 'v' => null]);
+	$params = array_intersect_key($_GET, [
+		'c'  => Emails::CONTEXT_BULK, // Optout context
+		'un' => null, // Contains email hash
+		'v'  => null, // Verification hash for double opt-in
+		'e'  => null, // Expiry of verification hash for double opt-in
+		'r'  => null, // accepts_reminders
+		'l'  => null, // accepts_mailings
+		'm'  => null, // accepts_messages
+		'y'  => null, // Verification hash for verifying email address
+	]);
+
+	$params['h'] = $params['un'];
+	unset($params['un']);
+
+	$params = array_filter($params, fn($a) => !is_null($a));
 
 	// RFC 8058
 	if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
-		$email = Emails::getEmailFromOptout($params['un']);
+		$email = Emails::getEmailFromQueryStringValue($params['h']);
 
 		if (!$email) {
 			throw new UserException('Adresse email introuvable.');
 		}
 
-		$email->setOptout();
+		$context = $params['c'] ?? null;
+		$email->setOptout($context ? (int) $context : null);
 		$email->save();
 		http_response_code(200);
 		echo 'Unsubscribe successful';
 		return;
 	}
+	else {
+		Utils::redirect('!email_preferences.php?' . http_build_query($params));
+	}
 
-	Utils::redirect('!optout.php?' . http_build_query($params));
+	return;
+}
+// Handle redirect (rd) URLs for emails: .../?rd=XXXXX
+elseif ((empty($uri) || $uri === '/') && !empty($_GET['rd'])) {
+	$r = Emails::redirectURL($_GET['rd']);
+
+	$header = '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">html { height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; } body { font-family: sans-serif;  }</style><body>';
+
+	if ($r === null) {
+		http_response_code(400);
+		echo $header;
+		echo '<h1>Adresse invalide</h1>';
+	}
+	else {
+		echo $header;
+		echo '<h2>Merci de bien vouloir cliquer sur l\'adresse suivante pour être redirigé à l\'adresse demandée&nbsp;:</h2>';
+		printf('<h1><a href="%s" rel="noreferrer noopener nofollow">%1$s</a></h1>', htmlspecialchars($r));
+	}
+
 	return;
 }
 

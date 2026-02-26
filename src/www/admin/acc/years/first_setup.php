@@ -7,47 +7,54 @@ use Paheko\Accounting\Charts;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Account;
+use Paheko\Entities\Accounting\Chart;
 
 require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
+// This form is only for noobs, people who know how to create an accounting chart
+// will have to create their bank accounts manually
+if (Charts::hasCustomCharts()) {
+	Utils::redirect('!acc/years/new.php');
+}
+
 $csrf_key = 'first_setup';
 
+$data = !empty($_POST) ? $_POST : $_GET;
+$step = $data['step'] = intval($data['step'] ?? 1);
+
+$data['step']--;
+$back_url = '!acc/years/first_setup.php?' . http_build_query($data);
 $year = Years::create();
 
-$config = Config::getInstance();
-$default_chart_code = Charts::getFirstForCountry($config->country);
-$default_chart_label = Charts::BUNDLED_CHARTS[$default_chart_code] ?? null;
-$selected_chart = f('chart');
-
-if ($id_chart = (int) f('id_chart')) {
-	$year->id_chart = $id_chart;
-}
-elseif ($selected_chart) {
-	$year->id_chart = Charts::getOrInstall($selected_chart);
-}
-
-$new_accounts = f('accounts');
-
-if (is_array($new_accounts)) {
-	$new_accounts = Utils::array_transpose($new_accounts);
-
-	foreach ($new_accounts as &$line) {
-		if (isset($line['balance'])) {
-			$line['balance'] = Utils::moneyToInteger($line['balance']);
-		}
+if (!empty($data['chart'])) {
+	// Assign already existing user-create chart
+	if (ctype_digit($data['chart'])) {
+		$year->id_chart = (int) $data['chart'];
 	}
-
-	unset($line);
+	// Install and assign bundled chart
+	else {
+		$year->id_chart = Charts::getOrInstall($data['chart']);
+	}
 }
-else {
-	$new_accounts = [];
+
+$accounts = null;
+
+if (!empty($data['accounts'])
+	&& is_array($data['accounts'])
+	&& isset($data['accounts']['label'][0])) {
+	$accounts = Utils::array_transpose($data['accounts']);
 }
 
 $appropriation_account = $year->id_chart ? $year->chart()->accounts()->getSingleAccountForType(Account::TYPE_APPROPRIATION_RESULT) : null;
 
-$form->runIf('save', function () use ($year, $new_accounts, $appropriation_account) {
+$form->runIf('save', function () use ($data, $year, $appropriation_account, $accounts, &$step) {
+	if (empty($year->id_chart)) {
+		$step = 2;
+		throw new UserException('Aucun plan comptable n\'a été sélectionné');
+	}
+
 	$db = DB::getInstance();
 
 	$db->begin();
@@ -55,7 +62,8 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 	$year->label = sprintf('Exercice %s', $year->label_years());
 	$year->save();
 
-	foreach ($new_accounts as $row) {
+	// Create bank accounts
+	foreach ($accounts ?? [] as $row) {
 		if (empty($row['label'])) {
 			continue;
 		}
@@ -70,16 +78,17 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 		$account->save();
 
 		if (trim($row['balance'] ?? '')) {
-			$t = $account->createOpeningBalance($year, $row['balance']);
+			$t = $account->createOpeningBalance($year, Utils::moneyToInteger($row['balance']));
 			$t->id_creator = Session::getUserId();
 			$t->save();
 		}
 	}
 
-	$result = abs(Utils::moneyToInteger($_POST['result'] ?? 0));
+	// Result appropriation
+	$result = abs(Utils::moneyToInteger($data['result'] ?? 0));
 
 	if ($result && $appropriation_account) {
-		$result = ($_POST['negative'] ?? null) ? $result : $result * -1;
+		$result = ($data['negative'] ?? null) ? $result : $result * -1;
 		$t = $appropriation_account->createOpeningBalance($year, $result, 'Report du résultat de l\'exercice précédent');
 		$t->id_creator = Session::getUserId();
 		$t->save();
@@ -88,12 +97,15 @@ $form->runIf('save', function () use ($year, $new_accounts, $appropriation_accou
 	$db->commit();
 }, $csrf_key, '!acc/years/?msg=WELCOME');
 
-if (!count($new_accounts)) {
-	$new_accounts[] = ['label' => 'Compte courant', 'balance' => 0];
+if ($step === 2) {
+	$tpl->assign('countries', Chart::COUNTRY_LIST);
+	$tpl->assign('charts_per_country', Charts::listByCountryFirstSetup());
+}
+elseif ($step === 3) {
+	$accounts ??= [['label' => 'Compte courant', 'balance' => 0]];
 }
 
-$step = (int)f('step');
-$charts_list = Charts::listForCountry($config->country);
-$tpl->assign(compact('year', 'new_accounts', 'csrf_key', 'appropriation_account', 'charts_list', 'default_chart_label', 'default_chart_code', 'step'));
+$tpl->assign('method', $step !== 4 ? 'get' : 'post');
+$tpl->assign(compact('data', 'csrf_key', 'step', 'year', 'back_url', 'appropriation_account', 'accounts'));
 
 $tpl->display('acc/years/first_setup.tpl');

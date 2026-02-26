@@ -12,17 +12,15 @@ use KD2\HTML\AbstractTable;
 
 class CSV
 {
-	static public function readAsArray(string $path)
+	static public function iterate(string $path): \Generator
 	{
-		if (!file_exists($path) || !is_readable($path))
-		{
+		if (!file_exists($path) || !is_readable($path)) {
 			throw new \RuntimeException('Fichier inconnu : '.$path);
 		}
 
 		$fp = self::open($path);
 
-		if (!$fp)
-		{
+		if (!$fp) {
 			return false;
 		}
 
@@ -30,50 +28,62 @@ class CSV
 		self::skipBOM($fp);
 
 		$line = 0;
-		$out = [];
-		$nb_columns = null;
 
-		while (!feof($fp))
-		{
-			$row = fgetcsv($fp, 4096, $delim);
+		while (!feof($fp)) {
+			$row = fgetcsv($fp, 4096, $delim, '"', '\\');
 			$line++;
 
-			if (empty($row))
-			{
+			if (empty($row)) {
 				continue;
 			}
-
-			if (null === $nb_columns)
-			{
-				$nb_columns = count($row);
-			}
-
-			if (count($row) != $nb_columns)
-			{
-				throw new UserException('Erreur sur la ligne ' . $line . ' : incohérence dans le nombre de colonnes avec la première ligne.');
-			}
-
-			// Make sure the data is UTF-8 encoded
-			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
-
-			$out[$line] = $row;
 
 			if ($line > 499999) {
 				throw new UserException('Dépassement de la taille maximale : le fichier fait plus de 500.000 lignes.');
 			}
+
+			// Make sure the data is UTF-8 encoded
+			$row = array_map(fn ($a) => Utils::utf8_encode(trim((string)$a)), $row);
+
+			yield $line => $row;
+
 		}
 
 		fclose($fp);
+	}
+
+	static public function readAsArray(string $path): array
+	{
+		$out = [];
+		$nb_columns = null;
+
+		foreach (self::iterate($path) as $line => $row) {
+			if (null === $nb_columns) {
+				$nb_columns = count($row);
+			}
+
+			if (count($row) != $nb_columns) {
+				throw new UserException('Erreur sur la ligne ' . $line . ' : incohérence dans le nombre de colonnes avec la première ligne.');
+			}
+
+			$out[$line] = $row;
+		}
 
 		return $out;
 	}
 
 	static public function open(string $file)
 	{
-		$fp = fopen($file, 'r');
-		$line = fread($fp, 4096);
+		if (PHP_VERSION_ID < 80100) {
+			// Make sure this is disabled, so that old MacOS lines are not detected by mistake in PHP < 8.1
+			@ini_set('auto_detect_line_endings', false);
+		}
 
-		if (false !== strpos($line, "\r") && false === strpos($line, "\r\n")) {
+		$fp = fopen($file, 'r');
+		$line = fgets($fp, 4096);
+
+		$line = preg_replace("!\r$|\r\n$!", '', $line);
+
+		if (false !== strpos($line, "\r")) {
 			fclose($fp);
 			throw new UserException('Le format de retour de ligne de ce fichier (MacOS 9) est obsolète et non supporté. Merci de convertir le fichier avec LibreOffice.');
 		}
@@ -86,8 +96,7 @@ class CSV
 	{
 		$line = '';
 
-		while ($line === '' && !feof($fp))
-		{
+		while ($line === '' && !feof($fp)) {
 			$line = fgets($fp, 4096);
 		}
 
@@ -116,8 +125,7 @@ class CSV
 	static public function skipBOM(&$fp)
 	{
 		// Skip BOM
-		if (fgets($fp, 4) !== chr(0xEF) . chr(0xBB) . chr(0xBF))
-		{
+		if (fgets($fp, 4) !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
 			fseek($fp, 0);
 		}
 	}
@@ -174,7 +182,7 @@ class CSV
 		return $row;
 	}
 
-	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$options['date_format'] ??= 'd/m/Y';
 		$csv = new TableToCSV;
@@ -190,12 +198,12 @@ class CSV
 		self::toTable(new TableToXLSX, $name, $iterator, $header, $row_map_callback);
 	}
 
-	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		self::toTable(new TableToODS, $name, $iterator, $header, $row_map_callback);
 	}
 
-	static public function toTable(AbstractTable $t, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toTable(AbstractTable $t, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$output = $options['output_path'] ?? null;
 		$default_style = ['border' => '0.05pt solid #999999'];
@@ -228,14 +236,14 @@ class CSV
 		$t->closeTable();
 
 		if (null === $output) {
-			$t->download($name);
+			$t->download($name, $options['extension'] ?? null);
 		}
 		else {
 			$t->save($output);
 		}
 	}
 
-	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, array $options = null): void
+	static public function toJSON(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, ?array $options = null): void
 	{
 		$output = $options['output_path'] ?? null;
 
@@ -298,7 +306,7 @@ class CSV
 
 		$line = 0;
 
-		$header = fgetcsv($fp, 4096, $delim);
+		$header = fgetcsv($fp, 4096, $delim, '"', '\\');
 
 		if ($header === false) {
 			throw new UserException('Impossible de trouver l\'entête du tableau');
@@ -339,7 +347,7 @@ class CSV
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, $delim);
+			$row = fgetcsv($fp, 4096, $delim, '"', '\\');
 			$line++;
 
 			// Empty line, skip

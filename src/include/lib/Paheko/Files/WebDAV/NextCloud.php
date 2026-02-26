@@ -8,6 +8,7 @@ use KD2\WebDAV\Exception as WebDAV_Exception;
 use Paheko\Config;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\Users\Users;
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 
@@ -244,20 +245,6 @@ class NextCloud extends WebDAV_NextCloud
 
 	protected function nc_avatar(): void
 	{
-		header('X-NC-IsCustomAvatar: 1');
-
-		$file = Config::getInstance()->file('icon');
-
-		if (!$file) {
-			$path = ROOT . '/www/admin/static/icon.png';
-
-			header('Content-Type: image/png');
-			header('Last-Modified: ' . gmdate(DATE_ISO8601));
-			header('Content-Length: ' . filesize($path));
-			readfile($path);
-		}
-		else {
-			$file->serveThumbnail('crop-256px');
-		}
+		Users::serveAvatar($_SERVER['REQUEST_URI'] ?? '');
 	}
 }

@@ -8,16 +8,16 @@
 			<table class="list auto">
 				<thead>
 					<tr>
-						<th>Colonne du fichier à importer</th>
+						<th scope="col">Colonne du fichier à importer</th>
 						<td></td>
-						<th>Importer cette colonne comme…</th>
+						<th scope="col">Importer cette colonne comme…</th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php $selected = $csv->getSelectedTable(); ?>
 				{foreach from=$csv->getFirstLine() key="index" item="csv_field"}
 					<tr>
-						<th>{$csv_field}</th>
+						<th scope="row">{$csv_field}</th>
 						<td class="help">{icon shape="right"}</td>
 						<td>
 							<select name="translation_table[{$index}]">

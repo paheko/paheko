@@ -21,7 +21,7 @@ $dates = [
 	'2024-03-01 20:42' => '2024-03-01 20:42:00',
 	'01/03/24'    => '2024-03-01 00:00:00',
 	'01/03/85'    => '1985-03-01 00:00:00',
-	$ts           => '2024-03-01 00:00:00',
+	$ts           => '2024-03-01 01:00:00',
 	'20240301'    => '2024-03-01 00:00:00',
 ];
 
@@ -31,7 +31,8 @@ foreach ($dates as $value => $expected) {
 
 function test_date(string $value, string $expected)
 {
-	$date = Entity::filterUserDateValue($value);
+	$date =  Utils::parseDateTime($value, DateTime::class, true);
 	Test::isInstanceOf(DateTime::class, $date);
 	Test::strictlyEquals($expected, $date->format('Y-m-d H:i:s'), 'Fail for: ' . $value);
+	Test::strictlyEquals('Europe/Paris', $date->getTimezone()->getName(), 'Fail for: ' . $value);
 }

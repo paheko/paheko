@@ -23,9 +23,6 @@
 
 	<nav class="tabs">
 		<aside>
-			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-				{linkbutton shape="upload" href="!acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
-			{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 		</aside>
 		<ul>
@@ -55,7 +52,7 @@
 	{if $year.nb_transactions}
 	<?php $list = $last_transactions[$year->id]; ?>
 	<h3 class="ruler">Dernières écritures</h3>
-	{include file="common/dynamic_list_head.tpl" check=false disable_user_ordering=true}
+	{include file="common/dynamic_list_head.tpl" check=false disable_user_sort=true}
 			{foreach from=$list->iterate() item="line"}
 			<tr>
 				<td>{$line.type_label}</td>
@@ -63,10 +60,9 @@
 				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.change|abs|raw|money}</td>
 				<td>{$line.reference}</td>
-				<th>{$line.label}</th>
-				<td>{$line.line_reference}</td>
+				<th scope="row">{$line.label}</th>
 				<td class="num">{foreach from=$line.project_code item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?project={$id}">{$code}</a> {/foreach}</td>
-				{if isset($line.locked)}
+				{if $list->hasColumn('locked')}
 				<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 				{/if}
 				<td>{if $line.files}{$line.files}{/if}</td>

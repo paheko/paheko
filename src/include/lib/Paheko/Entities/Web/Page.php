@@ -79,7 +79,7 @@ class Page extends Entity
 	protected ?array $_tagged_attachments = null;
 	protected ?string $_html = null;
 
-	static public function create(int $type, ?int $id_parent, string $title, string $status = self::STATUS_ONLINE): self
+	static public function create(int $type, ?int $id_parent, string $title, int $status = self::STATUS_ONLINE): self
 	{
 		$page = new self;
 		$data = compact('type', 'id_parent', 'title', 'status');
@@ -192,7 +192,7 @@ class Page extends Entity
 		return $page->status ?? null;
 	}
 
-	public function getStatus(): string
+	public function getStatus(): int
 	{
 		if ($this->status !== self::STATUS_ONLINE) {
 			return $this->status;
@@ -293,7 +293,10 @@ class Page extends Entity
 	{
 		$dir = null;
 
-		if (!$this->exists() || $this->isModified('status')) {
+		// Set default inherited status value
+		// This might be overwritten by updateChildrenInheritedStatus just after save
+		// as we don't know the status of the parent category at this point.
+		if (!isset($this->inherited_status)) {
 			$this->set('inherited_status', $this->status);
 		}
 
@@ -307,7 +310,9 @@ class Page extends Entity
 		}
 
 		$update_search = $this->isModified('content') || $this->isModified('title');
-		$update_children = ($this->isModified('status') && $this->type === self::TYPE_CATEGORY) || $this->isModified('id_parent');
+		$update_children = $this->isModified('status')
+			|| $this->isModified('id_parent')
+			|| !$this->exists();
 
 		parent::save($selfcheck);
 
@@ -359,6 +364,18 @@ class Page extends Entity
 
 		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
+
+		if (isset($this->id_parent) && $this->exists()) {
+			$this->assert($this->id_parent !== $this->id());
+
+			$breadcrumbs = Web::getBreadcrumbs($this->id_parent);
+
+			foreach ($breadcrumbs as $bc) {
+				$this->assert($bc->id != $this->id, 'Il n\'est pas possible de mettre une page dans une sous-catégorie d\'elle-même.');
+			}
+
+			$this->assert(count($breadcrumbs) < 50, 'Il n\'est pas possible d\'avoir plus de 50 niveaux de sous-catégories.');
+		}
 	}
 
 	public function importForm(?array $source = null)

@@ -257,7 +257,7 @@ Exemple plus complexe :
 {{:assign var='type_whitelist.html' value=1}}
 
 {{#foreach from=$documents item='document'}}
-  {{:assign var='allowed' value='type_whitelist.%s'|args:$document->type}}
+  {{:assign var='allowed' value='type_whitelist.%s'|args:$document.type}}
   {{if $allowed !== null}}
     {{:include file='document/'|cat:$type:'.tpl' keep='document'}}
   {{/if}}
@@ -491,3 +491,7 @@ Les autres mesures prises sont :
 * incitation forte à utiliser les paramètres nommés dans la documentation
 * protection automatique des variables dans la section `{{#select}}`
 * fourniture de fonctions pour protéger les chaînes de caractères contre l'injection SQL
+
+# Outils pour les développeur⋅euse⋅s
+
+* [Fichier de coloration de syntaxe pour Sublime Text 3 et 4](https://fossil.kd2.org/paheko/doc/tip/tools/config/brindille.sublime-syntax)

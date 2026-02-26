@@ -31,7 +31,191 @@ namespace Paheko;
 //const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
- * @var null|int|array
+ * OPEN_BASEDIR
+ *
+ * PHP propose la directive de configuration "open_basedir" pour
+ * améliorer la sécurité de l'installation.
+ *
+ * Indiquer `auto` pour ce réglage fait que Paheko va automatiquement
+ * ajouter à cette directive les chemins qu'il utilise.
+ *
+ * Il est possible d'ajouter d'autres chemins à la directive open_basedir
+ * en utilisant le caractère `:` comme séparateur :
+ * 'auto:/var/www/other:/var/lib/test'
+ *
+ * Avertissement : activer ce réglage désactive le cache realpath
+ * de PHP, risquant de rendre l'application plus lente.
+ *
+ * @see https://www.php.net/manual/en/ini.core.php#ini.open-basedir
+ * @var string|null
+ * @default null
+ */
+
+//const OPEN_BASEDIR = 'auto';
+
+/**
+ * Client OpenID Connect
+ *
+ * Ces paramètres permettent de configurer un fournisseur de SSO en utilisant
+ * OpenID Connect (OIDC).
+ *
+ * Note : en cas de connexion via OIDC, aucune authentification à double facteur TOTP
+ * ne sera effectuée.
+ *
+ * Attention à ne pas confondre "Client OIDC" et "Serveur OIDC" :
+ * - Client OIDC : les membres peuvent se connecter à Paheko via un service externe
+ * - Serveur OIDC : les membres peuvent utiliser Paheko pour se connecter à un service externe
+ */
+
+/**
+ * OIDC_CLIENT_BUTTON
+ *
+ * Indique le libellé du bouton de connexion au fournisseur SSO.
+ *
+ * La chaîne `%hostname%` sera remplacée par le nom d'hôte présent dans OIDC_CLIENT_URL
+ *
+ * Si `null` est indiqué, alors l'utilisateur sera obligatoirement renvoyé vers le SSO pour
+ * se connecter (avec une redirection automatique), aucun bouton ne sera affiché.
+ *
+ * @default "Se connecter avec %hostname%"
+ * @var string
+ */
+
+//const OIDC_CLIENT_BUTTON = 'Se connecter avec Google';
+
+/**
+ * OIDC_CLIENT_URL
+ *
+ * Adresse URL du fournisseur SSO OpenID Connect.
+ *
+ * La valeur `null` indique que la connexion via OIDC est désactivée.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_URL = 'https://accounts.google.com/';
+
+/**
+ * OIDC_CLIENT_ID
+ *
+ * Identifiant client pour le fournisseur SSO OpenID Connect.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_ID = 'xxx';
+
+/**
+ * OIDC_CLIENT_SECRET
+ *
+ * Clé secrète du client pour le fournisseur SSO OpenID Connect.
+ *
+ * @default null
+ * @var string|null
+ */
+
+//const OIDC_CLIENT_SECRET = 'yyy';
+
+/**
+ * OIDC_CLIENT_MATCH_EMAIL
+ *
+ * Indiquer `true` ici pour faire correspondre l'adresse e-mail
+ * indiquée par le fournisseur SSO OIDC avec le champ indiqué comme
+ * identifiant de connexion des membres (dans la configuration, par
+ * défaut c'est l'adresse e-mail).
+ *
+ * Si aucun membre ne correspond, la connexion sera refusée.
+ *
+ * Si un membre correspond, alors la connexion sera traitée comme si
+ * le membre s'était connecté de lui-même via la connexion Paheko.
+ * Il aura donc les droits de gestion donnés à sa catégorie de membre.
+ *
+ * Si le membre fait partie d'une catégorie qui n'a pas le droit de se
+ * connecter, la connexion sera refusée.
+ *
+ * Si `false` est indiqué, aucune correspondance ne sera effectuée,
+ * toute connexion via le SSO sera acceptée, et les permissions
+ * spécifiées dans OIDC_CLIENT_DEFAULT_PERMISSIONS seront appliquées.
+ *
+ * @default true
+ * @var bool
+ */
+
+//const OIDC_CLIENT_MATCH_EMAIL = false;
+
+/**
+ * OIDC_CLIENT_DEFAULT_PERMISSIONS
+ *
+ * Indiquer ici un tableau tel que suit pour déterminer les droits
+ * donnés à un membre qui se connecte via le SSO, si OIDC_CLIENT_MATCH_EMAIL
+ * est désactivé. Si OIDC_CLIENT_MATCH_EMAIL est activé, alors cette constante
+ * n'a aucun effet.
+ *
+ * Si OIDC_CLIENT_MATCH_EMAIL est désactivé et que OIDC_CLIENT_DEFAULT_PERMISSIONS
+ * vaut null, alors l'utilisateur pourra se connecter mais n'aura accès à rien.
+ *
+ * Les catégories de permissions sont : users, accounting, documents, web, config.
+ *
+ * Les permissions possibles sont : admin, write, read, none. Une catégorie de
+ * permissions non spécifiée vaut `none`.
+ *
+ * Exemple :
+ * `['users' => 'admin', 'config' => 'admin', 'accounting' => 'read',
+ * 'web' => 'write', 'documents' => 'read']`
+ *
+ * @default null
+ * @var array
+ */
+
+// const OIDC_CLIENT_DEFAULT_PERMISSIONS = ['users' => 'admin', 'config' => 'admin'];
+
+/**
+ * OIDC_CLIENT_CALLBACK
+ *
+ * Permet d'indiquer le nom d'une fonction PHP qui sera appelée après la connexion
+ * au serveur OIDC.
+ *
+ * Cela permet par exemple de créer ou mettre à jour un membre Paheko à partir des
+ * infos fournies à la connexion OIDC.
+ *
+ * Le premier paramètre passé à cette fonction sera un \stdClass contenant les
+ * informations renvoyées par le serveur OIDC. Le second paramètre sera l'entité
+ * User correspond à l'utilisateur connecté (à la suite de la règle OIDC_CLIENT_MATCH_EMAIL).
+ *
+ * La fonction peut renvoyer une entité User visant à remplacer celle qui est utilisée
+ * actuellement, ou NULL.
+ *
+ * Lire la doc pour plus d'exemples.
+ *
+ * @see https://fossil.kd2.org/paheko/wiki?name=Configuration+SSO+et+LDAP
+ * @default null
+ * @var null|callable
+ */
+
+// const OIDC_CLIENT_CALLBACK = '\Paheko\my_oidc_callback';
+
+/**
+ * ENABLE_PERMISSIONS
+ *
+ * Activer ou désactiver la gestion des permissions dans Paheko
+ *
+ * En mode client OIDC, on peut préférer désactiver la gestion des permissions
+ * dans Paheko, car celles-ci sont probablement gérées par le serveur OIDC.
+ *
+ * Si on désactive cette constante (false) on ne pourra plus afficher ou modifier
+ * les permissions pour chaque catégorie de membres. Les permissions d'un membre
+ * ne s'afficheront plus sur sa fiche membre non plus.
+ *
+ * @default true
+ * @var bool
+ */
+
+// const ENABLE_PERMISSIONS = false;
+
+/**
+ * LOCAL_LOGIN
  *
  * Forcer la connexion locale
  *
@@ -63,6 +247,7 @@ namespace Paheko;
 //const LOCAL_LOGIN = null;
 
 /**
+ * ALLOW_MODIFIED_IMPORT
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?
  *
  * Si mis à true, un avertissement et une confirmation seront demandés
@@ -72,6 +257,9 @@ namespace Paheko;
  * Ceci ne s'applique qu'à la page "Sauvegarde et restauration" de l'admin,
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
+ *
+ * Ceci n'est *PAS* une mesure de sécurité, mais pour empêcher les utilisateurs
+ * de bidouiller la BDD et casser le logiciel.
  *
  * Défaut : false
  * @var  bool
@@ -89,14 +277,25 @@ namespace Paheko;
 //const ROOT = __DIR__;
 
 /**
+ * DATA_ROOT
  * Répertoire où sont situées les données de Paheko
- * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
+ * (incluant la base de données SQLite, les sauvegardes et le cache)
  *
  * Défaut : sous-répertoire "data" de la racine
  * @var  string
  */
 
 //const DATA_ROOT = ROOT . '/data';
+
+/**
+ * BACKUPS_ROOT
+ * Répertoire où son stockées les sauvegardes de la base de données.
+ *
+ * Défaut : DATA_ROOT . '/backups'
+ * @var string
+ */
+
+//const BACKUPS_ROOT = DATA_ROOT . '/backups';
 
 /**
  * Répertoire où est situé le cache,
@@ -383,6 +582,31 @@ namespace Paheko;
 //const SQLITE_JOURNAL_MODE = 'TRUNCATE';
 
 /**
+ * Activation du journal d'audit séparé
+ *
+ * Si cette constante est renseignée par un fichier texte, le journal d'audit y sera
+ * également enregistré.
+ *
+ * Cela permet d'enregistrer le journal d'audit en dehors de la base de données.
+ *
+ * Default : null (= désactivé)
+ * @var string|null
+ */
+// const AUDIT_LOG_FILE = __DIR__ . '/audit.log';
+
+/**
+ * Taille maximale du journal d'audit séparé (en octets)
+ *
+ * Une fois que le journal d'audit atteint cette taille, il est coupé en deux,
+ * afin de supprimer les anciennes entrées. Exemple : une limite de 200 Ko, quand
+ * elle est atteinte les premiers 100 Ko sont remplacés par "(cut...)".
+ *
+ * Default : 1024*1024 (1 Mo)
+ * @var int
+ */
+// const AUDIT_LOG_LIMIT = 1024*1024;
+
+/**
  * Activation du log HTTP (option de développement)
  *
  * Si cette constante est renseignée par un fichier texte, *TOUTES* les requêtes HTTP
@@ -448,12 +672,12 @@ namespace Paheko;
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * les scripts suivants:
- * - scripts/cron.php toutes les 24 heures (envoi des rappels de cotisation,
+ * les commandes suivants:
+ * - bin/paheko cron toutes les 24 heures (envoi des rappels de cotisation,
  * création des sauvegardes)
- * - scripts/emails.php toutes les 5 minutes environ (envoi des emails en attente)
+ * - bin/paheko queue run toutes les minutes (envoi des emails en attente)
  *
- * Si "false", les actions de scripts/cron.php seront effectuées quand une personne
+ * Si "false", les actions de la commande "cron" seront effectuées quand une personne
  * se connecte. Et les emails seront envoyés instantanément (ce qui peut ralentir ou
  * planter si un message a beaucoup de destinataires).
  *
@@ -488,18 +712,6 @@ namespace Paheko;
  */
 
 //const ENABLE_XSENDFILE = false;
-
-/**
- * Serveur NTP utilisé pour les connexions avec TOTP
- * (utilisé seulement si le code OTP fourni est faux)
- *
- * Désactiver (NULL) si vous êtes sûr que votre serveur est toujours à l'heure.
- *
- * Défaut : fr.pool.ntp.org
- * @var string|null
- */
-
-//const NTP_SERVER = 'fr.pool.ntp.org';
 
 /**
  * Désactiver l'envoi d'e-mails
@@ -590,6 +802,21 @@ namespace Paheko;
 //const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
 
 /**
+ * SMTP_MAX_MESSAGES_PER_SESSION
+ *
+ * Nombre de messages à envoyer par session SMTP.
+ *
+ * Pour contourner les limitations de certains hébergeurs, comme IONOS,
+ * qui limitent le nombre de messages par session.
+ *
+ * Limite pour IONOS : 20
+ *
+ * Défaut : 50
+ * @var int
+ */
+//const SMTP_MAX_MESSAGES_PER_SESSION = 20;
+
+/**
  * Adresse e-mail destinée à recevoir les erreurs de mail
  * (adresses invalides etc.) — Return-Path / MAIL FROM
  *
@@ -642,8 +869,8 @@ namespace Paheko;
  * Si on définit 'abcd' ici, il faudra faire une requête comme ceci :
  * curl -F 'message=@/tmp/message.eml' https://bounce:abcd@monasso.com/admin/handle_bounce.php
  *
- * En alternative le serveur de mail peut aussi appeler le script
- * 'scripts/handle_bounce.php'
+ * En alternative le serveur de mail peut aussi appeler la commande
+ * "bin/paheko queue bounce" avec le contenu du message en STDIN.
  *
  * Défaut : null (l'API handlebounce est désactivée)
  *
@@ -651,6 +878,23 @@ namespace Paheko;
  */
 
 //const MAIL_BOUNCE_PASSWORD = null;
+
+/**
+ * MAIL_TEST_RECIPIENTS
+ *
+ * Permet de spécifier une liste d'adresses mail "testeuses" de la réception
+ * des messages collectifs. Chacune des boîtes mails indiquée recevra une copie
+ * de chaque message collectif, comme si elle était dans les destinataires.
+ * Elles n'apparaîtront pas dans la liste des destinataires de l'interface.
+ *
+ * Lire https://fossil.kd2.org/paheko/wiki?name=Configuration%2FMailboxTestAccounts
+ * pour plus d'infos.
+ *
+ * Défaut : null (la fonctionnalité est désactivée)
+ * @var array|null
+ */
+
+//const MAIL_TEST_RECIPIENTS = ['testpaheko@yahoo.fr', 'testpaheko@gmail.com'];
 
 /**
  * Couleur primaire de l'interface admin par défaut
@@ -870,10 +1114,10 @@ namespace Paheko;
  * Ces outils sont utilisés pour convertir les documents d'un format à l'autre.
  * Cette fonctionnalité est utilisée :
  * - pour extraire le texte des documents PDF, XLS, DOC, EPUB et l'indexer
- *   dans la recherche de documents
+ *   dans la recherche de documents (les fichiers OpenDocument, DOCX, XLSX et PPTX sont gérés en natif)
  * - pour générer les images miniatures des documents (dans les listes de documents)
- * - pour convertir les fichiers XLSX, XLS ou ODS pour l'import de membres,
- *   d'écritures etc. (sinon seul CSV est accepté)
+ * - pour convertir les fichiers XLS (vieux Excel) pour l'import de membres,
+ *   d'écritures etc. (sinon seuls les fichiers CSV, ODS et XLSX sont acceptés)
  *
  * Les outils supportés sont :
  * - collabora : serveur Collabora externe, via l'API HTTP de conversion,
@@ -890,7 +1134,7 @@ namespace Paheko;
  *
  * Si un outil permettant la conversion de documents bureautique est
  * spécifié (collabora, unoconvert, unocov, onlyoffice), alors il sera
- * possible d'importer des fichiers XLSX, XLS et ODS en plus du CSV
+ * possible d'importer des fichiers XLS (vieil Excel) en plus du CSV, ODS et XLSX
  * (par exemple pour les imports de membres ou d'écritures comptables).
  *
  * Paheko utilisera automatiquement en priorité l'outil le plus performant :
@@ -924,7 +1168,6 @@ namespace Paheko;
  *
  * Défaut : true
  * @var bool
- * @var string|null
  */
 //const ENABLE_FILE_THUMBNAILS = false;
 

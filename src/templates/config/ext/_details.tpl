@@ -7,9 +7,14 @@
 		<h2>{$item.label}</h2>
 		{if $item.broken_message}
 			<p class="error block">
-				<strong>Extension cassée : installation impossible</strong><br />
+				<strong>Extension cassée</strong><br />
 				Erreur : {$item.broken_message}
 			</p>
+			{if $item.type === 'module' && $item.module->hasLocal()}
+			<p>
+				{linkbutton shape="edit" href="!config/ext/edit.php?module=%s"|args:$item.name label="Modifier le code"}
+			</p>
+			{/if}
 		{elseif $item.missing}
 			<p class="error block">
 				{if ENABLE_TECH_DETAILS}
@@ -25,7 +30,7 @@
 	{else}
 		<figure class="icon">
 		{if $item.icon_url}
-			<a href="{$item.details_url}"><svg><use xlink:href='{$item.icon_url}#img' href="{$item.icon_url}#img"></use></svg></a>
+			<a href="{$item.details_url}"><svg role="img" aria-label="{$item.label}"><use xlink:href='{$item.icon_url}#img' href="{$item.icon_url}#img"></use></svg></a>
 		{/if}
 		</figure>
 
@@ -82,6 +87,10 @@
 					<figure class="permissions">
 						<figcaption>Accès limité</figcaption>
 						<span class="permissions">{display_permissions section=$item.restrict_section level=$item.restrict_level}</span>
+					</figure>
+				{elseif $item.ini.restrict_details}
+					<figure class="permissions">
+						<figcaption>Accès limité<br /><em>(voir détails)</em></figcaption>
 					</figure>
 				{/if}
 			{/if}

@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins
+.PHONY: dev-server release deps publish check-dependencies test-syntax tests minify phpstan www htaccess modules installer plugins doc
 SHELL := /bin/bash
 KD2FW_BRANCH := trunk
 MODULES_BRANCH := trunk
@@ -33,7 +33,8 @@ dev-server:
 	PHP_CLI_SERVER_WORKERS=4 php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
 test-syntax:
-	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php -l > /dev/null
+	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php7.4 -l > /dev/null
+	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php8.5 -l > /dev/null
 
 tests:
 	cd ../tests && php run.php
@@ -54,11 +55,12 @@ doc:
 	php ../tools/doc_md_to_html.php
 
 htaccess:
-	# Removing DOCUMENT_ROOT is important for the cache when using .htaccess, keep it!
+	cat apache-bots.conf > www/.htaccess
+	# Removing DOCUMENT_ROOT is important for the cache when using .htaccess!
 	cat apache-vhost.conf \
 		| sed 's/#RewriteBase/RewriteBase/' \
 		| sed 's/RewriteCond %{DOCUMENT_ROOT}%{REQUEST_/RewriteCond %{REQUEST_/' \
-		> www/.htaccess
+		>> www/.htaccess
 	cat apache-htaccess.conf >> www/.htaccess
 
 # Freeze versions before release

@@ -16,6 +16,10 @@ class Cache
 
 	static public function getRoot(): ?string
 	{
+		if (!WEB_CACHE_ROOT) {
+			return null;
+		}
+
 		$host = parse_url(WWW_URL, \PHP_URL_HOST);
 
 		if (!$host) {
@@ -111,9 +115,12 @@ class Cache
 		$cache_root = Utils::dirname(WEB_CACHE_ROOT);
 
 		// Create symlink for self-hosting with .htaccess
-		if (!file_exists(ROOT . '/www/.cache') && file_exists($cache_root) && is_writable(ROOT . '/www')) {
-			@symlink($cache_root, ROOT . '/www/.cache');
+		try {
+			if (!file_exists(ROOT . '/www/.cache') && file_exists($cache_root) && is_writable(ROOT . '/www')) {
+				@symlink($cache_root, ROOT . '/www/.cache');
+			}
 		}
+		catch (\Throwable $e) {}
 
 		return true;
 	}

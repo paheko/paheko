@@ -5,6 +5,7 @@ namespace Paheko\Entities\Accounting;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\ValidationException;
+use Paheko\UserException;
 use Paheko\Utils;
 use Paheko\Accounting\Accounts;
 
@@ -21,6 +22,10 @@ class Line extends Entity
 	protected ?string $label = null;
 	protected bool $reconciled = false;
 	protected ?int $id_project = null;
+	protected int $status = 0;
+
+	// Moved from transaction
+	const STATUS_DEPOSITED = 4;
 
 	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
 	{
@@ -37,7 +42,12 @@ class Line extends Entity
 	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'credit' || $key == 'debit') {
-			$value = abs(Utils::moneyToInteger($value));
+			try {
+				$value = abs(Utils::moneyToInteger($value));
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new UserException($e->getMessage(), 0, $e);
+			}
 		}
 		elseif ($key == 'id_project' && $value == 0) {
 			$value = null;
@@ -77,4 +87,24 @@ class Line extends Entity
 		];
 	}
 
+
+	public function removeStatus(int $property): void
+	{
+		$this->set('status', $this->status & ~$property);
+	}
+
+	public function addStatus(int $property): void
+	{
+		$this->set('status', $this->status | $property);
+	}
+
+	public function hasStatus(int $property): bool
+	{
+		return boolval($this->status & $property);
+	}
+
+	public function isDeposited(): bool
+	{
+		return $this->hasStatus(self::STATUS_DEPOSITED);
+	}
 }

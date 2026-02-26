@@ -26,6 +26,7 @@ class Service extends Entity
 	protected ?int $duration = null;
 	protected ?Date $start_date = null;
 	protected ?Date $end_date = null;
+	protected bool $archived = false;
 
 	public function selfCheck(): void
 	{
@@ -58,6 +59,10 @@ class Service extends Entity
 			}
 		}
 
+		if (isset($source['archived_present']) && empty($source['archived'])) {
+			$source['archived'] = false;
+		}
+
 		parent::importForm($source);
 	}
 
@@ -87,6 +92,7 @@ class Service extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => $id_field,
+				'order' => '_user_name_index %s',
 			],
 			'status' => [
 				'label' => 'Statut',
@@ -109,10 +115,28 @@ class Service extends Entity
 				'label' => 'Date d\'inscription',
 				'select' => 'su.date',
 			],
+			'_user_name_index' => [
+				'select' => DynamicFields::getNameFieldsSearchableSQL('us'),
+			],
 		];
+
+		$db = DB::getInstance();
+
+		foreach (DynamicFields::getInstance()->all() as $field) {
+			if ($field->isNumber() || $field->isName() || $field->isPassword() || $field->isVirtual()) {
+				continue;
+			}
+
+			$columns['u_' . $field->name] = [
+				'label'  => $field->label,
+				'select' => 'u.' . $db->quote($field->name),
+				'export' => true,
+			];
+		}
 
 		$tables = 'services_users su
 			INNER JOIN users u ON u.id = su.id_user
+			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
@@ -125,7 +149,6 @@ class Service extends Entity
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
 		$list->orderBy('paid', true);
-		$list->setCount('COUNT(DISTINCT su.id_user)');
 
 		$list->setExportCallback(function (&$row) {
 			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');

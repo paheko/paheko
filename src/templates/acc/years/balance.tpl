@@ -23,6 +23,10 @@
 	{/if}
 {/if}
 
+<div class="help block">
+	<p>La balance d'ouverture permet de reporter en début d'exercice les soldes des comptes provenant d'un exercice précédent.</p>
+	<p>Si votre association commence son premier exercice, ce formulaire ne doit pas être utilisé.</p>
+</div>
 
 <form method="post" action="{$self_url}">
 
@@ -50,7 +54,7 @@
 		let s = document.querySelector('#f_from_year');
 		const checkOpen = function() {
 			let v = s.options[s.selectedIndex].dataset.open;
-			g.toggle('.warn-not-closed', v === '' ? true : false);
+			g.toggle('.warn-not-closed', v === 'open' ? true : false);
 		};
 		s.onchange = checkOpen;
 		checkOpen();
@@ -70,9 +74,9 @@
 				<tr>
 					{if $chart_change}
 						<td>Ancien compte</td>
-						<th>Nouveau compte</th>
+						<th scope="col">Nouveau compte</th>
 					{else}
-						<th>Compte</th>
+						<th scope="col">Compte</th>
 					{/if}
 					<td>Débit</td>
 					<td>Crédit</td>
@@ -89,8 +93,8 @@
 							<input type="hidden" name="lines[label][]" value="{$line.label}" />
 						</td>
 					{/if}
-					<th>
-						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
+					<th scope="row">
+						{input type="list" target="!acc/charts/accounts/selector.php?id_chart=%d"|args:$year.id_chart name="lines[account_selector][]" default=$line.account_selector}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
@@ -100,7 +104,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<th>Total</th>
+					<th scope="row">Total</th>
 					{if $chart_change}
 						<td></td>
 					{/if}
@@ -122,10 +126,6 @@
 	<p class="submit">
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
-			— ou —
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
-			<br />
-			<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
 			{csrf_field key=$csrf_key}
 			{if $previous_year}

@@ -90,10 +90,8 @@ sp.disable_function.function("ini_set").param("option").value("assert.active").d
 sp.disable_function.function("ini_set").param("option").value("zend.assertions").drop();
 sp.disable_function.function("ini_set").param("option").value("memory_limit").drop();
 sp.disable_function.function("ini_set").param("option").value("include_path").drop();
-sp.disable_function.function("ini_set").param("option").value("open_basedir").drop();
 
 # Detect some backdoors via environment recon
-sp.disable_function.function("ini_get").param("option").value("open_basedir").drop();
 sp.disable_function.function("ini_get").param("option").value_r("suhosin").drop();
 sp.disable_function.function("function_exists").param("function").value("eval").drop();
 sp.disable_function.function("function_exists").param("function").value("exec").drop();

@@ -2,12 +2,11 @@
 
 namespace Paheko;
 
+use Paheko\Files\Storage;
 use Paheko\Users\Session;
-
 use Paheko\Accounting\Charts;
 
 use KD2\HTTP;
-
 use KD2\FossilInstaller;
 
 class Upgrade
@@ -57,8 +56,7 @@ class Upgrade
 		Static_Cache::store('upgrade', 'Updating');
 
 		// Créer une sauvegarde automatique
-		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', paheko_version());
-		Backup::make($backup_file);
+		$backup_file = Backup::createBeforeUpgrade(paheko_version());
 
 		// Extend execution time, just in case
 		if (false === strpos(@ini_get('disable_functions'), 'set_time_limit')) {
@@ -120,6 +118,41 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.13', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.13.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.14', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.14.sql');
+
+				if ($db->hasTable('module_data_recus_fiscaux')) {
+					$db->import(ROOT . '/include/migrations/1.3/1.3.14_recus.sql');
+				}
+
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.16', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.16.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.17', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.17.php';
+			}
+
+			if (version_compare($v, '1.3.18', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.18.php';
+			}
+
+			if (version_compare($v, '1.3.19', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.19.php';
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
@@ -147,6 +180,9 @@ class Upgrade
 			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
 
 			Static_Cache::remove('upgrade');
+
+			// Re-sync files cache with storage, if necessary (eg. if we are upgrading after a DB restore)
+			Storage::sync();
 		}
 		catch (\Throwable $e)
 		{
@@ -155,7 +191,7 @@ class Upgrade
 			}
 
 			$db->close();
-			rename($backup_file, DB_FILE);
+			rename(BACKUPS_ROOT . DIRECTORY_SEPARATOR . $backup_file, DB_FILE);
 
 			Static_Cache::remove('upgrade');
 

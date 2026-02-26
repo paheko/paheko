@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="%sBalance générale"|args:$project_title current="acc/years" prefer_landscape=true}
+{include file="_head.tpl" title="%sBalance générale"|args:$title current="acc/years" prefer_landscape=true}
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" allow_filter=true}
 
@@ -25,7 +25,7 @@
 				{else}{$account.code}
 				{/if}
 			</td>
-			<th data-spreadsheet-type="string">{$account.label}</th>
+			<th scope="row" data-spreadsheet-type="string">{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
 			{if !$simple}

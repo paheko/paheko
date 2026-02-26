@@ -33,7 +33,7 @@ use Paheko\Entities\Accounting\Account;
 	<thead>
 		<tr>
 			<td class="money">Montant</td>
-			<th>Compte</th>
+			<th scope="col">Compte</th>
 			<td></td>
 		</tr>
 	</thead>
@@ -41,7 +41,7 @@ use Paheko\Entities\Accounting\Account;
 	{foreach from=$accounts item="account"}
 		<tr>
 			<td class="money">{$account.balance|raw|money_currency}</td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			<td>
 				{if $account.position == Account::LIABILITY}<em>Nous vous devons {$account.balance|raw|money_currency}.</em>
 				{else}<strong class="error">Vous nous devez {$account.balance|raw|money_currency}.</strong>{/if}
@@ -60,7 +60,7 @@ use Paheko\Entities\Accounting\Account;
 
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				<th>{$row.label}</th>
+				<th scope="row">{$row.label}</th>
 				<td>{$row.fee}</td>
 				<td>{$row.date|date_short}</td>
 				<td>{$row.expiry|date_short}</td>

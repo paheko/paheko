@@ -39,10 +39,10 @@ class Categories
 	/**
 	 * Return a list of categories that have less or same permissions as the logged user
 	 */
-	static public function listAssocSafe(Session $session, ?int $hidden = null): array
+	static public function listAssocSafe(Session $session, bool $allow_config = true): array
 	{
-		$perms = $session->getPermissions();
-		$conditions = self::getHiddenClause($hidden);
+		$perms = $session->user()->getPermissions();
+		$conditions = '';
 
 		foreach ($perms as $section => $level) {
 			// Don't match login permission if logged-in user doesn't exist
@@ -51,6 +51,10 @@ class Categories
 			}
 
 			$conditions .= sprintf(' AND perm_%s <= %d', $section, $level);
+		}
+
+		if (!$allow_config) {
+			$conditions .= ' AND perm_config = 0';
 		}
 
 		$sql = sprintf('SELECT id, name FROM %s WHERE 1 %s ORDER BY name COLLATE U_NOCASE;',
@@ -78,7 +82,7 @@ class Categories
 		}
 
 		return $categories + $db->getGrouped(sprintf(
-			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count
+			'SELECT id, name AS label, (SELECT COUNT(*) FROM %s WHERE %1$s.id_category = %s.id) AS count, hidden
 			FROM %2$s
 			WHERE 1 %s
 			ORDER BY name COLLATE U_NOCASE;',

@@ -13,3 +13,12 @@ $c = current($c);
 Test::isInstanceOf(\stdClass::class, $c);
 Test::assert(isset($c->name));
 Test::assert(isset($c->id));
+
+$c = api('POST', 'user/new', ['nom' => 'Coucou']);
+Test::isArray($c);
+Test::assert(count($c) > 0);
+$c = (object) $c;
+
+Test::assert(isset($c->nom));
+Test::strictlyEquals('Coucou', $c->nom);
+Test::assert(isset($c->id));

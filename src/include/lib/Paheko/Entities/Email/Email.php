@@ -7,7 +7,7 @@ use Paheko\Entity;
 use Paheko\Plugins;
 use Paheko\UserException;
 use Paheko\Email\Emails;
-use Paheko\Email\Templates as EmailsTemplates;
+use Paheko\Email\Templates as EmailTemplates;
 
 use KD2\SMTP;
 
@@ -17,8 +17,7 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
-	const RESEND_VERIFICATION_DELAY = '15 days ago';
-	const RESEND_VERIFICATION_DELAY_OPTOUT = '3 days ago';
+	const RESEND_VERIFICATION_DELAY = 15;
 
 	/**
 	 * Antispam services that require to do a manual action to accept emails
@@ -30,13 +29,16 @@ class Email extends Entity
 	protected int $id;
 	protected string $hash;
 	protected bool $verified = false;
-	protected bool $optout = false;
 	protected bool $invalid = false;
 	protected int $sent_count = 0;
 	protected int $fail_count = 0;
-	protected ?string $fail_log;
+	protected ?string $fail_log = null;
 	protected \DateTime $added;
-	protected ?\DateTime $last_sent;
+	protected ?\DateTime $last_sent = null;
+
+	protected bool $accepts_messages = true;
+	protected bool $accepts_reminders = true;
+	protected bool $accepts_mailings = true;
 
 	/**
 	 * Normalize email address and create a hash from this
@@ -53,13 +55,49 @@ class Email extends Entity
 		return sha1($email);
 	}
 
-	static public function getOptoutURL(string $hash = null): string
+	static public function getOptoutURL(?string $hash = null, ?int $context = null): string
 	{
 		$hash = hex2bin($hash);
 		$hash = base64_encode($hash);
 		// Make base64 hash valid for URLs
 		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
-		return sprintf('%s?un=%s', WWW_URL, $hash);
+		$url = sprintf('%s?un=%s', WWW_URL, $hash);
+
+		if ($context !== null) {
+			$url .= '&c=' . $context;
+		}
+
+		return $url;
+	}
+
+	static public function acceptsThisMessage(\stdClass $r): bool
+	{
+		// We allow system emails to be sent to any address, even if it is invalid
+		if ($r->context === Emails::CONTEXT_SYSTEM) {
+			return true;
+		}
+
+		// Never send to invalid or bounced recipients
+		if ($r->invalid
+			|| $r->fail_count >= Emails::FAIL_LIMIT) {
+			return false;
+		}
+
+		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
+		switch ($r->context) {
+			case Emails::CONTEXT_BULK:
+				return (bool) $r->accepts_mailings;
+			case Emails::CONTEXT_REMINDER:
+			case Emails::CONTEXT_NOTIFICATION:
+				return (bool) $r->accepts_reminders;
+			default:
+				return (bool) $r->accepts_messages;
+		}
+	}
+
+	public function getUserPreferencesURL()
+	{
+		return self::getOptoutURL($this->hash) . '&h=1';
 	}
 
 	public function getVerificationCode(): string
@@ -74,14 +112,23 @@ class Email extends Entity
 			throw new UserException('Adresse email inconnue');
 		}
 
-		$verify_url = self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
-		EmailsTemplates::verifyAddress($email, $verify_url);
+		$verify_url = self::getOptoutURL($this->hash) . '&y=' . $this->getVerificationCode();
+		EmailTemplates::verifyAddress($email, $verify_url);
 	}
 
 	public function canSendVerificationAfterFail(): bool
 	{
-		$limit_date = new \DateTime($this->optout ? self::RESEND_VERIFICATION_DELAY_OPTOUT : self::RESEND_VERIFICATION_DELAY);
-		return isset($this->last_sent) ? $this->last_sent < $limit_date : false;
+		if ($this->canSend()) {
+			return false;
+		}
+
+		if (!$this->last_sent) {
+			return true;
+		}
+
+		$limit_date = new \DateTime(sprintf('%d days ago', self::RESEND_VERIFICATION_DELAY));
+		$date = $this->last_sent ?? $this->added;
+		return $date < $limit_date;
 	}
 
 	public function verify(string $code): bool
@@ -91,10 +138,9 @@ class Email extends Entity
 		}
 
 		$this->set('verified', true);
-		$this->set('optout', false);
 		$this->set('invalid', false);
 		$this->set('fail_count', 0);
-		$this->set('fail_log', null);
+		$this->appendFailLog('Adresse vérifiée');
 
 		Plugins::fire('email.address.verified', false, ['address' => $this]);
 
@@ -129,7 +175,7 @@ class Email extends Entity
 		}
 	}
 
-	static public function validateAddress(string $email, bool $mx_check = true): void
+	static public function validateAddress(string $email, bool $mx_check = true, bool $block_captcha_proxies = false): void
 	{
 		$pos = strrpos($email, '@');
 
@@ -170,15 +216,6 @@ class Email extends Entity
 			return;
 		}
 
-		self::checkMX($host);
-	}
-
-	static public function checkMX(string $host)
-	{
-		if (PHP_OS_FAMILY == 'Windows') {
-			return;
-		}
-
 		static $results = [];
 
 		if (array_key_exists($host, $results)) {
@@ -206,17 +243,13 @@ class Email extends Entity
 		if ($r === 'empty') {
 			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
-		elseif ($r === 'blocked') {
+		elseif ($r === 'blocked' && $block_captcha_proxies) {
 			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
 		}
 	}
 
 	public function canSend(): bool
 	{
-		if (!empty($this->optout)) {
-			return false;
-		}
-
 		if (!empty($this->invalid)) {
 			return false;
 		}
@@ -238,10 +271,99 @@ class Email extends Entity
 		$this->set('sent_count', $this->sent_count+1);
 	}
 
-	public function setOptout(string $message = null): void
+	public function adminSetPreferences(?array $source = null)
 	{
-		$this->set('optout', true);
-		$this->appendFailLog($message ?? 'Demande de désinscription');
+		$source ??= $_POST;
+
+		$keys = ['accepts_messages', 'accepts_reminders', 'accepts_mailings'];
+
+		foreach ($keys as $name) {
+			if (!array_key_exists($name . '_present', $source)) {
+				continue;
+			}
+
+			// Don't allow the admin to re-subscribe a user
+			if (!$this->$name) {
+				unset($source[$name]);
+				continue;
+			}
+
+			$source[$name] ??= false;
+		}
+
+		$this->setPreferences($source, 'administrateur');
+	}
+
+	protected function setPreferences(array $preferences, ?string $who = null): void
+	{
+		$options = [
+			'accepts_messages'  => 'messages personnels',
+			'accepts_reminders' => 'rappels',
+			'accepts_mailings'  => 'messages collectifs',
+		];
+
+		$log_accepts = [];
+		$log_denies = [];
+		$who ??= 'destinataire';
+
+		foreach ($options as $key => $label) {
+			if (!array_key_exists($key, $preferences)) {
+				continue;
+			}
+
+			$preferences[$key] ??= false;
+
+			if ((bool) $preferences[$key] === $this->$key) {
+				continue;
+			}
+
+			$this->set($key, (bool)$preferences[$key]);
+
+			if($this->$key) {
+				$log_accepts[] = $label;
+			}
+			else {
+				$log_denies[] = $label;
+			}
+		}
+
+		$log = [];
+
+		if (count($log_accepts)) {
+			$log[] = sprintf('Accepte les messages (%s) : %s', $who, implode(', ', $log_accepts));
+		}
+
+		if (count($log_denies)) {
+			$log[] = sprintf('Refuse les messages (%s) : %s', $who, implode(', ', $log_denies));
+		}
+
+		if (!count($log)) {
+			return;
+		}
+
+		$this->appendFailLog(implode(" ; ", $log));
+	}
+
+	public function setOptout(?int $context): void
+	{
+		if ($context === Emails::CONTEXT_BULK) {
+			$this->set('accepts_mailings', false);
+		}
+		elseif ($context === Emails::CONTEXT_REMINDER
+			|| $context === Emails::CONTEXT_NOTIFICATION) {
+			$this->set('accepts_reminders', false);
+		}
+		elseif ($context === Emails::CONTEXT_PRIVATE) {
+			$this->set('accepts_messages', false);
+		}
+		elseif ($context === null) {
+			$this->set('accepts_reminders', false);
+			$this->set('accepts_messages', false);
+			$this->set('accepts_mailings', false);
+		}
+		else {
+			throw new \LogicException('Invalid optout context: ' . $context);
+		}
 	}
 
 	public function appendFailLog(string $message): void
@@ -256,12 +378,12 @@ class Email extends Entity
 		$this->set('fail_log', $log);
 	}
 
-	public function hasBounced(string $type, string $message = null): void
+	public function hasBounced(string $type, ?string $message = null): void
 	{
 		// Treat complaints as opt-out
 		if ($type == 'complaint') {
-			$this->set('optout', true);
-			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
+			$this->set('invalid', true);
+			$this->appendFailLog($message ?? "Le destinataire a signalé un message comme étant un spam.");
 		}
 		elseif ($type == 'hard') {
 			$this->set('invalid', true);
@@ -275,5 +397,98 @@ class Email extends Entity
 		else {
 			throw new \LogicException('Invalid bounce type: ' . $type);
 		}
+	}
+
+	public function savePreferencesFromUserForm(?array $source = null): string
+	{
+		$source ??= $_POST;
+
+		$keys = ['reminders', 'messages', 'mailings'];
+		$preferences = [];
+		$require_confirm = false;
+
+		foreach ($keys as $key) {
+			$name = 'accepts_' . $key;
+			$value = boolval($source[$name] ?? false);
+
+			// Require double opt-in if re-subscribing to an unsubscribed item
+			if ($value !== $this->$name
+				&& $value === true
+				&& $this->$name === false) {
+				$require_confirm = true;
+			}
+
+			$preferences[$name] = $value;
+		}
+
+		$address = $source['email'] ?? '';
+
+		if ($require_confirm && !empty($address)) {
+			if (self::getHash($address) !== $this->hash) {
+				throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+			}
+
+			$url = $this->getSignedUserPreferencesURL($preferences);
+			$preferences = array_filter($preferences);
+			EmailTemplates::verifyPreferences($address, $url, $preferences);
+			return 'confirmation_sent';
+		}
+		elseif ($require_confirm) {
+			return 'confirmation_required';
+		}
+		else {
+			$this->setPreferences($preferences);
+			$this->save();
+			return 'saved';
+		}
+	}
+
+	public function getSignedUserPreferencesURL(array $preferences): string
+	{
+		$expiry = time() + 24*3600;
+		$values = [
+			'r' => intval($preferences['accepts_reminders'] ?? 0),
+			'l' => intval($preferences['accepts_mailings'] ?? 0),
+			'm' => intval($preferences['accepts_messages'] ?? 0),
+			'e' => $expiry,
+		];
+
+		ksort($values);
+		$values = http_build_query($values);
+		$hash = hash_hmac('sha1', $values . $this->hash, LOCAL_SECRET_KEY);
+		$values .= '&v=' . $hash;
+
+		$url = self::getOptoutURL($this->hash);
+		$url .= '&' . $values;
+		return $url;
+	}
+
+	public function confirmPreferences(array $qs): bool
+	{
+		if (!isset($qs['v'], $qs['e'])) {
+			return false;
+		}
+
+		$values = array_intersect_key($qs, array_flip(['r', 'l', 'm', 'e']));
+		ksort($values);
+
+		$hash = hash_hmac('sha1', http_build_query($values) . $this->hash, LOCAL_SECRET_KEY);
+
+		if ($hash !== $qs['v']) {
+			return false;
+		}
+
+		if ($qs['e'] < time()) {
+			return false;
+		}
+
+		$this->setPreferences([
+			'accepts_reminders' => boolval($values['r'] ?? false),
+			'accepts_mailings'  => boolval($values['l'] ?? false),
+			'accepts_messages'  => boolval($values['m'] ?? false),
+		]);
+
+		$this->save();
+		return true;
 	}
 }

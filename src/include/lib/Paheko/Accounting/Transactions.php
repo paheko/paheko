@@ -53,25 +53,28 @@ class Transactions
 		$db->commit();
 	}
 
-	static public function saveDeposit(Transaction $transaction, \Generator $journal, array $checked)
+	static public function saveDeposit(Account $account, Transaction $transaction, \Generator $journal, array $checked)
 	{
 		$db = DB::getInstance();
 		$db->begin();
 
 		try {
-			$ids = [];
+			$transactions_ids = [];
+			$lines_ids = [];
+
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id_line, $checked)) {
+				if (!in_array($row->id_line, $checked)) {
 					continue;
 				}
 
-				$ids[] = (int)$row->id;
+				$transactions_ids[] = (int)$row->id;
+				$lines_ids[] = $row->id_line;
 
 				$line = new Line;
 				$line->importForm([
 					'reference'  => $row->line_reference,
 					'label'      => $row->line_label ?? $row->label,
-					'id_account' => $row->id_account,
+					'id_account' => $account->id(),
 					'id_project' => $row->id_project,
 				]);
 
@@ -81,8 +84,8 @@ class Transactions
 			}
 
 			$transaction->save();
-			$ids = implode(',', $ids);
-			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSITED, $ids));
+			$transaction->updateLinkedTransactions($transactions_ids);
+			$account->markLinesAsDeposited($lines_ids);
 			$db->commit();
 		}
 		catch (\Exception $e) {
@@ -99,6 +102,11 @@ class Transactions
 	static public function countForCreator(int $user_id): int
 	{
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
+	}
+
+	static public function countAll(): int
+	{
+		return DB::getInstance()->count('acc_transactions');
 	}
 
 	/**
@@ -147,7 +155,6 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
@@ -205,7 +212,19 @@ class Transactions
 			unset($columns['locked']);
 		}
 
-		$columns['line_reference']['label'] = 'Réf. paiement';
+		$types_with_ref = [
+			Transaction::TYPE_REVENUE,
+			Transaction::TYPE_EXPENSE,
+			Transaction::TYPE_TRANSFER,
+		];
+
+		if (in_array($type, $types_with_ref)) {
+			$columns['line_reference']['label'] = 'Réf. paiement';
+		}
+		else {
+			unset($columns['line_reference']);
+		}
+
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
 		$columns['project_code']['select'] = 'json_group_array(IFNULL(b.code, SUBSTR(b.label, 1, 10) || \'…\'))';
@@ -243,7 +262,6 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(t.id)');
 		$list->setCountTables('acc_transactions t');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
@@ -293,7 +311,7 @@ class Transactions
 		return DB::getInstance()->iterate($sql, ...$params);
 	}
 
-	static public function createPayoffFrom(array $transactions): ?\stdClass
+	static public function createPayoffFrom(array $transactions, Year $year): ?\stdClass
 	{
 		$new = new Transaction;
 
@@ -306,12 +324,13 @@ class Transactions
 			'linked_users'        => [],
 			'linked_transactions' => [],
 			'type_label'          => null,
-			'targets'             => implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
+			'selector_types'      => implode('|', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]),
 			'id_project'          => null,
 			'payment_line'        => null,
 		];
 
 		$labels = [];
+		$accounts = $year->accounts();
 
 		foreach ($transactions as $id) {
 			$id = (int) $id;
@@ -365,12 +384,22 @@ class Transactions
 
 			if ($out->type === Transaction::TYPE_CREDIT) {
 				$line->credit = $sum;
-				$line->id_account = $t->getDebitLine()->id_account;
+				$id_account = $t->getDebitLine()->id_account;
 			}
 			else {
 				$line->debit = $sum;
-				$line->id_account = $t->getCreditLine()->id_account;
+				$id_account = $t->getCreditLine()->id_account;
 			}
+
+			// Make sure account ID is valid for this chart
+			$valid_id_account = $accounts->getValidAccountId($id_account);
+
+			if (!$valid_id_account) {
+				$account = $accounts::get($id_account);
+				throw new UserException(sprintf('Le compte "%s — %s" n\'existe pas dans le plan comptable de l\'année sélectionnée.', $account->code, $account->label));
+			}
+
+			$line->id_account = $valid_id_account;
 
 			$new->addLine($line);
 		}

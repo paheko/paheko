@@ -70,7 +70,7 @@ fetch('/paheko/juvlist?'+(+(new Date))).then((r) => {
 		let selected;
 
 		list.forEach((file) => {
-			var v = file.name.match(/^paheko-(\d+\.\d+\.\d+)\.(deb|exe|tar\.gz)$/);
+			var v = file.name.match(/^paheko-(\d+\.\d+\.\d+(?:\.\d+)?)\.(deb|exe|tar\.gz)$/);
 
 			if (!v || v[1].match(/-(alpha|rc|beta)/)) {
 				return;

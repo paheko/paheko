@@ -4,7 +4,7 @@ $title ??= '';
 $current ??= '';
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}"{if !empty($prefer_landscape)} data-prefer-landscape="1"{/if}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="nojs{if $dialog} dialog{/if}{if $logged_user.preferences.dark_theme} dark{/if}" data-version="{$version_hash}" data-url="{$admin_url}"{if !empty($prefer_landscape)} data-prefer-landscape="1"{/if}>
 <head>
 	<meta charset="utf-8" />
 	<meta name="v" content="{$version_hash}" />
@@ -59,13 +59,17 @@ if (ALERT_MESSAGE && !$dialog) {
 }
 ?>
 
-<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{/if}>
+<body{if !empty($class)} class="{$class}"{/if}{if !empty($upload_here)}{enable_upload_here path=$upload_here}{elseif !empty($upload_here_url)}{enable_upload_here url=$upload_here_url}{/if}>
 
 {if ALERT_MESSAGE && !$dialog}
 	<div id="sticky-alert"><?=ALERT_MESSAGE?></div>
 {/if}
 
 {if !array_key_exists('_dialog', $_GET) && $layout !== 'public' && $layout !== 'raw'}
+<nav id="skip">
+	<a href="#content">Aller au contenu</a>
+</nav>
+
 <nav id="menu">
 	<figure class="logo">
 	{if isset($config) && ($url = $config->fileURL('logo', '150px'))}
@@ -159,11 +163,11 @@ if (ALERT_MESSAGE && !$dialog) {
 
 {elseif $layout === 'public'}
 <header class="public">
-	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="" />{else}{$config.org_name}{/if}</a></h1>
+	<h1><a href="{$site_url}">{if $config.files.logo}<img src="{$config->fileURL('logo', '150px')}" alt="{$config.org_name}" />{else}{$config.org_name}{/if}</a></h1>
 </header>
 {/if}
 
-<main>
-	{if empty($hide_title)}
+<main id="content">
+	{if empty($hide_title) && !$dialog}
 	<h1 class="main">{$title}</h1>
 	{/if}

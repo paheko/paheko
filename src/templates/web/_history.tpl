@@ -22,7 +22,7 @@
 			{include file="common/dynamic_list_head.tpl" list=$versions}
 			{foreach from=$versions->iterate() item="version"}
 				<tr>
-					<th>{$version.date|date_short:true}</th>
+					<th scope="row">{$version.date|date_short:true}</th>
 					<td>{if !$version.author}<em>Membre supprimé</em>{else}{$version.author}{/if}</td>
 					<td>
 						{$version.size} caractères

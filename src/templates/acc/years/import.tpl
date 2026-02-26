@@ -8,13 +8,6 @@ use Paheko\Accounting\Export;
 	<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 </nav>
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}acc/years/import.php?year={$year.id}">Import</a></li>
-		<li><a href="{$admin_url}acc/years/export.php?year={$year.id}">Export</a></li>
-	</ul>
-</nav>
-
 {form_errors}
 
 {if $type_name && $csv->ready()}
@@ -32,7 +25,7 @@ use Paheko\Accounting\Export;
 		<table class="list auto">
 		{foreach from=$report.accounts item="account"}
 			<tr>
-				<th>{$account.code}</th>
+				<th scope="row">{$account.code}</th>
 				<td>{$account.label}</td>
 			</tr>
 		{/foreach}
@@ -120,6 +113,11 @@ use Paheko\Accounting\Export;
 	<fieldset>
 		<legend>Configuration de l'import</legend>
 		<dl>
+			{if $type === Export::FEC}
+				{input type="radio" name="fec_number_per_journal" value=0 default=0 label="Le numéro d'écriture est unique" help="recommandé en général" prefix_title="Numéros d'écriture du fichier FEC" prefix_required=true}
+				{input type="radio" name="fec_number_per_journal" value=1 label="Le numéro d'écriture est propre à chaque journal" help="pour certains logiciels inhabituels"}
+			{/if}
+
 			<dt><label for="f_ignore_ids_1">Mode d'import</label> <b>(obligatoire)</b></dt>
 
 			{input type="radio" name="ignore_ids" value="1" label="Créer toutes les écritures" required=true}
@@ -132,7 +130,7 @@ use Paheko\Accounting\Export;
 				Les écritures qui ne mentionnent pas de numéro seront créées.
 			</dd>
 
-			{if $type == Export::FEC}
+			{if $type === Export::FEC}
 				<dd><p class="alert block">Avec le format FEC, cette option effacera certaines données des écritures mises à jour : référence du paiement et projet analytique.</p></dd>
 			{/if}
 
@@ -176,7 +174,7 @@ use Paheko\Accounting\Export;
 	</fieldset>
 
 	<p class="help">
-		Il est conseillé de procéder à une <a href="../../config/backup/save.php">sauvegarde</a> avant de faire un import,
+		Il est conseillé de procéder à une <a href="{$admin_url}config/backup/">sauvegarde</a> avant de faire un import,
 		cela vous permettra de revenir en arrière en cas d'erreur.
 	</p>
 

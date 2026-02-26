@@ -4,6 +4,7 @@ namespace Paheko;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\SimpleDiff;
 use KD2\Smartyer;
 use KD2\Translate;
 use Paheko\Users\Session;
@@ -16,6 +17,7 @@ use Paheko\Files\Files;
 
 class Template extends Smartyer
 {
+	protected bool $init = false;
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -29,7 +31,8 @@ class Template extends Smartyer
 		$this->assign('table_export', false);
 		$this->assign('pdf_export', false);
 
-		if ($session->isLogged(false)) {
+		if ((isset($_GET['_pdf']) || isset($_GET['_export']))
+			&& $session->isLogged(false)) {
 			if (isset($_GET['_pdf'])) {
 				$this->assign('pdf_export', true);
 				$this->PDF($template);
@@ -59,6 +62,12 @@ class Template extends Smartyer
 
 		parent::display($template);
 		return $this;
+	}
+
+	public function fetch(?string $template = null): string
+	{
+		$this->init();
+		return parent::fetch($template);
 	}
 
 	public function PDF(?string $template = null, ?string $title = null)
@@ -91,6 +100,13 @@ class Template extends Smartyer
 		// For included templates just return a new instance,
 		// the singleton is only to get the 'master' Template object
 		else {
+			return;
+		}
+	}
+
+	protected function init(): void
+	{
+		if ($this->init) {
 			return;
 		}
 
@@ -187,8 +203,9 @@ class Template extends Smartyer
 		});
 
 		$this->register_function('enable_upload_here', function ($params) {
-			$csrf_key = 'upload_file_' . md5($params['path']);
-			$url = Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$url = $params['url'] ?? null;
+			$url ??= Utils::getLocalURL('!common/files/upload.php?p=' . rawurlencode($params['path']));
+			$csrf_key = 'upload_file';
 			return sprintf(' data-upload-url="%s" data-upload-token-value="%s" data-upload-token-name="%s" ',
 				htmlspecialchars($url),
 				Form::tokenGenerate($csrf_key),
@@ -199,6 +216,7 @@ class Template extends Smartyer
 		$this->register_block('linkmenu', [CommonFunctions::class, 'linkmenu']);
 
 		$this->register_modifier('strlen', fn($a) => strlen($a ?? ''));
+		$this->register_modifier('tolower', fn($a) => strtolower($a ?? ''));
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('percent_of', function($a, $b) { return !$b ? $b : round($a / $b * 100); });
@@ -220,12 +238,15 @@ class Template extends Smartyer
 			return preg_replace('!&lt;(/?mark)&gt;!', '<$1>', $str);
 		});
 
+		$this->register_modifier('html_hidden_inputs', [self::class, 'htmlHiddenInputs']);
+
 		foreach (CommonModifiers::PHP_MODIFIERS_LIST as $name => $params) {
-			$this->register_modifier($name, [CommonModifiers::class, $name]);
+			$this->register_modifier($name, $name);
 		}
 
-		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
-			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		foreach (CommonModifiers::MODIFIERS_LIST as $key => $modifier) {
+			$name = is_string($key) ? $key : $modifier;
+			$this->register_modifier($name, $modifier['callback'] ?? [CommonModifiers::class, $name]);
 		}
 
 		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
@@ -236,8 +257,11 @@ class Template extends Smartyer
 
 		// Overwrite default money modifiers
 		$this->register_modifier('money', [CommonModifiers::class, 'money_html']);
+		$this->register_modifier('money_text', [CommonModifiers::class, 'money']);
 		$this->register_modifier('money_currency', [CommonModifiers::class, 'money_currency_html']);
 		$this->register_modifier('money_currency_text', [CommonModifiers::class, 'money_currency']);
+
+		$this->init = true;
 	}
 
 
@@ -316,94 +340,11 @@ class Template extends Smartyer
 
 	protected function diff(array $params)
 	{
-		if (isset($params['old'], $params['new'])) {
-			$diff = \KD2\SimpleDiff::diff_to_array(false, $params['old'], $params['new'], $params['context'] ?? 3);
-		}
-		else {
+		if (!isset($params['old'], $params['new'])) {
 			throw new \BadFunctionCallException('Paramètres old et new requis.');
 		}
 
-		$out = '<table class="diff">';
-
-		if (isset($params['old_label'], $params['new_label'])) {
-			$out .= sprintf(
-				'<thead><tr><td colspan=2></td><th>%s</th><td></td><th>%s</th></tr></thead>',
-				htmlspecialchars($params['old_label']),
-				htmlspecialchars($params['new_label'])
-			);
-		}
-
-		$out .= '<tbody>';
-
-		$prev = key($diff);
-
-		foreach ($diff as $i=>$line)
-		{
-			if ($i > $prev + 1)
-			{
-				$out .= '<tr class="separator"><td colspan="5"><hr /></td></tr>';
-			}
-
-			list($type, $old, $new) = $line;
-
-			$class1 = $class2 = '';
-			$t1 = $t2 = '';
-
-			if ($type == \KD2\SimpleDiff::INS)
-			{
-				$class2 = 'ins';
-				$t2 = '<span data-icon="➕"></span>';
-				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
-				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
-			}
-			elseif ($type == \KD2\SimpleDiff::DEL)
-			{
-				$class1 = 'del';
-				$t1 = '<span data-icon="➖"></span>';
-				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
-				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
-			}
-			elseif ($type == \KD2\SimpleDiff::CHANGED)
-			{
-				$class1 = 'del';
-				$class2 = 'ins';
-				$t1 = '<span data-icon="➖"></span>';
-				$t2 = '<span data-icon="➕"></span>';
-
-				$lineDiff = \KD2\SimpleDiff::wdiff($old, $new);
-				$lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
-
-				// Don't show new things in deleted line
-				$old = preg_replace('!\{\+(?:.*)\+\}!U', '', $lineDiff);
-				$old = str_replace('  ', ' ', $old);
-				$old = str_replace('-] [-', ' ', $old);
-				$old = preg_replace('!\[-(.*)-\]!U', '<del>\\1</del>', $old);
-
-				// Don't show old things in added line
-				$new = preg_replace('!\[-(?:.*)-\]!U', '', $lineDiff);
-				$new = str_replace('  ', ' ', $new);
-				$new = str_replace('+} {+', ' ', $new);
-				$new = preg_replace('!\{\+(.*)\+\}!U', '<ins>\\1</ins>', $new);
-			}
-			else
-			{
-				$old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
-				$new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
-			}
-
-			$out .= '<tr>';
-			$out .= '<td class="line">'.($i+1).'</td>';
-			$out .= '<td class="leftChange">'.$t1.'</td>';
-			$out .= '<td class="leftText '.$class1.'">'.$old.'</td>';
-			$out .= '<td class="rightChange">'.$t2.'</td>';
-			$out .= '<td class="rightText '.$class2.'">'.$new.'</td>';
-			$out .= '</tr>';
-
-			$prev = $i;
-		}
-
-		$out .= '</tbody></table>';
-		return $out;
+		return SimpleDiff::asHTML($params['old'], $params['new'], $params['context'] ?? 3, $params['old_label'] ?? null, $params['new_label'] ?? null);
 	}
 
 	protected function displayPermissions(array $params): string
@@ -481,6 +422,24 @@ class Template extends Smartyer
 		);
 
 		$out .= sprintf('</%s>', $params['tag'] ?? 'span');
+		return $out;
+	}
+
+	static protected function htmlHiddenInputs(array $data, ?string $prefix = null)
+	{
+		$out = '';
+
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= self::htmlHiddenInputs($value, $name);
+			}
+			else {
+				$name = $prefix ? $prefix . '[' . $key . ']' : $key;
+				$out .= sprintf('<input type="hidden" name="%s" value="%s" />', htmlspecialchars($name), htmlspecialchars($value));
+			}
+		}
+
 		return $out;
 	}
 }

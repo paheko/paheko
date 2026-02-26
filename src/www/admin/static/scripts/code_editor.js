@@ -1,7 +1,7 @@
 (function (){
 	g.style('scripts/code_editor.css');
-	g.script('scripts/lib/text_editor.min.js', () => {
-	g.script('scripts/lib/code_editor.min.js', function ()
+	g.script('scripts/lib/text_editor.js', () => {
+	g.script('scripts/lib/code_editor.js', function ()
 	{
 		const doc_url = g.admin_url + 'static/doc/';
 		var save_btn = document.querySelector('[name=save]');
@@ -190,6 +190,7 @@
 		if (window.parent && window.parent.g.dialog) {
 			// Always fullscreen in dialogs
 			code.toggleFullscreen();
+			window.parent.g.toggleDialogFullscreen();
 
 			// Display error message in editor
 			if (msg = document.querySelector('p.error, p.confirm'))

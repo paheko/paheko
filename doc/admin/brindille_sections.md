@@ -362,7 +362,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
-| `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. Si une chaîne de texte est indiquée, elle sera utilisée dans la clause `COUNT(<texte>)`. |
+| `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. |
 
 Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points `:` :
 
@@ -380,10 +380,6 @@ Exemples d'utilisation du paramètre `count` :
 {{#articles count=true assign="result"}}
 {{/articles}}
 Il y a {{$result.count}} articles.
-
-{{#articles count="DISTINCT title"}}
-	Il y a {{$count}} articles avec un titre différent.
-{{/articles}}
 ```
 
 # Membres
@@ -585,6 +581,25 @@ Note : seul les fichiers de la section site web sont accessibles, les fichiers d
 
 # Sections relatives aux modules
 
+## extension
+
+Permet de charger les informations d'une extension (que ça soit un module ou un plugin). Utile pour récupérer ses infos, ou vérifier si une extension est activée.
+
+Si une extension est désactivée, la section ne renverra aucun résultat.
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `name` | **obligatoire** | Nom unique du module |
+
+```
+{{#extension name="caisse"}}
+	L'extension est activée : {{$label}}
+	(C'est un {{$type}})
+{{else}}
+	L'extension caisse est désactivée.
+{{/if}}
+```
+
 ## module
 
 Permet de charger les informations d'un autre module. Utile pour récupérer ses infos, ou vérifier si un module est activé.
@@ -593,7 +608,7 @@ Si un module est désactivé, la section ne renverra aucun résultat.
 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
-| `module` | **obligatoire** | Nom unique du module |
+| `name` | **obligatoire** | Nom unique du module |
 
 ```
 {{#module name="bookings"}}
@@ -840,13 +855,14 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `module` | *optionnel* | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
 | `columns` | *optionnel* | Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules. |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
-| `group` | *optionnel* | Expression SQL utilisée par défaut pour le groupement des résultats (`GROUP BY`). |
+| `group` | *optionnel* | Expression SQL utilisée pour le groupement des résultats (`GROUP BY`). |
+| `count` | *optionnel* | Expression SQL utilisée pour le décompte des résultats. Défaut : `COUNT(*)`. Principalement utile avec la clause `group`. |
 | `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri sera inversé. |
 | `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | *optionnel* | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
-| `disable_user_ordering` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
+| `disable_user_sort` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
 
 Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre `schema` pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la `description` indiquée dans le schéma), soit le paramètre `select`, où il faut alors indiquer le nom et le libellé des colonnes sous la forme `$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"`.
 

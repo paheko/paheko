@@ -6,6 +6,16 @@
     size: A4 landscape;
 }
 
+@page {
+    @bottom {
+        text-align: center;
+        content: counter(page) " / " counter(pages);
+        font-size: 9pt;
+        font-family: sans-serif;
+        margin-bottom: .5cm;
+    }
+}
+
 .pdf[data-prefer-landscape] {
     page: landscape;
 }
@@ -32,8 +42,7 @@ main {
 }
 
 main h1.main {
-    margin: 0;
-    text-align: center;
+    display: none;
 }
 
 table.list thead {
@@ -103,11 +112,12 @@ table.list td {
     display: block;
 }
 
-td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
+td.actions *, nav.tabs, .icn-btn, .pagination, a.icn, p.actions,
+table thead label, table tfoot label, table thead button span {
     display: none !important;
 }
 
-td.num a {
+td.num a, a.num {
     border: none;
     padding: 0;
     background: none;
@@ -135,4 +145,17 @@ details summary::after {
 
 .transaction-details-container {
     max-width: initial;
+    display: block;
+}
+
+.transaction-details-container aside {
+    columns: 2;
+    gap: 1em;
+}
+
+span.tag {
+    color: #000;
+    background: none;
+    text-shadow: none;
+    border: 1px solid #ccc;
 }

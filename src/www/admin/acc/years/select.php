@@ -19,7 +19,7 @@ $form->runIf('switch', function () {
 
 	$user = Session::getLoggedUser();
 	$user->setPreference('accounting_year', $year->id());
-	$user->save();
+	$user->savePreferences();
 }, $csrf_key, $url);
 
 $tpl->assign('years', Years::list());

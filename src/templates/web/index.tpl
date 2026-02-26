@@ -73,8 +73,8 @@
 		<table>
 			<thead>
 				<tr>
-					<th>Libellé du lien</th>
-					<th>Adresse du lien</th>
+					<th scope="col">Libellé du lien</th>
+					<th scope="col">Adresse du lien</th>
 				</tr>
 			</thead>
 			<tbody>

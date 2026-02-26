@@ -12,6 +12,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use KD2\DB\EntityManager;
+use KD2\DB\Date;
 
 class Services_User
 {
@@ -25,6 +26,16 @@ class Services_User
 		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
 	}
 
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
+	{
+		$su = new Service_User;
+		$su->date = new Date;
+		// Required, also to calculate expiry date
+		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
+		return $su;
+	}
+
 	static public function listDistinctForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT
@@ -35,12 +46,16 @@ class Services_User
 			INNER JOIN services s ON s.id = su.id_service
 			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
+			AND s.archived = 0
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
 	{
 		$columns = [
+			'archived' => [
+				'select' => 's.archived',
+			],
 			'id' => [
 				'select' => 'su.id',
 			],
@@ -108,7 +123,6 @@ class Services_User
 
 		$list->orderBy('date', true);
 		$list->groupBy('su.id');
-		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
 	}
 
@@ -168,6 +182,10 @@ class Services_User
 					$row->paid = true;
 				}
 
+				if (!empty($row->expected_amount)) {
+					$row->expected_amount = Utils::moneyToInteger($row->expected_amount);
+				}
+
 				$su->import((array)$row);
 
 				yield $i => $su;
@@ -181,6 +199,16 @@ class Services_User
 				throw $e;
 			}
 		}
+	}
+
+	static public function create(int $id_user, int $id_service, ?int $id_fee): Service_User
+	{
+		$su = new Service_User;
+		$su->set('id_user', $id_user);
+		$su->set('id_service', $id_service);
+		$su->set('id_fee', $id_fee);
+		$su->set('date', new Date);
+		return $su;
 	}
 
 	static public function import(CSV_Custom $csv): void

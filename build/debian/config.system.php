@@ -5,17 +5,14 @@
  */
 namespace Paheko;
 
-// Stop here if config file is already defined, as this means we are in user-mode
-// (see config.user.php)
-if (defined(__NAMESPACE__ . '\CONFIG_FILE')) {
-	return;
-}
-
-const SQLITE_JOURNAL_MODE = 'WAL';
 const ENABLE_UPGRADES = false;
 
 if (file_exists('/etc/paheko/config.php')) {
 	require_once '/etc/paheko/config.php';
+}
+
+if (!defined('Paheko\SQLITE_JOURNAL_MODE')) {
+	define('Paheko\SQLITE_JOURNAL_MODE', 'WAL');
 }
 
 if (!defined('Paheko\DATA_ROOT')) {
@@ -24,6 +21,10 @@ if (!defined('Paheko\DATA_ROOT')) {
 
 if (!defined('Paheko\CACHE_ROOT')) {
 	define('Paheko\CACHE_ROOT', '/var/cache/paheko');
+}
+
+if (!defined('Paheko\PLUGINS_ROOT')) {
+	define('Paheko\PLUGINS_ROOT', __DIR__ . '/plugins');
 }
 
 if (!defined('Paheko\SECRET_KEY')) {

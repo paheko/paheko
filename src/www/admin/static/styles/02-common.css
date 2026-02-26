@@ -151,7 +151,13 @@ dd.help li {
     overflow: hidden;
 }
 
-.ruler:before, .ruler:after {
+.ruler-left {
+    margin: .5em 0;
+    overflow: hidden;
+    display: block;
+}
+
+.ruler:before, .ruler:after, .ruler-left:after {
     background-color: var(--gLightBorderColor);
     content: "";
     display: inline-block;
@@ -166,9 +172,14 @@ dd.help li {
     margin-left: -50%;
 }
 
-.ruler:after {
+.ruler:after, .ruler-left:after {
     left: 0.5em;
     margin-right: -50%;
+}
+
+.ruler-left:after {
+    width: 100%;
+    margin-right: -100%;
 }
 
 .num a, a.num {
@@ -365,14 +376,13 @@ dl.list dd.desc {
 
 dl.describe {
     margin: 1rem 0;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: wrap;
+    display: grid;
     align-items: start;
+    grid-template-columns: 15rem 1fr;
 }
 
 dl.describe > dt {
-    flex: 0 0 15rem;
+    grid-column: 1;
     text-overflow: ellipsis;
     overflow: hidden;
     text-align: right;
@@ -381,8 +391,7 @@ dl.describe > dt {
 }
 
 dl.describe > dd {
-    flex: 0 0 calc(100% - 17rem);
-    margin-left: auto;
+    grid-column: 2;
     text-align: left;
     margin: .2rem .5rem;
 }
@@ -467,6 +476,12 @@ aside.describe dd a.icn-btn, aside.secondary a.icn-btn, aside.secondary button, 
         padding: 0;
         border: none;
     }
+
+    aside.secondary p.actions {
+        text-align: center;
+        float: none;
+        padding: 1em;
+    }
 }
 
 .hidden {
@@ -497,11 +512,11 @@ details summary:hover {
     background-color: rgba(var(--gMainColor), 0.1);
 }
 
-details summary::-webkit-details-marker {
+details:not(.debug) summary::-webkit-details-marker {
     display: none;
 }
 
-details summary::after {
+details:not(.debug) summary::after {
     content: "↓";
     position: absolute;
     left: 0;
@@ -525,11 +540,11 @@ details summary::after {
     font-size: 1.2em;
 }
 
-details[open] summary::after {
+details[open]:not(.debug) summary::after {
     content: "↑";
 }
 
-details summary:hover::after {
+details:not(.debug) summary:hover::after {
     background-color: rgb(var(--gMainColor));
     color: #fff;
 }
@@ -925,23 +940,6 @@ img.broken {
     display: inline-block;
     line-height: 1em;
     padding: .5rem;
-}
-
-pre.preview {
-    max-width: 55rem;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-
-    -ms-word-break: break-all;
-    word-break: break-all;
-    word-break: break-word;
-
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-
-    white-space: pre-wrap;
 }
 
 span.tag {

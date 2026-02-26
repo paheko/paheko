@@ -26,15 +26,11 @@ if ($homepage) {
 	$homepage = $homepage->render();
 }
 else {
-	$homepage = null;
+	$homepage = nl2br("Bienvenue !\n\nUtilisez le menu de gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu⋅e, n'hésitez pas à consulter l'aide :-)");
 }
 
 $buttons = Extensions::listHomeButtons($session);
 $has_extensions = empty($buttons) ? Extensions::isAnyExtensionEnabled() : true;
-
-if (!$has_extensions && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
-	$buttons = Extensions::listAvailableButtons();
-}
 
 $tpl->assign(compact('homepage', 'banner', 'buttons', 'has_extensions'));
 

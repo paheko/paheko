@@ -19,7 +19,7 @@
 	<nav>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->isLocked() && $transaction_year->isOpen()}
 		{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture" accesskey="M"}
-		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S"}
+		{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture" accesskey="S" target="_dialog"}
 	{/if}
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 		{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture" accesskey="D"}
@@ -104,9 +104,11 @@
 			<dt>Numéro pièce comptable</dt>
 			<dd>{if $transaction.reference}<mark>{$transaction.reference}</mark>{else}—{/if}</dd>
 
-			{if $transaction.type != $transaction::TYPE_ADVANCED}
-				<dt>Référence de paiement</dt>
-				<dd>{if $ref = $transaction->getPaymentReference()}<mark>{$ref}</mark>{else}—{/if}</dd>
+			{if $transaction.type !== $transaction::TYPE_ADVANCED}
+				{if $transaction.type !== $transaction::TYPE_CREDIT && $transaction.type !== $transaction::TYPE_DEBT}
+					<dt>Référence de paiement</dt>
+					<dd>{if $ref = $transaction->getPaymentReference()}<mark>{$ref}</mark>{else}—{/if}</dd>
+				{/if}
 				<dt>Projet</dt>
 				<dd>
 				{if $project = $transaction->getProject()}
@@ -171,12 +173,13 @@
 				<thead>
 					<tr>
 						<td class="num">N° compte</td>
-						<th>Compte</th>
+						<th scope="col">Compte</th>
 						<td class="money">Débit</td>
 						<td class="money">Crédit</td>
 						<td>Libellé ligne</td>
 						<td>Référence ligne</td>
 						<td>Projet</td>
+						<td></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -191,6 +194,11 @@
 						<td>
 							{if $line.id_project}
 								{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$transaction.id_year label=$line.project_name}
+							{/if}
+						</td>
+						<td>
+							{if $line.is_deposited}
+								{tag label="Déposé" color="lightseagreen"}
 							{/if}
 						</td>
 					</tr>

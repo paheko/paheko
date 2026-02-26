@@ -42,8 +42,12 @@ class Extensions
 		return $list;
 	}
 
-	static public function get(string $name): ?Extension
+	static public function get(?string $name): ?Extension
 	{
+		if (!$name) {
+			return null;
+		}
+
 		$ext = Plugins::get($name);
 		$ext ??= Plugins::getInstallable($name);
 		$ext ??= Modules::get($name);
@@ -62,12 +66,6 @@ class Extensions
 		$e = new Extension;
 		$e->normalize($item);
 		return $e;
-	}
-
-	static public function toggle(string $name, bool $enabled)
-	{
-		$ext = self::get($name);
-		$ext->toggle($enabled);
 	}
 
 	static protected function filterList(array &$list): void
@@ -112,6 +110,10 @@ class Extensions
 		$list = [];
 
 		foreach (EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE WHERE enabled = 1;') as $m) {
+			if (!$m->isValid()) {
+				continue;
+			}
+
 			$list[$m->name] = $m;
 		}
 
@@ -120,9 +122,9 @@ class Extensions
 				continue;
 			}
 
-			if (!$p->hasCode()) {
+			if ($p->isBroken()) {
 				$p->set('enabled', false);
-				$p->save();
+				$p->save(false);
 				continue;
 			}
 

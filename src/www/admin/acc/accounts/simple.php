@@ -22,7 +22,7 @@ $types = [
 	Transaction::TYPE_ADVANCED => 'Avancées',
 ];
 
-$type = qg('type');
+$type = intval(qg('type') ?? key($types));
 
 if (!array_key_exists($type, $types)) {
 	$type = key($types);
@@ -36,7 +36,7 @@ $can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_A
 
 $pending_count = null;
 
-if ($type == Transaction::TYPE_CREDIT || $type == Transaction::TYPE_DEBT) {
+if ($type === Transaction::TYPE_CREDIT || $type === Transaction::TYPE_DEBT) {
 	$pending_count = Transactions::listPendingCreditAndDebtForOtherYears(CURRENT_YEAR_ID)->count();
 }
 

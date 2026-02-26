@@ -18,6 +18,9 @@ class DynamicList implements \Countable
 	 * - If the key 'select' exists, then it will be used as the SELECT clause
 	 * - If the key 'label' exists, it will be used in the HTML table as its header
 	 * (if not, the result will still be available in the loop, just it will not generate a column in the HTML table)
+	 * - If the key 'order' exists and is NULL, then this column will not have sort buttons
+	 * - If the key 'order' exists and is a string it will be used for the ORDER BY clause when the
+	 *   column sort buttons are clicked. '%s' will be replaced by either ASC or DESC.
 	 * - If the key 'export' is TRUE, then the column will ONLY be included in CSV/ODS/XLSX exports
 	 * - If the key 'export' is FALSE, then the column will NOT be included in exports
 	 * (if the key `export` is NULL, or not set, then the column will be included both in HTML and in exports)
@@ -215,9 +218,24 @@ class DynamicList implements \Countable
 		$this->conditions = $conditions;
 	}
 
+	public function addConditions(string $conditions)
+	{
+		$this->conditions .= ' ' . ltrim($conditions);
+	}
+
 	public function setColumns(array $columns)
 	{
 		$this->columns = $columns;
+	}
+
+	public function setColumnProperty(string $column, string $property, $value)
+	{
+		$this->columns[$column][$property] = $value;
+	}
+
+	public function removeColumn(string $column)
+	{
+		unset($this->columns[$column]);
 	}
 
 	public function addColumn(string $name, array $column, int $position = -1)
@@ -228,6 +246,23 @@ class DynamicList implements \Countable
 		else {
 			$this->columns = array_slice($this->columns, 0, $position, true) + [$name => $column] + array_slice($this->columns, $position, null, true);
 		}
+	}
+
+	public function removeColumns(array $columns)
+	{
+		foreach ($columns as $name) {
+			unset($this->columns[$name]);
+		}
+	}
+
+	public function hasColumn(string $key)
+	{
+		return array_key_exists($key, $this->columns);
+	}
+
+	public function addTables(string $tables)
+	{
+		$this->tables .= ' ' . ltrim($tables);
 	}
 
 	/**
@@ -269,7 +304,7 @@ class DynamicList implements \Countable
 	public function count(): int
 	{
 		if (null === $this->count_result) {
-			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->count_tables ?? $this->tables, $this->conditions);
+			$sql = $this->SQL(true);
 			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
 		}
 
@@ -298,11 +333,6 @@ class DynamicList implements \Countable
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
 		$url = Utils::getSelfURI($query);
 		return $url;
-	}
-
-	public function setCount(string $count)
-	{
-		$this->count = $count;
 	}
 
 	public function setCountTables(string $tables)
@@ -480,7 +510,7 @@ class DynamicList implements \Countable
 		return null;
 	}
 
-	public function SQL()
+	public function SQL(bool $count = false)
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$db = DB::getInstance();
@@ -526,12 +556,27 @@ class DynamicList implements \Countable
 		}
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
+		$tables = null;
 
-		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
-			$select, $this->tables, $this->conditions, $group, $order);
+		if ($count) {
+			$select = '1';
+			$tables = $this->count_tables;
+		}
 
-		if (null !== $this->per_page) {
-			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
+		$tables ??= $this->tables;
+
+		$sql = sprintf('SELECT %s FROM %s WHERE %s %s',
+			$select, $tables, $this->conditions, $group);
+
+		if ($count) {
+			$sql = sprintf('SELECT %s FROM (%s);', $this->count, $sql);
+		}
+		else {
+			$sql .= sprintf(' ORDER BY %s', $order);
+
+			if (null !== $this->per_page) {
+				$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
+			}
 		}
 
 		return $sql;
@@ -590,6 +635,8 @@ class DynamicList implements \Countable
 			else {
 				$u->setPreference('list_' . $hash, ['o' => $order, 'd' => $desc]);
 			}
+
+			$u->savePreferences();
 		}
 
 		if ($order && array_key_exists($order, $this->columns)) {

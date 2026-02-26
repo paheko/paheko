@@ -6,6 +6,7 @@ use KD2\Graphics\Image;
 use KD2\HTML\Markdown;
 use KD2\ErrorManager;
 
+use Paheko\Config;
 use Paheko\Files\Conversion;
 use Paheko\Static_Cache;
 use Paheko\UserException;
@@ -91,7 +92,7 @@ trait FileThumbnailTrait
 			$size .= 'px';
 		}
 
-		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
+		$size = isset($size) && array_key_exists($size, self::ALLOWED_THUMB_SIZES) ? $size : key(self::ALLOWED_THUMB_SIZES);
 		$uri = sprintf('%s.%s.%s', $this->uri(), $size, $ext);
 
 		if ($with_hash) {
@@ -219,6 +220,19 @@ trait FileThumbnailTrait
 		file_put_contents($destination, $out);
 	}
 
+	public function isImageTooLarge(Image $i): bool
+	{
+		list($w, $h) = $i->getSize();
+
+		// Don't allow super large images: > 6000x6000
+		// as they can cause memory issues, eg. 'cache resources exhausted'
+		if ($w >= 6000 || $h >= 6000) {
+			return true;
+		}
+
+		return false;
+	}
+
 	protected function createThumbnail(string $size, string $destination): bool
 	{
 		$operations = self::ALLOWED_THUMB_SIZES[$size];
@@ -231,6 +245,10 @@ trait FileThumbnailTrait
 		$i = $this->asImageObject();
 
 		if (!$i) {
+			return false;
+		}
+
+		if ($this->isImageTooLarge($i)) {
 			return false;
 		}
 
@@ -256,7 +274,17 @@ trait FileThumbnailTrait
 
 		$format = null;
 
-		if ($i->format() !== 'gif') {
+		if ($size === 'email-150px') {
+			// There is only one file allowed to have this format
+			if ($this->path !== Config::FILES['logo']) {
+				return false;
+			}
+
+			// Force this thumbnail to be a PNG as Gmail sucks with Webp transparency
+			// see https://groups.google.com/a/webmproject.org/g/webp-discuss/c/e1ZzTJOfIyg
+			$format = 'png';
+		}
+		elseif ($i->format() !== 'gif') {
 			$format = ['webp', null];
 		}
 

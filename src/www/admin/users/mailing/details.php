@@ -12,14 +12,10 @@ if (!$mailing) {
 	throw new UserException('Invalid mailing ID');
 }
 
-if (qg('preview') !== null) {
-	echo $mailing->getHTMLPreview((int)qg('preview') ?: null, true);
-	return;
-}
+$hints = $mailing->sent ? null : $mailing->getDelivrabilityHints();
+$tpl->assign(compact('mailing', 'hints'));
 
-$tpl->assign(compact('mailing'));
-
-$tpl->assign('custom_css', [BASE_URL . 'content.css']);
+$tpl->assign('custom_css', [BASE_URL . 'content.css', 'mailing.css']);
 $tpl->assign('sent', null !== qg('sent'));
 
 $tpl->display('users/mailing/details.tpl');

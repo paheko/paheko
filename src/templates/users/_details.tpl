@@ -34,7 +34,7 @@ $fields = DF::getInstance()->all();
 	{/if}
 
 	<dd>
-		{if $field.type == 'checkbox'}
+		{if $field.type === 'checkbox'}
 			{if $value}
 				{icon shape="check"} Oui
 			{else}
@@ -45,13 +45,10 @@ $fields = DF::getInstance()->all();
 			$edit = ($field->user_access_level === Session::ACCESS_WRITE || $context === 'manage');
 			?>
 			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path:$key}
-		{elseif empty($value)}
+		{elseif null === $value}
 			<em>(Non renseigné)</em>
 		{elseif $field.type == 'email'}
 			<a href="mailto:{$value|escape:'url'}">{$value}</a>
-			{if !DISABLE_EMAIL && $show_message_button && !$email_button++}
-				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
-			{/if}
 		{elseif $field.type == 'multiple'}
 			<ul>
 			{foreach from=$field.options key="b" item="name"}
@@ -62,35 +59,37 @@ $fields = DF::getInstance()->all();
 			</ul>
 		{else}
 			{if in_array($key, $id_fields)}<strong>{/if}
-			{user_field field=$field value=$value user_id=$user.id}
+			{user_field field=$field value=$value user_id=$user.id context="details"}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
-	</dd>
-		{if $field.type == 'email' && $value}
-		<?php $email = Email\Emails::getEmail($value); ?>
-		<dt>Statut e-mail</dt>
-		<dd>
-			{if $email.optout}
-				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
-				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					<?php $value = rawurlencode($value); ?>
-					<br/>{linkbutton target="_dialog" label="Rétablir les envois à cette adresse" href="!users/mailing/verify.php?address=%s"|args:$value shape="check"}
-				{/if}
-			{elseif $email.invalid}
-				<b class="error">{icon shape="alert"} Adresse invalide</b>
-				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email && $email->hasReachedFailLimit()}
-				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
-				{linkbutton href="!users/mailing/rejected.php?hl=%d#e_%1\$d"|args:$email.id label="Détails de l'erreur" shape="help"}
-			{elseif $email.verified}
-				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
-			{else}
-				{* Adresse non vérifiée *}
-				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					{linkbutton target="_dialog" label="Désinscrire de tous les envois" href="!users/mailing/block.php?address=%s"|args:$value shape="delete"}
-				{/if}
+		{if $field.type === 'email' && $value}
+		<?php $email = Email\Emails::getOrCreateEmail($value); $address = rawurlencode($value); ?>
+			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
+				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
+			<br />
+			{if $email.invalid}
+				{tag label="Adresse invalide" color="darkred"}
+			{elseif $email && $email->hasReachedFailLimit()}
+				{tag label="Adresse bloquée" color="darkorange"}
+			{elseif $email.verified}
+				{tag label="Adresse vérifiée" color="darkgreen"}
+			{*
+			{else}
+				{tag label="Adresse non vérifiée" color="darkgrey"}
+			*}
+			{/if}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
+		<dt>Préférences de réception</dt>
+		<dd>
+			{if $email.accepts_messages}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages personnels<br />
+			{if $email.accepts_reminders}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Rappels de cotisation et d'activité<br />
+			{if $email.accepts_mailings}{icon shape="check"}{else}{icon shape="uncheck"}{/if} Messages collectifs<br />
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+				{linkbutton target="_dialog" label="Modifier les préférences" href="!users/mailing/status/preferences.php?address=%s"|args:$value shape="settings"}
+			{/if}
 		{/if}
+	</dd>
 	{/foreach}
 </dl>

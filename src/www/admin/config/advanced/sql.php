@@ -75,9 +75,11 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 				$result = $db->get('PRAGMA foreign_key_check;') ?: [['no errors']];
 			}
 			elseif (ENABLE_TECH_DETAILS && $pragma == 'vacuum') {
+				$db->disableSafetyAuthorizer();
 				$result[] = ['Size before VACUUM: ' . Backup::getDBSize()];
 				$db->exec('VACUUM;');
 				$result[] = ['Size after VACUUM: ' . Backup::getDBSize()];
+				$db->enableSafetyAuthorizer();
 			}
 
 			$result_count = count($result);
@@ -90,9 +92,14 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 				return;
 			}
 
+			$result_count = $s->countResults();
+
+			if ($result_count > 10000) {
+				throw new UserException('Trop de résultats. Merci de limiter la requête à 10.000 résultats.');
+			}
+
 			$result = $s->iterateResults();
 			$result_header = $s->getHeader();
-			$result_count = $s->countResults();
 		}
 		else {
 			$result = $result_count = $result_header = null;

@@ -28,7 +28,7 @@
 							expiration
 						{/if}
 					</td>
-					<th><a href="details.php?id={$reminder.id}">{$reminder.subject}</a></th>
+					<th scope="row"><a href="details.php?id={$reminder.id}">{$reminder.subject}</a></th>
 					<td class="actions">
 						{linkbutton shape="history" label="Liste des rappels envoyés" href="!services/reminders/details.php?id=%d&list=sent"|args:$reminder.id}
 						{linkbutton shape="mail" label="Liste des rappels à envoyer" href="!services/reminders/details.php?id=%d&list=pending"|args:$reminder.id}<br />

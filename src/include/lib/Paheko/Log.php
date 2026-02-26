@@ -25,6 +25,8 @@ class Log
 
 	const SOFT_LOCKOUT_ATTEMPTS = 3;
 
+	const PASSWORD_LOCKOUT_ATTEMPTS = 2;
+
 	const MESSAGE = 0;
 
 	const LOGIN_FAIL = 1;
@@ -61,9 +63,40 @@ class Log
 		self::MESSAGE => '',
 	];
 
-	static public function add(int $type, ?array $details = null, int $id_user = null): void
+	static public function add(int $type, ?array $details = null, ?int $id_user = null): void
 	{
-		// Don't log during install/upgrade
+		if (isset($details['entity'])) {
+			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
+		}
+
+		$ip = Utils::getIP();
+
+		// Log to text file
+		if (AUDIT_LOG_FILE) {
+			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s) %s' . PHP_EOL,
+				date('Y-m-d H:i:s'),
+				self::ACTIONS[$type] ?? 'Action',
+				$ip,
+				json_encode($details)
+			), FILE_APPEND);
+
+			$i = random_int(0, 100);
+
+			// Also log database file size, to see if something happens there
+			if ($i % 10 == 0) {
+				file_put_contents(AUDIT_LOG_FILE, sprintf("[INFO] DB size = %d\n", filesize(DB_FILE)), FILE_APPEND);
+			}
+
+			// Limit size of audit log from time to time
+			if ($i % 50 == 0
+				&& filesize(AUDIT_LOG_FILE) > AUDIT_LOG_SIZE) {
+				$log = file_get_contents(AUDIT_LOG_FILE, false, null, AUDIT_LOG_SIZE);
+				file_put_contents(AUDIT_LOG_FILE, sprintf("(Cut on %s)\n...", date('Y-m-d H:i:s')) . $log);
+				unset($log);
+			}
+		}
+
+		// Don't log to DB during install/upgrade (it might not be installed/migrated yet)
 		if (defined('Paheko\SKIP_STARTUP_CHECK')) {
 			return;
 		}
@@ -77,11 +110,6 @@ class Log
 			}
 		}
 
-		if (isset($details['entity'])) {
-			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
-		}
-
-		$ip = Utils::getIP();
 		$id_user ??= Session::getUserId();
 
 		DB::getInstance()->insert('logs', [
@@ -147,6 +175,20 @@ class Log
 		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
 	}
 
+	/**
+	 * Returns TRUE if the current IP address has done too many password recovery requests
+	 */
+	static public function isPasswordRecoveryLocked(): bool
+	{
+		$ip = Utils::getIP();
+
+		// is IP locked out?
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_RECOVER, $ip);
+
+		return $count >= self::PASSWORD_LOCKOUT_ATTEMPTS;
+	}
+
 	static public function list(array $params = []): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
@@ -199,7 +241,6 @@ class Log
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('created', true);
-		$list->setCount('COUNT(l.id)');
 		$list->setModifier(function (&$row) {
 			$row->details = $row->details ? json_decode($row->details) : null;
 			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];

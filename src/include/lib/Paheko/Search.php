@@ -3,11 +3,48 @@
 namespace Paheko;
 
 use Paheko\Entities\Search as SE;
+use Paheko\DynamicList;
 
 use KD2\DB\EntityManager as EM;
 
 class Search
 {
+	static public function getList(string $target, ?int $id_user): DynamicList
+	{
+		$columns = [
+			'label' => [
+				'label' => 'Recherche',
+				'order' => 'label COLLATE U_NOCASE %s',
+			],
+			'type' => [
+				'label' => 'Type',
+				'order' => 'type %s, label COLLATE U_NOCASE %1$s',
+			],
+			'id_user' => [
+				'label' => 'Statut',
+				'order' => 'id_user %s, label COLLATE U_NOCASE %1$s',
+			],
+			'updated' => [
+				'label' => 'Mise à jour',
+			],
+			'id' => [],
+		];
+
+		$tables = SE::TABLE;
+
+		$conditions = 'target = :target AND (id_user IS NULL%s)';
+		$conditions = sprintf($conditions, $id_user ? sprintf(' OR id_user = %d', $id_user): '');
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->setParameter('target', $target);
+		$list->orderBy('label', false);
+		$list->setModifier(function (&$row) {
+			$row->type = $row->type === SE::TYPE_JSON ? 'Avancée' : 'SQL';
+		});
+
+		return $list;
+	}
+
 	static public function list(string $target, ?int $id_user): array
 	{
 		$params = [$target];
@@ -45,7 +82,6 @@ class Search
 	{
 		$s = new SE;
 		$s->set('target', $target);
-		$s->set('created', new \DateTime);
 
 		if ($type !== null) {
 			$s->set('type', $type);

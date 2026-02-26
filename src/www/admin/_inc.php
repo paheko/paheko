@@ -6,11 +6,17 @@ use Paheko\Users\Session;
 
 require_once __DIR__ . '/../../include/init.php';
 
+/**
+ * @deprecated use $_POST[$key] ?? null instead
+ */
 function f($key)
 {
 	return \KD2\Form::get($key);
 }
 
+/**
+ * @deprecated Use $_GET[$key] ?? null instead
+ */
 function qg($key)
 {
 	return isset($_GET[$key]) ? $_GET[$key] : null;

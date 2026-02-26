@@ -128,13 +128,13 @@ abstract class AdvancedSearch
 				continue;
 			}
 
-			if (isset($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
+			if (!empty($group['join_operator']) && $group['join_operator'] !== 'AND' && $group['join_operator'] !== 'OR') {
 				continue;
 			}
 
 			$query_group_conditions = [];
 
-			foreach ($group['conditions'] as $condition)
+			foreach ($group['conditions'] as $position => $condition)
 			{
 				if (!isset($condition['column'], $condition['operator'])
 					|| (isset($condition['values']) && !is_array($condition['values'])))
@@ -192,13 +192,16 @@ abstract class AdvancedSearch
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
 
-				if (!empty($column['normalize'])) {
-					if ($column['normalize'] == 'tel') {
-						// Normaliser le numéro de téléphone
-						$values = array_map(['Paheko\Utils', 'normalizePhoneNumber'], $values);
-					}
-					elseif ($column['normalize'] == 'money') {
+				if ($column['type'] == 'tel') {
+					// Normaliser le numéro de téléphone
+					$values = array_map(['Paheko\Utils', 'normalizePhoneNumber'], $values);
+				}
+				elseif ($column['type'] == 'money') {
+					try {
 						$values = array_map(['Paheko\Utils', 'moneyToInteger'], $values);
+					}
+					catch (\InvalidArgumentException $e) {
+						throw new UserException($e->getMessage(), 0, $e);
 					}
 				}
 				elseif ($column['type'] === 'integer') {
@@ -246,8 +249,10 @@ abstract class AdvancedSearch
 					$expected = substr_count($query, '?');
 					$found = count($values);
 
-					if ($expected != $found)
-					{
+					if (!$found && $expected) {
+						throw new UserException(sprintf('Choix manquant pour le critère n°%d', $position));
+					}
+					elseif ($expected != $found) {
 						throw new \RuntimeException(sprintf('Operator %s expects at least %d parameters, only %d supplied', $condition['operator'], $expected, $found));
 					}
 
@@ -265,7 +270,7 @@ abstract class AdvancedSearch
 			}
 
 			if ($query_groups !== '') {
-				$query_groups .= ' ' . ($group['join_operator'] ?? 'AND') . ' ';
+				$query_groups .= ' ' . (empty($group['join_operator']) ? 'AND' : $group['join_operator']) . ' ';
 			}
 
 			$o = $group['operator'];

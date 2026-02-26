@@ -6,36 +6,35 @@ use Paheko\Backup;
 require_once __DIR__ . '/../_inc.php';
 
 $csrf_key = 'backup_config';
+$config = Config::getInstance();
 
-$form->runIf('config', function () {
-	$frequency = (int) f('backup_frequency');
+$form->runIf('config', function () use ($config) {
+	$source = $_POST;
+	$option = $source['backup'] ?? 'none';
 
-	if ($frequency < 0 || $frequency > 365) {
-		throw new UserException('Fréquence invalide');
+	if ($option === 'none') {
+		$source['backup_frequency'] = 0;
+	}
+	elseif ($option === 'auto') {
+		$source['backup_frequency'] = -1;
 	}
 
-	$number = (int) f('backup_limit');
-
-	if ($number < 0 || $number > 50) {
-		throw new UserException('Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
-	}
-
-	$config = Config::getInstance();
-	$config->set('backup_frequency', $frequency);
-	$config->set('backup_limit', $number);
+	$config->importForm($source);
 	$config->save();
 }, $csrf_key, '!config/backup/auto.php?msg=CONFIG_SAVED');
 
-$frequencies = [
-	0 => 'Aucun — les sauvegardes automatiques sont désactivées',
-	1 => 'Quotidienne, tous les jours',
-	7 => 'Hebdomadaire, tous les 7 jours',
-	15 => 'Bimensuelle, tous les 15 jours',
-	30 => 'Mensuelle',
-	90 => 'Trimestrielle',
-	365 => 'Annuelle',
-];
+$frequencies = Config::BACKUP_FREQUENCIES;
 
-$tpl->assign(compact('frequencies', 'csrf_key'));
+if ($config->backup_frequency === -1) {
+	$backup = 'auto';
+}
+elseif (!$config->backup_frequency) {
+	$backup = 'none';
+}
+else {
+	$backup = 'custom';
+}
+
+$tpl->assign(compact('frequencies', 'backup', 'csrf_key'));
 
 $tpl->display('config/backup/auto.tpl');

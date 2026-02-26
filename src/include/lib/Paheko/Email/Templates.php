@@ -50,4 +50,9 @@ class Templates
 	{
 		self::send($email, 'verify_email.tpl', compact('verify_url'));
 	}
+
+	static public function verifyPreferences(string $recipient, string $verify_url, array $preferences): void
+	{
+		self::send($recipient, 'verify_preferences.tpl', compact('verify_url', 'preferences'));
+	}
 }

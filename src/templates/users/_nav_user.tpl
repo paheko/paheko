@@ -18,7 +18,9 @@
 		{if isset($list) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			{exportmenu href="?id=%d"|args:$user_id}
 		{/if}
-		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}
+		{if isset($user) && !$user->isHidden()}
+			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}
+		{/if}
 	{/if}
 
 	</aside>

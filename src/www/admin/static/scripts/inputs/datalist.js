@@ -240,8 +240,18 @@
 					return;
 				}
 
+				var search = input.value.trim();
+
+				if (a = $('#f_code_postal')) {
+					search += ' ' + a.value.trim();
+				}
+
+				if (a = $('#f_ville')) {
+					search += ' ' + a.value.trim();
+				}
+
 				var fd = new FormData;
-				fd.append('search', g.normalizeString(input.value));
+				fd.append('search', g.normalizeString(search.trim()));
 
 				fetch(g.admin_url + 'common/autocomplete_address.php', {
 					method: 'POST',

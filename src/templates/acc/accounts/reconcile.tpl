@@ -82,16 +82,16 @@
 	<table class="list">
 		<thead>
 			<tr>
-				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+				<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 				<td></td>
 				<td>Date</td>
 				<td class="money">Débit</td>
 				<td class="money">Crédit</td>
 				<td class="money">Solde cumulé</td>
 				<td class="money">Solde rapproché</td>
-				<th>Libellé</th>
-				<th>Réf. écriture</th>
-				<th>Réf. ligne</th>
+				<th scope="col">Libellé</th>
+				<th scope="col">Réf. écriture</th>
+				<th scope="col">Réf. ligne</th>
 			</tr>
 		</thead>
 		{if $sum_start}
@@ -99,7 +99,7 @@
 			<tr>
 				<td colspan="6"></td>
 				<td class="money" data-sum-start="{$sum_start}">{$sum_start|raw|money}</td>
-				<th>Solde initial du relevé de compte</th>
+				<th scope="row">Solde initial du relevé de compte</th>
 				<td colspan="2"></td>
 			</tr>
 		</tbody>
@@ -111,7 +111,7 @@
 				<td colspan="5"></td>
 				<td class="money" data-sum="{$line.sum}">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|money:false}</td>
 				<td class="money" data-reconciled-sum="{$line.reconciled_sum}">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|money}</td>
-				<th>Solde au {$line.date|date_short}</th>
+				<th scope="row">Solde au {$line.date|date_short}</th>
 				<td colspan="2"></td>
 			</tr>
 			{else}
@@ -125,7 +125,7 @@
 				<td class="money">{$line.debit|raw|money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
 				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
 				<td class="money" data-credit="{$line.credit}" data-debit="{$line.debit}">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|money:false}</td>
-				<th>{$line.label}</th>
+				<th scope="row">{$line.label}</th>
 				<td>{$line.reference}</td>
 				<td>{$line.line_reference}</td>
 			</tr>
@@ -137,13 +137,13 @@
 			<tr>
 				<td colspan="6"></td>
 				<td class="money" data-sum-end="{$sum_end}">{$sum_end|raw|money}</td>
-				<th>Solde final du relevé de compte</th>
+				<th scope="row">Solde final du relevé de compte</th>
 				<td colspan="2"></td>
 			</tr>
 			<tr>
 				<td colspan="6"></td>
 				<td class="money" data-sum-end-diff="{$sum_end_diff}">{$sum_end_diff|raw|money_html:false}</td>
-				<th>Différence entre solde théorique et solde final</th>
+				<th scope="row">Différence entre solde théorique et solde final</th>
 				<td colspan="2"></td>
 			</tr>
 		</tfoot>

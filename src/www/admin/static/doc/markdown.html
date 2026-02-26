@@ -87,13 +87,6 @@
 		</ol></li>
 		<li><a href="#extensions">Extensions</a>
 		<ol>
-			<li><a href="#images-jointes">Images jointes</a></li>
-			<li><a href="#galerie-d-images">Galerie d'images</a>
-			<ol>
-				<li><a href="#diaporama-d-images">Diaporama d'images</a>
-			</ol></li>
-			<li><a href="#fichiers-joints">Fichiers joints</a></li>
-			<li><a href="#videos">Vidéos</a></li>
 			<li><a href="#sommaire-table-des-matieres-automatique">Sommaire / table des matières automatique</a>
 			<ol>
 				<li><a href="#exclure-un-sous-titre-du-sommaire">Exclure un sous-titre du sommaire</a>
@@ -101,8 +94,18 @@
 			<li><a href="#grilles-et-colonnes">Grilles et colonnes</a></li>
 			<li><a href="#alignement-du-texte">Alignement du texte</a></li>
 			<li><a href="#boutons">Boutons</a></li>
-			<li><a href="#couleurs">Couleurs</a>
-</li></ol></li></ol></aside><h1 id="syntaxe-markdown">Syntaxe MarkDown</h1>
+			<li><a href="#couleurs">Couleurs</a></li>
+			<li><a href="#extensions-pour-le-site-web"> Extensions pour le site web</a>
+			<ol>
+				<li><a href="#images-jointes">Images jointes</a>
+				<ol>
+					<li><a href="#utilisation-avancee">Utilisation avancée</a>
+				</ol></li>
+				<li><a href="#galerie-d-images">Galerie d'images</a></li>
+				<li><a href="#diaporama-d-images">Diaporama d'images</a></li>
+				<li><a href="#fichiers-joints">Fichiers joints</a></li>
+				<li><a href="#videos">Vidéos</a>
+</li></ol></li></ol></li></ol></aside><h1 id="syntaxe-markdown">Syntaxe MarkDown</h1>
 <p>Paheko permet d'utiliser la syntaxe <a href="https://fr.wikipedia.org/wiki/Markdown" rel="noreferrer noopener external" target="_blank">MarkDown</a> dans les pages du site web.</p>
 <p>Cette syntaxe est la plus répandue dans les outils d'édition de texte, si vous ne la connaissez pas encore, voici les règles qu'on peut utiliser pour formatter du texte avec MarkDown dans la plupart des outils (dont Paheko), ainsi que <a href="#extensions">les règles spécifiques supportées par Paheko</a>.</p>
 <h2 id="styles-de-texte">Styles de texte</h2>
@@ -257,7 +260,7 @@ paragraphe.</p>
 <p>Résultat :</p>
 <pre><code>&lt;html&gt;...&lt;/html&gt;</code></pre>
 <h3 id="tableaux">Tableaux</h3>
-<p>Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (<code>|</code>, obtenu avec les touches <a href="https://fr.wikipedia.org/wiki/Barre_verticale#Saisie" rel="noreferrer noopener external" target="_blank">AltGr + 6</a>).</p>
+<p>Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (<code>|</code>, obtenu avec les touches <a href="https://fr.wikipedia.org/wiki/Barre_verticale#Saisie" rel="noreferrer noopener external" target="_blank">AltGr + 6</a>). Il doit y avoir une ligne vide avant le tableau, et une autre ligne vide après le tableau.</p>
 <p>La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.</p>
 <pre><code>| Colonne 1 | Colonne 2 |
 | - | - | - |
@@ -331,7 +334,7 @@ paragraphe.</p>
 <p>Certains services vidéo comme les instances Peertube permettent l'intégration des vidéos.</p>
 <p>Pour cela il faut recopier le code d'intégration donné par le service vidéo. Voici un exemple :</p>
 <pre><code>&lt;iframe title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" width="560" height="315" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"&gt;&lt;/iframe&gt;</code></pre>
-<p>Résultat :</p><figure class="video" style="padding-top: 56.250000%;"><iframe width="100%" height="100%" title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals" allowtransparency="" style="position: absolute; inset: 0px;"></iframe></figure><h2 id="identifiant-et-classe-css-sur-les-titres">Identifiant et classe CSS sur les titres</h2>
+<p>Résultat :</p><figure class="video" style="height: 315px"><iframe width="100%" height="100%" title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals" allowtransparency="" style="position: absolute; inset: 0px"></iframe></figure><h2 id="identifiant-et-classe-css-sur-les-titres">Identifiant et classe CSS sur les titres</h2>
 <p>Il est possible de spécifier l'ID et la classe CSS d'un titre en les rajoutant à la fin du titre, entre accolades, comme ceci :</p>
 <pre><code>## Titre de niveau 2 {#titre2} {.text-center}</code></pre>
 <p>Le code HTML résultant sera comme ceci :</p>
@@ -418,74 +421,6 @@ Paragraphe
 <h1 id="extensions">Extensions</h1>
 <p>Paheko propose des extensions au langage MarkDown, qui n'existent pas dans les autres logiciels utilisant aussi MarkDown.</p>
 <p>Toutes ces extensions se présentent sous la forme d'un code situé entre deux signes <strong>inférieur à</strong> (<code>&lt;&lt;</code>) et deux signes <strong>supérieur à</strong> (<code>&gt;&gt;</code>), à ne pas confondre avec les guillements français (<code>«</code> et <code>»</code>).</p>
-<h2 id="images-jointes">Images jointes</h2>
-<p>Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :</p>
-<pre><code>&lt;&lt;image|Nom_fichier.jpg|Alignement|Légende&gt;&gt;</code></pre>
-<ul>
-<li><code>Nom_fichier.jpg</code> : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)</li>
-<li><code>Alignement</code> : remplacer par l'alignement :<ul>
-<li><code>gauche</code> ou <code>left</code> : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;</li>
-<li><code>droite</code> ou <code>right</code> : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;</li>
-<li><code>centre</code> ou <code>center</code> : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.</li>
-</ul>
-</li>
-<li>Légende : indiquer ici une courte description de l'image.</li>
-</ul>
-<p>Exemple :</p>
-<pre><code>&lt;&lt;image|mon_image.png|center|Ceci est une belle image&gt;&gt;</code></pre>
-<p>Il est aussi possible d'utiliser la syntaxe avec des paramètres nommés :</p>
-<pre><code>&lt;&lt;image file="Nom_fichier.jpg" align="center" caption="Légende"&gt;&gt;</code></pre>
-<p>Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.</p>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
-<h2 id="galerie-d-images">Galerie d'images</h2>
-<p>Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise <code>&lt;&lt;gallery</code> qui contient la liste des images à mettre dans la galerie :</p>
-<pre><code>&lt;&lt;gallery
-Nom_fichier.jpg
-Nom_fichier_2.jpg
-&gt;&gt;</code></pre>
-<p>Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :</p>
-<pre><code>&lt;&lt;gallery&gt;&gt;</code></pre>
-<p>Il est également possible de rajouter une légende à chaque image :</p>
-<pre><code>&lt;&lt;gallery
-Nom_fichier.jpg|Joli dessin
-Nom_fichier_2.jpg|Photo du lavoir
-&gt;&gt;</code></pre>
-<p>Note : <strong>cette extension ne fonctionne que dans les pages du site web.</strong></p>
-<p>Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :</p>
-<pre><code>&lt;&lt;gallery center
-Nom_fichier.jpg
-Nom_fichier_2.jpg
-&gt;&gt;</code></pre>
-<h3 id="diaporama-d-images">Diaporama d'images</h3>
-<p>On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.</p>
-<p>La syntaxe est la même, mais on ajoute le mot <code>slideshow</code> après le mot <code>gallery</code> :</p>
-<pre><code>&lt;&lt;gallery slideshow
-Nom_fichier.jpg
-Nom_fichier_2.jpg
-&gt;&gt;</code></pre>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
-<h2 id="fichiers-joints">Fichiers joints</h2>
-<p>Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :</p>
-<pre><code>&lt;&lt;file|Nom_fichier.ext|Libellé&gt;&gt;</code></pre>
-<ul>
-<li><code>Nom_fichier.ext</code> : remplacer par le nom du fichier  (parmi les fichiers joints à la page)</li>
-<li><code>Libellé</code> : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché</li>
-</ul>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
-<h2 id="videos">Vidéos</h2>
-<p>Pour inclure un lecteur vidéo dans la page web à partir d'un fichier vidéo joint à la page, il faut utiliser le code suivant :</p>
-<pre><code>&lt;&lt;video|Nom_du_fichier.ext&gt;&gt;</code></pre>
-<p>On peut aussi spécifier d'autres paramètres :</p>
-<ul>
-<li><code>file</code> : nom du fichier vidéo</li>
-<li><code>poster</code> : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue</li>
-<li><code>subtitles</code> : nom d'un fichier de sous-titres au format VTT ou SRT</li>
-<li><code>width</code> : largeur de la vidéo (en pixels)</li>
-<li><code>height</code> : hauteur de la vidéo (en pixels)</li>
-</ul>
-<p>Exemple :</p>
-<pre><code>&lt;&lt;video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt"&gt;&gt;</code></pre>
-<p>Cette extension ne fonctionne que dans les pages du site web.</p>
 <h2 id="sommaire-table-des-matieres-automatique">Sommaire / table des matières automatique</h2>
 <p>Il est possible de placer le code <code>&lt;&lt;toc&gt;&gt;</code> pour générer un sommaire automatiquement à partir des titres et sous-titres :</p>
 <pre><code>&lt;&lt;toc&gt;&gt;</code></pre>
@@ -523,13 +458,6 @@ Nom_fichier_2.jpg
 		</ol></li>
 		<li><a href="#extensions">Extensions</a>
 		<ol>
-			<li><a href="#images-jointes">Images jointes</a></li>
-			<li><a href="#galerie-d-images">Galerie d'images</a>
-			<ol>
-				<li><a href="#diaporama-d-images">Diaporama d'images</a>
-			</ol></li>
-			<li><a href="#fichiers-joints">Fichiers joints</a></li>
-			<li><a href="#videos">Vidéos</a></li>
 			<li><a href="#sommaire-table-des-matieres-automatique">Sommaire / table des matières automatique</a>
 			<ol>
 				<li><a href="#exclure-un-sous-titre-du-sommaire">Exclure un sous-titre du sommaire</a>
@@ -537,8 +465,18 @@ Nom_fichier_2.jpg
 			<li><a href="#grilles-et-colonnes">Grilles et colonnes</a></li>
 			<li><a href="#alignement-du-texte">Alignement du texte</a></li>
 			<li><a href="#boutons">Boutons</a></li>
-			<li><a href="#couleurs">Couleurs</a>
-</li></ol></li></ol></div><p>Il est possible de limiter les niveaux en utilisant le paramètre <code>level</code> comme ceci :</p>
+			<li><a href="#couleurs">Couleurs</a></li>
+			<li><a href="#extensions-pour-le-site-web"> Extensions pour le site web</a>
+			<ol>
+				<li><a href="#images-jointes">Images jointes</a>
+				<ol>
+					<li><a href="#utilisation-avancee">Utilisation avancée</a>
+				</ol></li>
+				<li><a href="#galerie-d-images">Galerie d'images</a></li>
+				<li><a href="#diaporama-d-images">Diaporama d'images</a></li>
+				<li><a href="#fichiers-joints">Fichiers joints</a></li>
+				<li><a href="#videos">Vidéos</a>
+</li></ol></li></ol></li></ol></div><p>Il est possible de limiter les niveaux en utilisant le paramètre <code>level</code> comme ceci :</p>
 <pre><code>&lt;&lt;toc level=1&gt;&gt;</code></pre>
 <p>N'affichera que les titres de niveau 1 (précédés d'un seul signe hash <code>#</code>), comme ceci :</p><div class="toc">
 	<ol>
@@ -580,14 +518,14 @@ Col. 1
 Col. 2
 &lt;&lt;grid&gt;&gt;
 Col. 3
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.34fr) minmax(0, 0.34fr) minmax(0, 0.34fr)"><article class="web-block" style=""><p>Col. 1</p></article><article class="web-block" style=""><p>Col. 2</p></article><article class="web-block" style=""><p>Col. 3</p></article></section><p>Exemple avec 3 colonnes, dont 2 petites et une large :</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template:none / minmax(0, 0.34fr)  minmax(0, 0.34fr)  minmax(0, 0.34fr);"><article class="web-block" style=""><p>Col. 1</p></article><article class="web-block" style=""><p>Col. 2</p></article><article class="web-block" style=""><p>Col. 3</p></article></section><p>Exemple avec 3 colonnes, dont 2 petites et une large :</p>
 <pre><code>&lt;&lt;grid !##!&gt;&gt;
 Col. 1
 &lt;&lt;grid&gt;&gt;
 Colonne 2 large
 &lt;&lt;grid&gt;&gt;
 Col. 3
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.25fr) minmax(0, 0.5fr) minmax(0, 0.25fr)"><article class="web-block" style=""><p>Col. 1</p></article><article class="web-block" style=""><p>Colonne 2 large</p></article><article class="web-block" style=""><p>Col. 3</p></article></section><p>Il est possible de créer plus de blocs qu'il n'y a de colonnes, cela créera une nouvelle ligne avec le même motif :</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template:none / minmax(0, 0.25fr)  minmax(0, 0.5fr)  minmax(0, 0.25fr);"><article class="web-block" style=""><p>Col. 1</p></article><article class="web-block" style=""><p>Colonne 2 large</p></article><article class="web-block" style=""><p>Col. 3</p></article></section><p>Il est possible de créer plus de blocs qu'il n'y a de colonnes, cela créera une nouvelle ligne avec le même motif :</p>
 <pre><code>&lt;&lt;grid !!&gt;&gt;
 L1 C1
 &lt;&lt;grid&gt;&gt;
@@ -596,7 +534,7 @@ L1 C2
 L2 C1
 &lt;&lt;grid&gt;&gt;
 L2 C2
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.5fr) minmax(0, 0.5fr)"><article class="web-block" style=""><p>L1 C1</p></article><article class="web-block" style=""><p>L1 C2</p></article><article class="web-block" style=""><p>L2 C1</p></article><article class="web-block" style=""><p>L2 C2</p></article></section><p>Enfin, il est possible d'utiliser la notation CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row" rel="noreferrer noopener external" target="_blank"><code>grid-row</code></a> et <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column" rel="noreferrer noopener external" target="_blank"><code>grid-column</code></a> pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre <code>row</code> ou <code>column</code> qui précède le bloc :</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template:none / minmax(0, 0.5fr)  minmax(0, 0.5fr);"><article class="web-block" style=""><p>L1 C1</p></article><article class="web-block" style=""><p>L1 C2</p></article><article class="web-block" style=""><p>L2 C1</p></article><article class="web-block" style=""><p>L2 C2</p></article></section><p>Enfin, il est possible d'utiliser la notation CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row" rel="noreferrer noopener external" target="_blank"><code>grid-row</code></a> et <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column" rel="noreferrer noopener external" target="_blank"><code>grid-column</code></a> pour chaque bloc, permettant de déplacer les blocs, ou de faire en sorte qu'un bloc s'étende sur plusieurs colonnes ou plusieurs lignes. Pour cela il faut utiliser le paramètre <code>row</code> ou <code>column</code> qui précède le bloc :</p>
 <pre><code>&lt;&lt;grid short="#!!" column="span 2"&gt;&gt;
 A
 &lt;&lt;grid row="span 2"&gt;&gt;
@@ -605,8 +543,18 @@ B
 C
 &lt;&lt;grid&gt;&gt;
 D
-&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template: none / minmax(0, 0.34fr) minmax(0, 0.34fr) minmax(0, 0.34fr)"><article class="web-block" style="grid-column: span 2"><p>A</p></article><article class="web-block" style="grid-row: span 2"><p>B</p></article><article class="web-block" style=""><p>C</p></article><article class="web-block" style=""><p>D</p></article></section><p>Noter que dans ce cas on doit utiliser la notation <code>short="…"</code> pour pouvoir utiliser les autres paramètres.</p>
-<p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>align</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" rel="noreferrer noopener external" target="_blank"><code>align-self</code></a>).</p>
+&lt;&lt;/grid&gt;&gt;</code></pre><section class="web-grid web-grid-debug" style="--grid-template:none / minmax(0, 0.34fr)  minmax(0, 0.34fr)  minmax(0, 0.34fr);"><article class="web-block" style="grid-column: span 2;"><p>A</p></article><article class="web-block" style="grid-row: span 2;"><p>B</p></article><article class="web-block" style=""><p>C</p></article><article class="web-block" style=""><p>D</p></article></section><p>Noter que dans ce cas on doit utiliser la notation <code>short="…"</code> pour pouvoir utiliser les autres paramètres.</p>
+<p>Enfin, il est possible d'aligner un bloc verticalement par rapport aux autres en utilisant le paramètre <code>valign</code> (équivalent de la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/align-self" rel="noreferrer noopener external" target="_blank"><code>align-self</code></a>), ou horizontalement avec le paramètre <code>align</code> (équivalent de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self" rel="noreferrer noopener external" target="_blank"><code>justify-self</code></a>).</p>
+<p>Il est aussi possible d'utiliser d'autres propriétés CSS :</p>
+<ul>
+<li><code>color</code> pour la couleur du texte</li>
+<li><code>bgcolor</code> pour la couleur du fond</li>
+<li><code>border</code> pour ajouter une bordure</li>
+<li><code>border-radius</code> pour ajuster l'arrondi de la bordure</li>
+<li><code>padding</code> pour les marges intérieures</li>
+<li><code>text-align</code> pour l'alignement du texte</li>
+</ul>
+<p>Note : cette syntaxe est limitée dans les messages collectifs : on ne peut utiliser que la notation <code>short</code> pour définir les colonnes, et les paramètres <code>column</code>, <code>row</code>, <code>align</code> et <code>gap</code> ne sont pas supportés. Ceci est dû au fait que la plupart des clients mail sont très limités.</p>
 <h2 id="alignement-du-texte">Alignement du texte</h2>
 <p>Il suffit de placer sur une ligne seule le code <code>&lt;&lt;center&gt;&gt;</code> pour centrer du texte :</p>
 <pre><code>&lt;&lt;center&gt;&gt;
@@ -625,7 +573,7 @@ Texte centré
 </ul>
 <p>Il est possible d'utiliser les couleurs avec <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/named-color" rel="noreferrer noopener external" target="_blank">leur nom</a> ou leur code hexadécimal (exemple : <code>#ff0000</code> pour rouge).</p>
 <pre><code>&lt;&lt;button href="https://paheko.cloud/" label="👋 Cliquez ici !" size=20 color="white" bgcolor="darkred"&gt;&gt;</code></pre>
-<p>Donnera le bouton suivant :</p><a href="https://paheko.cloud/" target="_blank" style="padding: 6pt 12pt; display: inline-block; color: white; background-color: darkred; box-shadow: 0px 0px 5px #000; margin: 6pt; border-radius: 6pt; text-decoration: none; font-size: 20pt; text-align: center;">👋 Cliquez ici !</a><h2 id="couleurs">Couleurs</h2>
+<p>Donnera le bouton suivant :</p><a href="https://paheko.cloud/" target="_blank" style="padding: 6pt 12pt; display: inline-block; color: white; background-color: darkred; box-shadow: 0px 0px 5px #000; margin: 6pt; border-radius: 6pt; text-decoration: none; font-size: 20pt; text-align: center; margin: .5em; margin-bottom: 1em;">👋 Cliquez ici !</a><h2 id="couleurs">Couleurs</h2>
 <p>Comme sur les <a href="http://web.archive.org/web/20230821114216/https://decoblog.skyrock.com/" rel="noreferrer noopener external" target="_blank">Skyblogs</a>, il est possible de mettre en couleur le texte et le fond, et même de créer des dégradés !</p>
 <p>Utiliser la syntaxe <code>&lt;&lt;color COULEUR&gt;&gt;...texte...&lt;&lt;/color&gt;&gt;</code> pour changer la couleur du texte, ou <code>&lt;&lt;bgcolor COULEUR&gt;&gt;...texte...&lt;&lt;/bgcolor&gt;&gt;</code> pour la couleur du fond.</p>
 <p>Il est possible d'indiquer plusieurs couleurs, séparées par des espaces, pour créer des dégradés.</p>
@@ -655,4 +603,79 @@ Avec des paragraphes
 <p>Et citations</p>
 </blockquote></div></div></blockquote>
 <p>Il est possible d'utiliser les couleurs avec <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/named-color" rel="noreferrer noopener external" target="_blank">leur nom</a> ou leur code hexadécimal (exemple : <code>#ff0000</code> pour rouge).</p>
-<p><strong>Attention : cette fonctionnalité est rigolote mais doit être utilisé avec parcimonie, en effet cela risque de rendre le texte illisible, notamment pour les personnes daltoniennes.</strong></p></div></body></html>
+<p><strong>Attention : cette fonctionnalité est rigolote mais doit être utilisé avec parcimonie, en effet cela risque de rendre le texte illisible, notamment pour les personnes daltoniennes.</strong></p>
+<h2 id="extensions-pour-le-site-web"> Extensions pour le site web</h2>
+<p>Les extensions suivantes ne fonctionnent que sur le site web, et pas par exemple dans les messages collectifs.</p>
+<h3 id="images-jointes">Images jointes</h3>
+<p>Il est possible d'intégrer une image jointe à la page web en plaçant le code suivant sur une ligne (sans autre texte) :</p>
+<pre><code>&lt;&lt;image|Nom_fichier.jpg|Alignement|Légende|Lien&gt;&gt;</code></pre>
+<ul>
+<li><code>Nom_fichier.jpg</code> : remplacer par le nom du fichier de l'image (parmi les images jointes à la page)</li>
+<li><code>Alignement</code> : remplacer par l'alignement :<ul>
+<li><code>gauche</code> ou <code>left</code> : l'image sera placée à gauche en petit (200 pixels), le texte remplira l'espace laissé sur la droite de l'image ;</li>
+<li><code>droite</code> ou <code>right</code> : l'image sera placée à droite en petit, le texte remplira l'espace laissé sur la gauche de l'image ;</li>
+<li><code>centre</code> ou <code>center</code> : l'image sera placée au centre en taille moyenne (500 pixels), le texte sera placé au dessus et en dessous.</li>
+</ul>
+</li>
+<li>Légende : indiquer ici une courte description de l'image.</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>&lt;&lt;image|mon_image.png|center|Ceci est une belle image&gt;&gt;</code></pre>
+<p>Les images qui ne sont pas mentionnées dans le texte seront affichées après le texte sous forme de galerie.</p>
+<h4 id="utilisation-avancee">Utilisation avancée</h4>
+<p>Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivants :</p>
+<ul>
+<li><code>src</code> : nom du fichier de l'image (obligatoire)</li>
+<li><code>align</code> : alignement de l'image</li>
+<li><code>caption</code> : légende qui apparaîtra en dessous de l'image</li>
+<li><code>href</code> : adresse du lien de l'image</li>
+<li><code>alt</code> : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)</li>
+</ul>
+<p>Si le paramètre <code>link</code> est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.</p>
+<pre><code>&lt;&lt;image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/"&gt;&gt;</code></pre>
+<h3 id="galerie-d-images">Galerie d'images</h3>
+<p>Il est possible d'afficher une galerie d'images (sous forme d'images miniatures) avec la balise <code>&lt;&lt;gallery</code> qui contient la liste des images à mettre dans la galerie :</p>
+<pre><code>&lt;&lt;gallery
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+&gt;&gt;</code></pre>
+<p>Si aucun nom de fichier n'est indiqué, alors toutes les images jointes à la page seront affichées :</p>
+<pre><code>&lt;&lt;gallery&gt;&gt;</code></pre>
+<p>Il est également possible de rajouter une légende à chaque image :</p>
+<pre><code>&lt;&lt;gallery
+Nom_fichier.jpg|Joli dessin
+Nom_fichier_2.jpg|Photo du lavoir
+&gt;&gt;</code></pre>
+<p>Par défaut la galerie est sous forme de grille (lignes de hauteur équivalente, les images trop grandes ou trop larges sont tronquées). Pour ne pas tronquer les images, il est possible d'utiliser le style de galerie centrée :</p>
+<pre><code>&lt;&lt;gallery center
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+&gt;&gt;</code></pre>
+<h3 id="diaporama-d-images">Diaporama d'images</h3>
+<p>On peut également afficher cette galerie sous forme de diaporama. Dans ce cas une seule image est affichée, et on peut passer de l'une à l'autre.</p>
+<p>La syntaxe est la même, mais on ajoute le mot <code>slideshow</code> après le mot <code>gallery</code> :</p>
+<pre><code>&lt;&lt;gallery slideshow
+Nom_fichier.jpg
+Nom_fichier_2.jpg
+&gt;&gt;</code></pre>
+<h3 id="fichiers-joints">Fichiers joints</h3>
+<p>Pour créer un bouton permettant de voir ou télécharger un fichier joint à la page web, il suffit d'utiliser la syntaxe suivante :</p>
+<pre><code>&lt;&lt;file|Nom_fichier.ext|Libellé&gt;&gt;</code></pre>
+<ul>
+<li><code>Nom_fichier.ext</code> : remplacer par le nom du fichier  (parmi les fichiers joints à la page)</li>
+<li><code>Libellé</code> : indique le libellé du qui sera affiché sur le bouton, si aucun libellé n'est indiqué alors c'est le nom du fichier qui sera affiché</li>
+</ul>
+<h3 id="videos">Vidéos</h3>
+<p>Pour inclure un lecteur vidéo dans la page web à partir d'un fichier vidéo joint à la page, il faut utiliser le code suivant :</p>
+<pre><code>&lt;&lt;video|Nom_du_fichier.ext&gt;&gt;</code></pre>
+<p>On peut aussi spécifier d'autres paramètres :</p>
+<ul>
+<li><code>file</code> : nom du fichier vidéo</li>
+<li><code>poster</code> : nom de fichier d'une image utilisée pour remplacer la vidéo avant qu'elle ne soit lue</li>
+<li><code>subtitles</code> : nom d'un fichier de sous-titres au format VTT ou SRT</li>
+<li><code>width</code> : largeur de la vidéo (en pixels)</li>
+<li><code>height</code> : hauteur de la vidéo (en pixels)</li>
+</ul>
+<p>Exemple :</p>
+<pre><code>&lt;&lt;video file="Ma_video.webm" poster="Ma_video_poster.jpg" width="640" height="360" subtitles="Ma_video_sous_titres.vtt"&gt;&gt;</code></pre>
+<p>Note : cette extension ne fonctionne que dans les pages du site web.</p></div></body></html>

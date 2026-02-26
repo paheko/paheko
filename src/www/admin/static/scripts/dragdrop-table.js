@@ -1,4 +1,9 @@
 window.enableTableDragAndDrop = function (table) {
+	if (table.tagName.toLowerCase() === 'tr') {
+		addEvents(table);
+		return;
+	}
+
 	table.classList.add('drag');
 	var items = table.querySelectorAll('tbody tr');
 

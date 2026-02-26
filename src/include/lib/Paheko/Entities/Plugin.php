@@ -21,6 +21,8 @@ use const Paheko\{PLUGINS_ROOT, WWW_URL, ROOT, ADMIN_URL};
 
 class Plugin extends Entity
 {
+	const VALID_NAME_REGEXP = '/^' . Plugins::NAME_REGEXP . '$/';
+
 	const META_FILE = 'plugin.ini';
 	const CONFIG_FILE = 'admin/config.php';
 	const INDEX_FILE = 'admin/index.php';
@@ -71,16 +73,28 @@ class Plugin extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^' . Plugins::NAME_REGEXP . '$/', $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+		$this->assert(preg_match(self::VALID_NAME_REGEXP, $this->name), 'Nom unique d\'extension invalide: ' . $this->name);
+
+		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
+
+		$path = Plugins::getPath($this->name);
+
+		// Strip phar prefix as realpath doesn't work with phar paths @FIXME remove phar support in 1.4.0
+		if (0 === strpos($path, 'phar://')) {
+			$path = substr($path, strlen('phar://'));
+		}
+
+		// Security check
+		if (!$path || 0 !== strpos(realpath($path), realpath(PLUGINS_ROOT))) {
+			throw new \LogicException(sprintf('Security alert for "%s": plugin path "%s" seems to be outside PLUGINS_ROOT', $this->name, $path));
+		}
+
 		$this->assert(isset($this->label) && trim($this->label) !== '', sprintf('%s : le nom de l\'extension ("name") ne peut rester vide', $this->name));
 		$this->assert(isset($this->label) && trim($this->version) !== '', sprintf('%s : la version ne peut rester vide', $this->name));
 
-		if ($this->hasCode() || $this->enabled) {
-			$this->assert($this->hasFile(self::META_FILE), 'Le fichier plugin.ini est absent');
-			$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
-			$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
-			$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
-		}
+		$this->assert(!$this->menu || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "menu" est activée.');
+		$this->assert(!$this->home_button || $this->hasFile(self::INDEX_FILE), 'Le fichier admin/index.php n\'existe pas alors que la directive "home_button" est activée.');
+		$this->assert(!$this->home_button || $this->hasFile(self::ICON_FILE), 'Le fichier admin/icon.svg n\'existe pas alors que la directive "home_button" est activée.');
 
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');
 		$this->assert(!isset($this->restrict_level) || in_array($this->restrict_level, Session::ACCESS_LEVELS, true), 'Restriction de niveau invalide');
@@ -90,17 +104,36 @@ class Plugin extends Entity
 				sprintf('This restricted access level doesn\'t exist for this section: %s', $this->restrict_level));
 		}
 
-		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur.');
-	}
-
-	public function setBrokenMessage(string $str)
-	{
-		$this->_broken_message = $str;
+		$this->assert(Plugins::isAllowed($this->name), 'Cette extension est désactivée par l\'hébergeur');
 	}
 
 	public function getBrokenMessage(): ?string
 	{
+		$this->checkIfBroken();
 		return $this->_broken_message;
+	}
+
+	public function checkIfBroken(): void
+	{
+		if ($this->_broken_message !== null) {
+			return;
+		}
+
+		try {
+			$this->selfCheck();
+		}
+		catch (ValidationException $e) {
+			$this->_broken_message = $e->getMessage();
+			return;
+		}
+
+		$this->_broken_message = '';
+	}
+
+	public function isBroken(): bool
+	{
+		$this->checkIfBroken();
+		return $this->_broken_message !== '';
 	}
 
 	public function getINIProperties(): ?\stdClass
@@ -110,6 +143,7 @@ class Plugin extends Entity
 		}
 
 		if (!$this->hasFile(self::META_FILE)) {
+			$this->_broken_message = 'Le fichier plugin.ini est absent';
 			return null;
 		}
 
@@ -117,7 +151,8 @@ class Plugin extends Entity
 			$ini = Utils::parse_ini_file($this->path(self::META_FILE), false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier plugin.ini est invalide pour "%s" : %s', $this->name, $e->getMessage()), 0, $e);
+			$this->_broken_message = sprintf('Le fichier plugin.ini est invalide : %s', $e->getMessage());
+			return null;
 		}
 
 		if (empty($ini)) {
@@ -146,8 +181,10 @@ class Plugin extends Entity
 			return false;
 		}
 
-		if (!empty($ini->min_version)) {
-			$this->assert(version_compare(\Paheko\paheko_version(), $ini->min_version, '>='), sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version));
+		if (!empty($ini->min_version)
+			&& !version_compare(\Paheko\paheko_version(), $ini->min_version, '>=')) {
+			$this->_broken_message = sprintf('L\'extension "%s" nécessite Paheko version %s ou supérieure.', $this->name, $ini->min_version);
+			return false;
 		}
 
 		$restrict_section = null;
@@ -165,8 +202,14 @@ class Plugin extends Entity
 		$this->set('author_url', $ini->author_url ?? null);
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
-		$this->set('restrict_section', $restrict_section);
-		$this->set('restrict_level', $restrict_level);
+
+		// Only set restricted access if user didn't set it
+		if (!isset($this->restrict_section) && !isset($this->restrict_level)) {
+			$this->set('restrict_section', $restrict_section);
+			$this->set('restrict_level', $restrict_level);
+		}
+
+		$this->_broken_message = null;
 
 		return true;
 	}
@@ -180,7 +223,7 @@ class Plugin extends Entity
 		return $this->url(self::ICON_FILE);
 	}
 
-	public function path(string $file = null): ?string
+	public function path(?string $file = null): ?string
 	{
 		$path = Plugins::getPath($this->name);
 
@@ -216,7 +259,7 @@ class Plugin extends Entity
 		return file_get_contents($this->path($path));
 	}
 
-	public function url(string $file = '', array $params = null)
+	public function url(string $file = '', ?array $params = null)
 	{
 		if (null !== $params) {
 			$params = '?' . http_build_query($params);
@@ -238,7 +281,7 @@ class Plugin extends Entity
 		return File::CONTEXT_EXTENSIONS . '/p/' . $this->name;
 	}
 
-	public function getConfig(string $key = null)
+	public function getConfig(?string $key = null)
 	{
 		if (is_null($key)) {
 			return $this->config;
@@ -372,24 +415,38 @@ class Plugin extends Entity
 
 	public function call(string $file, bool $allow_protected = false): void
 	{
+		if ($this->isBroken()) {
+			throw new UserException(sprintf('The "%s" file cannot be opened as the plugin is broken: %s', $file, $this->getBrokenMessage()));
+		}
+
+		if (!$this->enabled && $file !== self::UNINSTALL_FILE) {
+			throw new UserException('The file cannot be opened as the plugin is disabled: ' . $this->name);
+		}
+
 		$file = ltrim($file, './');
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file)) {
-			throw new UserException('Chemin de fichier incorrect.');
+			throw new UserException('Invalid file path', 403);
 		}
 
 		if (!$allow_protected && in_array($file, self::PROTECTED_FILES)) {
-			throw new UserException('Le fichier ' . $file . ' ne peut être appelé par cette méthode.');
+			throw new UserException('This file cannot be called with this method', 403);
 		}
 
 		$path = $this->path($file);
 
 		if (!file_exists($path)) {
-			throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name));
+			if (file_exists($this->path('router.php'))) {
+				$this->call('router.php');
+				return;
+			}
+			else {
+				throw new UserException(sprintf('Le fichier "%s" n\'existe pas dans le plugin "%s"', $file, $this->name), 404);
+			}
 		}
 
 		if (is_dir($path)) {
-			throw new UserException(sprintf('Sécurité : impossible de lister le répertoire "%s" du plugin "%s".', $file, $this->name));
+			throw new UserException('Cannot list directory of plugin', 403);
 		}
 
 		$is_private = (0 === strpos($file, 'admin/'));
@@ -402,17 +459,16 @@ class Plugin extends Entity
 				define('Paheko\PLUGIN_ADMIN_URL', ADMIN_URL .'p/' . $this->name . '/');
 				define('Paheko\PLUGIN_QSP', '?');
 
-				$tpl = Template::getInstance();
-
 				if ($is_private) {
 					require ROOT . '/www/admin/_inc.php';
+					$tpl = Template::getInstance();
 					$tpl->assign('current', 'plugin_' . $this->name);
-				}
 
-				$tpl->assign('plugin', $this);
-				$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
-				$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
-				$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+					$tpl->assign('plugin', $this);
+					$tpl->assign('plugin_url', \Paheko\PLUGIN_URL);
+					$tpl->assign('plugin_admin_url', \Paheko\PLUGIN_ADMIN_URL);
+					$tpl->assign('plugin_root', \Paheko\PLUGIN_ROOT);
+				}
 			}
 
 			$plugin = $this;
@@ -434,6 +490,10 @@ class Plugin extends Entity
 				Utils::redirect('!login.php');
 			}
 
+			if ($uri === 'admin/config.php') {
+				$session->requireAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+			}
+
 			// Restrict access
 			if (isset($this->restrict_section, $this->restrict_level)) {
 				$session->requireAccess($this->restrict_section, $this->restrict_level);
@@ -453,22 +513,22 @@ class Plugin extends Entity
 		}
 	}
 
-	public function isAvailable(): bool
+	public function checkCanBeEnabled(): bool
 	{
-		return $this->hasFile(self::META_FILE);
+		$this->updateFromINI();
+
+		if ($this->isBroken()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function assertCanBeEnabled(): void
 	{
-		if (!Plugins::isAllowed($this->name)) {
-			throw new \RuntimeException('This plugin is not allowed: ' . $this->name);
+		if (!$this->checkCanBeEnabled()) {
+			throw new UserException($this->getBrokenMessage());
 		}
-
-		if (!$this->hasFile(self::META_FILE)) {
-			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Paheko : fichier plugin.ini manquant.', $this->name));
-		}
-
-		$this->updateFromINI();
 	}
 
 	public function enable(): void

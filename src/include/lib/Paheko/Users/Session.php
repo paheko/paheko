@@ -16,6 +16,7 @@ use Paheko\Email\Templates as EmailsTemplates;
 use Paheko\Files\Files;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Email\Email;
 
 use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
@@ -26,13 +27,19 @@ use const Paheko\{
 	ADMIN_URL,
 	LOCAL_LOGIN,
 	DATA_ROOT,
-	NTP_SERVER
+	OIDC_CLIENT_URL,
+	OIDC_CLIENT_ID,
+	OIDC_CLIENT_SECRET,
+	OIDC_CLIENT_MATCH_EMAIL,
+	OIDC_CLIENT_DEFAULT_PERMISSIONS,
+	OIDC_CLIENT_CALLBACK
 };
 
 use KD2\Security;
 use KD2\Security_OTP;
 use KD2\Graphics\QRCode;
 use KD2\HTTP;
+use KD2\OpenIDConnect;
 
 class Session extends \KD2\UserSession
 {
@@ -71,9 +78,8 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
 
-	protected ?User $_user;
-	protected ?array $_permissions;
-	protected ?array $_files_permissions;
+	protected ?array $_permissions = null;
+	protected ?array $_files_permissions = null;
 
 	static protected $_instance = null;
 
@@ -157,13 +163,26 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
-		$user = Users::get($id);
+		return Users::get($id);
+	}
 
-		if (!$user) {
+	/**
+	 * @overrides
+	 */
+	protected function getUserSessionVerifier(): ?string
+	{
+		// FIXME: remove in 1.4.0
+		if (is_int($this->user)) {
+			// upgrade old sessions which didn't have a User object
+			$this->create($this->user);
+		}
+
+		if (null === $this->user) {
 			return null;
 		}
 
-		return $id;
+		// Logout if data_root doesn't match, to forbid one session being used with another organization
+		return strval($this->user->password) . strval($this->user->otp_secret) . DATA_ROOT;
 	}
 
 	protected function rememberMeAutoLogin(): bool
@@ -220,13 +239,22 @@ class Session extends \KD2\UserSession
 
 	public function refresh(): bool
 	{
-		$v = parent::refresh();
+		if (!$this->isLogged()) {
+			throw new \LogicException('User is not logged in.');
+		}
 
-		$this->_user = null;
-		$this->_permissions = null;
+		$this->start(true);
+
+		// Reload user object from DB
+		if ($this->user->exists()) {
+			$_SESSION['userSession'] = $this->user = Users::get($this->user->id());
+		}
+
 		$this->_files_permissions = null;
 
-		return $v;
+		$this->close();
+
+		return true;
 	}
 
 	public function isLogged(bool $allow_new_session = true)
@@ -242,32 +270,7 @@ class Session extends \KD2\UserSession
 			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
 		}
 
-		// Logout if data_root doesn't match, to forbid one session being used with another organization
-		if ($logged) {
-			$root = $this->get('data_root');
-
-			if (!$root) {
-				$this->set('data_root', DATA_ROOT);
-				$this->save();
-			}
-			elseif ($root !== DATA_ROOT) {
-				$this->logout();
-				return false;
-			}
-		}
-
 		return $logged;
-	}
-
-	protected function create($user_id): bool
-	{
-		$r = parent::create($user_id);
-
-		// Make sure we cannot use the same login for another organization, by linking it to the data root
-		$this->set('data_root', DATA_ROOT);
-		$this->save();
-
-		return $r;
 	}
 
 	public function start(bool $write = false)
@@ -287,17 +290,17 @@ class Session extends \KD2\UserSession
 		// Force login with a static user, that is not in the local database
 		// this is useful for using a SSO like LDAP for example
 		if (is_array($login)) {
-			$this->_user = (new User)->import($login['user'] ?? []);
+			$this->user = (new User)->import($login['user'] ?? []);
 
 			if (isset($login['user']['_name'])) {
 				$name = DynamicFields::getFirstNameField();
-				$this->_user->$name = $login['user']['_name'];
+				$this->user->$name = $login['user']['_name'];
 			}
 
-			$this->_permissions = [];
+			$this->user->setPermissions($login['permissions']);
 
-			foreach (Category::PERMISSIONS as $perm => $data) {
-				$this->_permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
+			if (!empty($login['save']) && $allow_new_session) {
+				$this->setUser($this->user);
 			}
 
 			return true;
@@ -313,10 +316,17 @@ class Session extends \KD2\UserSession
 			$login = $this->db->firstColumn('SELECT id FROM users
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
+
+			// Cannot auto-login, as there is no admin user
+			if (!$login) {
+				return false;
+			}
+		}
+		elseif ($login <= 0 || !is_numeric($login)) {
+			throw new \LogicException('Invalid value for LOCAL_LOGIN: ' . $login);
 		}
 
-		// Only login if required
-		if ($login > 0 && ($this->user ?? null) != $login) {
+		if (!$this->user || ($this->user->exists() && $this->user->id() !== $login)) {
 			return $this->create($login);
 		}
 
@@ -355,14 +365,14 @@ class Session extends \KD2\UserSession
 	/**
 	 * @overrides
 	 */
-	public function loginOTP(string $code, ?string $ntp_server = null): bool
+	public function loginOTP(string $code): bool
 	{
 		$this->start();
 		$user_id = $_SESSION['userSessionRequireOTP']->user->id ?? null;
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		$details = compact('user_agent') + ['otp' => true];
 
-		$success = parent::loginOTP($code, NTP_SERVER ?: null);
+		$success = parent::loginOTP($code);
 
 		if ($success) {
 			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
@@ -377,6 +387,63 @@ class Session extends \KD2\UserSession
 		Plugins::fire('user.login.otp', false, compact('success', 'user_id'));
 
 		return $success;
+	}
+
+	public function loginOIDC(): void
+	{
+		$oid = new OpenIDConnect(
+			OIDC_CLIENT_URL,
+			OIDC_CLIENT_ID,
+			OIDC_CLIENT_SECRET,
+			ADMIN_URL . 'login.php?oidc'
+		);
+
+		try {
+			// authenticate with openid connect
+			if (!$oid->authenticate()) {
+				return;
+			}
+		}
+		catch (\RuntimeException $e) {
+			throw new UserException('Erreur dans la connexion OIDC : ' . $e->getMessage(), 0, $e);
+		}
+
+		// fetch user info
+		$info = $oid->getUserInfo();
+
+		$user = ['save' => true,
+			'user' => ['_name' => $info->profile->name ?? ($info->email ?? '')]
+		];
+
+		if (OIDC_CLIENT_MATCH_EMAIL) {
+			if (empty($info->email)) {
+				throw new UserException('Le fournisseur OpenID Connect n\'a pas fourni d\'adresse e-mail dans sa réponse.');
+			}
+
+			$user = Users::getFromLogin($info->email);
+
+			if (!$user) {
+				throw new UserException('Aucun membre trouvé avec l\'adresse e-mail fournie : ' . $info->email);
+			}
+
+			$user = $user->id();
+		}
+		elseif (OIDC_CLIENT_DEFAULT_PERMISSIONS) {
+			$user['permissions'] = OIDC_CLIENT_DEFAULT_PERMISSIONS;
+		}
+		else {
+			$user['permissions'] = ['connect' => self::ACCESS_READ];
+		}
+
+		$this->forceLogin($user);
+
+		if (OIDC_CLIENT_CALLBACK) {
+			$r = call_user_func(OIDC_CLIENT_CALLBACK, $info, $this->user());
+
+			if (is_object($r) && ($r instanceof User) && $r !== $this->user()) {
+				$this->setUser($r);
+			}
+		}
 	}
 
 	/**
@@ -398,7 +465,7 @@ class Session extends \KD2\UserSession
 	 */
 	public function logout(bool $all = false)
 	{
-		$this->_user = null;
+		$this->user = null;
 		$this->_permissions = null;
 		$this->_files_permissions = null;
 
@@ -426,6 +493,9 @@ class Session extends \KD2\UserSession
 		if (!trim($email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
+
+		// Make sure we block sending recovery to mailinblack/spamenmoins addresses as they most likely won't be able to receive our email
+		Email::validateAddress($email, true, true);
 
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		Log::add(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);
@@ -506,7 +576,7 @@ class Session extends \KD2\UserSession
 		}
 
 		// Fetch user info
-		$user = Users::get($id, 'id');
+		$user = Users::get($id);
 
 		if (!$user) {
 			return null;
@@ -535,6 +605,25 @@ class Session extends \KD2\UserSession
 		EmailsTemplates::passwordChanged($user);
 	}
 
+	/**
+	 * Returns cookie string for PDF printing
+	 */
+	static public function getCookie(): ?string
+	{
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return sprintf('%s=%s', $i->cookie_name, $i->id());
+	}
+
+	static public function getCookieSecret(): string
+	{
+		return self::getInstance()->sid_in_url_secret;
+	}
+
 	public function user(): ?User
 	{
 		return $this->getUser();
@@ -557,44 +646,27 @@ class Session extends \KD2\UserSession
 		return $s->getUser();
 	}
 
-	/**
-	 * Returns cookie string for PDF printing
-	 */
-	static public function getCookie(): ?string
-	{
-		$i = self::getInstance();
-
-		if (!$i->isLogged()) {
-			return null;
-		}
-
-		return sprintf('%s=%s', $i->cookie_name, $i->id());
-	}
-
-	static public function getCookieSecret(): string
-	{
-		return self::getInstance()->sid_in_url_secret;
-	}
-
 	public function getUser(): ?User
 	{
-		if (isset($this->_user)) {
-			return $this->_user;
-		}
-
-		if (!$this->isLogged())
-		{
+		if (!$this->isLogged()) {
 			throw new \LogicException('User is not logged in.');
 		}
 
-		$this->_user = Users::get($this->user);
-
 		// If user does not exist anymore
-		if (!$this->_user) {
+		if ($this->user->exists() && !Users::exists($this->user->id())) {
 			$this->logout();
+			return null;
 		}
 
-		return $this->_user;
+		return $this->user;
+	}
+
+	protected function setUser(User $user): void
+	{
+		$this->start(true);
+		$this->user = $user;
+		$_SESSION['userSession'] = $this->user;
+		$this->close();
 	}
 
 	static public function getUserId(): ?int
@@ -605,16 +677,13 @@ class Session extends \KD2\UserSession
 			return null;
 		}
 
-		return $i->getUser()->id;
-	}
+		$user = $i->getUser();
 
-	public function getPermissions(): array
-	{
-		if (!isset($this->_permissions)) {
-			$this->_permissions = $this->user()->category()->getPermissions();
+		if (!$user) {
+			return null;
 		}
 
-		return $this->_permissions;
+		return $user->id;
 	}
 
 	public function canAccess(string $section, int $required): bool
@@ -623,11 +692,7 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		if (!isset($this->_permissions)) {
-			$this->getPermissions();
-		}
-
-		$perm = $this->_permissions[$section] ?? null;
+		$perm = $this->user->getPermissions()[$section] ?? null;
 
 		if (null === $perm) {
 			throw new \InvalidArgumentException('Unknown section: ' . $section);

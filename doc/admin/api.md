@@ -201,7 +201,23 @@ Notes :
 * il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.
 * il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé
 * il n'est pas possible de modifier des membres ayant accès à la configuration
-* seul un identifiant d'API ayant l'accès en "Administartion" pourra modifier un membre administrateur
+* seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur
+
+### user/{ID}/subscribe (POST)
+
+_(Depuis la version 1.3.19)_
+
+Inscrit un membre à une activité.
+
+| Paramètre | Type | Description |
+| :- | :- | :- |
+| `ID` | `int` | Identifiant unique du membre (différent du numéro). |
+| `id_service` | `int` | Identifiant de l'activité. |
+| `id_fee` | `int` (facultatif) | Identifiant du tarif de l'activité. |
+| `paid` | `bool` (facultatif) | Si l'inscription doit être marquée comme réglée ou non. |
+| `date` | `string` (facultatif) | Date de l'inscription à l'activité. |
+| `expiry_date` | `string` (facultatif) | Date de l'expiration de l'inscription à l'activité. Si non spécifié, sera calculé à partir de l'activité. N'aura aucun effet si l'activité est ponctuelle. |
+| `expected_amount` | `string` (facultatif) | Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : `42,99`). Si non spécifié, il sera calculé à partir du tarif fourni. |
 
 ### user/import (PUT)
 
@@ -479,6 +495,7 @@ Crée une nouvelle écriture, renvoie les détails si l'écriture a été créé
 Les champs à spécifier pour créer ou modifier une écriture sont les suivants :
 
 * `id_year`
+* `label` : libellé de l'écriture
 * `date` (format YYYY-MM-DD)
 * `type` peut être un type d'écriture simplifié (2 lignes) : `EXPENSE` (dépense), `REVENUE` (recette), `TRANSFER` (virement), `DEBT` (dette), `CREDIT` (créance), ou `ADVANCED` pour une écriture multi-ligne
 * `amount` (uniquement pour les écritures simplifiées) : contient le montant de l'écriture

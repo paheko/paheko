@@ -29,7 +29,7 @@ $form->runIf('cancel', function () use ($csv) {
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf(f('upload') && isset($_FILES['file']['name']), function () use ($csv) {
-	$csv->load($_FILES['file']);
+	$csv->upload($_FILES['file']);
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf('assign', function () use ($ar) {
@@ -48,7 +48,7 @@ if (null !== qg('start') && null !== qg('end')) {
 }
 else {
 	try {
-		extract($ar->getStartAndEndDates());
+		extract($ar->getStartAndEndDates($current_year));
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());

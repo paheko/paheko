@@ -108,13 +108,11 @@ class Install
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
 
-		$name = date('Y-m-d-His-') . 'avant-remise-a-zero';
-
-		Backup::create($name);
+		Backup::createBeforeReset();
 
 		// Keep a backup file of files
-		if (FILE_STORAGE_BACKEND == 'FileSystem') {
-			$name = 'documents_' . $name . '.zip';
+		if (FILE_STORAGE_BACKEND === 'FileSystem') {
+			$name = 'documents_before_reset_' . date('Ymd-His') . '.zip';
 			Files::zipAll(CACHE_ROOT . '/' . $name);
 			Files::callStorage('truncate');
 			@mkdir(FILE_STORAGE_CONFIG . '/documents');
@@ -133,7 +131,7 @@ class Install
 			'country'      => $config->country,
 		]));
 
-		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
+		Utils::safe_unlink(DB_FILE);
 
 		self::showProgressSpinner('!install.php', 'Remise à zéro en cours…');
 		exit;
@@ -184,7 +182,7 @@ class Install
 		}
 	}
 
-	static public function installFromForm(array $source = null): void
+	static public function installFromForm(?array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -308,10 +306,6 @@ class Install
 
 		$config->set('files', array_map(fn () => null, $config::FILES));
 
-		$welcome_text = sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nSi vous êtes perdu⋅e, n'hésitez pas à consulter l'aide :-)", $name);
-
-		$config->setFile('admin_homepage', $welcome_text);
-
 		// Create an example saved search (users)
 		$query = (object) [
 			'groups' => [[
@@ -336,7 +330,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		// Create an example saved search (accounting)
@@ -364,7 +357,6 @@ class Install
 			'type'    => $search::TYPE_JSON,
 			'content' => json_encode($query),
 		]);
-		$search->created = new \DateTime;
 		$search->save();
 
 		$config->save();
@@ -393,12 +385,15 @@ class Install
 		$paths = [
 			DATA_ROOT,
 			CACHE_ROOT,
+			BACKUPS_ROOT,
 			SHARED_CACHE_ROOT,
 			USER_TEMPLATES_CACHE_ROOT,
 			STATIC_CACHE_ROOT,
 			SMARTYER_CACHE_ROOT,
 			SHARED_USER_TEMPLATES_CACHE_ROOT,
 		];
+
+		$paths = array_unique($paths);
 
 		foreach ($paths as $path)
 		{
@@ -426,49 +421,54 @@ class Install
 		return true;
 	}
 
-	static public function setConfig(?string $file, string $key, $value, bool $overwrite = true): void
+	static public function setConfig(string $file, array $constants): void
 	{
-		if (null === $file) {
-			return;
-		}
-
 		if (!is_writable(dirname($file))) {
 			throw new \RuntimeException('Impossible de créer le fichier de configuration "'. $file .'". Le répertoire "'. dirname($file) . '" n\'est pas accessible en écriture.');
 		}
 
-		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
-
 		if (@filesize($file)) {
 			$config = file_get_contents($file);
 
-			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
+			$pattern = '/(^\s*)(?:const\s+([A-Z_]+)\s?=|\s*define\s*\(.*?Paheko\\\([A-Z_]+).*?\)).*(\s*$)/m';
 
-			$config = preg_replace_callback($pattern, function ($match) use ($new_line, $key, $value) {
-				if (false !== strpos($match[0], 'define')) {
-					return 'define(\'Paheko\\' . $key . '\', ' . var_export($value, true) . ');';
+			$config = preg_replace_callback($pattern, function ($match) use (&$constants) {
+				$key = $match[3] ?: $match[2];
+
+				if (!array_key_exists($key, $constants)) {
+					return $match[0];
+				}
+
+				$value = Utils::var_export($constants[$key]);
+				unset($constants[$key]);
+
+				if (!empty($match[3])) {
+					$replace = 'define(\'Paheko\\%s\', %s);';
 				}
 				else {
-					return $new_line;
+					$replace = 'const %s = %s;';
 				}
-			}, $config, -1, $count);
 
-			if ($count && !$overwrite) {
-				return;
-			}
+				return $match[1] . sprintf($replace, $key, $value) . $match[4];
+			}, $config);
 
-			if (!$count) {
-				$config = preg_replace('/\?>.*/s', '', $config);
-				$config .= PHP_EOL . $new_line . PHP_EOL;
+			if (count($constants)) {
+				$config = preg_replace('/\?>.*$|\s+$/s', '', $config);
+				$config .= PHP_EOL;
 			}
 		}
 		else {
 			$config = '<?php' . PHP_EOL
-				. 'namespace Paheko;' . PHP_EOL . PHP_EOL
-				. $new_line . PHP_EOL;
+				. 'namespace Paheko;' . PHP_EOL . PHP_EOL;
+		}
+
+		foreach ($constants as $key => $value) {
+			$config .= sprintf('const %s = %s;' . PHP_EOL, $key, Utils::var_export($value));
 		}
 
 		file_put_contents($file . '.tmp', $config);
 		rename($file . '.tmp', $file);
+		@clearstatcache($file);
 
 		// Make sure we reset the cached file, or the changes might take a few seconds to be reloaded
 		if (function_exists('opcache_reset')) {

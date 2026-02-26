@@ -73,7 +73,38 @@ elseif (null !== f('from_year')) {
 $matching_accounts = null;
 
 if ($previous_year) {
-	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
+	$lines = Reports::getAccountsBalances([
+		'year' => $previous_year->id(),
+		'exclude_position' => [Account::EXPENSE, Account::REVENUE],
+		'exclude_type' => [Account::TYPE_OPENING, Account::TYPE_CLOSING],
+	]);
+
+	// Append result
+	$result = Reports::getResult(['year' => $previous_year->id()]);
+	$type = $result > 0 ? Account::TYPE_POSITIVE_RESULT : Account::TYPE_NEGATIVE_RESULT;
+	$account = $accounts->getSingleAccountForType($type);
+
+	if (!$account) {
+		$chart = $year->chart();
+		if ($chart->isOfficial()) {
+			// This should not happen
+			\KD2\ErrorManager::reportExceptionSilent(new \LogicException('Official chart does not have a result account for type='.$type));
+		}
+
+		$account = (object) [
+			'id'    => null,
+			'code'  => null,
+			'label' => 'Résultat de l\'exercice',
+		];
+	}
+
+	$lines[] = (object) [
+		'balance' => $result,
+		'id'      => $account->id,
+		'code'    => $account->code,
+		'label'   => $account->label,
+		'is_debt' => $result < 0,
+	];
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;
@@ -86,38 +117,14 @@ if ($previous_year) {
 		$matching_accounts = $accounts->listForCodes($codes);
 	}
 
-	// Append result
-	$result = Reports::getResult(['year' => $previous_year->id()]);
-
-	if ($result > 0) {
-		$account = $accounts->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
-	}
-	else {
-		$account = $accounts->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
-	}
-
-	if (!$account) {
-		$account = (object) [
-			'id' => null,
-			'code' => null,
-			'label' => null,
-		];
-	}
-
-	$lines[] = (object) [
-		'balance'   => $result,
-		'id'    => $account->id,
-		'code'  => $account->code,
-		'label' => $account->label,
-		'is_debt' => $result < 0,
-	];
-
 	foreach ($lines as &$line) {
 		$line->credit = !$line->is_debt ? abs($line->balance) : 0;
 		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
-			if ($matching_accounts && array_key_exists($line->code, $matching_accounts)) {
+			if ($matching_accounts
+				&& $line->code
+				&& array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
 				$line->account_selector = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}

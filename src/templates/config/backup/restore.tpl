@@ -84,7 +84,7 @@
 				<thead>
 					<tr>
 						<td></td>
-						<th>Nom</th>
+						<th scope="col">Nom</th>
 						<td>Taille</td>
 						<td>Date</td>
 						<td>Version</td>
@@ -94,7 +94,7 @@
 			{foreach from=$list item="backup"}
 				<tr>
 					<td class="check">{input type="radio" name="selected" value=$backup.filename}</td>
-					<th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
+					<th scope="row"><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
 					<td>{$backup.size|size_in_bytes}</td>
 					<td>{$backup.date|date_short:true}</td>
 					<td>{if $backup.error}

@@ -1,4 +1,22 @@
-{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
+{include file="_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code:$account.label current="acc/accounts"}
+
+{include file="acc/_year_select.tpl"}
+
+{if $has_transactions_from_other_years}
+<p class="actions">
+	{if !$only_this_year}
+		{linkbutton shape="eye-off" label="Cacher les écritures d'autres exercices" href="?id=%d&only=1"|args:$account.id}
+	{else}
+		{linkbutton shape="eye" label="Afficher les écritures de tous les exercices" href="?id=%d&only=0"|args:$account.id}
+	{/if}
+</p>
+{/if}
+
+{if isset($_GET['marked'])}
+<p class="confirm block">
+	Les lignes ont bien été marquées comme déposées.
+</p>
+{/if}
 
 {form_errors}
 
@@ -6,8 +24,7 @@
 <p class="alert block">
 	Il existe une différence de {$missing_balance|raw|money_currency} entre la liste des écritures à déposer
 	et le solde du compte.<br />
-	Cette situation est généralement dûe à des écritures de dépôt qui ont été supprimées.<br />
-	{linkbutton shape="plus" label="Faire un virement pour régulariser" href="!acc/transactions/new.php?0=%d&l=Régularisation%%20dépôt&account=%d"|args:$missing_balance,$account.id}
+	Il y a peut-être des chèques de l'exercice précédent qui n'ont pas été déposés&nbsp;?
 </p>
 {/if}
 
@@ -16,11 +33,11 @@
 	</p>
 {else}
 	<p class="help">
-		Cocher les cases correspondant aux montants à déposer, une nouvelle écriture sera générée.
+		Cocher les cases correspondant aux montants à déposer.
 	</p>
 
-	<form method="post" action="{$self_url}" data-focus="1">
-		{include file="common/dynamic_list_head.tpl" check=true list=$journal}
+	<form method="post" action="" data-focus="1">
+		{include file="common/dynamic_list_head.tpl" check=true list=$journal use_buttons=true}
 
 		{foreach from=$journal->iterate() item="line"}
 				<tr>
@@ -29,36 +46,33 @@
 					</td>
 					<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 					<td>{$line.date|date_short}</td>
+					{if !$only_this_year}
+						<td>{$line.year_label}</td>
+					{/if}
 					<td>{$line.reference}</td>
 					<td>{$line.line_reference}</td>
-					<th>{$line.label}</th>
+					<th scope="row">{$line.label}</th>
 					<td class="money">{$line.debit|raw|money}</td>
 					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
+					<td></td>
 				</tr>
 			{/foreach}
 			</tbody>
 		</table>
 
-		<fieldset>
-			<legend>Détails de l'écriture de dépôt</legend>
-			<dl>
-				<dt><strong>Nombre de chèques</strong></dt>
-				<dd><mark id="cheques_count">0</mark></dd>
-				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
-				{input type="date" name="date" default=$date label="Date" required=1}
-				{input type="money" name="amount" label="Montant" required=1}
-				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d&targets=%d"|args:$account.id_chart,$target name="account_transfer" label="Compte de dépôt" required=1}
-				{input type="text" name="reference" label="Numéro de pièce comptable"}
-				{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
-			</dl>
-		</fieldset>
+		<p class="help">
+			<mark id="lines_count">0</mark> lignes sélectionnées<br />
+			Total des montants : <mark id="lines_total">0</mark>
+		</p>
 
+		<p class="actions">
+			{button type="submit" class="minor" name="mark" label="Marquer comme déposé" shape="check" value=1}
+		</p>
 		<p class="submit">
-			{csrf_field key="acc_deposit_%s"|args:$account.id}
-			{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
+			{csrf_field key=$csrf_key}
+			{button type="submit" name="create" label="Renseigner le dépôt" class="main" shape="right"}
 		</p>
 	</form>
-
 	{literal}
 	<script type="text/javascript">
 	var total = 0;
@@ -72,8 +86,11 @@
 			if (total < 0) {
 				total = 0;
 			}
-			$('#f_amount').value = g.formatMoney(total);
-			$('#cheques_count').innerText = count;
+			if (count < 0) {
+				count = 0;
+			}
+			$('#lines_total').innerText = g.formatMoney(total);
+			$('#lines_count').innerText = count;
 		});
 	});
 

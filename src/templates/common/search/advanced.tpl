@@ -7,7 +7,13 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 
 {form_errors}
 
-<fieldset>
+{if $s.description}
+<p class="help block">
+	{$s.description|escape|nl2br}
+</p>
+{/if}
+
+<fieldset class="noprint">
 {if $s.type !== $s::TYPE_JSON}
 	{if !$can_sql}
 		<legend>Recherche enregistrée</legend>

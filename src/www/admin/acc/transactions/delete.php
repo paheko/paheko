@@ -20,7 +20,8 @@ $csrf_key = 'acc_delete_' . $transaction->id;
 
 $form->runIf('delete', function () use ($transaction) {
 	$transaction->delete();
-}, $csrf_key, '!acc/');
+	Utils::redirectParent('!acc/');
+}, $csrf_key);
 
 $tpl->assign(compact('transaction', 'csrf_key'));
 

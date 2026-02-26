@@ -12,6 +12,7 @@ $ok_code = qg('code'); // return code
 $ok = qg('ok'); // return message
 
 if ($ok === 'restore') {
+	// Force user to be re-logged as the first admin if its user ID does not work
 	if (!$session->refresh()) {
 		$session->forceLogin(-1);
 		$ok_code |= Backup::CHANGED_USER;

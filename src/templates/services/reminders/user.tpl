@@ -8,7 +8,7 @@
 
 		{foreach from=$list->iterate() item="row"}
 			<tr>
-				<th>{$row.label}</th>
+				<th scope="row">{$row.label}</th>
 				<td>{if $row.delay > 0}{$row.delay} jours après l'expiration{elseif $row.delay < 0}{$row.delay|abs} jours avant l'expiration{else}le jour de l'expiration{/if}</td>
 				<td>{$row.date|date_short}</td>
 				<td>

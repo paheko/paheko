@@ -22,7 +22,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	{foreach from=$lines key="k" item="line"}
 		<tr>
 			<td class="account">
-				{input type="list" target="!acc/charts/accounts/selector.php?year=%d"|args:$transaction.id_year name="lines[account_selector][]" default=$line.account_selector}
+				{input type="list" target="!acc/charts/accounts/selector.php?id_year=%d"|args:$transaction.id_year name="lines[account_selector][]" default=$line.account_selector}
 			</td>
 			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5 readonly=$line.debit_locked}</td>
 			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5 readonly=$line.credit_locked}</td>
@@ -37,7 +37,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	</tbody>
 	<tfoot>
 		<tr>
-			<th>Total</th>
+			<th scope="row">Total</th>
 			<td class="money">{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 			<td class="money">{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 			<td colspan="{if count($projects) > 0}3{else}2{/if}" id="lines_message"></td>

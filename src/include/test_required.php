@@ -58,6 +58,11 @@ test_required(
 	'Le module de base de données SQLite3 n\'est pas disponible.'
 );
 
+test_required(
+	class_exists('DOMDocument'),
+	'L\'extension "DOM" n\'est pas installée mais est nécessaire (apt install php-xml).'
+);
+
 $v = \SQLite3::version();
 
 test_required(

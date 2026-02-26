@@ -30,6 +30,10 @@ nav.tabs .sub:nth-of-type(3), nav.tabs:nth-of-type(3) .sub {
     margin-left: 3em;
 }
 
+nav.tabs .sub:nth-of-type(4), nav.tabs:nth-of-type(4) .sub {
+    margin-left: 4em;
+}
+
 nav.tabs .title {
     padding: .3em .7em;
     margin-top: .5em;
@@ -138,6 +142,14 @@ nav.tabs aside form {
     left: unset !important;
 }
 
+.menu-btn h4 {
+    font-weight: normal;
+    font-size: .9em;
+    margin: .2rem .5rem;
+    margin-top: .8rem;
+    color: var(--gBorderColor);
+}
+
 main .menu-btn button {
     text-align: left;
 }
@@ -184,15 +196,6 @@ nav.home ul li a::before, nav.home ul li a .icon {
     text-shadow: none;
 }
 
-.expose-extensions nav.home {
-    font-size: .9em;
-}
-
-.expose-extensions nav.home ul li {
-    width: 12em;
-}
-
-
 /**
  * Dropdown, eg. interactive <select>
  */
@@ -225,71 +228,85 @@ nav.dropdown ul::after {
     font-size: 1.5em;
     content: "↓";
     font-family: "paheko";
+    cursor: pointer;
 }
 
 nav.dropdown li {
     display: none;
 }
 
-nav.dropdown li.selected, nav.dropdown:hover li {
+html.js nav.dropdown:not(.open) {
+    cursor: pointer;
+}
+
+nav.dropdown li.selected, html.nojs nav.dropdown:hover li, nav.dropdown.open li {
     display: block;
 }
 
-nav.dropdown li a {
+html.js nav.dropdown:not(.open) li a {
+    pointer-events: none;
+}
+
+nav.dropdown li > a {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: .4rem .6rem;
     text-decoration: none;
     height: 1.5em;
     color: unset;
+    cursor: pointer;
 }
 
 nav.dropdown li a strong {
     font-weight: normal;
     text-align: left;
+    margin-right: auto;
 }
 
 nav.dropdown li a small {
     color: var(--gBorderColor);
-    margin-right: 2em;
     text-align: right;
     white-space: pre;
 }
 
-nav.dropdown li:nth-child(1) {
+nav.dropdown li.label {
     display: none;
 }
 
-nav.dropdown:hover {
+nav.dropdown.open {
     border-color: transparent;
 }
 
-nav.dropdown:hover li:nth-child(even) a {
+nav.dropdown.open li:nth-child(even) a {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
-nav.dropdown:hover ul {
+nav.dropdown.open ul {
     box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
     border-radius: .25rem;
 }
 
-nav.dropdown:hover .selected a {
+nav.dropdown.open .selected a {
     box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
     color: rgb(var(--gHoverLinkColor));
 }
 
-nav.dropdown:hover li a strong {
+nav.dropdown.open li a strong {
     font-weight: bold;
 }
 
-nav.dropdown:hover li a:hover {
+nav.dropdown.open li a:hover {
     background: rgba(var(--gMainColor), 0.2);
-    color: rgb(var(--gHoverLinkColor));
+}
+
+nav.dropdown li a > span {
+    width: 2em;
+    text-align: center;
 }
 
 @media handheld, screen and (max-width:981px) {
-    nav.dropdown:hover li:nth-child(1) {
+    nav.dropdown.open li.default {
         display: block;
     }
 

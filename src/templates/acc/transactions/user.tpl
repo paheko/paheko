@@ -1,5 +1,9 @@
 {include file="_head.tpl" title="Écritures liées à %s"|args:$transaction_user->name() current="acc/accounts"}
 
+<nav class="tabs">
+	<aside>{exportmenu right=true table=true}</aside>
+</nav>
+
 {if !$dialog}
 <p>
 	{linkbutton href="!users/details.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="left"}
@@ -28,10 +32,11 @@
 <p class="block help">Cette liste représente le solde des comptes uniquement pour les écritures liées à ce membre.</p>
 
 <table class="list">
+	<caption>Solde des comptes</caption>
 	<thead>
 		<tr>
 			<td class="num">Numéro</td>
-			<th>Compte</th>
+			<th scope="col">Compte</th>
 			{if $simple}
 				<td class="money">Solde</td>
 			{else}
@@ -46,7 +51,7 @@
 	{foreach from=$balance item="account"}
 		<tr class="{if $account.balance === 0}disabled{/if}">
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}">{$account.code}</a></td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			{if $simple}
 				<td class="money">{show_balance account=$account}</td>
 			{else}

@@ -10,7 +10,6 @@ parameters:
       - ../build/windows
     excludePaths:
       - ../src/include/lib/KD2
-      - ../src/include/lib/Parsedown.php
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - '#Access to protected property Paheko\\Entities#'

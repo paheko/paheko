@@ -15,7 +15,7 @@
 	width: 280px;
 }
 
-.services a {
+.services span a {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -28,20 +28,25 @@
 	background: #fff
 }
 
-.services a h3 {
+.services span a h3 {
 	display: none;
 }
 
-.services a img {
+.services span a img {
 	box-shadow: none;
 	margin: 0 auto;
 	max-height: 150px;
 	max-width: 100%;
 }
 
-.services a:hover {
+.services span a:hover {
 	border-color: #666;
 	box-shadow: 0px 0px 5px orange;
+}
+
+.services small {
+	font-size: .8em;
+	color: #666;
 }
 
 .services em {

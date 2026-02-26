@@ -14,27 +14,39 @@ use const Paheko\ROOT;
 
 class Charts
 {
+	/**
+	 * @todo TODO/FIXME: rajouter 2 colonnes 'type' et 'revision' à la table acc_charts
+	 * et ne plus avoir "pca", "pcc" etc. mais uniquement "asso" "copro" "cse" "entreprise" etc.
+	 * pour que ça soit plus clair
+	 */
 	const BUNDLED_CHARTS = [
-		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2025)',
+		'fr_pca_2025' => 'Plan comptable associatif (révision 2025)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2024)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
-		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 2024)',
+		'fr_pcg_2025' => 'Plan comptable général, pour entreprises (révision 2025)',
 		'fr_pcs_2018' => 'Plan comptable des syndicats (2018, révisé 2024)',
 		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 		'ch_asso' => 'Plan comptable associatif',
 		'fr_pca_1999' => 'Plan comptable associatif 1999',
+		'fr_pca_2018' => 'Plan comptable associatif (2018, révision 2024)',
+		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (2014, révision 2024)',
 	];
 
-	static public function getFirstForCountry(string $country): ?string
-	{
-		foreach (self::BUNDLED_CHARTS as $code => $label) {
-			if (substr($code, 0, 2) === strtolower($country)) {
-				return $code;
-			}
-		}
-
-		return null;
-	}
+	const COUNTRIES_CHARTS = [
+		'FR' => [
+			'fr_pca_2025' => 'Association ou fondation',
+			'fr_cse_2015' => 'CSE (Comité Social et Économique)',
+			'fr_pcs_2018' => 'Syndicat',
+			'fr_pcc_2020' => 'Copropriété',
+			'fr_pcg_2025' => 'Entreprise',
+		],
+		'CH' => [
+			'ch_asso' => 'Association',
+		],
+		'BE' => [
+			'be_pcmn_2019' => 'Association ou fondation',
+		],
+	];
 
 	static public function updateInstalled(string $chart_code): ?Chart
 	{
@@ -77,10 +89,28 @@ class Charts
 			$chart_code = 'be_pcmn_2019';
 		}
 		else {
-			$chart_code = 'fr_pca_2018';
+			$chart_code = 'fr_pca_2025';
 		}
 
 		return self::install($chart_code);
+	}
+
+	static public function getDefaultChartId(string $country_code): ?int
+	{
+		$db = DB::getInstance();
+		$charts = ['PCA_2025', 'PCMN_2019', 'ASSO'];
+		$order = [];
+
+		foreach ($charts as $chart) {
+			$order[] = $db->where('code', $chart) . ' DESC';
+		}
+
+		$order[] = 'code';
+
+		$order = implode(', ', $order);
+		$sql = sprintf('SELECT id FROM acc_charts WHERE code IS NOT NULL AND country = ? ORDER BY %s LIMIT 1;', $order);
+
+		return $db->firstColumn($sql, $country_code) ?: null;
 	}
 
 	static public function install(string $chart_code): Chart
@@ -138,6 +168,13 @@ class Charts
 		return EntityManager::findOneById(Chart::class, $id);
 	}
 
+	static public function getByCode(string $chart_code): ?Chart
+	{
+		$country = strtoupper(substr($chart_code, 0, 2));
+		$code = strtoupper(substr($chart_code, 3));
+		return EntityManager::findOne(Chart::class, 'SELECT * FROM @TABLE WHERE code = ? AND country = ?;', $code, $country);
+	}
+
 	static public function list(): array
 	{
 		$em = EntityManager::getInstance(Chart::class);
@@ -149,23 +186,37 @@ class Charts
 		return EntityManager::getInstance(Chart::class)->count();
 	}
 
-	static public function listForCountry(string $country): array
+	static public function listByCountryFirstSetup(): array
 	{
-		$installed = DB::getInstance()->getAssoc(sprintf('SELECT id, label FROM %s WHERE country = ? AND code IS NULL ORDER BY label COLLATE U_NOCASE;', Chart::TABLE), $country);
-		$country = strtolower($country);
+		$db = DB::getInstance();
 
-		$list = [];
+		$out = self::COUNTRIES_CHARTS;
 
-		foreach (self::BUNDLED_CHARTS as $code => $label) {
-			if (substr($code, 0, 2) != $country) {
-				continue;
+		$sql = sprintf('SELECT id, country, code, label FROM %s ORDER BY label COLLATE U_NOCASE;', Chart::TABLE);
+
+		foreach ($db->iterate($sql) as $chart) {
+			$country = strtoupper($chart->country ?? '') ?: 'other';
+
+			if (!isset($out[$country])) {
+				$out[$country] = [];
 			}
 
-			$list[$code] = $label;
+			$key = $chart->code ? strtolower($chart->country . '_' . $chart->code) : $chart->id;
+
+			$out[$country][$key] = $chart->label;
 		}
 
-		// Don't use array_merge here, or it will erase ID keys
-		return $list + $installed;
+		return $out;
+	}
+
+	static public function hasCustomCharts(): bool
+	{
+		return DB::getInstance()->test(Chart::TABLE, 'country IS NULL OR code IS NULL');
+	}
+
+	static public function hasActiveCustomCharts(): bool
+	{
+		return DB::getInstance()->test(Chart::TABLE, 'archived = 0 AND (country IS NULL OR code IS NULL)');
 	}
 
 	static public function getOrInstall(string $id_or_code): int
@@ -235,5 +286,35 @@ class Charts
 		$chart->importCSV($_FILES[$file_key]['tmp_name']); // This will save everything
 
 		$db->commit();
+	}
+
+	/**
+	 * Migrate old accounting charts to 2025
+	 */
+	static public function migrateTo2025(): void
+	{
+		$db = DB::getInstance();
+
+		if (!self::getByCode('fr_pca_2025')
+			&& ($old_chart = self::getByCode('fr_pca_2018'))) {
+			$new_chart = self::install('fr_pca_2025');
+
+			// Copy old accounts
+			$db->exec(sprintf('INSERT OR IGNORE INTO acc_accounts (id_chart, code, label, description, position, type, user, bookmark)
+				SELECT %d, code, label, description, position, type, user, bookmark
+				FROM acc_accounts
+				WHERE id_chart = %d AND user = 1;', $new_chart->id(), $old_chart->id()));
+		}
+
+		if (!self::getByCode('fr_pcg_2025')
+			&& ($old_chart = self::getByCode('fr_pcg_2014'))) {
+			$new_chart = self::install('fr_pcg_2025');
+
+			// Copy old accounts
+			$db->exec(sprintf('INSERT OR IGNORE INTO acc_accounts (id_chart, code, label, description, position, type, user, bookmark)
+				SELECT %d, code, label, description, position, type, user, bookmark
+				FROM acc_accounts
+				WHERE id_chart = %d AND user = 1;', $new_chart->id(), $old_chart->id()));
+		}
 	}
 }

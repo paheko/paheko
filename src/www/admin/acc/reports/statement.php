@@ -15,7 +15,7 @@ $tpl->assign(compact('general', 'volunteering'));
 
 if (!empty($criterias['year'])) {
 	$years = Years::listAssocExcept($criterias['year']);
-	$tpl->assign('other_years', count($years) ? [null => '-- Ne pas comparer'] + $years : $years);
+	$tpl->assign('other_years', $years);
 }
 
 $tpl->display('acc/reports/statement.tpl');

@@ -14,12 +14,14 @@ $csrf_key = 'edit_otp_' . md5($user->password);
 $form->runIf('disable', function () use ($user) {
 	$user->setOTPSecret(null);
 	$user->save(false); // Don't self-check other fields
+	Session::getInstance()->clearSessionVerifier();
 }, $csrf_key, '!me/security.php?ok');
 
 $form->runIf('enable', function () use ($user) {
 	$user->verifyPassword(f('password_check'));
 	$user->setOTPSecret(f('otp_secret'), f('otp_code'));
 	$user->save(false); // Don't self-check other fields
+	Session::getInstance()->clearSessionVerifier();
 }, $csrf_key, '!me/security.php?ok');
 
 $otp = null;

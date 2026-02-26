@@ -39,6 +39,16 @@ class Config extends Entity
 		'logo', 'icon', 'favicon', 'admin_background', 'admin_css',
 	];
 
+	const BACKUP_FREQUENCIES = [
+		0   => 'Aucune — les sauvegardes automatiques sont désactivées',
+		1   => 'Quotidienne, tous les jours',
+		7   => 'Hebdomadaire, tous les 7 jours',
+		15  => 'Bimensuelle, tous les 15 jours',
+		30  => 'Mensuelle',
+		90  => 'Trimestrielle',
+		365 => 'Annuelle',
+	];
+
 	const VERSIONING_POLICIES = [
 		'none' => [
 			'label' => 'Ne pas conserver les anciennes versions',
@@ -108,11 +118,12 @@ class Config extends Entity
 	];
 
 	protected string $org_name;
-	protected ?string $org_infos;
+	protected ?string $org_infos = null;
 	protected string $org_email;
-	protected ?string $org_address;
-	protected ?string $org_phone;
-	protected ?string $org_web;
+	protected ?string $org_address = null;
+	protected ?string $org_address_public = null;
+	protected ?string $org_phone = null;
+	protected ?string $org_web = null;
 
 	protected string $currency;
 	protected string $country;
@@ -121,22 +132,24 @@ class Config extends Entity
 	protected int $default_category;
 	protected ?bool $show_parent_column = true;
 	protected ?bool $show_has_children_column = true;
+	protected bool $show_category_in_list = true;
 
-	protected ?int $backup_frequency;
-	protected ?int $backup_limit;
+	protected ?int $backup_frequency = null;
+	protected ?int $backup_limit = null;
 
-	protected ?int $last_chart_change;
-	protected ?string $last_version_check;
+	protected ?int $last_chart_change = null;
+	protected ?string $last_version_check = null;
 
-	protected ?string $color1;
-	protected ?string $color2;
+	protected ?string $color1 = null;
+	protected ?string $color2 = null;
 
 	protected array $files = [];
 
 	protected bool $site_disabled;
 
 	protected int $log_retention;
-	protected bool $analytical_set_all;
+	protected bool $analytical_set_all = false;
+	protected bool $analytical_mandatory = false;
 
 	protected ?string $file_versioning_policy = null;
 	protected int $file_versioning_max_size = 0;
@@ -244,6 +257,10 @@ class Config extends Entity
 			$source['show_has_children_column'] = false;
 		}
 
+		if (!empty($source['show_category_in_list_present'])) {
+			$source['show_category_in_list'] = boolval($source['show_category_in_list'] ?? false);
+		}
+
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
 		if (isset($source['color1'], $source['color2'])
 			&& ($source['color1'] == ADMIN_COLOR1 && $source['color2'] == ADMIN_COLOR2))
@@ -265,6 +282,13 @@ class Config extends Entity
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
 
+		$this->assert(is_null($this->backup_frequency)
+			|| $this->backup_frequency === -1
+			|| $this->backup_frequency === 0
+			|| !in_array($this->backup_frequency, self::BACKUP_FREQUENCIES, true),
+			'Fréquence de sauvegarde invalide');
+		$this->assert(is_null($this->backup_limit) || ($this->backup_limit >= 0 && $this->backup_limit <= 50), 'Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
+
 		// Files
 		$this->assert(count($this->files) == count(self::FILES));
 
@@ -279,7 +303,7 @@ class Config extends Entity
 		$tzlist = TimeZones::listForCountry($this->country);
 
 		// Make sure we set a valid timezone
-		if (!array_key_exists($this->timezone, $tzlist)) {
+		if (!$this->timezone || !array_key_exists($this->timezone, $tzlist)) {
 			$this->set('timezone', key($tzlist));
 		}
 
@@ -325,7 +349,7 @@ class Config extends Entity
 			return null;
 		}
 
-		$url = WWW_URI . self::FILES[$key];
+		$url = WWW_URL . self::FILES[$key];
 
 		if ($thumb_size) {
 			$url .= '.' . $thumb_size . '.webp';
@@ -373,32 +397,40 @@ class Config extends Entity
 			$f = null;
 		}
 		elseif ($upload) {
-			$f = Files::upload(Utils::dirname($path), $value, Utils::basename($path));
+			$f = Files::upload(Utils::dirname($path), $value, null, Utils::basename($path));
 
 			if ($type === 'image' && !$f->image) {
 				$this->setFile($key, null);
-				throw new UserException('Le fichier n\'est pas une image.');
+				throw new UserException('Le fichier n\'est pas une image (formats autorisés : PNG, JPEG, GIF, WEBP).');
+			}
+
+			$i = null;
+
+			if ($type === 'image') {
+				$i = $f->asImageObject();
+
+				if ($f->isImageTooLarge($i)) {
+					$this->setFile($key, null);
+					throw new UserException('Cette image est trop grande. Taille maximale : 6000x6000.');
+				}
 			}
 
 			try {
 				// Force favicon format
 				if ($key === 'favicon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(32, 32);
 					$f->setContent($i->output($format, true));
 				}
 				// Force icon format
 				else if ($key === 'icon') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->cropResize(512, 512);
 					$f->setContent($i->output($format, true));
 				}
 				// Force signature size
 				else if ($key === 'signature') {
 					$format = 'png';
-					$i = $f->asImageObject();
 					$i->resize(200, 200);
 					$f->setContent($i->output($format, true));
 				}

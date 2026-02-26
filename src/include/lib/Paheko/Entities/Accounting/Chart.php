@@ -26,8 +26,8 @@ class Chart extends Entity
 	protected bool $archived = false;
 
 	const COUNTRY_LIST = [
-		'BE' => 'Belgique',
 		'FR' => 'France',
+		'BE' => 'Belgique',
 		'CH' => 'Suisse',
 	];
 
@@ -187,5 +187,10 @@ class Chart extends Entity
 		}
 
 		return strtolower($this->country . '_' . $this->code);
+	}
+
+	public function isOfficial(): bool
+	{
+		return $this->code !== null;
 	}
 }

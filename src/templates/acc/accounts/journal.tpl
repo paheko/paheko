@@ -47,17 +47,17 @@
 	<nav class="tabs">
 		<aside>
 		{if !$filter.start && !$filter.end}
-			{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+			{linkbutton shape="calendar" href="?start=1" label="Filtrer par date" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
 		{/if}
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{exportmenu}
-		{/if}
-			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
+			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id:$account.code label="Rechercher"}
 		{if $year.id == CURRENT_YEAR_ID}
 			{if $account.type == $account::TYPE_BANK}
-				{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
+				{linkbutton label="Rapprocher" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 			{/if}
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
+		{/if}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			{exportmenu right=true}
 		{/if}
 		</aside>
 	</nav>
@@ -101,10 +101,10 @@
 				<td class="money">{$line.sum|raw|money:false}</td>
 			{/if}
 			<td>{$line.reference}</td>
-			<th>{$line.label}{if $simple && $line.line_label} — <em>{$line.line_label}</em>{/if}</th>
+			<th scope="row">{$line.label}{if $simple && $line.line_label} — <em>{$line.line_label}</em>{/if}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
-			<td class="num">{if $line.id_project}<a href="{$admin_url}acc/reports/statement.php?project={$line.id_project}&amp;year={$year.id}">{$line.project_code}</a>{/if}</td>
+			<td class="num">{if $line.id_project}{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$year.id label=$line.project_code|truncate:10}{/if}</td>
 			{if isset($line.locked)}
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
 			{/if}
@@ -112,15 +112,6 @@
 			{if isset($line.reconciled)}
 				<td>{if $line.reconciled}{icon title="Rapprochée" shape="check"}{/if}</td>
 			{/if}
-			{* Deposit status, might be consufing
-			<td>
-				{if $account.type === $account::TYPE_OUTSTANDING && $line.debit}
-					{if !($line.status & Entities\Accounting\Transaction::STATUS_DEPOSITED)}
-						{icon shape="alert" title="Cette opération n'a pas été déposée"}
-					{/if}
-				{/if}
-			</td>
-			*}
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}

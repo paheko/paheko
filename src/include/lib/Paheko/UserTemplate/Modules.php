@@ -21,6 +21,7 @@ use const Paheko\ADMIN_URL;
 
 use KD2\DB\EntityManager as EM;
 use KD2\ZipReader;
+use KD2\ErrorManager;
 
 class Modules
 {
@@ -73,7 +74,7 @@ class Modules
 		}
 
 		foreach ($delete as $name) {
-			self::get($name)->delete();
+			self::get($name, true)->delete();
 		}
 
 		foreach ($existing as $name) {
@@ -191,7 +192,16 @@ class Modules
 	 */
 	static public function list(): array
 	{
-		return EM::getInstance(Module::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+		$out = [];
+		$i = EM::getInstance(Module::class)->iterate('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
+
+		foreach ($i as $module) {
+			if ($module->isValid()) {
+				$out[] = $module;
+			}
+		}
+
+		return $out;
 	}
 
 	static public function snippetsAsString(string $snippet, array $variables = []): string
@@ -217,7 +227,15 @@ class Modules
 				continue;
 			}
 
-			$out[$module->name] = $module->fetch($snippet, $variables);
+			try {
+				$content = $module->fetch($snippet, $variables);
+			}
+			catch (\RuntimeException $e) {
+				ErrorManager::reportExceptionSilent($e);
+				$content = sprintf('Le module "%s" a rencontré une erreur.', $module->name);
+			}
+
+			$out[$module->name] = $content;
 		}
 
 		return array_filter($out, fn($a) => trim($a) !== '');
@@ -225,19 +243,37 @@ class Modules
 
 	static public function listForSnippet(string $snippet): array
 	{
-		return EM::getInstance(Module::class)->all('SELECT f.* FROM @TABLE f
+		$out = [];
+
+		$i = EM::getInstance(Module::class)->iterate('SELECT f.* FROM @TABLE f
 			INNER JOIN modules_templates t ON t.id_module = f.id
 			WHERE t.name = ? AND f.enabled = 1
 			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
+
+		foreach ($i as $module) {
+			if ($module->isValid()) {
+				$out[] = $module;
+			}
+		}
+
+		return $out;
 	}
 
-	static public function get(string $name): ?Module
+	static public function get(string $name, bool $return_invalid = false): ?Module
 	{
+		if (!$return_invalid && !preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return null;
+		}
+
 		return EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE name = ?;', $name);
 	}
 
 	static public function isEnabled(string $name): bool
 	{
+		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return false;
+		}
+
 		return (bool) EM::getInstance(Module::class)->col('SELECT 1 FROM @TABLE WHERE name = ? AND enabled = 1;', $name);
 	}
 
@@ -262,6 +298,8 @@ class Modules
 			$module->set('enabled', true);
 			$module->save();
 		}
+
+		$module->assertIsValid();
 
 		return $module;
 	}
@@ -289,9 +327,22 @@ class Modules
 			$module = self::getWeb();
 		}
 
+		// Make sure the module name is valid
+		$module->assertIsValid();
+
 		// If path ends with trailing slash, then ask for index.html
 		if (!$path || substr($path, -1) == '/') {
 			$path .= 'index.html';
+		}
+		// Redirect /m/module/directory to /m/module/directory/
+		elseif ($module->hasLocalDir($path)) {
+			// Unless this directory doesn't have an index
+			if (!$module->hasLocalFile($path . '/' . $module::INDEX_FILE)) {
+				throw new UserException('This path does not exist, sorry.', 404);
+			}
+
+			Utils::redirect('/' . $uri . '/');
+			return;
 		}
 
 		$name = Utils::basename($uri);
@@ -337,8 +388,7 @@ class Modules
 		}
 		// 404 if module is not enabled, except for icon
 		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {
-			http_response_code(404);
-			throw new UserException('This page is currently disabled.');
+			throw new UserException('This page is currently disabled.', 404);
 		}
 
 		// Restrict access
@@ -355,9 +405,7 @@ class Modules
 
 		// Check if the file actually exists in the module
 		if (!$has_local_file && !$has_dist_file) {
-
-			http_response_code(404);
-			throw new UserException('This path does not exist, sorry.');
+			throw new UserException('This path does not exist, sorry.', 404);
 		}
 
 		$module->serve($path, $has_local_file, compact('uri', 'page'));

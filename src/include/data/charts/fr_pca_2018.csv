@@ -505,7 +505,7 @@ code,label,description,position,bookmark
 765,Escomptes obtenus,,Produit,
 766,Gains de change,,Produit,
 767,Produits nets sur cession valeurs mobilières de placement,,Produit,
-768,Autres produits financiers,,Produit,
+768,Autres produits financiers,"Par exemple intérêts des livrets",Produit,
 77,Produits exceptionnels,,Produit,
 771,Produits exceptionnels sur opération de gestion,,Produit,
 7713,Libéralités perçues,,Produit,

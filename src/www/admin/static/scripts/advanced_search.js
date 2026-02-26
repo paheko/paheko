@@ -7,8 +7,8 @@ g.script('scripts/lib/query_builder.js', () => {
 		"after": "après",
 		"before": "avant",
 		"is equal to": "est égal à",
-		"is equal to one of": "est égal à une des ces options",
-		"is not equal to one of": "n'est pas égal à une des ces options",
+		"is equal to one of": "est égal à une de ces options",
+		"is not equal to one of": "n'est pas égal à une de ces options",
 		"is not equal to": "n'est pas égal à",
 		"is greater than": "est supérieur à",
 		"is greater than or equal to": "est supérieur ou égal à",
@@ -50,6 +50,8 @@ g.script('scripts/lib/query_builder.js', () => {
 
 	// Add specific condition just to have the column show up in result
 	q.operators["1"] = "afficher cette colonne";
+	q.types_operators['money'] = q.types_operators['integer'];
+	q.types_operators['tel'] = q.types_operators['text'];
 
 	for (var i in q.types_operators) {
 		if (i === 'enum_restricted') {

@@ -16,7 +16,7 @@ $form->runIf('save', function () use ($user) {
 	foreach ($user::PREFERENCES as $key => $v) {
 		$user->setPreference($key, f($key));
 	}
-	$user->save();
+	$user->savePreferences();
 }, $csrf_key, '!me/preferences.php?ok');
 
 $folders_options = [

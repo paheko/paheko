@@ -142,7 +142,9 @@ class SQLite implements StorageInterface
 	static public function truncate(): void
 	{
 		$db = DB::getInstance();
+		$db->disableSafetyAuthorizer();
 		$db->exec('DELETE FROM files_contents; VACUUM;');
+		$db->enableSafetyAuthorizer();
 	}
 
 	static public function lock(): void

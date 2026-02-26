@@ -24,7 +24,7 @@
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="name" item="label"}
 				<td>
-					{user_field name=$name value=$row->$name link_name_id=$row.id files_href="!users/details.php?id=%d"|args:$row.id}
+					{user_field name=$name value=$row->$name link_name_id=$row.id context="list" files_href="!users/details.php?id=%d"|args:$row.id}
 				</td>
 			{/foreach}
 			<td class="actions">
@@ -72,7 +72,7 @@
 		<thead>
 			<tr>
 				{if $is_admin && $id_column !== false}
-					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+					<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 				{/if}
 				{foreach from=$header item="column"}
 					<td>{$column}</td>
@@ -84,15 +84,16 @@
 		</thead>
 		<tbody>
 			{foreach from=$results item="row"}
+			<?php $id = $id_column !== false ? ($row[$id_column] ?? null) : null; ?>
 			<tr>
-			{if $is_admin && $id_column !== false && ($value = $row[$id_column] ?? null)}
-				<td class="check">{input type="checkbox" name="selected[]" value=$value}</td>
+			{if $is_admin && $id}
+				<td class="check">{input type="checkbox" name="selected[]" value=$id}</td>
 			{/if}
 				{foreach from=$header key="i" item="label"}
 				<td>
 					<?php $value = $row[$i]; $name = $header[$i]; ?>
 					{if $id_column !== false}
-						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column]}
+						{user_field name=$name value=$value files_href="!users/details.php?id=%d"|args:$row[$id_column] link_name_id=$id context="list"}
 					{else}
 						{$value}
 					{/if}

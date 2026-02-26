@@ -7,8 +7,14 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
+use Paheko\Web\Cache as WebCache;
 
 $start_timer = microtime(true);
+
+// Disable output buffering, if enabled
+// as some hosting providers do enable it by default
+@ini_set('output_buffering', false);
+@ob_end_clean();
 
 foreach ($_ENV as $key => $value) {
 	if (strpos($key, 'PAHEKO_') === 0) {
@@ -24,7 +30,7 @@ if (!defined('Paheko\CONFIG_FILE')) {
 require_once __DIR__ . '/lib/KD2/ErrorManager.php';
 
 ErrorManager::enable(ErrorManager::DEVELOPMENT);
-ErrorManager::setLogFile(__DIR__ . '/data/error.log');
+ErrorManager::setLogFile(__DIR__ . '/../data/error.log');
 
 /*
  * Version de Paheko
@@ -165,11 +171,12 @@ if (!defined('Paheko\WWW_URL') && $host !== null) {
 }
 
 static $default_config = [
-	// USER_CONFIG_FILE is used in single-user setup (Debian/Windows)
+	// DESKTOP_CONFIG_FILE is used in single-user setup (Debian/Windows)
 	// to be able to add user-specific config constants, even though we already
 	// have a config.local.php for OS-specific stuff, this also allows
 	// to remove LOCAL_USER and have a multi-user setup on a single computer
-	'USER_CONFIG_FILE'      => null,
+	'DESKTOP_CONFIG_FILE'   => null,
+	'BACKUPS_ROOT'          => DATA_ROOT . '/backups',
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
@@ -184,6 +191,8 @@ static $default_config = [
 	'ERRORS_REPORT_URL'     => null,
 	'REPORT_USER_EXCEPTIONS' => 0,
 	'ENABLE_TECH_DETAILS'   => true,
+	'AUDIT_LOG_FILE'        => null,
+	'AUDIT_LOG_SIZE'        => 1024*1024,
 	'HTTP_LOG_FILE'         => null,
 	'WEBDAV_LOG_FILE'       => null,
 	'WOPI_LOG_FILE'         => null,
@@ -195,13 +204,14 @@ static $default_config = [
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
-	'SMTP_SECURITY'         => 'STARTTLS',
+	'SMTP_SECURITY'         => 'NONE',
 	'SMTP_HELO_HOSTNAME'    => null,
+	'SMTP_MAX_MESSAGES_PER_SESSION' => 50,
 	'MAIL_RETURN_PATH'      => null,
 	'MAIL_BOUNCE_PASSWORD'  => null,
 	'MAIL_SENDER'           => null,
+	'MAIL_TEST_RECIPIENTS'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
-	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ADMIN_COLOR1'          => '#20787a',
 	'ADMIN_COLOR2'          => '#85b9ba',
 	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/bg.png',
@@ -221,12 +231,22 @@ static $default_config = [
 	'ENABLE_PROFILER'       => false,
 	'SYSTEM_SIGNALS'        => [],
 	'LOCAL_LOGIN'           => null,
+	'OIDC_CLIENT_BUTTON'    => 'Se connecter avec %hostname%',
+	'OIDC_CLIENT_URL'       => null,
+	'OIDC_CLIENT_ID'        => null,
+	'OIDC_CLIENT_SECRET'    => null,
+	'OIDC_CLIENT_MATCH_EMAIL' => true,
+	'OIDC_CLIENT_DEFAULT_PERMISSIONS' => null,
+	'OIDC_CLIENT_CALLBACK'  => null,
+	'ENABLE_PERMISSIONS'    => true,
 	'LEGAL_HOSTING_DETAILS' => null,
 	'ALERT_MESSAGE'         => null,
 	'DISABLE_INSTALL_PING'  => false,
 	'WOPI_DISCOVERY_URL'    => null,
 	'SQLITE_JOURNAL_MODE'   => 'TRUNCATE',
 	'LOCAL_ADDRESSES_ROOT'  => null,
+	'DONATE_URL'            => 'https://paheko.cloud/don/',
+	'OPEN_BASEDIR'          => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -305,6 +325,55 @@ if (ENABLE_PROFILER) {
 	register_shutdown_function([Utils::class, 'showProfiler']);
 }
 
+// Open_basedir hardening, but only in a web context
+if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
+	$paths = explode(':', OPEN_BASEDIR);
+
+	if (isset($paths[0]) && $paths[0] === 'auto') {
+		unset($paths[0]);
+		$paths = array_merge($paths, [ROOT,
+			// Just in case KD2 is a symlink
+			ROOT . '/include/lib/KD2',
+			// Same with modules
+			ROOT . '/modules',
+			DATA_ROOT,
+			BACKUPS_ROOT,
+			CACHE_ROOT,
+			SHARED_CACHE_ROOT,
+			PLUGINS_ROOT,
+			WebCache::getRoot(),
+			LOCAL_ADDRESSES_ROOT,
+			sys_get_temp_dir(),
+		]);
+
+		if (FILE_STORAGE_BACKEND === 'FileSystem') {
+			$paths[] = FILE_STORAGE_CONFIG;
+		}
+	}
+
+	$paths = array_filter($paths);
+
+	foreach ($paths as &$path) {
+		// Make sure the path exists, or errors might be returned
+		Utils::safe_mkdir($path, null, true);
+
+		$r = realpath($path);
+
+		if (!$r) {
+			throw new \LogicException('This path does not exist: ' . $path);
+		}
+
+		$path = $r;
+	}
+
+	unset($path);
+	sort($paths);
+
+	$basedir = ini_get('open_basedir');
+	$basedir .= PATH_SEPARATOR . implode(PATH_SEPARATOR, $paths);
+	ini_set('open_basedir', ltrim($basedir, PATH_SEPARATOR));
+}
+
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
@@ -325,6 +394,10 @@ class APIException extends \LogicException
 {
 }
 
+class TemplateException extends \RuntimeException
+{
+}
+
 // activer le gestionnaire d'erreurs/exceptions
 ErrorManager::setEnvironment(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION | ErrorManager::CLI_DEVELOPMENT);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');
@@ -342,6 +415,7 @@ ErrorManager::setContext([
 	'root_directory'   => ROOT,
 	'paheko_data_root' => DATA_ROOT,
 	'paheko_version'   => paheko_version(),
+	'sqlite_journal'   => SQLITE_JOURNAL_MODE,
 ]);
 
 
@@ -420,6 +494,13 @@ function user_error(UserException $e)
 	exit;
 }
 
+function ngettext(string $singular, string $plural, int $count): string
+{
+	$str = $count > 1 ? $plural : $singular;
+	$str = str_replace('%n', $count, $str);
+	return $str;
+}
+
 if (REPORT_USER_EXCEPTIONS < 2) {
 	// Message d'erreur simple pour les erreurs de l'utilisateur
 	ErrorManager::setCustomExceptionHandler('\Paheko\UserException', '\Paheko\user_error');
@@ -428,8 +509,12 @@ if (REPORT_USER_EXCEPTIONS < 2) {
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Paheko\SECRET_KEY')) {
 	$key = base64_encode(random_bytes(64));
-	Install::setConfig(CONFIG_FILE, 'SECRET_KEY', $key);
 	define('Paheko\SECRET_KEY', $key);
+
+	// CONFIG_FILE may be NULL (eg. in unit tests)
+	if (null !== CONFIG_FILE) {
+		Install::setConfig(CONFIG_FILE, ['SECRET_KEY' => $key]);
+	}
 }
 
 // Define a local secret key derived of the main secret key and the data root

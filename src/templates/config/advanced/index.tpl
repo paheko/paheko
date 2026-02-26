@@ -8,10 +8,6 @@
 	<p class="block confirm">
 		La remise à zéro a été effectuée. Une sauvegarde a également été créée.</p>
 	</p>
-{else if $_GET.msg == 'REOPEN'}
-	<p class="block confirm">
-		L'exercice sélectionné a été réouvert.
-	</p>
 {/if}
 
 <p class="help">
@@ -19,14 +15,6 @@
 </p>
 
 <dl class="large">
-	<dt>Réouvrir un exercice clôturé</dt>
-	<dd class="help">
-		À utiliser si vous avez clôturé un exercice par erreur. Attention, en comptabilité cette action est normalement exceptionnelle.
-	</dd>
-	<dd>
-		{linkbutton shape="reload" href="reopen.php" label="Réouvrir un exercice clôturé"}
-	</dd>
-
 	<dt>Journal d'audit</dt>
 	<dd class="help">
 		Affiche l'historique des actions (connexion, changement de mot de passe, création de membre, modification comptable, etc.) effectuées par tous les membres.

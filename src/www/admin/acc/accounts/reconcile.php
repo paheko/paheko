@@ -46,8 +46,7 @@ $filter_options = [
 	$account::RECONCILE_MISSING => 'Seulement les écritures non rapprochées',
 ];
 
-if (null !== qg('start') && null !== qg('end'))
-{
+if (null !== qg('start') && null !== qg('end')) {
 	$start = \DateTime::createFromFormat('!d/m/Y', qg('start'));
 	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
 
@@ -56,11 +55,11 @@ if (null !== qg('start') && null !== qg('end'))
 	}
 }
 
-if ($start < $current_year->start_date || $start > $current_year->end_date) {
+if (!$start || $start < $current_year->start_date || $start > $current_year->end_date) {
 	$start = clone $current_year->start_date;
 }
 
-if ($end < $current_year->start_date || $end > $current_year->end_date) {
+if (!$end || $end < $current_year->start_date || $end > $current_year->end_date) {
 	$end = clone $current_year->end_date;
 }
 
@@ -109,8 +108,7 @@ if ($prev < $current_year->start_date) {
 if ($start == $current_year->start_date) {
 	$prev = null;
 }
-
-if ($end == $current_year->end_date) {
+elseif ($end == $current_year->end_date) {
 	$next = null;
 }
 

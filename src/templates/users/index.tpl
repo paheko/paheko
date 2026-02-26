@@ -16,29 +16,18 @@
 	<p class="block confirm">Les membres sélectionnés ont bien été changés de catégorie.</p>
 {/if}
 
-{if !empty($categories)}
+{if !empty($categories_list)}
 	<fieldset class="shortFormRight">
 		<legend>Filtrer par catégorie</legend>
-		<nav class="dropdown">
-			<ul>
-				<li><a></a></li>
-			{foreach from=$categories key="c" item="category"}
-			<li class="{if $c === $current_cat}selected{/if}">
-				<a href="?cat={$c}">
-					<strong>{$category.label}</strong>
-					<small>{{%n membre}{%n membres} n=$category.count}</small>
-				</a>
-			</li>
-			{/foreach}
-			</ul>
-		</nav>
+		{dropdown value=$current_cat options=$categories_list title="Sélectionner une catégorie de membres"}
 	</fieldset>
 {/if}
 
 <form method="get" action="search.php" class="shortFormLeft" data-focus="1">
 	<fieldset>
 		<legend>Rechercher un membre</legend>
-		<input type="text" name="qt" value="" placeholder="Nom, numéro, ou adresse e-mail" />
+		{input type="text" name="qt" placeholder="Nom, numéro, ou adresse e-mail"}
+		{input type="hidden" name="id_category" default=$current_cat}
 		{button type="submit" name="" title="Chercher" shape="search"}
 	</fieldset>
 </form>
@@ -54,7 +43,7 @@
 		<?php $url = sprintf('details.php?id=%d&list_category=%d', $row->_user_id, $current_cat); ?>
 		<tr>
 			{if $can_check}
-				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id}</td>
+				<td class="check">{input type="checkbox" name="selected[]" value=$row._user_id title=$row.identity}</td>
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="value"}
 				<?php $value = $row->$key; ?>
@@ -63,7 +52,7 @@
 						{link href=$url label=$value}
 					</td>
 				{elseif $key == 'identity'}
-					<th>{link href=$url label=$value}</th>
+					<th scope="row">{link href=$url label=$value}</th>
 				{elseif $key == 'id_parent'}
 					<td>
 						{if $value}
@@ -78,7 +67,7 @@
 					</td>
 				{else}
 					<td>
-						{user_field name=$key value=$value user_id=$row._user_id files_href=$url}
+						{user_field name=$key value=$value user_id=$row._user_id files_href=$url context="list"}
 					</td>
 				{/if}
 			{/foreach}

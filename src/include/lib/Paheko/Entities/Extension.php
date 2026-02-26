@@ -82,6 +82,13 @@ class Extension extends Entity
 		return $this->{$this->type}->delete();
 	}
 
+	public function changeRestrictedAccess(string $section, int $level)
+	{
+		$this->{$this->type}->set('restrict_section', $section);
+		$this->{$this->type}->set('restrict_level', $level);
+		$this->{$this->type}->save();
+	}
+
 	public function normalize($item)
 	{
 		$type = $item instanceof Plugin ? 'plugin' : 'module';
@@ -100,8 +107,8 @@ class Extension extends Entity
 		$this->set('config_url', $item->hasConfig() ? $item->url($item::CONFIG_FILE) : null);
 		$this->set('installed', $type === 'plugin' ? $item->exists() : true);
 		$this->set('missing', $type === 'plugin' ? !$item->hasCode() : false);
-		$this->set('broken_message', $type === 'plugin' ? $item->getBrokenMessage() : null);
 		$this->set('ini', $item->getINIProperties());
+		$this->set('broken_message', $item->getBrokenMessage());
 		$this->set('doc_url', $this->ini->doc_url ?? null);
 
 		if ($item->hasFile($item::INDEX_FILE)) {

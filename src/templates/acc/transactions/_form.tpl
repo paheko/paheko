@@ -70,7 +70,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 		<fieldset data-types="t99"{if $is_new} class="hidden"{/if}>
 			<legend>{$payoff.type_label}</legend>
 			<dl>
-				{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff.targets,$chart.id name="payoff_account" label="Compte de règlement" required=1}
+				{input type="list" target="!acc/charts/accounts/selector.php?types=%s&id_chart=%d"|args:$payoff.selector_types:$chart.id name="payoff_account" label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
 	{/if}
@@ -84,7 +84,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{else}
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart.id name=$account.selector_name label=$account.label required=1 default=$account.selector_value}
+					{input type="list" target="!acc/charts/accounts/selector.php?types=%s&id_chart=%d"|args:$account.types_string:$chart.id name=$account.selector_name label=$account.label required=1 default=$account.selector_value}
 				{/foreach}
 				</dl>
 			{/if}
@@ -97,7 +97,8 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->getPaymentReference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users}
+			<?php $linked_users_is_required ??= false; ?>
+			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php" default=$linked_users required=$linked_users_is_required}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		{if !isset($payoff)}
@@ -107,7 +108,7 @@ $is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'ac
 		{/if}
 		<dl data-types="all-but-advanced">
 			{if !empty($projects)}
-				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —"}
+				{input type="select" name="id_project" label="Projet (analytique)" options=$projects default=$id_project default_empty="— Aucun —" required=$config.analytical_mandatory}
 			{/if}
 		</dl>
 	</fieldset>

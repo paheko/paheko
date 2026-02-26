@@ -1,5 +1,11 @@
 {include file="_head.tpl" title="Connexion" current="login"}
 
+{if DESKTOP_CONFIG_FILE}
+<nav class="tabs">
+	{linkbutton shape="reset" label="Ouvrir une autre base de données" href="!open_db.php"}
+</nav>
+{/if}
+
 {form_errors}
 
 {if $changed}
@@ -58,6 +64,9 @@
 	<p class="submit">
 		{csrf_field key="login"}
 		{button type="submit" name="login" label="Se connecter" shape="right" class="main"}
+		{if $oidc_button}
+			{linkbutton href="?oidc" label=$oidc_button shape="login"}
+		{/if}
 		{if !DISABLE_EMAIL && !$app_token}
 			{linkbutton href="!password.php" label="Mot de passe perdu ?" shape="help"}
 			{linkbutton href="!password.php?new" label="Première connexion ?" shape="user"}

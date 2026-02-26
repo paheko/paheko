@@ -10,8 +10,9 @@ require_once __DIR__ . '/_inc.php';
 $session = Session::getInstance();
 $self = $session->user();
 $is_admin = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+$can_email = $self->canEmail();
 
-if (!$self->canEmail()) {
+if (!$can_email && !$is_admin) {
 	throw new UserException('Vous devez renseigner une adresse e-mail dans votre fiche membre pour pouvoir envoyer des messages personnels.');
 }
 
@@ -21,8 +22,14 @@ if (!$user) {
 	throw new UserException("Ce membre n'existe pas.");
 }
 
-if (!$user->canEmail()) {
+$email = $user->getEmailObject();
+
+if (!$email) {
 	throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans sa fiche membre.');
+}
+
+if (!$email->accepts_messages) {
+	throw new UserException('Ce destinataire n\'accepte pas les messages personnels');
 }
 
 $csrf_key = 'send_message_' . $user->id;
@@ -39,6 +46,6 @@ $form->runIf('send', function () use ($user, $self, $is_admin) {
 
 $tpl->assign('category', Categories::get($user->id_category));
 $tpl->assign('recipient', $user);
-$tpl->assign(compact('self', 'csrf_key', 'is_admin'));
+$tpl->assign(compact('self', 'csrf_key', 'is_admin', 'can_email'));
 
 $tpl->display('users/message.tpl');

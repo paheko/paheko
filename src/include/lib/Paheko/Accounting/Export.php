@@ -65,7 +65,7 @@ class Export
 			'Membres associés'       => 'linked_users',
 		],
 		self::FEC => [
-			'JournalCode'   => null,
+			'JournalCode'   => 'journal',
 			'JournalLib'    => null,
 			'EcritureNum'   => 'id',
 			'EcritureDate'  => 'date',
@@ -212,7 +212,7 @@ class Export
 				t.type, --JournalLib
 				t.id, -- EcritureNum
 				date, --EcritureDate
-				a.code AS account, --CompteNum
+				CASE WHEN LENGTH(a.code) < 3 THEN a.code || \'0\' ELSE a.code END AS account, --CompteNum
 				a.label AS account_label, --CompteLib
 				NULL AS CompAuxNum,
 				NULL AS CompAuxLib,

@@ -12,7 +12,7 @@ use Paheko\Entities\Accounting\Account;
 	<thead>
 		<tr>
 			<td>Numéro</td>
-			<th>Compte</th>
+			<th scope="col">Compte</th>
 			<td class="money">Total des débits</td>
 			<td class="money">Total des crédits</td>
 			<td class="money">Solde</td>
@@ -24,7 +24,7 @@ use Paheko\Entities\Accounting\Account;
 			<td class="num">
 				<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a>
 			</td>
-			<th>{$account.label}</th>
+			<th scope="row">{$account.label}</th>
 			<td class="money{if !$account.debit} disabled{/if}">{$account.debit|raw|money:false}</td>
 			<td class="money{if !$account.credit} disabled{/if}">{$account.credit|raw|money:false}</td>
 			<td class="money">{if $account.balance !== null}<b>{$account.balance|escape|money:false}</b>{/if}</td>
@@ -43,8 +43,8 @@ use Paheko\Entities\Accounting\Account;
 
 <p class="help">
 	Note : n'apparaissent ici que les comptes qui ont été utilisés dans cet exercice (au moins une écriture).<br />
-	Les lignes grisées correspondent aux comptes soldés.<br />
-	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
+	Les lignes grisées correspondent aux comptes soldés (le solde est à zéro).<br />
+	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/all.php?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 
 {include file="_foot.tpl"}

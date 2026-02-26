@@ -26,7 +26,7 @@ class Storage
 	 */
 	static public function sync(?string $path = null, ?callable $callback = null): void
 	{
-		if (FILE_STORAGE_BACKEND == 'SQLite') {
+		if (FILE_STORAGE_BACKEND === 'SQLite') {
 			return;
 		}
 
@@ -62,7 +62,8 @@ class Storage
 			}
 
 			if ($cache) {
-				$cache->deleteSafe();
+				$cache->loadFromEntity($file);
+				$file = $cache;
 			}
 			else {
 				$file->deleteCache();

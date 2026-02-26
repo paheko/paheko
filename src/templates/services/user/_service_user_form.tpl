@@ -1,10 +1,8 @@
 <?php
 assert(isset($create) && is_bool($create));
-assert(isset($has_past_services) && is_bool($has_past_services));
-assert(isset($current_only) && is_bool($current_only));
 assert(isset($form_url) && is_string($form_url));
 assert(isset($today) && $today instanceof \DateTimeInterface);
-assert($create === false || isset($account_targets));
+assert($create === false || isset($account_types));
 assert(isset($grouped_services) && is_array($grouped_services));
 ?>
 
@@ -30,7 +28,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 								{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
 								{/if}
 							</td>
-							<th>
+							<th scope="row">
 								{$name}
 							</th>
 						</tr>
@@ -49,21 +47,6 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
-
-			{if $has_past_services}
-			<dd>
-				{* We can't use a button type="submit" here because it would trigger when user presses Enter, instead of the true submit button *}
-				<input type="hidden" name="past_services" value="{$current_only}" />
-				{if $current_only}
-					Seules les activités courantes sont affichées.
-					{button value="1" shape="reset" type="button" onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité passée"}
-				{else}
-					Seules les activités passées sont affichées.
-					{button value="0" shape="left" type="button"  onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité courante"}
-				{/if}
-			</dd>
-			{/if}
-
 
 			{foreach from=$grouped_services item="service"}
 				<dd class="radio-btn">
@@ -105,8 +88,8 @@ assert(isset($grouped_services) && is_array($grouped_services));
 					<div>
 						<h3>{$fee.label}</h3>
 						<p>
-							{if $fee.user_amount && $fee.formula}
-								<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
+							{if $fee.formula !== null && isset($fee.user_amount)}
+								<strong>{$fee.user_amount|raw|money_currency:false}</strong> (montant calculé)
 							{elseif $fee.formula}
 								montant calculé, variable selon les membres
 							{elseif $fee.user_amount}
@@ -152,7 +135,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{/if}
 
 			{input type="money" name="amount" label="Montant réglé par le membre" required=true help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=0"|args:$account_targets name="account_selector" label="Compte de règlement" required=true}
+			{input type="list" target="!acc/charts/accounts/selector.php?types=%s"|args:$account_types name="account_selector" label="Compte de règlement" required=true}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}

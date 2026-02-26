@@ -20,7 +20,7 @@
 	</dd>
 	{foreachelse}
 	<dd>
-		Ce membre n'est inscrit à aucune activité ou cotisation.
+		Ce membre n'est actuellement inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
 	{if !$only && !$after}
@@ -41,8 +41,8 @@
 {include file="common/dynamic_list_head.tpl"}
 
 	{foreach from=$list->iterate() item="row"}
-		<tr>
-			<th>{$row.label}</th>
+		<tr{if $row.archived} class="disabled"{/if}>
+			<th scope="row">{$row.label} {if $row.archived}<em>(archivée)</em>{/if}</th>
 			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>

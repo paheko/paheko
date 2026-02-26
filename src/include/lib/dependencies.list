@@ -28,8 +28,12 @@ KD2/HTTP.php
 KD2/HTTP/Server.php
 KD2/I18N/TimeZones.php
 KD2/Mail_Message.php
-KD2/Office/Calc/Writer.php
+KD2/Office/QIFParser.php
+KD2/Office/OFXParser.php
+KD2/Office/Calc/Reader.php
+KD2/Office/Excel/Reader.php
 KD2/Office/ToText.php
+KD2/OpenIDConnect.php
 KD2/Security.php
 KD2/Security_OTP.php
 KD2/SimpleDiff.php
@@ -41,7 +45,9 @@ KD2/UserSession.php
 KD2/WebDAV/AbstractStorage.php
 KD2/WebDAV/Exception.php
 KD2/WebDAV/NextCloud.php
+KD2/WebDAV/NextCloudNotes.php
 KD2/WebDAV/Server.php
+KD2/WebDAV/TrashInterface.php
 KD2/WebDAV/WOPI.php
 KD2/ZipReader.php
 KD2/ZipWriter.php
