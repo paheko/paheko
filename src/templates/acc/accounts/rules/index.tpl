@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="plus" href="edit.php" target="_dialog" label="Nouvelle règle"}
+		{linkbutton shape="plus" href="edit.php" label="Nouvelle règle"}
 	</aside>
 </nav>
 
