@@ -79,7 +79,7 @@ class Plugin extends Entity
 
 		$path = Plugins::getPath($this->name);
 
-		// Strip phar prefix as realpath doesn't work with phar paths
+		// Strip phar prefix as realpath doesn't work with phar paths @FIXME remove phar support in 1.4.0
 		if (0 === strpos($path, 'phar://')) {
 			$path = substr($path, strlen('phar://'));
 		}
