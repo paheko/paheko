@@ -81,16 +81,24 @@ $login = null;
 $login_regexp = '([a-z0-9_-]{1,63})';
 $domain_regexp = sprintf('/^%s\.%s$/', $login_regexp, preg_quote(FACTORY_DOMAIN, '/'));
 
-if (isset($_SERVER['SERVER_NAME']) && preg_match($domain_regexp, $_SERVER['SERVER_NAME'], $match)) {
-	$login = $match[1];
-}
-elseif (PHP_SAPI == 'cli' && !empty($_SERVER['PAHEKO_FACTORY_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['PAHEKO_FACTORY_USER'])) {
-	$login = $_SERVER['PAHEKO_FACTORY_USER'];
+if (PHP_SAPI == 'cli') {
+	if (!empty($_SERVER['PAHEKO_FACTORY_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['PAHEKO_FACTORY_USER'])) {
+		$login = $_SERVER['PAHEKO_FACTORY_USER'];
+	}
+	else {
+		echo "Unknown factory user, please provide PAHEKO_FACTORY_USER\n";
+		exit(1);
+	}
 }
 else {
-	// Login invalide ou non fourni
-	http_response_code(404);
-	die('<h1>Page non trouvée</h1>');
+	if (isset($_SERVER['SERVER_NAME']) && preg_match($domain_regexp, $_SERVER['SERVER_NAME'], $match)) {
+		$login = $match[1];
+	}
+	else {
+		// Login invalide ou non fourni
+		http_response_code(404);
+		die('<h1>Page non trouvée</h1>');
+	}
 }
 
 $user_data_dir = rtrim(FACTORY_USER_DIRECTORY, '/') . '/' . $login;

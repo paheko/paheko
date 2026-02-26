@@ -211,21 +211,21 @@ class AdvancedSearch extends A_S
 			];
 		}
 
-		// Match number: find transactions per credit or debit
-		if (preg_match('/^=\s*\d+([.,]\d+)?$/', $text))
-		{
-			$text = ltrim($text, "\n\t =");
+		// Match amount: find transactions per credit or debit
+		if (preg_match('/^(>=|<=|=|>|<)\s*(\d+(?:[.,]\d+)?)$/', $text, $match)) {
+			$operator = $match[1];
+			$text = $match[2];
 			$query[] = [
 				'operator' => 'OR',
 				'conditions' => [
 					[
 						'column'   => 'debit',
-						'operator' => '= ?',
+						'operator' => $operator . ' ?',
 						'values'   => [$text],
 					],
 					[
 						'column'   => 'credit',
-						'operator' => '= ?',
+						'operator' => $operator . ' ?',
 						'values'   => [$text],
 					],
 					[
@@ -236,8 +236,8 @@ class AdvancedSearch extends A_S
 			];
 		}
 		// Match date
-		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::parseDateTime($text)))
-		{
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text)
+			&& ($d = Utils::parseDateTime($text))) {
 			$query[] = [
 				'operator' => 'OR',
 				'conditions' => [
@@ -250,8 +250,7 @@ class AdvancedSearch extends A_S
 			];
 		}
 		// Or search in label or reference
-		else
-		{
+		else {
 			$operator = 'LIKE %?%';
 			$query[] = [
 				'operator' => 'OR',
