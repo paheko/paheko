@@ -77,8 +77,16 @@ class Plugin extends Entity
 
 		$this->assert($this->hasFile(self::META_FILE), 'Le code du plugin n\'est pas disponible (fichier plugin.ini absent)');
 
-		if (0 !== strpos(realpath($this->path(self::META_FILE)), realpath(PLUGINS_ROOT))) {
-			throw new \RuntimeException('Security alert: plugin.ini file seems to be outside PLUGINS_ROOT');
+		$path = Plugins::getPath($this->name);
+
+		// Strip phar prefix as realpath doesn't work with phar paths
+		if (0 === strpos($path, 'phar://')) {
+			$path = substr($path, strlen('phar://'));
+		}
+
+		// Security check
+		if (!$path || 0 !== strpos(realpath($path), realpath(PLUGINS_ROOT))) {
+			throw new \LogicException(sprintf('Security alert for "%s": plugin path "%s" seems to be outside PLUGINS_ROOT', $this->name, $path));
 		}
 
 		$this->assert(isset($this->label) && trim($this->label) !== '', sprintf('%s : le nom de l\'extension ("name") ne peut rester vide', $this->name));
