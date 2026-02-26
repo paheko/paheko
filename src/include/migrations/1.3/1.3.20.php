@@ -7,6 +7,9 @@ $db::toggleAuthorizer($db, false);
 $db->beginSchemaUpdate();
 $db->import(__DIR__ . '/1.3.20.sql');
 
+// Make sure 74* are correct
+Charts::updateInstalled('fr_pca_2025');
+
 // Import rules from acc_tools plugin
 $config = $db->firstColumn('SELECT config FROM plugins WHERE name = \'acc_tools\';');
 $config = json_decode($config ?? 'null');
