@@ -78,6 +78,9 @@ else {
 
 $target = CURRENT_SEARCH_TARGET;
 $target_label = SE::TARGETS[CURRENT_SEARCH_TARGET];
-$tpl->assign(compact('mode', 'target', 'target_label', 'search_url', 'access_section', 'search', 'csrf_key'));
+
+$current = CURRENT_SEARCH_TARGET === 'accounting' ? 'acc' : CURRENT_SEARCH_TARGET;
+
+$tpl->assign(compact('mode', 'current', 'target', 'target_label', 'search_url', 'access_section', 'search', 'csrf_key'));
 
 $tpl->display('common/search/saved_searches.tpl');

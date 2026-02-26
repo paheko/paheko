@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Recherches enregistrées" current=$target}
+{include file="_head.tpl" title="Recherches enregistrées" current=$current}
 
 {if !$dialog}
 	{if $target == 'users'}
