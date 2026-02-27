@@ -242,9 +242,8 @@ class Backup
 
 			// Make sure we reduce the final backup
 			$dest_db->exec('VACUUM;');
+			$dest_db->close();
 		}
-
-		$dest_db->close();
 
 		if (null !== $destination) {
 			rename($tmp, $destination);
