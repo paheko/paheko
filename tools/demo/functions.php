@@ -4,6 +4,10 @@ namespace Paheko;
 
 use KD2\Security;
 
+// We don't have autoloader yet here
+require_once __DIR__ . '/src/paheko/src/include/lib/KD2/Security.php';
+require_once __DIR__ . '/src/paheko/src/include/lib/Paheko/Utils.php';
+
 function demo_prune(string $path): bool
 {
 	static $expiry = null;
