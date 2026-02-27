@@ -14,11 +14,16 @@ function demo_prune(string $path): bool
 	$expiry ??= time() - (3600 * 24 * DEMO_DELETE_DAYS);
 
 	if (filemtime($path) < $expiry) {
-		Utils::deleteRecursive($path, true);
+		demo_delete($path);
 		return true;
 	}
 
 	return false;
+}
+
+function demo_delete(string $path): void
+{
+	Utils::deleteRecursive($path, true);
 }
 
 function demo_prune_old(): void
