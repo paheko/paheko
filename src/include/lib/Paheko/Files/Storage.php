@@ -171,6 +171,79 @@ class Storage
 	}
 
 	/**
+	 * Export files contents from local storage to an external database file.
+	 * Use $quota to restrict the quota allowed for files contents
+	 */
+	static public function export(string $file, ?int $quota = null): void
+	{
+		$db = new \SQLite3($file);
+
+		$tables_count = $db->querySingle('SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name IN (\'files\', \'files_contents\');');
+
+		if (2 !== $tables_count) {
+			throw new \LogicException('The target database is not a valid Paheko database');
+		}
+
+		$db->exec('PRAGMA foreign_keys = ON; BEGIN; DELETE FROM files_contents;');
+		$st = $db->prepare('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));');
+		$total_size = 0;
+
+		foreach (Files::all() as $file) {
+			if ($file->isDir()) {
+				continue;
+			}
+
+			if (null !== $quota
+				&& $total_size + $file->size >= $quota) {
+				continue;
+			}
+
+			$pointer = $file->getReadOnlyPointer();
+
+			if (!$pointer) {
+				$path = $file->getLocalFilePath();
+
+				if (!$path || !file_exists($path)) {
+					continue;
+				}
+
+				$pointer = fopen($path, 'rb');
+			}
+
+			$st->clear();
+			$st->reset();
+			$st->bindValue(1, $file->id());
+			$st->bindValue(2, $file->size);
+			$st->execute();
+
+			$blob = $db->openBlob('files_contents', 'content', $file->id, 'main', \SQLITE3_OPEN_READWRITE);
+
+			while (!feof($pointer)) {
+				$bytes = fread($pointer, 8192);
+				fwrite($blob, $bytes);
+			}
+
+			fclose($pointer);
+			fclose($blob);
+			$total_size += $file->size;
+		}
+
+		// Delete files that could not be copied because quota has been exceeded
+		// don't delete directories or it will also delete files inside them (via foreign keys)
+		$db->exec('DELETE FROM files WHERE type = 1 AND id NOT IN (SELECT id FROM files_contents);');
+
+		$db->exec('COMMIT;');
+		$db->close();
+
+		// reopen to vacuum, if we just vacuum then we might get an error
+		// because of the blob pointers, even though they should be closed?
+		// https://stackoverflow.com/questions/41516542/sqlite-error-statements-in-progress-when-no-statements-should-be#comment127004699_41516542
+		$db = new \SQLite3($file);
+		$db->exec('VACUUM;');
+		$db->close();
+	}
+
+	/**
 	 * Delete all files from a storage backend
 	 */
 	static public function truncate(string $backend, $config = null): void

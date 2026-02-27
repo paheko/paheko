@@ -12,8 +12,8 @@ const DEMO_STORAGE_PATH = __DIR__ . '/../data/%s';
 
 // List of example organizations, each has a directory with "association.sqlite" and a "files" directory
 const EXAMPLE_ORGANIZATIONS = [
-	"L'asso du coin" => __DIR__ . '/../examples/asso',
-	"L'atelier vélo" => __DIR__ . '/../examples/bike',
+	"L'asso du coin" => __DIR__ . '/../examples/asso.sqlite',
+	"L'atelier vélo" => __DIR__ . '/../examples/bike.sqlite',
 ];
 
 const MAIL_ERRORS = 'root@example.org';
