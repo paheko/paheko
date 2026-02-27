@@ -108,6 +108,19 @@ if (isset($_GET['__from'])
 	apcu_delete('demo_login_' . $hash);
 	define('Paheko\LOCAL_LOGIN', $id);
 }
+// Re-create demo-account from local client
+elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
+	&& isset($_GET['f'])
+	&& ctype_alnum($_GET['f'])
+	&& ($source = \apcu_fetch('demo_' . $_GET['f']))
+	&& 0 === strpos(realpath(sys_get_temp_dir(), realpath($source)))
+) {
+	\apcu_delete('demo_' . $_GET['f']);
+	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
+	\apcu_delete('demo_login_' . $_GET['f']);
+	create_demo($source, $id);
+	@unlink($source);
+}
 // Use cookie to create local login to carry logged user
 elseif (!empty($_COOKIE['__login'])
 	&& ($_COOKIE['__login'] === md5($hash . SECRET_KEY))
@@ -133,7 +146,7 @@ $message = <<<EOF
 Compte de test temporaire
 — L'envoi d'e-mail est désactivé
 — <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
-— <form method="post" style="display: inline" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; padding: 2px 5px; background: none; font: inherit;">Supprimer</button></form>
+— <form method="post" style="display: inline" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; padding: 1px 2px; background: none; font: inherit; font-size: .8em">Supprimer</button></form>
 EOF;
 
 define('Paheko\ALERT_MESSAGE', $message);

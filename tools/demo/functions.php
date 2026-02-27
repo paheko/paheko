@@ -63,7 +63,6 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 		$path = sprintf(DEMO_STORAGE_PATH, $key);
 	}
 
-	$expire = strtotime('tomorrow 02:00');
 	mkdir($path, 0777, true);
 
 	if ($source) {
