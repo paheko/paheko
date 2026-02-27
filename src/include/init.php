@@ -520,7 +520,9 @@ if (!defined('Paheko\SECRET_KEY')) {
 // Define a local secret key derived of the main secret key and the data root
 // This is to make sure that in a multi-instance setup you don't reuse the same secret
 // between instances.
-define('Paheko\LOCAL_SECRET_KEY', sha1(SECRET_KEY . DATA_ROOT));
+if (!defined('Paheko\LOCAL_SECRET_KEY')) {
+	define('Paheko\LOCAL_SECRET_KEY', sha1(SECRET_KEY . DATA_ROOT));
+}
 
 // Intégration du secret pour les tokens CSRF
 Form::tokenSetSecret(LOCAL_SECRET_KEY);
