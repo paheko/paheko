@@ -133,7 +133,7 @@ $message = <<<EOF
 Compte de test temporaire
 — L'envoi d'e-mail est désactivé
 — <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
-— <form method="post" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" value="Supprimer" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; padding: 2px 5px; background: none; font: inherit;" /></form>
+— <form method="post" style="display: inline" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; padding: 2px 5px; background: none; font: inherit;">Supprimer</button></form>
 EOF;
 
 define('Paheko\ALERT_MESSAGE', $message);
