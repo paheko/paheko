@@ -77,12 +77,12 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 	$params = '';
 
 	if ($user_id) {
-		\apcu_add('demo_login_' . $hash, $user_id);
+		\apcu_add('demo_login_' . $key, $user_id);
 		$params = '?__from=' . md5($hash . 'from' . SECRET_KEY);
 	}
 
 	$url = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
-	$url .= '://demo-' . $hash . '.' . DEMO_PARENT_DOMAIN . '/admin/' . $params;
+	$url .= '://demo-' . $key . '.' . DEMO_PARENT_DOMAIN . '/admin/' . $params;
 
 	header('Location: ' . $url);
 	exit;
