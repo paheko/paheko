@@ -93,7 +93,7 @@ elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
 	&& isset($_GET['f'])
 	&& ctype_alnum($_GET['f'])
 	&& ($source = \apcu_fetch('demo_' . $_GET['f']))
-	&& 0 === strpos(realpath(sys_get_temp_dir()), realpath($source))
+	&& 0 === strpos(realpath($source), realpath(sys_get_temp_dir()))
 ) {
 	\apcu_delete('demo_' . $_GET['f']);
 	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
