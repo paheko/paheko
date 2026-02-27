@@ -2,6 +2,36 @@
 
 namespace Paheko;
 
+function demo_prune(string $path): bool
+{
+	static $expiry = null;
+	$expiry ??= time() - (3600 * 24 * DEMO_DELETE_DAYS);
+
+	if (filemtime($path) < $expiry) {
+		Utils::deleteRecursive($path, true);
+		return true;
+	}
+
+	return false;
+}
+
+function demo_prune_old(): void
+{
+	$dir = dir(DEMO_STORAGE_PATH);
+
+	while ($file = $dir->read()) {
+		if ($file[0] === '.') {
+			continue;
+		}
+
+		$path = DEMO_STORAGE_PATH . '/' . $file;
+
+		demo_prune($path);
+	}
+
+	$dir->close();
+}
+
 function create_demo(?string $example = null, ?string $source = null, ?int $user_id = null): void
 {
 	if ($example && array_key_exists($example, EXAMPLE_ORGANIZATIONS)) {
@@ -18,9 +48,8 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 	$path = null;
 
 	while (!$path || file_exists($path)) {
-		$hash = sha1(SECRET_KEY . random_bytes(10));
-		$hash = base_convert(substr($hash, 0, 8), 16, 36);
-		$path = sprintf(DEMO_STORAGE_PATH, $hash);
+		$key = Security::getRandomPassword(random_int(10, 20), 'abcdefghijkmnopqrstuvwxyz1234567890');
+		$path = sprintf(DEMO_STORAGE_PATH, $key);
 	}
 
 	$expire = strtotime('tomorrow 02:00');

@@ -61,7 +61,7 @@ function demo_email_check($signal)
 	}
 }
 
-const ALERT_MESSAGE = 'Compte de test temporaire — <strong style="color: darkred">Toutes les données seront effacées au bout de quelques jours&nbsp;!</strong> — L\'envoi d\'e-mail est désactivé';
+const ALERT_MESSAGE = 'Compte de test temporaire — <strong style="color: darkred">Toutes les données seront effacées au bout de ' . DEMO_DELETE_DAYS . ' jours&nbsp;!</strong> — L\'envoi d\'e-mail est désactivé';
 
 /** Setting the demo hash **/
 $hash = null;
@@ -74,7 +74,8 @@ if (preg_match('/^demo-([a-z0-9]+)\./', $_SERVER['SERVER_NAME'] ?? '', $match)) 
 if ($hash) {
 	$path = sprintf(DEMO_STORAGE_PATH, $hash);
 	if (ctype_alnum($hash)
-		&& is_dir($path)) {
+		&& is_dir($path)
+		&& !demo_prune($path)) {
 		define('Paheko\DATA_ROOT', $path);
 	}
 	else {
@@ -86,15 +87,6 @@ if ($hash) {
 			<h2>Ce compte de test n\'existe pas ou a expiré.</h2>
 			<p><a href="https://' . DEMO_PARENT_DOMAIN . '/">Retour</a></p>');
 	}
-}
-// Re-create demo-account from local client
-elseif (isset($_GET['f'])
-	&& ctype_alnum($_GET['f'])
-	&& ($source = \apcu_fetch('demo_' . $_GET['f']))) {
-	\apcu_delete('demo_' . $_GET['f']);
-	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
-	\apcu_delete('demo_login_' . $_GET['f']);
-	create_demo($source, $id);
 }
 // Demo form
 else {
