@@ -43,7 +43,7 @@ function demo_prune_old(): void
 	$dir->close();
 }
 
-function create_demo(?string $example = null, ?string $source = null, ?int $user_id = null): void
+function demo_create(?string $example = null, ?string $source = null, ?int $user_id = null): void
 {
 	if ($example && array_key_exists($example, EXAMPLE_ORGANIZATIONS)) {
 		$source = EXAMPLE_ORGANIZATIONS[$example];
@@ -89,5 +89,4 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 	$url .= '://demo-' . $key . '.' . DEMO_PARENT_DOMAIN . '/admin/' . $params;
 
 	header('Location: ' . $url);
-	exit;
 }

@@ -98,8 +98,9 @@ elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
 	\apcu_delete('demo_' . $_GET['f']);
 	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
 	\apcu_delete('demo_login_' . $_GET['f']);
-	create_demo($source, $id);
+	demo_create(null, $source, $id);
 	@unlink($source);
+	exit;
 }
 // Demo form
 else {

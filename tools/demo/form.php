@@ -8,7 +8,8 @@ $error = false;
 
 if (isset($_POST['c'], $_POST['h'])
 	&& Security::checkCaptcha(SECRET_KEY, $_POST['h'], $_POST['c'])) {
-	create_demo($_POST['source'] ?? null);
+	demo_create($_POST['source'] ?? null);
+	exit;
 }
 elseif (isset($_POST['c'])) {
 	$error = true;
