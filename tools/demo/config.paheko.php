@@ -6,6 +6,8 @@ namespace Paheko;
 
 use KD2\ErrorManager;
 
+ErrorManager::setLogFile(__DIR__ . '/error.log');
+
 // Make sure we never disclose errors in production
 ErrorManager::setEnvironment(ErrorManager::PRODUCTION);
 
