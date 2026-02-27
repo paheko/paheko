@@ -608,11 +608,13 @@ class Functions
 
 	static public function error(array $params, UserTemplate $tpl, int $line)
 	{
-		if (isset($params['admin'])) {
-			throw new Brindille_Exception($params['admin']);
+		$message = $params['message'] ?? 'Erreur du module';
+
+		if (!empty($params['admin'])) {
+			throw new Brindille_Exception($message);
 		}
 
-		throw new UserException($params['message'] ?? 'Erreur du module', intval($params['code'] ?? 0));
+		throw new UserException($message, intval($params['code'] ?? 0));
 	}
 
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
