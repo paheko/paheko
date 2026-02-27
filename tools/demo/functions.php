@@ -78,7 +78,7 @@ function create_demo(?string $example = null, ?string $source = null, ?int $user
 
 	if ($user_id) {
 		\apcu_add('demo_login_' . $key, $user_id);
-		$params = '?__from=' . md5($hash . 'from' . SECRET_KEY);
+		$params = '?__from=' . md5($key . 'from' . SECRET_KEY);
 	}
 
 	$url = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
