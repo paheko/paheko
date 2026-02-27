@@ -213,10 +213,12 @@ class Backup
 	{
 		$db = DB::getInstance();
 
+		// Use a temporary file so that if BACKUPS_ROOT is on NFS,
+		// we don't have issues with SQLite writing over NFS
+		$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
+
 		// use VACUUM INTO when SQLite 3.27+ is available
 		if ($db->hasFeatures('vacuum_into')) {
-			$tmp = tempnam(Utils::dirname($destination), 'sqlite-backup-');
-
 			// We need to allow ATTACH here, as VACUUM INTO is using ATTACH,
 			// which is restricted for security reasons, so we disable the authorizer
 			DB::toggleAuthorizer($db, false);
@@ -228,10 +230,6 @@ class Backup
 		// use ::backup since PHP 7.4.0+
 		// https://www.php.net/manual/en/sqlite3.backup.php
 		else {
-			// Use a temporary file so that if BACKUPS_ROOT is on NFS,
-			// we don't have issues with SQLite writing over NFS
-			$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
-
 			$dest_db = new \SQLite3($tmp);
 			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
