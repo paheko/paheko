@@ -88,6 +88,19 @@ if ($hash) {
 			<p><a href="https://' . DEMO_PARENT_DOMAIN . '/">Retour</a></p>');
 	}
 }
+// Re-create demo-account from local backup
+elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
+	&& isset($_GET['f'])
+	&& ctype_alnum($_GET['f'])
+	&& ($source = \apcu_fetch('demo_' . $_GET['f']))
+	&& 0 === strpos(realpath(sys_get_temp_dir(), realpath($source)))
+) {
+	\apcu_delete('demo_' . $_GET['f']);
+	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
+	\apcu_delete('demo_login_' . $_GET['f']);
+	create_demo($source, $id);
+	@unlink($source);
+}
 // Demo form
 else {
 	if (trim($_SERVER['REQUEST_URI'], '/') !== '') {
@@ -107,19 +120,6 @@ if (isset($_GET['__from'])
 	apcu_add('demo_user_' . $hash, $id, 300); // 5 minutes
 	apcu_delete('demo_login_' . $hash);
 	define('Paheko\LOCAL_LOGIN', $id);
-}
-// Re-create demo-account from local client
-elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
-	&& isset($_GET['f'])
-	&& ctype_alnum($_GET['f'])
-	&& ($source = \apcu_fetch('demo_' . $_GET['f']))
-	&& 0 === strpos(realpath(sys_get_temp_dir(), realpath($source)))
-) {
-	\apcu_delete('demo_' . $_GET['f']);
-	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
-	\apcu_delete('demo_login_' . $_GET['f']);
-	create_demo($source, $id);
-	@unlink($source);
 }
 // Use cookie to create local login to carry logged user
 elseif (!empty($_COOKIE['__login'])
