@@ -7,7 +7,7 @@ namespace Paheko;
 use KD2\ErrorManager;
 
 // Make sure we never disclose errors in production
-ErrorManager::enable(ErrorManager::PRODUCTION);
+ErrorManager::setEnvironment(ErrorManager::PRODUCTION);
 
 // Block bots
 if (stristr($_SERVER['REQUEST_URI'] ?? '', 'robots.txt')) {

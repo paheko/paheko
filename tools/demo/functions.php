@@ -2,6 +2,8 @@
 
 namespace Paheko;
 
+use KD2\Security;
+
 function demo_prune(string $path): bool
 {
 	static $expiry = null;
