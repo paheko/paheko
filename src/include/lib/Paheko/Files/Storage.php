@@ -174,9 +174,9 @@ class Storage
 	 * Export files contents from local storage to an external database file.
 	 * Use $quota to restrict the quota allowed for files contents
 	 */
-	static public function export(string $file, ?int $quota = null): void
+	static public function export(string $path, ?int $quota = null): void
 	{
-		$db = new \SQLite3($file);
+		$db = new \SQLite3($path);
 
 		$tables_count = $db->querySingle('SELECT COUNT(*) FROM sqlite_master WHERE type = \'table\' AND name IN (\'files\', \'files_contents\');');
 
@@ -238,7 +238,7 @@ class Storage
 		// reopen to vacuum, if we just vacuum then we might get an error
 		// because of the blob pointers, even though they should be closed?
 		// https://stackoverflow.com/questions/41516542/sqlite-error-statements-in-progress-when-no-statements-should-be#comment127004699_41516542
-		$db = new \SQLite3($file);
+		$db = new \SQLite3($path);
 		$db->exec('VACUUM;');
 		$db->close();
 	}
