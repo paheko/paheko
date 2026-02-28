@@ -144,7 +144,7 @@ if (!empty($_POST['delete_demo']) && $_POST['delete_demo'] === $delete_hash) {
 }
 
 $message = <<<EOF
-Compte de test temporaire
+<strong>Bac à sable temporaire</strong>
 — L'envoi d'e-mail est désactivé
 — <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
 — <form method="post" style="display: inline; float: right" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; margin: 0; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</button></form>
