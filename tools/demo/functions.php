@@ -28,7 +28,7 @@ function demo_delete(string $path): void
 
 function demo_prune_old(): void
 {
-	$dir = dir(DEMO_STORAGE_PATH);
+	$dir = dir(dirname(DEMO_STORAGE_PATH));
 
 	while ($file = $dir->read()) {
 		if ($file[0] === '.') {
