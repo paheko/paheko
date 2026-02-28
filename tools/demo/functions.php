@@ -28,7 +28,7 @@ function demo_delete(string $path): void
 
 function demo_prune_old(): void
 {
-	$dir = dir(dirname(DEMO_STORAGE_PATH));
+	$dir = dir(DEMO_STORAGE_PATH);
 
 	while ($file = $dir->read()) {
 		if ($file[0] === '.') {
@@ -60,7 +60,7 @@ function demo_create(?string $example = null, ?string $source = null, ?int $user
 
 	while (!$path || file_exists($path)) {
 		$key = Security::getRandomPassword(random_int(10, 20), 'abcdefghijkmnopqrstuvwxyz1234567890');
-		$path = sprintf(DEMO_STORAGE_PATH, $key);
+		$path = DEMO_STORAGE_PATH . '/' . $key;
 	}
 
 	mkdir($path, 0777, true);

@@ -8,7 +8,7 @@ namespace Paheko;
 const DEMO_PARENT_DOMAIN = 'example.org';
 
 // Where each demo account will be stored
-const DEMO_STORAGE_PATH = __DIR__ . '/../data/%s';
+const DEMO_STORAGE_PATH = __DIR__ . '/../data';
 
 // List of example organizations, each is a ".sqlite" file
 const EXAMPLE_ORGANIZATIONS = [

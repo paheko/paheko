@@ -72,7 +72,7 @@ if (preg_match('/^demo-([a-z0-9]+)\./', $_SERVER['SERVER_NAME'] ?? '', $match)) 
 
 // Hash was supplied in URL
 if ($hash) {
-	$path = sprintf(DEMO_STORAGE_PATH, $hash);
+	$path = DEMO_STORAGE_PATH . '/' . $hash;
 	if (ctype_alnum($hash)
 		&& is_dir($path)
 		&& !demo_prune($path)) {
