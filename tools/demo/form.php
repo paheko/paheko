@@ -15,6 +15,9 @@ elseif (isset($_POST['c'])) {
 	$error = true;
 }
 
+// Prune old accounts
+demo_prune_old();
+
 $captcha = Security::createCaptcha(SECRET_KEY, 'fr_FR');
 
 echo '<!DOCTYPE html><head><title>Bac à sable Paheko</title><style type="text/css">
