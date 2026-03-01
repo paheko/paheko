@@ -350,6 +350,10 @@ class CommonFunctions
 				throw new TemplateException('Missing "options" parameter');
 			}
 
+			if (!is_array($options)) {
+				throw new TemplateException('"options" parameter is not an array');
+			}
+
 			foreach ($options as $_key => $_value) {
 				$selected = null !== $current_value && ($current_value == $_key);
 				if (is_array($_value) && array_key_exists('label', $_value)) {
@@ -368,9 +372,17 @@ class CommonFunctions
 				$input .= sprintf('<option value="">%s</option>', $attributes['default_empty'] ?? '');
 			}
 
+			if (!isset($options)) {
+				throw new TemplateException('Missing "options" parameter');
+			}
+
+			if (!is_array($options)) {
+				throw new TemplateException('"options" parameter is not an array');
+			}
+
 			foreach ($options as $optgroup => $suboptions) {
 				// Accept [['label' => 'optgroup label', 'options' => ['key1' => 'option 1']]]
-				if (isset($suboptions['options'])) {
+				if (isset($suboptions['options']) && is_array($suboptions['options'])) {
 					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$suboptions['label']));
 
 					foreach ($suboptions['options'] as $_key => $_value) {
