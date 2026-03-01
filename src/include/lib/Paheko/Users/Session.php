@@ -692,12 +692,13 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		$perm = $this->user->getPermissions()[$section] ?? null;
+		$permissions = $this->user->getPermissions();
 
-		if (null === $perm) {
+		if (!in_array($section, self::SECTIONS, true)) {
 			throw new \InvalidArgumentException('Unknown section: ' . $section);
 		}
 
+		$perm = $permissions[$section] ?? self::ACCESS_NONE;
 		return ($perm >= $required);
 	}
 
