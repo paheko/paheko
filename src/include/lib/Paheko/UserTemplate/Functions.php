@@ -356,16 +356,13 @@ class Functions
 		$document = $value;
 
 		if (!$result) {
-			// If replacing, delete then insert
-			if ($replace) {
-				$db->begin();
-				$db->delete($table, $field . ' = ?', $where_value);
-				$db->insert($table, compact('id', 'document', 'key'));
-				$db->commit();
-			}
-			else {
-				$db->insert($table, compact('id', 'document', 'key'));
-			}
+			// Always delete then replace
+			// in some rare cases (race condition) the item will already exist
+			// but will not be fetched in $result, in that case just overwrite what exists
+			$db->begin();
+			$db->delete($table, $field . ' = ?', $where_value);
+			$db->insert($table, compact('id', 'document', 'key'));
+			$db->commit();
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
