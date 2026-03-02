@@ -153,8 +153,8 @@ class Upgrade
 				require ROOT . '/include/migrations/1.3/1.3.19.php';
 			}
 
-			if (version_compare($v, '1.3.20', '<')) {
-				require ROOT . '/include/migrations/1.3/1.3.20.php';
+			if (version_compare($v, '1.4.0', '<')) {
+				require ROOT . '/include/migrations/1.4/1.4.0.php';
 			}
 
 			Plugins::upgradeAllIfRequired();

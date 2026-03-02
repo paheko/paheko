@@ -5,7 +5,7 @@ use Paheko\Accounting\Charts;
 
 $db::toggleAuthorizer($db, false);
 $db->beginSchemaUpdate();
-$db->import(__DIR__ . '/1.3.20.sql');
+$db->import(__DIR__ . '/1.4.0.sql');
 
 // Make sure 74* are correct
 Charts::updateInstalled('fr_pca_2025');
