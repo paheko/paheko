@@ -40,11 +40,10 @@
 		{foreach from=$list->iterate() item="row"}
 			<tr>
 				<th scope="row">{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
-				{if $row.expiry_date}
+				{if $list->hasColumn('expiry_date')}
 					<td>{$row.expiry_date|date_short}</td>
-				{else}
-					<td>{$row.date|date_short}</td>
 				{/if}
+				<td>{$row.reminder_date|date_short}</td>
 				<td class="actions">
 				{if $current_list === 'pending'}
 					{linkbutton href="preview.php?id_user=%d&id_reminder=%d"|args:$row.id_user:$reminder.id shape="eye" label="Prévisualiser" target="_dialog"}

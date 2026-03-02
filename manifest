@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Remove\scomplete\shistory\sexport\sbutton,\swhich\swas\sweird,\sinstead\simplement\scomplete\ssubscriptions\shistory,\sfrom\sdev\sbranch
-D 2026-03-02T22:12:45.793
+C Backport\sreminders\schanges\sfrom\sdev\sbranch
+D 2026-03-02T22:38:35.072
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -148,8 +148,8 @@ F src/include/lib/Paheko/Entities/Module.php be0f61b248b71a9501e8f46fb1dd83042b2
 F src/include/lib/Paheko/Entities/Plugin.php 259faf5c0e27f9bdbcdd0267af43154c3573fe20d313d5584187aefc904b78c2
 F src/include/lib/Paheko/Entities/Search.php 381ecb77f0ff5811a75032177f495f23a6f6796231a6bb20acb4d05b691cdd15
 F src/include/lib/Paheko/Entities/Services/Fee.php 85e6d9059564baf87fc6b2b0d89080e7d2bf62ea977c857b8d9656af4d44df2f
-F src/include/lib/Paheko/Entities/Services/Reminder.php 6b96346054b0a179e089fb5a545ab9e075eb8e39b57dc9eea4aaaf0867536015
-F src/include/lib/Paheko/Entities/Services/ReminderMessage.php 16bfb7f3c72bf4662ce0b5dea7164158242b18cd858ec413eb370e5bfdb600e2
+F src/include/lib/Paheko/Entities/Services/Reminder.php c428a51a87559e7df2be9f454bdee11004d56b51e0e9015ee98d37fa69fffa78
+F src/include/lib/Paheko/Entities/Services/ReminderMessage.php 9f8f3666d9e76c47f8990883933fd6adc407c4c6aa56f2e237fd26b7a7b63974
 F src/include/lib/Paheko/Entities/Services/Service.php 010c5614dc0fdfaac58f3dadd5956b3c2e08d484c7251112ce6310bbb0631398
 F src/include/lib/Paheko/Entities/Services/Subscription.php d9a56528ebdc7e6b93682f22ea081c484a27910c01cb40ece9dc8254a3e4e326
 F src/include/lib/Paheko/Entities/Signal.php a5e7ac2ccc7fbdcacdde3769249f0d267012785acf1362592939730c2c9c66be
@@ -181,7 +181,7 @@ F src/include/lib/Paheko/Plugins.php cb5c7c83934d4d9f8acaa63b313873f6aca19b11f53
 F src/include/lib/Paheko/Search.php 47ba63f16e55a31cdc9f24faaf9b6bf3b9e454aeac625c5cabf1af64c6d9b234
 F src/include/lib/Paheko/Security.php 0acd3e28319dde138377ee7dbaf090e31d976061b8d1364bc0e6df45eaded74a
 F src/include/lib/Paheko/Services/Fees.php 5dc24df06b0873589f54ed3146f153fc9062de528b0cf018bdf7a16ca8e85aff
-F src/include/lib/Paheko/Services/Reminders.php 65f0b175787f8347e40d8215a6ffb9d231b3b47226cca61b845d749625803701
+F src/include/lib/Paheko/Services/Reminders.php 3a8be046039e0b058288e9f92c1b687ef4238157e99b8c20e3784e02900bff6f
 F src/include/lib/Paheko/Services/Services.php 9a5acf36be9cc1487636195467b0d06a12796ed4b89a011c50088077dc4c83e7
 F src/include/lib/Paheko/Services/Subscriptions.php a0f8c92e2cfdd25b169bfafa6db1dada2b0645134293ec9a17bd2a2c6b3788ea
 F src/include/lib/Paheko/Static_Cache.php 447386e95463f265dc3cf16cbecf76f0580884f888ae6216532060a2813e1d1a
@@ -239,8 +239,8 @@ F src/include/migrations/1.3/1.3.8.sql fa48aee2ee55d3eeec09c0a5b0b5ac8ff099af3c2
 F src/include/migrations/1.3/1.3.9.php b518754e6a65425e466f1f5810e5b607458d999e344e8ecbb3ee0334ea2d874f
 F src/include/migrations/1.3/1.3.9.sql e73d94df7284fd1690727f1ba62d0fd3c973e11b0460685f6306ada6f1f298f0
 F src/include/migrations/1.4/1.4.0.php 6172805b6cd5811323ec14f37de4c49a94cfd33b048d3295e62ae87ed937f3aa
-F src/include/migrations/1.4/1.4.0.sql 850df80400dd9c3d8997b1d3a9407045352404b8ab16e1895a3b2b90f041f931
-F src/include/migrations/1.4/schema.sql 0c0565d455904a373a8b6cc5b9b9663e9bbfd738b8730a0cfceb9fc9f4d8773a
+F src/include/migrations/1.4/1.4.0.sql 2fc03ad1144debd28db7bf44333f29de746708a599a994e5ef67df5ca72d4de9
+F src/include/migrations/1.4/schema.sql 568ca9b139f608b9f8306c57a61a34aa538c30b6b27f20def7b8049e014c1b76
 F src/include/test_required.php 2989c7c4fa81e6494f76ed4fb7283ee768a371a844b903c39dd391b50c407e06
 F src/index.php 3633bc39287a8bc3e4fc60b80287a12b61710f6e
 F src/pubkey.asc e8974cff9c91a4a2e6dc1749dfe79cc46ecd3750b57a829945aa748a932eb54a
@@ -453,9 +453,9 @@ F src/templates/services/fees/index.tpl e300e0ac1fdd558a008500bbfaff9de722615fb4
 F src/templates/services/history.tpl 843f005875624aa93d6eb3a4a71f09c36942b3d916580b986ef792e10e3af8cc
 F src/templates/services/import.tpl eab4cd0c341b0a9dcf6d0572091482289d843ad0be5225a81231351037c41f5b
 F src/templates/services/index.tpl b37c4ceef1fc7e59e28180a3b53bca952c1065987f981ef279baebc86e7fc657
-F src/templates/services/reminders/_form.tpl 36ee2bc6af1fc45f50ace4d3ff4c7d88ad540db37df9d6204848e679a2eed493
-F src/templates/services/reminders/delete.tpl 5e648894f4666e0d6c5339440ba9336f23050bd6bf6f3c16fe73060a7c0bf462
-F src/templates/services/reminders/details.tpl 51def1b3f1f4d6818c31447a1973b5d868bb2e3d8b139fd0b44b12abcde87b6a
+F src/templates/services/reminders/_form.tpl 3575943ca505216255545bc247c947a77c173664443a8ba0e51760d120be4521
+F src/templates/services/reminders/delete.tpl 95bcd98fcf9bfd492c6dd55a80354f0d123b7916ea5cd68434df99c6ae2ae38e
+F src/templates/services/reminders/details.tpl dd6925fcbba72aa6312d64bbaf83371c5f24ad4c7aca79cbdaa112ff176db2c7
 F src/templates/services/reminders/edit.tpl bf5129f51cf1c454c1d9ca99ab0a5cf2baefc225c20fdcdbdeb1f97267a9a458
 F src/templates/services/reminders/index.tpl a14025e756dee7b8f0b230303929f9d374d57ca6f922552d73bd9267176368ab
 F src/templates/services/reminders/new.tpl 8974fb9fde0b0d607997c6c56447bb30563fd1467800e5b1e4eead0c24e4b05d
@@ -686,7 +686,7 @@ F src/www/admin/services/fees/index.php afe436a6289e877143a64fe22e28c6518e69bb43
 F src/www/admin/services/history.php c26070860d8352d677b1f1c9b2a9d993c927dc9533ff3aae590a04676c0d3973
 F src/www/admin/services/import.php c275f1310e4385f155860dd562b317306b43813b0cc8ca45830c80fa50abca2d
 F src/www/admin/services/index.php 1c9db068ebf1bc219861aea1be9e6b3248bff9a3846ce885338af0fbd3d10757
-F src/www/admin/services/reminders/delete.php 32c8f1317f93c12ac19182a04b0383f827bd1ea9d147f891cc84e2215ccac682
+F src/www/admin/services/reminders/delete.php 7fa839c1bc9119a3d1f76f536f2305bb2bae21ad7d76fe2a7c18b933d6be12ac
 F src/www/admin/services/reminders/details.php 7fd507e005d1a5f1cfa790059ee5075c89af3e03ac4ea20828e4dd92493cc285
 F src/www/admin/services/reminders/edit.php 1cec0cd9241342c30894289539220e73ace46cdd5e29f474449f52cae0fba338
 F src/www/admin/services/reminders/index.php 78083f62c133ccf2f08d080728283b87740c5b86d5a2d5f0219bbe6922d2ea5f
@@ -862,24 +862,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 9cfb59319fce2156b2b7f094fe554b2ff96413452060b96d29bb10039341d583
-R 4afcec2269f5f4094a64e896e6541ae0
+P 2a1c6dde76272ff23f64f119f8a2638e17577237654ffedac1bfbcec72c59cdd
+R 9de90afe742b2c36c944504a2d19eca2
 U bohwaz
-Z 6df5ce25ea250a8354f6e801c9b80b9c
+Z 8cce9d082b2c06a615990788cb7a420a
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmmC10ACgkQksnacbiI
-6jTMPhAAnw4GwA+zCo8K9vS7h3H3sREG2ea2p4tHzhJ1bRUUX+iWEaWzHXVwdZzY
-978WFiCsqRMCOgjRqX16pR/Hg8WxWlEabpY8aNV2kJt9nmTdfw7+hw/4UwfPM5i4
-it4bdoGcttwenhu24RudJiZtnaQ3C95RwhuceIwilNHPRtcLN7mtB4nlIflxfSsS
-aYNkRCyIw/WAslxbqoeeu5sUa+CGWTumHb1JARK0cCmjS6nRAiVwpEobezISLce8
-ZBB8qXdS7mWlPQkLpxZhdaRF/stpAXec/UcOI3jhYs2h/PezWUEs3NwuMRnLYJr9
-1WUOVjTE+VysrgasAEY0X+/2a0TyLc5c1usmSvd0TpK7Mc/QtkbidB+fMJXOoWG8
-ro0nPd003p5WeLDIetcRgnLLjkb7ZwvXwYPxWqaRI2QSFnhKj5tKUUFPGCb7q0TY
-6OwoCXz1Z282Xl1U6BpzEm8u/qCR8jAPHWJcuN4+fmU6CAYggkwuvTQCwnnZaGLn
-nWg9fxVtt4s980pLQ9dcONAKKZu4DKPaCYjnkostWZNBsYR+TW9KiCsmVszKV1Fh
-5kb9B34bSSf/Hc2HgSSuMVGMpY8RkxO0GfK4bhP1n/adRVYjRkc0Q6r182Mmc+Pi
-HyOX0HQqPyudBhGf4v11f7vlpFUE1tNEg6JmQPMB6SCI2jyXC+E=
-=DzOP
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmmEWsACgkQksnacbiI
+6jTXhA/+KuHFdtOtRLvYOdXUaW4v0cQ+3BYTryBYBnjw9+h+9kkkA8Jiux0z7dZQ
+ep4s+JEz1F/NsQB8dGRxzZGykY1G1ac/bEcI+tb5h22VmMq/V85yeexzVg0hY7/t
+8DfwrwUnVr1qoy2XmDyF3UJfmJe2zDkefYK8h+OZK3ep7zCfeLSkQ2gQ6UJPcoOj
+8/BDy/5ZnBfL1cQEzurX+Jfx+NDMheLO6SpprnEQqW+zwKsHmSC47pl4vshKQ7Dq
+2kc/HToCOnNzxT5smezNh0UDIITeXK0idttWpeMQMXIg+5RcIHWuYWgzHROAFzmj
+hl9UEzhdcM7j211FzLjgJU4kGgBagCX7wwYCBWa3qH20NTj//OORzMLJbdZBRbOY
+uRL2NqRaWHy3b01Y+pFiDnvnc6UaEEMA3ohWbTKH3mZ3IpMX8dId29/0agmt1fIs
+APzof7r+Ud7CxNsNvuPG7p9H6SpfLrUuONagzXInQoz1N8df6FFnHYRnvQwIZVYT
+pDaY93rxuBPpGs/gokjKudKeaZd5av2PHc77vudYtPQBu9Ack4RzHOmjUstrQW+q
+63Mr2/GgxvQn7b6ox491sJ0ZxZCcEM0/p6vz84xikfQQoSjU1rkZjKEz/2JYk9I3
+bCiQy57tgeIgQV0UqDV7/6FIlIWlwHOSQl6rTNAzE5wD2MqgzoU=
+=8+j0
 -----END PGP SIGNATURE-----

@@ -6,7 +6,6 @@
 		<legend>{$legend}</legend>
 		<dl>
 			{input type="select" name="id_service" options=$services_list label="Activité associée au rappel" required=1 source=$reminder}
-			{input type="text" name="subject" required=1 source=$reminder label="Sujet du message envoyé"}
 
 			<dt><label for="f_delay_type_0">Délai d'envoi</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
 			{input type="radio" name="delay_type" value=0 default=$delay_type label="Le jour de l'expiration de l'activité"}
@@ -20,7 +19,27 @@
 				{input type="number" name="delay_after" min=1 max=999 size=4 default=$delay_after}
 				<label for="f_delay_type_2">jours <strong>après</strong> expiration</label>
 			</dd>
-			{input type="textarea" name="body" required=1 source=$reminder label="Texte du message envoyé" cols="90" rows="15"}
+
+			{if !$reminder->exists()}
+				<?php $yes_before = ($reminder->not_before_date ?? 1) === null; ?>
+				{input type="radio-btn" name="yes_before" value=0 default=$yes_before label="Uniquement aux membres dont l'inscription n'a pas encore expiré" help="Seuls les inscriptions qui expirent à partir de demain seront concernées par ce rappel." prefix_title="Envoyer ce rappel…" prefix_required=true }
+				{input type="radio-btn" name="yes_before" value=1 default=$yes_before label="À tous les membres" help="Même si leur inscription a expiré il y a longtemps, sauf s'ils ont déjà reçu un rappel pour cette activité.\nCela peut générer un grand nombre d'envois à des membres qui ne sont plus à jour depuis longtemps !"}
+			{else}
+				<dt><strong>Restriction d'envoi</strong></dt>
+				{if $reminder.not_before_date}
+					<dd><p class="alert block">Aucun rappel ne sera envoyé aux inscriptions expirant avant le {$reminder.not_before_date|date_short}</p></dd>
+				{else}
+					<dd>Aucune restriction. Tous les membres recevront ce rappel, selon le délai choisi.</dd>
+				{/if}
+			{/if}
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>Message envoyé</legend>
+		<dl>
+			{input type="text" name="subject" required=1 source=$reminder label="Sujet"}
+			{input type="textarea" name="body" required=1 source=$reminder label="Texte" cols="90" rows="15"}
 			<dd class="help">
 				Il est possible d'utiliser les mots-clés suivant dans le corps du mail, ils seront remplacés lors de l'envoi&nbsp;:
 				{literal}
