@@ -1,1 +1,0 @@
-../migrations/1.3/schema.sql
