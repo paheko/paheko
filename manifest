@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Merge\schanges\sfrom\strunk
-D 2026-03-02T18:25:48.413
+C Create\snew\sbranch\snamed\s"next-refactor"
+D 2026-03-02T21:18:14.820
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -852,24 +852,27 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P e71268cf7c633d15e6130f9bf2400eb17454f119e480a9a70428e54d902a318b 8e4cb4776f8c00c7f23759bc2b5fabc0b09f80be759b397ef06984e89ae32111
+P 24673b693c18385d5b74a08714e5137ead525f80fc0ce883165c94ec993019d6
 R 81a82db38469693ed606895c6e459b13
+T *branch * next-refactor
+T *sym-next-refactor *
+T -sym-next-stable *
 U bohwaz
-Z 1ee0c20eff64f6df223d26d189d58a36
+Z c0e4bc53855424f342a12f9193e16628
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmml1iwACgkQksnacbiI
-6jR92xAAk42zJF9KbCGGxMTMxV8HJWlkKn2IH57XIRnORwxPY40osiQuegFMz5sp
-5+392tSppYYOvPNTmgsbZiCaHEOB+yOxhFQU83m4z1ZP4cBs5DuiETdCWnY8qR4B
-aCMarJf508VBI5jqZVWANzMY8nY6fF/wLuzF8NoLFISIz3pYw+//1+jeMU/cPQhV
-78wHuGI72V+d6xfyKz5GAWT06JrvP/TDNx1a6eqh5Xq+8yqUYbvzAX3DkeuvDOHk
-PZ5Z4XBZDBVAh/U91WotGTzC/qqPe6ID8Ats/ZiKgwAQVBX8Vz7aFfh8Hh62AUo2
-0NZoopQTrq4fSmHihP8dG5rkcY9fWEw+UVMqnYazAnrDwDb7azNYOEVtllGcT9Xo
-z4VCDqS34V+avP0KqvtwE5xAIsSa80DtHSIMgKJD97Q6Ns+igZvIQ7JzzCx3FUnp
-EjV8YtYtHBwpr9sp9QBofOX2AcOkyjTykrTCL/JT3Cq0I3YCOUEYZaPwxB+PDb6z
-CAa3AhHOqYQTgqYhdV3VlesWhDKmy56qx9+7/agfnmndq3pROoIsEGh3zjPEZj5w
-UQfJVYyEFK8gnUZVggYYmiy7buCmzKY/73/YUz4x8thiwqlLpMLwT1JLimfRdAr6
-tEVfcf8HSAPsQwLllWoX/7FetzfiLhv4QSo0txxzTX7EHPDkIrw=
-=+sxM
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmml/pYACgkQksnacbiI
+6jTuKBAAnFMynHsEfja3rs2Kezb/OUE/gAm54AGfrgLnyIavmIR6gqifbumMiOLr
+qx7of3w3CLxYJc1zcUCwB0VG+PkQGwLwrQy5BI89V6E0FDGSb40wdYu85c4lSL/O
++tMzznpeA2knxLixOHrDTSnmBHAuNdnweZs72kDsAXC5OtUeKUhU1AuDYVDfhbbc
+L5pTHij2un23KmMWBz/R+qf2cwuG5mUPPAqktjgmJkuitPBE0tWvr0MS0JKHRFiz
+5mkWYMmICWEMS2CzHe6/VBvtQ5hAZqopU+YIC4HPndHsPVse1McvaTvLFgf6+97p
+cIAo0G0tW579Y5+EXEySkdrR6BMXNEA3mnMg4tsJ7ywc3883f9zDsLtEesxfwj8+
+ph7/ONppswu4iOm02bw4GvqJE7HXORZ/a+Dj1B/oFLsTRwXmzuCNbR+CCiHs0KAI
+Da1i/O9vClY8drD0+26Uzsd1I1iNaRorCZCVK9ZEVIGMDPzR1P0nANaUZvAirHmd
+//qz589q8Hrg7/kjUja7G4pyRoxxcAQic9DYsfem/392THyEYmjL9sLJKqo3U8d6
+vmcXtz68ezGzFSt76V0IxosDtn+sX/0yrQiETC9q/tVz87rBtoHsuJH8spFa7bYa
+r98mx12Lq3W+7T5Zgb+3s2WRBw8wAOgcA3QzuceK5omYT36jiA4=
+=NZ52
 -----END PGP SIGNATURE-----
