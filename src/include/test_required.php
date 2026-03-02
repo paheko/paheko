@@ -34,8 +34,8 @@ function test_required($condition, $message)
 }
 
 test_required(
-	version_compare(phpversion(), '7.4', '>='),
-	'PHP 7.4 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
+	version_compare(phpversion(), '8.2', '>='),
+	'PHP 8.2 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
 );
 
 test_required(
@@ -68,8 +68,10 @@ $v = \SQLite3::version();
 test_required(
 	//$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
 	// 3.25.0 = RENAME COLUMN + UPSERT
-	version_compare($v['versionString'], '3.25', '>='),
-	'SQLite3 version 3.25 ou supérieur requise. Version installée : ' . $v['versionString']
+	// 3.34 is Debian Bullseye (2021)
+	// 3.40 is Debian Bookworm (2023)
+	version_compare($v['versionString'], '3.34', '>='),
+	'SQLite3 version 3.34 ou supérieur requise. Version installée : ' . $v['versionString']
 );
 
 test_required(
@@ -92,7 +94,7 @@ test_required(
 test_required(
 	in_array('ENABLE_JSON1', $options)
 	|| (version_compare($v['versionString'], '3.38', '>=') && !in_array('OMIT_JSON', $options)),
-	'Le module SQLite3 JSON1 (utilisé dans les formulaires) n\'est pas installé.'
+	'Le module SQLite3 JSON1 (utilisé dans les modules) n\'est pas installé.'
 );
 
 test_required(
