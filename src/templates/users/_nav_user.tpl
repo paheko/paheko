@@ -19,14 +19,14 @@
 			{exportmenu href="?id=%d"|args:$user_id}
 		{/if}
 		{if isset($user) && !$user->isHidden()}
-			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}
+			{linkbutton href="!services/subscription/new.php?user=%d"|args:$id label="Inscrire à une activité" shape="plus" target="_dialog" accesskey="K"}
 		{/if}
 	{/if}
 
 	</aside>
 	<ul>
 		<li{if $current == 'details'} class="current"{/if}>{link href="!users/details.php?id=%d"|args:$id label="Fiche membre" accesskey="F"}</li>
-		<li{if $current == 'services'} class="current"{/if}>{link href="!services/user/?id=%d"|args:$id label="Inscriptions aux activités" accesskey="I"}</li>
+		<li{if $current == 'services'} class="current"{/if}>{link href="!users/subscriptions.php?id=%d"|args:$id label="Inscriptions aux activités" accesskey="I"}</li>
 		<li{if $current == 'reminders'} class="current"{/if}>{link href="!services/reminders/user.php?id=%d"|args:$id label="Rappels envoyés" accesskey="R"}</li>
 	</ul>
 </form>

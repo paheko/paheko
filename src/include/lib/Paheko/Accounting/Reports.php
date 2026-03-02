@@ -59,7 +59,7 @@ class Reports
 		}
 
 		if (!empty($criterias['subscription'])) {
-			$where[] = sprintf($transactions_alias . 'id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['subscription']);
+			$where[] = sprintf($transactions_alias . 'id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE tu.id_subscription = %d)', $criterias['subscription']);
 		}
 
 		if (!empty($criterias['project'])) {

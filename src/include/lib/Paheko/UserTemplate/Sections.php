@@ -1013,28 +1013,28 @@ class Sections
 	{
 		$params['where'] ??= '';
 
-		$params['select'] = 'su.expiry_date, su.date, s.label, su.paid, su.expected_amount,
-			CASE WHEN su.expiry_date >= date() THEN 1 WHEN su.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
-		$params['tables'] = 'services_users su INNER JOIN services s ON s.id = su.id_service';
+		$params['select'] = 'sub.expiry_date, sub.date, s.label, sub.paid, sub.expected_amount,
+			CASE WHEN sub.expiry_date >= date() THEN 1 WHEN sub.expiry_date IS NOT NULL THEN -1 ELSE NULL END AS status';
+		$params['tables'] = 'services_subscriptions sub INNER JOIN services s ON s.id = sub.id_service';
 
 		if (isset($params['user'])) {
-			$params['where'] .= ' AND su.id_user = :id_user';
+			$params['where'] .= ' AND sub.id_user = :id_user';
 			$params[':id_user'] = (int) $params['user'];
 			unset($params['user']);
 		}
 
 		if (isset($params['id_service'])) {
-			$params['where'] .= ' AND su.id_service = :id_service';
+			$params['where'] .= ' AND sub.id_service = :id_service';
 			$params[':id_service'] = (int) $params['id_service'];
 			unset($params['id_service']);
 		}
 
 		if (isset($params['active'])) {
 			if (!$params['active']) {
-				$params['having'] = 'MAX(su.expiry_date) < date()';
+				$params['having'] = 'MAX(sub.expiry_date) < date()';
 			}
 			else {
-				$params['having'] = 'MAX(su.expiry_date) >= date()';
+				$params['having'] = 'MAX(sub.expiry_date) >= date()';
 			}
 
 			unset($params['active']);
@@ -1050,10 +1050,10 @@ class Sections
 		}
 
 		if (empty($params['order'])) {
-			$params['order'] = 'su.id';
+			$params['order'] = 'sub.id';
 		}
 
-		$params['group'] = 'su.id_user, su.id_service';
+		$params['group'] = 'sub.id_user, sub.id_service';
 
 		return self::sql($params, $tpl, $line);
 	}

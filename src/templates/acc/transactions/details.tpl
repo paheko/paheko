@@ -122,11 +122,12 @@
 			<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}—{/if}</dd>
 
 
-			{if $transaction.id_creator}
+			{if $creator_name}
 				<dt>Écriture créée par</dt>
 				<dd>
-					{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-						<a href="{$admin_url}users/details.php?id={$transaction.id_creator}">{$creator_name}</a>
+					{if $transaction.id_creator
+						&& $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
+						{link href="!users/details.php?id=%d"|args:$transaction.id_creator label=$creator_name}
 					{else}
 						{$creator_name}
 					{/if}
@@ -240,7 +241,8 @@
 				<tr>
 					<td class="num">{link href="!users/details.php?id=%d"|args:$s.id_user label=$s.user_number}</td>
 					<td>{$s.user_identity}</td>
-					<td class="actions">{linkbutton href="!services/user/?id=%d&only=%s"|args:$s.id_user:$s.id_subscription label="Inscription" shape="eye"}</td>
+					<td><small>{$s.label}</small></td>
+					<td class="actions">{linkbutton href="!users/subscriptions.php?id=%d&only=%s"|args:$s.id_user:$s.id_subscription label="Inscription" shape="eye"}</td>
 				</tr>
 			{/foreach}
 			</tbody>

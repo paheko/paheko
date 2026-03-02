@@ -5,7 +5,7 @@ namespace Paheko;
 use Paheko\CSV_Custom;
 use Paheko\Users\Session;
 use Paheko\Users\Users;
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -15,8 +15,8 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 $csrf_key = 'su_import';
 $csv = new CSV_Custom($session, 'su_import');
 
-$csv->setColumns(Services_User::listImportColumns());
-$csv->setMandatoryColumns(Services_User::listMandatoryImportColumns());
+$csv->setColumns(Subscriptions::listImportColumns());
+$csv->setMandatoryColumns(Subscriptions::listMandatoryImportColumns());
 
 $form->runIf('cancel', function() use ($csv) {
 	$csv->clear();
@@ -36,7 +36,7 @@ $form->runIf(f('import') && $csv->loaded(), function () use (&$csv) {
 			throw new UserException('Erreur dans le chargement du CSV');
 		}
 
-		Services_User::import($csv);
+		Subscriptions::import($csv);
 	}
 	finally {
 		$csv->clear();

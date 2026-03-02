@@ -12,7 +12,7 @@ trait TransactionUsersTrait
 	public function deleteLinkedUsers(): void
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_service_user IS NULL', $this->id());
+		$db->delete('acc_transactions_users', 'id_transaction = ? AND id_subscription IS NULL', $this->id());
 	}
 
 	public function updateLinkedUsers(array $users): void
@@ -53,8 +53,8 @@ trait TransactionUsersTrait
 		$number_column = DynamicFields::getNumberFieldSQL('u');
 		$sql = sprintf('SELECT u.id, %s AS identity, %s AS number
 			FROM users u
-			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ? AND l.id_service_user IS NULL
+			INNER JOIN acc_transactions_users l ON l.id_subscription IS NULL AND l.id_user = u.id
+			WHERE l.id_transaction = ?
 			ORDER BY id;', $identity_column, $number_column);
 		return $db->get($sql, $this->id());
 	}
@@ -65,8 +65,8 @@ trait TransactionUsersTrait
 		$identity_column = DynamicFields::getNameFieldsSQL('u');
 		$sql = sprintf('SELECT u.id, %s AS identity
 			FROM users u
-			INNER JOIN acc_transactions_users l ON l.id_user = u.id
-			WHERE l.id_transaction = ? AND l.id_service_user IS NULL;', $identity_column);
+			INNER JOIN acc_transactions_users l ON l.id_subscription IS NULL AND l.id_user = u.id
+			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
 	}
 }

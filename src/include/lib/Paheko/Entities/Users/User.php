@@ -24,7 +24,7 @@ use Paheko\Email\Templates as EmailTemplates;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Users\Users;
-use Paheko\Services\Services_User;
+use Paheko\Services\Subscriptions;
 
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Email\Email;
@@ -849,7 +849,7 @@ class User extends Entity
 
 	public function downloadExport(): void
 	{
-		$services_list = Services_User::perUserList($this->id);
+		$services_list = Subscriptions::perUserList($this->id);
 		$services_list->setPageSize(null);
 
 		$export_data = [
