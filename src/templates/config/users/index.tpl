@@ -17,6 +17,7 @@
 		<legend>Préférences des membres</legend>
 		<dl>
 			{input type="select" name="default_category" source=$config options=$users_categories required=true label="Catégorie par défaut des nouveaux membres"}
+			{input type="checkbox" name="show_category_in_list" source=$config value=1 label="Afficher la catégorie dans la liste des membres"}
 		</dl>
 	</fieldset>
 

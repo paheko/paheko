@@ -16,6 +16,7 @@ use Paheko\Email\Templates as EmailsTemplates;
 use Paheko\Files\Files;
 
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Email\Email;
 
 use Paheko\Entities\Users\Category;
 use Paheko\Entities\Users\User;
@@ -30,7 +31,8 @@ use const Paheko\{
 	OIDC_CLIENT_ID,
 	OIDC_CLIENT_SECRET,
 	OIDC_CLIENT_MATCH_EMAIL,
-	OIDC_CLIENT_DEFAULT_PERMISSIONS
+	OIDC_CLIENT_DEFAULT_PERMISSIONS,
+	OIDC_CLIENT_CALLBACK
 };
 
 use KD2\Security;
@@ -295,18 +297,10 @@ class Session extends \KD2\UserSession
 				$this->user->$name = $login['user']['_name'];
 			}
 
-			$permissions = [];
-
-			foreach (Category::PERMISSIONS as $perm => $data) {
-				$permissions[$perm] = $login['permissions'][$perm] ?? self::ACCESS_NONE;
-			}
-
-			$this->user->setPermissions($permissions);
+			$this->user->setPermissions($login['permissions']);
 
 			if (!empty($login['save']) && $allow_new_session) {
-				$this->start(true);
-				$_SESSION['userSession'] = $this->user;
-				$this->close();
+				$this->setUser($this->user);
 			}
 
 			return true;
@@ -443,6 +437,14 @@ class Session extends \KD2\UserSession
 		}
 
 		$this->forceLogin($user);
+
+		if (OIDC_CLIENT_CALLBACK) {
+			$r = call_user_func(OIDC_CLIENT_CALLBACK, $info, $this->user());
+
+			if (is_object($r) && ($r instanceof User) && $r !== $this->user()) {
+				$this->setUser($r);
+			}
+		}
 	}
 
 	/**
@@ -492,6 +494,9 @@ class Session extends \KD2\UserSession
 		if (!trim($email)) {
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
+
+		// Make sure we block sending recovery to mailinblack/spamenmoins addresses as they most likely won't be able to receive our email
+		Email::validateAddress($email, true, true);
 
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 		Log::add(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);
@@ -601,6 +606,25 @@ class Session extends \KD2\UserSession
 		EmailsTemplates::passwordChanged($user);
 	}
 
+	/**
+	 * Returns cookie string for PDF printing
+	 */
+	static public function getCookie(): ?string
+	{
+		$i = self::getInstance();
+
+		if (!$i->isLogged()) {
+			return null;
+		}
+
+		return sprintf('%s=%s', $i->cookie_name, $i->id());
+	}
+
+	static public function getCookieSecret(): string
+	{
+		return self::getInstance()->sid_in_url_secret;
+	}
+
 	public function user(): ?User
 	{
 		return $this->getUser();
@@ -623,25 +647,6 @@ class Session extends \KD2\UserSession
 		return $s->getUser();
 	}
 
-	/**
-	 * Returns cookie string for PDF printing
-	 */
-	static public function getCookie(): ?string
-	{
-		$i = self::getInstance();
-
-		if (!$i->isLogged()) {
-			return null;
-		}
-
-		return sprintf('%s=%s', $i->cookie_name, $i->id());
-	}
-
-	static public function getCookieSecret(): string
-	{
-		return self::getInstance()->sid_in_url_secret;
-	}
-
 	public function getUser(): ?User
 	{
 		if (!$this->isLogged()) {
@@ -655,6 +660,14 @@ class Session extends \KD2\UserSession
 		}
 
 		return $this->user;
+	}
+
+	protected function setUser(User $user): void
+	{
+		$this->start(true);
+		$this->user = $user;
+		$_SESSION['userSession'] = $this->user;
+		$this->close();
 	}
 
 	static public function getUserId(): ?int
@@ -680,12 +693,13 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		$perm = $this->user->getPermissions()[$section] ?? null;
+		$permissions = $this->user->getPermissions();
 
-		if (null === $perm) {
+		if (!in_array($section, self::SECTIONS, true)) {
 			throw new \InvalidArgumentException('Unknown section: ' . $section);
 		}
 
+		$perm = $permissions[$section] ?? self::ACCESS_NONE;
 		return ($perm >= $required);
 	}
 

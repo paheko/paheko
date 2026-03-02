@@ -1,12 +1,12 @@
 @charset "UTF-8";
 @font-face {
   font-family: 'paheko';
-  src: url('../font/paheko.eot?15983143');
-  src: url('../font/paheko.eot?15983143#iefix') format('embedded-opentype'),
-       url('../font/paheko.woff2?15983143') format('woff2'),
-       url('../font/paheko.woff?15983143') format('woff'),
-       url('../font/paheko.ttf?15983143') format('truetype'),
-       url('../font/paheko.svg?15983143#paheko') format('svg');
+  src: url('../font/paheko.eot?86973109');
+  src: url('../font/paheko.eot?86973109#iefix') format('embedded-opentype'),
+       url('../font/paheko.woff2?86973109') format('woff2'),
+       url('../font/paheko.woff?86973109') format('woff'),
+       url('../font/paheko.ttf?86973109') format('truetype'),
+       url('../font/paheko.svg?86973109#paheko') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +16,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'paheko';
-    src: url('../font/paheko.svg?15983143#paheko') format('svg');
+    src: url('../font/paheko.svg?86973109#paheko') format('svg');
   }
 }
 */
@@ -71,6 +71,8 @@
 .icn-up:before { content: '\2191'; } /* '↑' */
 .icn-right:before { content: '\2192'; } /* '→' */
 .icn-down:before { content: '\2193'; } /* '↓' */
+.icn-reply:before { content: '\21a2'; } /* '↢' */
+.icn-forward:before { content: '\21a3'; } /* '↣' */
 .icn-import:before { content: '\21b6'; } /* '↶' */
 .icn-export:before { content: '\21b7'; } /* '↷' */
 .icn-reset:before { content: '\21ba'; } /* '↺' */
@@ -100,6 +102,7 @@
 .icn-logout:before { content: '\291d'; } /* '⤝' */
 .icn-eye-off:before { content: '\292b'; } /* '⤫' */
 .icn-radio-checked:before { content: '\2b24'; } /* '⬤' */
+.icn-reply-all:before { content: '\2b39'; } /* '⬹' */
 .icn-menu:before { content: '𝍢'; } /* '\1d362' */
 .icn-globe:before { content: '🌍'; } /* '\1f30d' */
 .icn-mic:before { content: '🎤'; } /* '\1f3a4' */

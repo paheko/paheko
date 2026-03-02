@@ -334,6 +334,16 @@ class Modules
 		if (!$path || substr($path, -1) == '/') {
 			$path .= 'index.html';
 		}
+		// Redirect /m/module/directory to /m/module/directory/
+		elseif ($module->hasLocalDir($path)) {
+			// Unless this directory doesn't have an index
+			if (!$module->hasLocalFile($path . '/' . $module::INDEX_FILE)) {
+				throw new UserException('This path does not exist, sorry.', 404);
+			}
+
+			Utils::redirect('/' . $uri . '/');
+			return;
+		}
 
 		$name = Utils::basename($uri);
 
@@ -378,8 +388,7 @@ class Modules
 		}
 		// 404 if module is not enabled, except for icon
 		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {
-			http_response_code(404);
-			throw new UserException('This page is currently disabled.');
+			throw new UserException('This page is currently disabled.', 404);
 		}
 
 		// Restrict access
@@ -396,8 +405,7 @@ class Modules
 
 		// Check if the file actually exists in the module
 		if (!$has_local_file && !$has_dist_file) {
-			http_response_code(404);
-			throw new UserException('This path does not exist, sorry.');
+			throw new UserException('This path does not exist, sorry.', 404);
 		}
 
 		$module->serve($path, $has_local_file, compact('uri', 'page'));

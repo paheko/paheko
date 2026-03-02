@@ -211,7 +211,7 @@ class Export
 				printf(\'%02d\', t.type) AS type_id, -- JournalCode
 				t.type, --JournalLib
 				t.id, -- EcritureNum
-				date, --EcritureDate
+				strftime(\'%Y%m%d\', date) AS EcritureDate,
 				CASE WHEN LENGTH(a.code) < 3 THEN a.code || \'0\' ELSE a.code END AS account, --CompteNum
 				a.label AS account_label, --CompteLib
 				NULL AS CompAuxNum,

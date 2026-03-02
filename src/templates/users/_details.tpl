@@ -59,7 +59,7 @@ $fields = DF::getInstance()->all();
 			</ul>
 		{else}
 			{if in_array($key, $id_fields)}<strong>{/if}
-			{user_field field=$field value=$value user_id=$user.id}
+			{user_field field=$field value=$value user_id=$user.id context="details"}
 			{if in_array($key, $id_fields)}</strong>{/if}
 		{/if}
 	</dd>
@@ -73,14 +73,13 @@ $fields = DF::getInstance()->all();
 			{tag color=$email->getStatusColor() label=$email->getStatusLabel()}
 			{linkbutton target="_dialog" label="Détails" href="!users/email/address.php?address=%s"|args:$address shape="mail"}
 		{if $field.type === 'email' && $value}
-		<?php
-		$email = Email\Addresses::getOrCreateEmail($value); ?>
+		<?php $email = Email\Addresses::getOrCreateEmail($value); $address = rawurlencode($value); ?>
 			{if !DISABLE_EMAIL && $show_message_button && !$email_button++ && $email->canSend() && $email.accepts_messages}
 				{linkbutton href="!users/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail" target="_dialog"}
 			{/if}
 			<br />
 			{tag color=$email->getStatusColor() label=$email->getStatusLabel()}
-			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$value label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
+			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}
 		</dd>
 		<dt>Préférences de réception</dt>
 		<dd>

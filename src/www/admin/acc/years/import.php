@@ -29,7 +29,7 @@ if (!$year) {
 $year->assertCanBeModified();
 
 $type = qg('type');
-$type_name = Export::NAMES[$type] ?? null;
+$type_name = Export::NAMES[(string)$type] ?? null;
 $csrf_key = 'acc_years_import_' . $year->id();
 $examples = null;
 $csv = new CSV_Custom($session, 'acc_import_year');

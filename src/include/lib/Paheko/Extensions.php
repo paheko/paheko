@@ -118,6 +118,10 @@ class Extensions
 		}
 
 		foreach (Plugins::listInstalled() as $p) {
+			if (!$p->enabled) {
+				continue;
+			}
+
 			if ($p->isBroken()) {
 				$p->set('enabled', false);
 				$p->save(false);

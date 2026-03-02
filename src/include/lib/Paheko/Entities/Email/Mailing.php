@@ -7,6 +7,7 @@ use Paheko\CSV;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Entity;
+use Paheko\Form;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Email\Addresses;
@@ -17,6 +18,8 @@ use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
 use Paheko\Entities\Users\DynamicField;
+
+use KD2\Brindille_Exception;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
@@ -73,6 +76,13 @@ class Mailing extends Entity
 		$this->assert(trim($this->subject) !== '', 'Le sujet ne peut rester vide.');
 		$this->assert(!isset($this->body) || trim($this->body) !== '', 'Le corps du message ne peut rester vide.');
 		$this->assert(!isset($this->preheader) || strlen($this->preheader) <= 80, 'Le chapô du message doit faire moins de 80 caractères.');
+
+		try {
+			$this->getPreview();
+		}
+		catch (Brindille_Exception $e) {
+			$this->assert(false, 'Erreur dans le code du message : ' . $e->getMessage());
+		}
 
 		if (isset($this->sender_name) || isset($this->sender_email)) {
 			$this->assert(trim($this->sender_name) !== '', 'Le nom d\'expéditeur est vide.');
@@ -360,11 +370,19 @@ class Mailing extends Entity
 			return '';
 		}
 
+		$body = $this->body;
+
+		// Force grid to output as tables
+		$body = preg_replace('/<<grid\s+([^!#].*?)>>/', '<<grid legacy $1>>', $body);
+		$body = preg_replace('/<<grid\s+([!#]+)\s*>>/', '<<grid legacy short="$1">>', $body);
+
 		if ($this->isTemplate()) {
-			return UserTemplate::createFromUserString($this->body);
+			// Make sure line breaks are kept
+			$body = '{{**keep_whitespaces**}}' . $body;
+			return UserTemplate::createFromUserString($body);
 		}
 		else {
-			return $this->body;
+			return $body;
 		}
 	}
 
@@ -373,52 +391,66 @@ class Mailing extends Entity
 		return isset($this->body) && false !== strpos($this->body, '{{') && false !== strpos($this->body, '}}');
 	}
 
-	public function getPreview(?int $id = null): string
+	public function getPreview(?int $id = null, bool $html = true): string
 	{
-		$db = DB::getInstance();
-
-		$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
-		$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
-		$args = $id ? (array)$id : [];
-
-		$r = $db->firstColumn($sql, ...$args);
-
-		if ($r) {
-			$r = json_decode($r, true);
+		if (!isset($this->body)) {
+			return '';
 		}
 
-		$body = $this->getBody();
+		$body = $this->body;
 
-		if ($body instanceof UserTemplate) {
-			if (is_array($r)) {
-				$body->assignArray($r, null, false);
+		// The message is sent, we no longer have personal data,
+		// so handle placeholder replacement just if mailing hasn't been sent
+		// FIXME: remove Brindille use here and only replace?
+		if (!$this->sent) {
+			$db = DB::getInstance();
+
+			$where = $id ? 'id = ?' : '1 ORDER BY RANDOM()';
+			$sql = sprintf('SELECT extra_data FROM mailings_recipients WHERE id_mailing = %d AND %s LIMIT 1;', $this->id(), $where);
+			$args = $id ? (array)$id : [];
+
+			$r = $db->firstColumn($sql, ...$args);
+
+			if ($r) {
+				$r = json_decode($r, true);
 			}
 
-			try {
+			$body = $this->getBody();
+
+			if ($body instanceof UserTemplate) {
+				if (is_array($r)) {
+					$body->assignArray($r, null, false);
+				}
+
 				$body = $body->fetch();
 			}
-			catch (\KD2\Brindille_Exception $e) {
-				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
-			}
 		}
 
-		$render = Render::FORMAT_MARKDOWN;
+		$render = $html ? Render::FORMAT_MARKDOWN : Render::FORMAT_PLAINTEXT;
 		return Render::render($render, null, $body);
 	}
 
 	public function getHTMLPreview(?int $recipient = null, bool $append_footer = false): string
 	{
 		$html = $this->getPreview($recipient);
-		$tpl = new UserTemplate('web/email.html');
-		$tpl->assignArray(compact('html'), null, false);
-
-		$out = $tpl->fetch();
+		$html = Emails::applyHTMLTemplate($html);
 
 		if ($append_footer) {
-			$out = Emails::appendHTMLOptoutFooter($out, 'javascript:alert(\'--\');');
+			$html = Emails::appendHTMLOptoutFooter($html, 'javascript:alert(\'--\');');
 		}
 
-		return $out;
+		$html = str_replace('</head>',
+			'<style type="text/css">
+			body {
+				background: #fff;
+				color: #000;
+				margin: 10px;
+				font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+			}
+			</style>',
+			$html);
+
+		return $html;
 	}
 
 	public function send(): void
@@ -440,6 +472,7 @@ class Mailing extends Entity
 		}
 
 		// FIXME: need to be updated
+		// TODO: append mailing identifier to message headers
 		Emails::queue(Emails::CONTEXT_BULK,
 			$this->listRecipients(),
 			$sender,
@@ -485,7 +518,13 @@ class Mailing extends Entity
 			return [];
 		}
 
-		$html = $this->getPreview();
+		try {
+			$html = $this->getPreview();
+		}
+		catch (Brindille_Exception $e) {
+			return [];
+		}
+
 		$out = [];
 
 		$regexp = sprintf('/\bhref="(?!%s|%s)/', preg_quote(WWW_URL, '/'), preg_quote(ADMIN_URL, '/'));
@@ -507,6 +546,14 @@ class Mailing extends Entity
 			$out['caps'] = 'Le sujet contient des mots en majuscule.';
 		}
 
+		if (count(preg_split('/\s+/', $this->subject)) > 8) {
+			$out['subject_words'] = 'Le sujet contient plus de 8 mots. Les destinataires lisent moins les messages avec un sujet trop long.';
+		}
+
+		if (mb_strlen($this->subject) > 60) {
+			$out['subject_length'] = 'Le sujet contient plus de 60 lettres. Les destinataires lisent moins les messages avec un sujet trop long.';
+		}
+
 		if (substr_count($this->subject, '!')) {
 			$out['exclamation_mark'] = 'Le sujet contient des points d\'exclamation.';
 		}
@@ -524,8 +571,8 @@ class Mailing extends Entity
 
 		$count = preg_match_all('!src="(https?://[^"]+?)"!', $html, $matches);
 
-		if ($count > 3) {
-			$out['too_many_images'] = 'Le message contient plus de 3 images.';
+		if ($count > 5) {
+			$out['too_many_images'] = 'Le message contient plus de 5 images.';
 		}
 
 		foreach ($matches[1] as $match) {
@@ -536,7 +583,7 @@ class Mailing extends Entity
 		}
 
 		// Not sure if this is very relevant so disabling it for now
-		if (false && preg_match('!alt=""!', $html)) {
+		if (preg_match('!alt=""!', $html)) {
 			$out['missing_alt'] = 'Au moins une image n\'a pas de texte alternatif.';
 		}
 

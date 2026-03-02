@@ -9,6 +9,7 @@ class Render
 	const FORMAT_SKRIV = 'skriv';
 	const FORMAT_ENCRYPTED = 'encrypted';
 	const FORMAT_MARKDOWN = 'markdown';
+	const FORMAT_PLAINTEXT = 'plaintext';
 
 	static protected $attachments = [];
 
@@ -36,6 +37,9 @@ class Render
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
 			$r = new Markdown($path, $link_prefix);
+		}
+		else if ($format == self::FORMAT_PLAINTEXT) {
+			$r = new Plaintext($path, $link_prefix);
 		}
 		else {
 			throw new \LogicException('Invalid format: ' . $format);

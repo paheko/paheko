@@ -356,7 +356,7 @@
 		}
 
 		if (!dialog.dataset.caption && document.title) {
-			var title = document.title.replace(/^([^—-]+).*$/, "$1");
+			var title = document.title.replace(/^(\s[^—-]+\s).*$/, "$1");
 			dialog.querySelector('.title').innerText = title;
 			p.document.title = document.title + ' — ' + p.g.dialog_title;
 		}
@@ -555,7 +555,7 @@
 		}
 
 		var updateHandle = () => {
-			var v = parseInt(c.value, 10);
+			var v = parseInt(c.value, 10) || 0;
 
 			if (v > -10 && v < 0) {
 				v = -1; // White

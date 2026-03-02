@@ -33,7 +33,8 @@ dev-server:
 	PHP_CLI_SERVER_WORKERS=4 php -S localhost:8082 -d upload_max_filesize=256M -d post_max_size=256M -t www www/_route.php
 
 test-syntax:
-	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php -l > /dev/null
+	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php7.4 -l > /dev/null
+	find . -name '*.php' -not -path './data/*' -print0 | xargs -0 -n1 php8.5 -l > /dev/null
 
 tests:
 	cd ../tests && php run.php

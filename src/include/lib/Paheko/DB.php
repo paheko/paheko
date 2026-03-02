@@ -19,15 +19,15 @@ class DB extends SQLite3
 
 	static protected $_instance = null;
 
-	protected $_version = -1;
+	protected ?string $_version = '';
 
-	static protected $unicode_patterns_cache = [];
+	static protected array $unicode_patterns_cache = [];
 
-	protected $_log_last = null;
-	protected $_log_start = null;
-	protected $_log_store = [];
+	protected ?float $_log_last = null;
+	protected ?float $_log_start = null;
+	protected array $_log_store = [];
 
-	protected $_schema_update = 0;
+	protected int $_schema_update = 0;
 
 	protected bool $_install_check = true;
 
@@ -78,7 +78,7 @@ class DB extends SQLite3
 		// Enable SQL debug log if configured
 		if (SQL_DEBUG || ENABLE_PROFILER) {
 			$this->callback = [$this, 'log'];
-			$this->_log_start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
+			$this->_log_start = (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
 		}
 	}
 
@@ -236,7 +236,7 @@ class DB extends SQLite3
 
 	public function connect(bool $check_installed = true): void
 	{
-		if (null !== $this->db) {
+		if (isset($this->db)) {
 			return;
 		}
 
@@ -406,7 +406,7 @@ class DB extends SQLite3
 
 	public function version(): ?string
 	{
-		if (-1 === $this->_version) {
+		if ('' === $this->_version) {
 			$this->connect();
 			$this->_version = self::getVersion($this->db);
 		}
@@ -414,7 +414,7 @@ class DB extends SQLite3
 		return $this->_version;
 	}
 
-	static public function getVersion($db)
+	static public function getVersion($db): ?string
 	{
 		$v = (int) $db->querySingle('PRAGMA user_version;');
 

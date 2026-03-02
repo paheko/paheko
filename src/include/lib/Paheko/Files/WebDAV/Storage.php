@@ -16,7 +16,7 @@ use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
 use Paheko\Web\Router;
 
-use const Paheko\{LOCAL_SECRET_KEY};
+use const Paheko\{LOCAL_SECRET_KEY, WWW_URL};
 
 class Storage extends AbstractStorage
 {
@@ -206,14 +206,20 @@ class Storage extends AbstractStorage
 				return $this->nextcloud->getDirectDownloadURL($uri, $this->session::getUserId());
 			case NextCloud::PROP_NC_RICH_WORKSPACE:
 				return '';
+			// fileId is required by NextCloud desktop client
+			case NextCloud::PROP_OC_FILEID:
+				$id = $file->id;
+				// Root directory doesn't have a ID, give something random instead
+				$id ??= 10000000;
+				return $id;
 			case NextCloud::PROP_OC_ID:
-				// fileId is required by NextCloud desktop client
-				if (!isset($file->id)) {
-					// Root directory doesn't have a ID, give something random instead
-					return 10000000;
-				}
+				$id = $file->id;
+				// Root directory doesn't have a ID, give something random instead
+				$id ??= 10000000;
 
-				return $file->id;
+				// ID = fileid (padded with zeros to be at least 8 characters long) + instanceid
+				$id = str_pad((string)$id, 8, '0', STR_PAD_LEFT) . sha1(WWW_URL);
+				return $id;
 			case NextCloud::PROP_OC_PERMISSIONS:
 				$permissions = [
 					NextCloud::PERM_READ => $file->canRead($this->session),
@@ -252,7 +258,7 @@ class Storage extends AbstractStorage
 		}
 
 		if (null === $properties) {
-			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID]);
+			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID, NextCloud::PROP_OC_FILEID]);
 		}
 
 		$out = [];

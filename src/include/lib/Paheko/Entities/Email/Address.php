@@ -78,7 +78,7 @@ class Address extends Entity
 		return $url;
 	}
 
-	static public function acceptsThisMessage(\stdClass $r)
+	static public function acceptsThisMessage(\stdClass $r): bool
 	{
 		// We allow system emails to be sent to any address, even if it is invalid
 		if ($r->context === Emails::CONTEXT_SYSTEM) {
@@ -91,13 +91,15 @@ class Address extends Entity
 			return false;
 		}
 
+		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
-				return $r->accepts_mailings;
-			case Emails::CONTEXT_REMINDER;
-				return $r->accepts_reminders;
+				return (bool) $r->accepts_mailings;
+			case Emails::CONTEXT_REMINDER:
+			case Emails::CONTEXT_NOTIFICATION:
+				return (bool) $r->accepts_reminders;
 			default:
-				return $r->accepts_messages;
+				return (bool) $r->accepts_messages;
 		}
 	}
 
@@ -124,6 +126,14 @@ class Address extends Entity
 
 	public function canSendVerificationAfterFail(): bool
 	{
+		if ($this->canSend()) {
+			return false;
+		}
+
+		if (!$this->last_sent) {
+			return true;
+		}
+
 		$limit_date = Addresses::getVerificationLimitDate();
 		$date = $this->last_sent ?? $this->added;
 		return $date < $limit_date;
@@ -201,7 +211,8 @@ class Address extends Entity
 			'accepts_mailings'  => 'messages collectifs',
 		];
 
-		$log = [];
+		$log_accepts = [];
+		$log_denies = [];
 		$who ??= 'destinataire';
 
 		foreach ($options as $key => $label) {
@@ -216,9 +227,24 @@ class Address extends Entity
 			}
 
 			$this->set($key, (bool)$preferences[$key]);
-			$log[] = sprintf('%s (%s) : %s', $this->$key ? 'Accepte les messages' : 'Refus des messages', $who, $label);
+
+			if($this->$key) {
+				$log_accepts[] = $label;
+			}
+			else {
+				$log_denies[] = $label;
+			}
 		}
 
+		$log = [];
+
+		if (count($log_accepts)) {
+			$log[] = sprintf('Accepte les messages (%s) : %s', $who, implode(', ', $log_accepts));
+		}
+
+		if (count($log_denies)) {
+			$log[] = sprintf('Refuse les messages (%s) : %s', $who, implode(', ', $log_denies));
+		}
 
 		if (!count($log)) {
 			return;
@@ -227,16 +253,25 @@ class Address extends Entity
 		$this->appendFailLog(implode(" ; ", $log));
 	}
 
-	public function setOptout(int $context): void
+	public function setOptout(?int $context): void
 	{
 		if ($context === Emails::CONTEXT_BULK) {
 			$this->set('accepts_mailings', false);
 		}
-		elseif ($context === Emails::CONTEXT_REMINDER) {
+		elseif ($context === Emails::CONTEXT_REMINDER
+			|| $context === Emails::CONTEXT_NOTIFICATION) {
 			$this->set('accepts_reminders', false);
 		}
-		else {
+		elseif ($context === Emails::CONTEXT_PRIVATE) {
 			$this->set('accepts_messages', false);
+		}
+		elseif ($context === null) {
+			$this->set('accepts_reminders', false);
+			$this->set('accepts_messages', false);
+			$this->set('accepts_mailings', false);
+		}
+		else {
+			throw new \LogicException('Invalid optout context: ' . $context);
 		}
 	}
 
@@ -257,10 +292,7 @@ class Address extends Entity
 		// Treat complaints as opt-out
 		if ($type == 'complaint') {
 			$this->set('status', self::STATUS_COMPLAINT);
-			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire.");
-			$this->set('accepts_mailings', false);
-			$this->set('accepts_reminders', false);
-			$this->appendFailLog($message ?? "Un signalement de spam a été envoyé par le destinataire, il a été désinscrit des rappels et messages collectifs.");
+			$this->appendFailLog($message ?? "Le destinataire a signalé un message comme étant un spam.");
 		}
 		elseif ($type == 'hard') {
 			$this->set('status', self::STATUS_HARD_BOUNCE);
@@ -308,17 +340,9 @@ class Address extends Entity
 		return self::STATUS_LIST[$this->status];
 	}
 
-	public function savePreferencesFromUserForm(?array $source = null, ?int $optout_context = null): bool
+	public function savePreferencesFromUserForm(?array $source = null): string
 	{
 		$source ??= $_POST;
-
-		if (!$optout_context) {
-			$address = $source['email'] ?? '';
-
-			if (!$address || self::getHash($address) !== $this->hash) {
-				throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
-			}
-		}
 
 		$keys = ['reminders', 'messages', 'mailings'];
 		$preferences = [];
@@ -338,18 +362,25 @@ class Address extends Entity
 			$preferences[$name] = $value;
 		}
 
-		// Don't require double opt-in if the user is coming from the optout link
-		// at the bottom of a message
-		if ($require_confirm && !$optout_context) {
+		$address = $source['email'] ?? '';
+
+		if ($require_confirm && !empty($address)) {
+			if (self::getHash($address) !== $this->hash) {
+				throw new UserException('L\'adresse e-mail indiquée ne correspond pas à celle que nous avons enregistré. Merci de vérifier l\'adresse e-mail saisie.');
+			}
+
 			$url = $this->getSignedUserPreferencesURL($preferences);
 			$preferences = array_filter($preferences);
 			EmailTemplates::verifyPreferences($address, $url, $preferences);
-			return false;
+			return 'confirmation_sent';
+		}
+		elseif ($require_confirm) {
+			return 'confirmation_required';
 		}
 		else {
 			$this->setPreferences($preferences);
 			$this->save();
-			return true;
+			return 'saved';
 		}
 	}
 
@@ -392,9 +423,12 @@ class Address extends Entity
 			return false;
 		}
 
-		$this->set('accepts_reminders', boolval($values['r'] ?? false));
-		$this->set('accepts_mailings', boolval($values['l'] ?? false));
-		$this->set('accepts_messages', boolval($values['m'] ?? false));
+		$this->setPreferences([
+			'accepts_reminders' => boolval($values['r'] ?? false),
+			'accepts_mailings'  => boolval($values['l'] ?? false),
+			'accepts_messages'  => boolval($values['m'] ?? false),
+		]);
+
 		$this->save();
 		return true;
 	}

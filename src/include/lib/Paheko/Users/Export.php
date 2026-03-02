@@ -47,7 +47,7 @@ class Export
 		self::exportWhere($format, 'Tous les membres', '1', $with_id);
 	}
 
-	static protected function exportWhere(string $format, string $name, string $where, bool $with_id = false): void
+	static protected function exportWhere(string $format, string $file_name, string $where, bool $with_id = false): void
 	{
 		$df = DynamicFields::getInstance();
 		$db = DB::getInstance();
@@ -84,7 +84,7 @@ class Export
 		$i = $db->iterate(sprintf('SELECT %s, (SELECT name FROM users_categories WHERE id = u.id_category) AS category
 			FROM %s WHERE %s GROUP BY u.id ORDER BY %s;', $columns, $tables, $where, $df->getNameFieldsSQL('u')));
 
-		CSV::export($format, $name, $i, $header, [self::class, 'exportRowCallback']);
+		CSV::export($format, $file_name, $i, $header, [self::class, 'exportRowCallback']);
 	}
 
 	static public function exportRowCallback(&$row)

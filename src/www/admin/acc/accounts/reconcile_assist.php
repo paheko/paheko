@@ -48,7 +48,7 @@ if (null !== qg('start') && null !== qg('end')) {
 }
 else {
 	try {
-		extract($ar->getStartAndEndDates());
+		extract($ar->getStartAndEndDates($current_year));
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());

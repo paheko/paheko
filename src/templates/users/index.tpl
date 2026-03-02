@@ -67,7 +67,7 @@
 					</td>
 				{else}
 					<td>
-						{user_field name=$key value=$value user_id=$row._user_id files_href=$url}
+						{user_field name=$key value=$value user_id=$row._user_id files_href=$url context="list"}
 					</td>
 				{/if}
 			{/foreach}

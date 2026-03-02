@@ -329,6 +329,10 @@ table.provisional tbody table tbody tr:first-child td.actions button {
     display: none;
 }
 
+table.import td.checkbox {
+    text-align: center;
+}
+
 @media handheld, screen and (max-width: 980px) {
     .transaction-details-container {
         grid-template-columns: 1fr;

@@ -11,25 +11,143 @@ if (!$cfg || !is_readable($cfg)) {
 
 require __DIR__ . '/../src/include/lib/KD2/Mail/Mailbox.php';
 
-TestMailbox::all($cfg);
+$argv = $_SERVER['argv'];
+$cmd = $argv[2] ?? null;
+$arg = $argv[3] ?? null;
+
+$r = TestMailbox::all($cfg);
+
+/*
+if ($arg) {
+	$r = find_message($r, $arg);
+}
+
+if ($cmd === 'json') {
+	echo json_encode($r, JSON_PRETTY_PRINT);
+}
+elseif ($cmd === 'headers' && $arg) {
+	echo $r->headers ?? "Not found\n";
+}
+elseif ($cmd === 'body' && $arg) {
+	echo $r->body ?? "Not found\n";
+}
+elseif ($cmd === 'export' && $arg) {
+	echo $r->headers . "\r\n\r\n" . $r->body;
+}
+*/
+
+$current = null;
+$errors = [];
+
+foreach ($r as $msg) {
+	if ($current !== $msg->recipient) {
+		$current = $msg->recipient;
+		echo "\n\n--- $current ---\n";
+	}
+
+	if ($msg->status === 'inbox') {
+		color('green', 'i');
+	}
+	elseif ($msg->status === 'junk') {
+		color('red', 'J');
+		$errors[] = $msg;
+	}
+	elseif ($msg->status === 'promotional') {
+		color('yellow', 'P');
+		$errors[] = $msg;
+	}
+}
+
+echo "\n\n";
+
+foreach ($errors as $msg) {
+	display_message_report($msg, false);
+}
+
+function display_message_report(stdClass $msg)
+{
+	echo '[';
+
+	if ($msg->status === 'inbox') {
+		color('green', 'INBOX');
+	}
+	else {
+		color('red', strtoupper($msg->status));
+	}
+
+	echo '] ' . $msg->subject . "\n";
+
+	printf("  To: %s\n  From: %s\n  Date: %s\n  Message-ID: %s\n  Flags: %s\n  Local ID: %s\n", $msg->recipient, $msg->from, $msg->date, $msg->message_id, implode(' ', $msg->flags), $msg->id);
+
+	if ($msg->status !== 'inbox') {
+		echo "  Diagnostic headers:\n";
+
+		foreach ($msg->diagnostic as $header) {
+			echo '  ' . $header . "\n";
+		}
+	}
+
+	foreach ($msg->actions as $action) {
+		color('yellow', sprintf("  -> %s\n", $action));
+	}
+}
+
+function color(string $color, string $str): void
+{
+	static $codes = [
+		'red' => 91,
+		'green' => 92,
+		'yellow' => 93,
+	];
+
+	printf("\e[%dm%s\e[0m", $codes[$color], $str);
+}
+
+function find_message(array $report, string $requested): ?stdClass
+{
+	foreach ($report as $address => $messages) {
+		foreach ($messages as $id => $msg) {
+			if ($id === $requested) {
+				return $msg;
+			}
+		}
+	}
+
+	return null;
+}
 
 class TestMailbox
 {
-	// Orange/SFR/Neuf = QUARANTINE, Yahoo.fr = Bulk Mail
-	const JUNK_FOLDER_NAMES = ['QUARANTINE', 'Bulk Mail', 'Junk'];
+	const JUNK_FOLDER_NAMES = [
+		// Orange/SFR/Neuf
+		'QUARANTINE',
+		// Laposte.net
+		'QUARANTAINE',
+		// Yahoo.fr = Bulk Mail
+		'Bulk Mail',
+		'Bulk',
+		// Most others
+		'Junk',
+		'Spam',
+	];
 
 	const PROMO_FLAGS = [
-		// SFR = les messages identifiés comme "NEWSLETTER" sont mis dans le dossier
+		// SFR / Laposte.net = les messages identifiés comme "NEWSLETTER" sont mis dans le dossier
 		// "Infos et promos"
 		'NEWSLETTER',
 	];
 
-	const MESSAGE_ID_PREFIX = 'pahekourriel.';
+	const SPAM_HEADERS_REGEXP =
+		// Most VadeRetro headers (OVH, Laposte...)
+		'/^(?:X-[a-z]+-(?:mailing|spamrating|spamlevel|spamcause)'
+		. '|X-[^:]*spam[^:]*'
+		. '|X-(?:ironport|vr)-[^:]+'
+		. '):.*$/mi';
 
 	protected stdClass $config;
 	protected Mailbox $mailbox;
 
-	static public function all(string $file): stdClass
+	static public function all(string $file, ?DateTime $since = null): \Generator
 	{
 		$ini = parse_ini_file($file, true);
 
@@ -39,7 +157,6 @@ class TestMailbox
 			'address'           => null,
 			'mark_as_important' => true,
 			'move_if_spam'      => true,
-			'others_are_spam'   => false,
 		];
 
 		foreach ($ini as $address => $config) {
@@ -49,84 +166,215 @@ class TestMailbox
 			$config->provider ??= substr($address, strrpos($address, '@')+1);
 
 			$t = new self($config);
-			var_dump($t->report());
+			yield from $t->report($since);
 		}
 	}
 
 	public function __construct(stdClass $config)
 	{
+		if (isset($config->oauth_refresh_token)) {
+			if (!isset($config->oauth_refresh_url, $config->oauth_client_id)) {
+				throw new \LogicException('Missing option: oauth_refresh_url or oauth_client_id');
+			}
+
+			$file = $_SERVER['XDG_CONFIG_HOME'] ?? ($_SERVER['HOME'] . '/.config');
+			$file .= '/test_mailboxes.json';
+			$data = [];
+
+			if (file_exists($file)) {
+				$data = json_decode(file_get_contents($file), true);
+			}
+
+			$d = $data[$config->address] ?? null;
+
+			// Refresh oauth token if necessary
+			if (!isset($d['expiry'])
+				|| empty($d['access_token'])
+				|| $d['expiry'] <= time()) {
+				$c = curl_init($config->oauth_refresh_url);
+				curl_setopt($c, CURLOPT_POST, true);
+				curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($c, CURLOPT_POSTFIELDS, http_build_query([
+					'grant_type'    => 'refresh_token',
+					'refresh_token' => $d['refresh_token'] ?? $config->oauth_refresh_token,
+					'client_id'     => $config->oauth_client_id,
+					'client_secret' => $config->oauth_client_secret ?? '',
+				]));
+				$r = curl_exec($c);
+				$d = json_decode($r, true);
+
+				if (!$d) {
+					throw new \RuntimeException('Cannot fetch OAuth token: ' . $r);
+				}
+
+				$d['expiry'] = time() + $d['expires_in'];
+				$data[$config->address] = $d;
+
+				// Save current token
+				@mkdir(dirname($file), fileperms(__FILE__), true);
+				file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+			}
+
+			$config->token = $d['access_token'];
+		}
+
 		$this->config = $config;
 	}
 
-	public function report(): array
+	public function report(?DateTime $since = null): \Generator
 	{
 		$m = $this->mailbox = new Mailbox($this->config->imap);
 		//$m->setLogFilePointer(STDOUT);
-		$m->setLogin($this->config->user, $this->config->password);
+		$m->setLogin($this->config->user, $this->config->password ?? null, $this->config->token ?? null);
 		$this->config->password = null;
+		$this->config->token = null;
 		$folders = $m->listFolders();
-		$report = [];
+
+		echo $this->config->address . "\n";
+		$this->config->inbox = null;
 
 		foreach ($folders as $key => $folder) {
-			if (in_array('Junk', $folder->flags)
-				|| $key === 'INBOX'
+			if (strtoupper($key) === 'INBOX') {
+				$this->config->inbox = $key;
+				break;
+			}
+		}
+
+		if (!$this->config->inbox) {
+			throw new \LogicException('Cannot find inbox folder');
+		}
+
+		foreach ($folders as $key => $folder) {
+			if (in_array('\\Junk', $folder->flags)
+				|| $key === $this->config->inbox
 				|| in_array($key, self::JUNK_FOLDER_NAMES)) {
-				$this->exploreFolder($key, $report);
+				yield from $this->exploreFolder($key, $since);
 			}
 			else {
 				// Not interested
 				continue;
 			}
 		}
-
-		return $report;
 	}
 
-	protected function exploreFolder(string $folder, array &$report)
+	protected function exploreFolder(string $folder, ?DateTime $since): \Generator
 	{
-		$date = new \DateTime('30 days ago');
+		$since ??= new \DateTime('15 days ago');
 
-		foreach ($this->mailbox->iterateMessages($folder, ['since' => $date]) as $msg) {
+		// Some IMAP servers don't support SEARCH for custom header and cannot return custom headers either (ie. Yahoo)
+		foreach ($this->mailbox->listMessages($folder, ['since' => $since]) as $msg) {
 			// Not one of our messages
-			if (0 !== strpos($msg->message_id, self::MESSAGE_ID_PREFIX)) {
+			if (0 === strpos($msg->message_id, 'pko.')) {
 				continue;
 			}
 
-			$id = substr($msg->message_id, strlen(self::MESSAGE_ID_PREFIX));
-			$id = (int) substr($id, 0, strpos($id, '.')-1);
+			$status = null;
 
-			if (!$id) {
-				continue;
-			}
-
-			$error = null;
-
-			// Identify messages marked as promo (SFR)
-			if ($folder === 'INBOX'
+			// Identify messages marked as promo (SFR/Laposte)
+			if ($folder === $this->config->inbox
 				&& in_array(self::PROMO_FLAGS, $msg->flags)) {
-				$error = 'promotional';
+				$status = 'promotional';
 			}
-			elseif ($folder !== 'INBOX') {
-				$error = 'junk';
+			elseif ($folder !== $this->config->inbox) {
+				$status = 'junk';
 			}
-			else {
-				continue;
+			elseif ($folder === $this->config->inbox) {
+				$status = 'inbox';
 			}
 
-			$report[] = [
-				'error'      => $error,
+			$raw = $this->mailbox->fetchMessage($folder, $msg->uid);
+			$parts = explode("\r\n\r\n", $raw, 2);
+
+			preg_match_all(self::SPAM_HEADERS_REGEXP, $parts[0], $match);
+			$spam_headers = array_map('trim', $match[0]);
+
+			$r = (object) [
+				'id'         => sha1($this->config->address . $msg->message_id),
+				'status'     => $status,
+				'folder'     => $folder,
 				'subject'    => $msg->subject,
-				'date'       => $msg->date,
+				'date'       => $msg->date->format('Y-m-d H:i:s'),
 				'uid'        => $msg->uid,
 				'message_id' => $msg->message_id,
-				'mailing_id' => $id,
 				'from'       => $msg->from->address,
-				'sender'     => $msg->sender->address,
+				'sender'     => $msg->sender->address ?? null,
 				'recipient'  => $this->config->address,
 				'provider'   => $this->config->provider,
-				'message'    => $this->mailbox->fetchMessage($folder, $msg->uid),
 				'flags'      => $msg->flags,
+				'diagnostic' => $spam_headers,
+				'headers'    => $parts[0],
+				'body'       => $parts[1] ?? '',
+				'size'       => strlen($raw),
+				'actions'    => null,
 			];
+
+			unset($raw, $parts);
+
+			$actions = [];
+
+			if ($this->config->mark_as_important) {
+				$actions[] = $this->addFlagsToMessage($r, ['\Seen', '\Flagged']);
+
+				if ($this->config->provider === 'gmail.com') {
+					$actions[] = $this->addFlagsToMessage($r, ['NotJunk', 'Important']);
+					$this->mailbox->move($folder, $msg->uid, '[Gmail]/Important');
+					$actions[] = 'Moved to "Important" folder';
+				}
+			}
+
+			if ($status === 'junk' && $this->config->move_if_spam) {
+				$actions[] = $this->removeFlagsFromMessage($r, ['\Junk', 'Junk', 'Spam']);
+				$this->mailbox->move($folder, $msg->uid, $this->config->inbox);
+				$actions[] = 'Moved to ' . $this->config->inbox;
+			}
+			elseif ($status === 'promotional' && $this->config->move_if_spam) {
+				$actions[] = $this->removeFlagsFromMessage($r, self::PROMO_FLAGS);
+			}
+
+			$actions = array_filter($actions);
+			$r->actions = $actions;
+
+			yield $r->id => $r;
 		}
+	}
+
+	protected function removeFlagsFromMessage(stdClass $msg, array $flags): ?string
+	{
+		$applied = [];
+		foreach ($flags as $flag) {
+			if (!in_array($flag, $msg->flags)
+				&& !in_array(ltrim($flag, '\\'), $msg->flags)) {
+				continue;
+			}
+
+			$this->mailbox->removeFlag($msg->folder, $msg->uid, $flag);
+			$applied[] = $flag;
+		}
+
+		if (count($applied)) {
+			return 'Removed flags: ' . implode(' ', $applied);
+		}
+
+		return null;
+	}
+
+	protected function addFlagsToMessage(stdClass $msg, array $flags): ?string
+	{
+		$applied = [];
+		foreach ($flags as $flag) {
+			if (in_array($flag, $msg->flags)
+				|| in_array(ltrim($flag, '\\'), $msg->flags)) {
+				continue;
+			}
+
+			$this->mailbox->addFlag($msg->folder, $msg->uid, $flag);
+			$applied[] = $flag;
+		}
+
+		if (count($applied)) {
+			return 'Add flags: ' . implode(' ', $applied);
+		}
+
+		return null;
 	}
 }

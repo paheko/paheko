@@ -26,7 +26,7 @@
 		<fieldset>
 			<legend>Relevé de compte</legend>
 			<dl>
-				{input type="file" name="file" label="Fichier à importer" accept="csv" required=1}
+				{input type="file" name="file" label="Fichier à importer" accept="csv+ofx+qif" required=1}
 				{include file="common/_csv_help.tpl" more_text="Le fichier doit obligatoirement disposer, soit d'une colonne 'Montant', soit de deux colonnes 'Débit' et 'Crédit'."}
 			</dl>
 			<p class="submit">
@@ -84,10 +84,10 @@
 	</p>
 
 	<form method="post" action="{$self_url}">
-		<table class="list">
+		<table class="list reconcile">
 			<thead>
 				<tr>
-					<th scope="col colspan="6">Journal du compte (compta)</th>
+					<th scope="col" colspan="6">Journal du compte (compta)</th>
 					<td class="separator"></td>
 					<th scope="col" colspan="4" class="separator">Extrait de compte (banque)</th>
 				</tr>
@@ -105,19 +105,13 @@
 					<td>Date</td>
 				</tr>
 			</thead>
+			<?php $footer = null; ?>
 			<tbody>
 				{foreach from=$lines key="line_id" item="line"}
 				{if isset($line->journal->sum)}
-				<tr>
-					<td colspan="4"></td>
-					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|money:false}</td>
-					<th scope="row" style="text-align: right">Solde au {$line.journal.date|date_short}</th>
-					<td class="separator"></td>
-					<td class="separator"></td>
-					<td colspan="3"></td>
-				</tr>
+					<?php $footer = $line->journal; ?>
 				{else}
-				<tr>
+				<tr class="{if !$line.journal && !$line.csv.amount}disabled{/if}">
 					{if isset($line->journal)}
 						<td class="check">
 							{input type="checkbox" name="reconcile[%d]"|args:$line.journal.id_line value="1" default=$line.journal.reconciled}
@@ -142,11 +136,11 @@
 							{/if}
 						</td>
 					{/if}
-						<td class="separator">
+						<td class="separator icon">
 						{if $line->journal && $line->csv}
-							==
-						{else}
-							{icon shape="alert"}
+							<span class="ok">=</span>
+						{elseif $line.journal || $line.csv.amount}
+							<span class="missing">≠</span>
 						{/if}
 						</td>
 					{if isset($line->csv)}
@@ -163,6 +157,18 @@
 				{/if}
 			{/foreach}
 			</tbody>
+			{if $footer}
+				<tfoot>
+					<tr>
+						<td colspan="4"></td>
+						<td class="money">{if $footer.sum > 0}-{/if}{$footer.sum|abs|raw|money:false}</td>
+						<th scope="row" style="text-align: right">Solde au {$footer.date|date_short}</th>
+						<td class="separator"></td>
+						<td class="separator"></td>
+						<td colspan="3"></td>
+					</tr>
+				</tfoot>
+			{/if}
 		</table>
 		<p class="submit">
 			{csrf_field key=$csrf_key}

@@ -92,9 +92,14 @@ elseif (($pragma = qg('pragma')) || isset($query)) {
 				return;
 			}
 
+			$result_count = $s->countResults();
+
+			if ($result_count > 10000) {
+				throw new UserException('Trop de résultats. Merci de limiter la requête à 10.000 résultats.');
+			}
+
 			$result = $s->iterateResults();
 			$result_header = $s->getHeader();
-			$result_count = $s->countResults();
 		}
 		else {
 			$result = $result_count = $result_header = null;

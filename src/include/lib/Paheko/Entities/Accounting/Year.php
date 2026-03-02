@@ -175,6 +175,10 @@ class Year extends Entity
 			throw new ValidationException('La date de fin ne correspond pas à l\'exercice cible choisi.');
 		}
 
+		if ($this->id_chart !== $target->id_chart) {
+			throw new ValidationException('Les deux exercices doivent utiliser le même plan comptable');
+		}
+
 		DB::getInstance()->preparedQuery('UPDATE acc_transactions
 			SET id_year = ?
 			WHERE id_year = ? AND date >= ? AND date <= ?;',
@@ -353,7 +357,7 @@ class Year extends Entity
 			WHERE t.id_year != ?
 				AND a.type = ?
 				AND l.credit = 0
-				AND NOT (t.status & ?)
+				AND NOT (l.status & ?)
 				AND NOT (t.status & ?)
 			GROUP BY a.code
 			ORDER BY a.label COLLATE U_NOCASE;';
@@ -361,7 +365,7 @@ class Year extends Entity
 		return DB::getInstance()->get($sql,
 			$this->id(),
 			Account::TYPE_OUTSTANDING,
-			Transaction::STATUS_DEPOSITED,
+			Line::STATUS_DEPOSITED,
 			Transaction::STATUS_OPENING_BALANCE
 		);
 	}

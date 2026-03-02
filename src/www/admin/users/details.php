@@ -49,7 +49,7 @@ $category = $user->category();
 $csrf_key = 'user_' . $user->id();
 $can_login = $user->canLoginBy($session);
 $can_be_modified = $user->canBeModifiedBy($session);
-$can_change_password = $user->canChangePasswordBy($session);
+$can_change_password = $can_login && $user->canChangePasswordBy($session);
 
 $form->runIf('login_as', function () use ($user, $session, $can_login) {
 	if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {

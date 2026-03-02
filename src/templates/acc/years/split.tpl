@@ -27,6 +27,11 @@
 		</dl>
 	</fieldset>
 
+	<p class="alert block">
+		Attention&nbsp;: cette action ne modifie pas les dates des écritures.
+		L'exercice cible doit donc avoir des dates qui englobent les écritures déplacées.
+	</p>
+
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="split" label="Déplacer" shape="right" class="main"}

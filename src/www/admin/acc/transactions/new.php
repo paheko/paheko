@@ -37,6 +37,7 @@ $id_project = null;
 $linked_users = null;
 $linked_transactions = null;
 $payoff = null;
+$linked_users_is_required = false;
 
 $lines = [[], []];
 
@@ -96,7 +97,9 @@ if (isset($_POST['type'])) {
 $types_details = $transaction->getTypesDetails();
 
 // Set last used date
-if (empty($transaction->date) && $session->get('acc_last_date') && $date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+if (empty($transaction->date)
+	&& $session->get('acc_last_date')
+	&& ($date = Date::createFromFormat('!Y-m-d', $session->get('acc_last_date')))) {
 	$transaction->date = $date;
 }
 // Set date of the day if no date was set
@@ -165,7 +168,8 @@ $form->runIf('save', function () use ($transaction, $session, $payoff) {
 }, $csrf_key);
 
 $projects = Projects::listAssoc();
-$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details', 'linked_users', 'linked_transactions', 'chart', 'projects', 'payoff');
+$variables = compact('csrf_key', 'transaction', 'amount', 'lines', 'id_project', 'types_details',
+	'linked_users', 'linked_transactions', 'chart', 'projects', 'payoff', 'linked_users_is_required');
 
 $tpl->assign($variables);
 

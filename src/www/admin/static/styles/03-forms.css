@@ -734,6 +734,12 @@ dialog.datepicker {
     color: darkred;
 }
 
+input[disabled] + .datepicker-parent {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 #queryBuilderForm textarea {
     width: calc(100% - 2em);
 }

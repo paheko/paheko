@@ -160,7 +160,19 @@ class Users
 			throw new UserException('La recherche ne comporte pas de colonne "id" ou "_user_id", et donc ne permet pas l\'envoi d\'email.');
 		}
 
-		$columns = array_map([$db, 'quoteIdentifier'], $header);
+		// Make sure the list doesn't have duplicates, or the SQL CREATE TABLE query will fail
+		$columns = [];
+		$i = 1;
+
+		foreach ($header as $value) {
+			if (array_key_exists($value, $header)) {
+				$value = 'col' . $i . '_' . $value;
+			}
+
+			$columns[$value] = null;
+		}
+
+		$columns = array_map([$db, 'quoteIdentifier'], array_keys($columns));
 		$columns = implode(', ', $columns);
 
 		// We only need the user id, store it in a temporary table for now
@@ -269,6 +281,7 @@ class Users
 		}
 
 		$tables = 'users_view u';
+		$tables .= ' INNER JOIN users_categories c ON c.id = u.id_category';
 		$tables .= ' LEFT JOIN users_search s ON s.id = u.id';
 
 		if (self::hasParents()) {
@@ -297,13 +310,23 @@ class Users
 		}
 
 		if (!$id_category) {
-			$conditions = 'u.id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
+			$conditions = 'c.hidden = 0';
 		}
 		elseif ($id_category > 0) {
 			$conditions = sprintf('u.id_category = %d', $id_category);
 		}
 		else {
 			$conditions = '1';
+		}
+
+		$config = Config::getInstance();
+
+		if ($id_category <= 0 && $config->show_category_in_list) {
+			$columns['category'] = [
+				'label'  => 'Catégorie',
+				'select' => 'c.name',
+				'order'  => 'c.name COLLATE U_NOCASE %s',
+			];
 		}
 
 		$order = 'identity';
@@ -314,6 +337,7 @@ class Users
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy($order, false);
+		$list->groupBy('u.id');
 
 		return $list;
 	}

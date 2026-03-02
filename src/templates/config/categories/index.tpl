@@ -6,7 +6,10 @@
 	<thead>
 		<th scope="col">Nom</th>
 		<td class="num">Membres</td>
+		{if ENABLE_PERMISSIONS}
 		<td>Droits</td>
+		{/if}
+		<td></td>
 		<td></td>
 	</thead>
 	<tbody>
@@ -14,9 +17,12 @@
 			<tr>
 				<th scope="row">{$cat.name}</th>
 				<td class="num">{$cat.count}</td>
+				{if ENABLE_PERMISSIONS}
 				<td class="permissions">
 					{display_permissions permissions=$cat}
 				</td>
+				{/if}
+				<td>{if $cat.hidden}Cachée{/if}</td>
 				<td class="actions">
 					{if $cat.id != $logged_user.id_category}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$cat.id target="_dialog"}

@@ -247,10 +247,10 @@ html.js nav.dropdown:not(.open) li a {
     pointer-events: none;
 }
 
-nav.dropdown li a, nav.dropdown li span {
+nav.dropdown li > a {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: .4rem .6rem;
     text-decoration: none;
     height: 1.5em;
@@ -261,11 +261,11 @@ nav.dropdown li a, nav.dropdown li span {
 nav.dropdown li a strong {
     font-weight: normal;
     text-align: left;
+    margin-right: auto;
 }
 
 nav.dropdown li a small {
     color: var(--gBorderColor);
-    margin-right: 2em;
     text-align: right;
     white-space: pre;
 }
@@ -298,7 +298,11 @@ nav.dropdown.open li a strong {
 
 nav.dropdown.open li a:hover {
     background: rgba(var(--gMainColor), 0.2);
-    color: rgb(var(--gHoverLinkColor));
+}
+
+nav.dropdown li a > span {
+    width: 2em;
+    text-align: center;
 }
 
 @media handheld, screen and (max-width:981px) {

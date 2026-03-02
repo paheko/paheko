@@ -150,7 +150,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 				<th scope="row"><a href="?path={$item.path}">{$item.identity}</a></th>
 				<td class="actions">
 					{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-					{linkbutton href="!users/details.php?=%d"|args:$item.id label="Fiche membre" shape="user"}
+					{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
 				</td>
 			</tr>
 			{else}
@@ -164,7 +164,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 						<td class="icon"><a href="?id={$item.hash_id}">{icon shape="folder"}</a></td>
 						<th scope="row" colspan="3"><a href="?id={$item.hash_id}">{$item.name}</a></th>
 						<td class="actions">
-						{if $dir->canCreateHere() || $item->canDelete()}
+						{if $dir->canCreateHere() || $item->canMoveToTrash()}
 							{linkmenu label="Modifier…" shape="edit"}
 								{if $item->canRename()}
 									{linkbutton href="!common/files/rename.php?id=%s"|args:$item.hash_id label="Renommer" shape="reload" target="_dialog"}
@@ -172,7 +172,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 								{if $item->canMove()}
 									{linkbutton href="!docs/move.php?p=%s"|args:$item->path_uri() label="Déplacer" shape="export" target="_dialog"}
 								{/if}
-								{if $item->canDelete()}
+								{if $item->canMoveToTrash()}
 									{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 								{/if}
 							{/linkmenu}
@@ -203,7 +203,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 							{if $item->canShare()}
 								{linkbutton href="!common/files/share.php?h=%s"|args:$item->hash_id label="Partager" shape="export" target="_dialog" title="Partager"}
 							{/if}
-							{if $item->canRename() || $item->canDelete() || ($item->canWrite() && $item->editorType())}
+							{if $item->canRename() || $item->canMoveToTrash() || ($item->canWrite() && $item->editorType())}
 								{linkmenu label="Modifier…" shape="edit" right=true}
 									{assign var="can_write" value=$item->canWrite()}
 									{if $can_write && $item->editorType()}
@@ -215,7 +215,7 @@ $upload_here = $context_specific_root ? null : $dir->path;
 									{if $item->canMove()}
 										{linkbutton href="!docs/move.php?p=%s"|args:$item->path_uri() label="Déplacer" shape="export" target="_dialog"}
 									{/if}
-									{if $item->canDelete()}
+									{if $item->canMoveToTrash()}
 										{linkbutton href="!common/files/delete.php?p=%s"|args:$item->path_uri() label="Supprimer" shape="trash" target="_dialog"}
 									{/if}
 									{if !(FILE_VERSIONING_POLICY === 'none' || $config.file_versioning_policy === 'none') && $can_write}

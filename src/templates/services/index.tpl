@@ -11,15 +11,7 @@
 			{foreach from=$list->iterate() item="row"}
 				<tr>
 					<th scope="row"><a href="fees/?id={$row.id}">{$row.label}</a></th>
-					<td>
-						{if $row.duration}
-							{$row.duration} jours
-						{elseif $row.start_date}
-							{$row.start_date|date_short} au {$row.end_date|date_short}
-						{else}
-							ponctuelle
-						{/if}
-					</td>
+					<td>{$row.date}</td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=active">{$row.nb_users_ok}</a></td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=expired">{$row.nb_users_expired}</a></td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</a></td>

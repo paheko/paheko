@@ -23,7 +23,7 @@ $grouped_services = Services::listGroupedWithFees($single_user_id);
 $today = new \DateTime;
 
 $tpl->assign([
-	'custom_js' => ['service_form.js'],
+	'custom_js' => ['service_form.js?2025'],
 ]);
 
 $tpl->assign(compact('form_url', 'today', 'grouped_services',

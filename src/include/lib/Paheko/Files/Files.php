@@ -581,6 +581,11 @@ class Files
 		return DB::getInstance()->test('files', 'path = ?', $path);
 	}
 
+	static public function getType(string $path): ?int
+	{
+		return DB::getInstance()->firstColumn('SELECT type FROM files WHERE path = ?;', $path);
+	}
+
 	static public function getFromURI(string $uri): ?File
 	{
 		$uri = rawurldecode($uri);

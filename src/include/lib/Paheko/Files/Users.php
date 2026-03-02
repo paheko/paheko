@@ -39,7 +39,6 @@ class Users
 		$list = new DynamicList($columns, $tables);
 		$list->orderBy('number', false);
 		$list->groupBy('uf.id_user');
-		$list->setCount('COUNT(DISTINCT uf.id_user)');
 
 		return $list;
 	}

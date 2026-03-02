@@ -567,7 +567,7 @@ Inscrit un membre à une activité.
 | `expected_amount` | `string` (facultatif) | Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : `42,99`). Si non spécifié, il sera calculé à partir du tarif fourni. |
 | `force_duplicate` | `bool` (facultatif) | Par défaut, si une inscription existe déjà pour la même activité, le même jour et le même membre, une erreur sera renvoyée. Pour pouvoir inscrire le membre à la même activité et le même jour plusieurs fois, passer `TRUE` à ce paramètre. |
 
-_(Depuis la version 1.4.0)_
+_(Depuis la version 1.3.19)_
 
 ### POST user/import
 

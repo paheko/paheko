@@ -40,7 +40,13 @@ $form->runIf('recover', function () use ($session) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de demandes de récupération de mot de passe perdu.\nSi vous n'avez pas reçu l'e-mail de récupération de mot de passe, vérifiez votre dossier Spam ou indésirables.\nSinon merci d'attendre %d minutes avant de ré-essayer.", Log::LOCKOUT_DELAY/60));
 	}
 
-	$session->recoverPasswordSend(f('id'));
+	$id = strval($_POST['id'] ?? '');
+
+	if (trim($id) === '') {
+		throw new UserException('Aucun identifiant fourni');
+	}
+
+	$session->recoverPasswordSend($id);
 }, $csrf_key, '!password.php?sent' . ($new ? '&new' : ''));
 
 $sent = !$form->hasErrors() && null !== qg('sent');

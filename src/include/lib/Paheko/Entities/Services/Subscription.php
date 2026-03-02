@@ -7,6 +7,7 @@ use Paheko\Entity;
 use Paheko\Form;
 use Paheko\UserException;
 use Paheko\ValidationException;
+use Paheko\Utils;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
 use Paheko\Users\Users;
@@ -40,6 +41,10 @@ class Subscription extends Entity
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
 		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre, ce tarif et cette date');
+
+		if ($this->expiry_date) {
+			$this->assert($this->expiry_date >= $this->date, 'La date d\'expiration ne peut être avant la date d\'inscription à l\'activité');
+		}
 
 		$db = DB::getInstance();
 
@@ -111,13 +116,40 @@ class Subscription extends Entity
 			$service = $this->_service = Services::get((int) $source['id_service']);
 
 			if (!$service) {
-				throw new \LogicException('The requested service is not found');
+				throw new UserException('The requested service is not found');
 			}
 
 			// This is used for creating multiple subscriptions for a user from the caisse, see Subscriptions::createFromFee
 			$qty = intval($source['qty'] ?? 1);
 
 			$this->updateExpiryDate($qty);
+
+			$date = null;
+
+			if (isset($source['date'])) {
+				$date = Utils::parseDateTime($source['date'], Date::class);
+			}
+
+			$date ??= new Date;
+
+			if ($service->duration) {
+				$date->modify(sprintf('+%d days', $service->duration * $multiple));
+				$this->set('expiry_date', $date);
+			}
+			elseif ($service->end_date) {
+				if ($qty > 1) {
+					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité à date fixe.');
+				}
+
+				$this->set('expiry_date', $service->end_date);
+			}
+			else {
+				if ($qty > 1) {
+					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité sans durée.');
+				}
+
+				$this->set('expiry_date', null);
+			}
 		}
 
 		if (!empty($source['id_service'])) {

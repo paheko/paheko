@@ -172,6 +172,49 @@ namespace Paheko;
 // const OIDC_CLIENT_DEFAULT_PERMISSIONS = ['users' => 'admin', 'config' => 'admin'];
 
 /**
+ * OIDC_CLIENT_CALLBACK
+ *
+ * Permet d'indiquer le nom d'une fonction PHP qui sera appelée après la connexion
+ * au serveur OIDC.
+ *
+ * Cela permet par exemple de créer ou mettre à jour un membre Paheko à partir des
+ * infos fournies à la connexion OIDC.
+ *
+ * Le premier paramètre passé à cette fonction sera un \stdClass contenant les
+ * informations renvoyées par le serveur OIDC. Le second paramètre sera l'entité
+ * User correspond à l'utilisateur connecté (à la suite de la règle OIDC_CLIENT_MATCH_EMAIL).
+ *
+ * La fonction peut renvoyer une entité User visant à remplacer celle qui est utilisée
+ * actuellement, ou NULL.
+ *
+ * Lire la doc pour plus d'exemples.
+ *
+ * @see https://fossil.kd2.org/paheko/wiki?name=Configuration+SSO+et+LDAP
+ * @default null
+ * @var null|callable
+ */
+
+// const OIDC_CLIENT_CALLBACK = '\Paheko\my_oidc_callback';
+
+/**
+ * ENABLE_PERMISSIONS
+ *
+ * Activer ou désactiver la gestion des permissions dans Paheko
+ *
+ * En mode client OIDC, on peut préférer désactiver la gestion des permissions
+ * dans Paheko, car celles-ci sont probablement gérées par le serveur OIDC.
+ *
+ * Si on désactive cette constante (false) on ne pourra plus afficher ou modifier
+ * les permissions pour chaque catégorie de membres. Les permissions d'un membre
+ * ne s'afficheront plus sur sa fiche membre non plus.
+ *
+ * @default true
+ * @var bool
+ */
+
+// const ENABLE_PERMISSIONS = false;
+
+/**
  * LOCAL_LOGIN
  *
  * Forcer la connexion locale
@@ -204,6 +247,7 @@ namespace Paheko;
 //const LOCAL_LOGIN = null;
 
 /**
+ * ALLOW_MODIFIED_IMPORT
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?
  *
  * Si mis à true, un avertissement et une confirmation seront demandés
@@ -213,6 +257,9 @@ namespace Paheko;
  * Ceci ne s'applique qu'à la page "Sauvegarde et restauration" de l'admin,
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
+ *
+ * Ceci n'est *PAS* une mesure de sécurité, mais pour empêcher les utilisateurs
+ * de bidouiller la BDD et casser le logiciel.
  *
  * Défaut : false
  * @var  bool
@@ -230,14 +277,25 @@ namespace Paheko;
 //const ROOT = __DIR__;
 
 /**
+ * DATA_ROOT
  * Répertoire où sont situées les données de Paheko
- * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
+ * (incluant la base de données SQLite, les sauvegardes et le cache)
  *
  * Défaut : sous-répertoire "data" de la racine
  * @var  string
  */
 
 //const DATA_ROOT = ROOT . '/data';
+
+/**
+ * BACKUPS_ROOT
+ * Répertoire où son stockées les sauvegardes de la base de données.
+ *
+ * Défaut : DATA_ROOT . '/backups'
+ * @var string
+ */
+
+//const BACKUPS_ROOT = DATA_ROOT . '/backups';
 
 /**
  * Répertoire où est situé le cache,
@@ -760,6 +818,21 @@ namespace Paheko;
 //const SMTP_HELO_HOSTNAME = 'mail.domain.tld';
 
 /**
+ * SMTP_MAX_MESSAGES_PER_SESSION
+ *
+ * Nombre de messages à envoyer par session SMTP.
+ *
+ * Pour contourner les limitations de certains hébergeurs, comme IONOS,
+ * qui limitent le nombre de messages par session.
+ *
+ * Limite pour IONOS : 20
+ *
+ * Défaut : 50
+ * @var int
+ */
+//const SMTP_MAX_MESSAGES_PER_SESSION = 20;
+
+/**
  * Adresse e-mail destinée à recevoir les erreurs de mail
  * (adresses invalides etc.) — Return-Path / MAIL FROM
  *
@@ -1057,10 +1130,10 @@ namespace Paheko;
  * Ces outils sont utilisés pour convertir les documents d'un format à l'autre.
  * Cette fonctionnalité est utilisée :
  * - pour extraire le texte des documents PDF, XLS, DOC, EPUB et l'indexer
- *   dans la recherche de documents
+ *   dans la recherche de documents (les fichiers OpenDocument, DOCX, XLSX et PPTX sont gérés en natif)
  * - pour générer les images miniatures des documents (dans les listes de documents)
- * - pour convertir les fichiers XLSX, XLS ou ODS pour l'import de membres,
- *   d'écritures etc. (sinon seul CSV est accepté)
+ * - pour convertir les fichiers XLS (vieux Excel) pour l'import de membres,
+ *   d'écritures etc. (sinon seuls les fichiers CSV, ODS et XLSX sont acceptés)
  *
  * Les outils supportés sont :
  * - collabora : serveur Collabora externe, via l'API HTTP de conversion,
@@ -1077,7 +1150,7 @@ namespace Paheko;
  *
  * Si un outil permettant la conversion de documents bureautique est
  * spécifié (collabora, unoconvert, unocov, onlyoffice), alors il sera
- * possible d'importer des fichiers XLSX, XLS et ODS en plus du CSV
+ * possible d'importer des fichiers XLS (vieil Excel) en plus du CSV, ODS et XLSX
  * (par exemple pour les imports de membres ou d'écritures comptables).
  *
  * Paheko utilisera automatiquement en priorité l'outil le plus performant :

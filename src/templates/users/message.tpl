@@ -8,8 +8,10 @@
 		<dl>
 			<dt>Expéditeur</dt>
 		{if $is_admin}
-			{input type="radio" name="sender" value="self" default="self" required=true label="Membre : %s"|args:$self->getNameAndEmail()}
-			{input type="radio" name="sender" value="org" default="self" required=true label='Association : "%s" <%s>'|args:$config.org_name:$config.org_email}
+			{input type="radio" name="sender" value="org" default="org" required=true label='Association : "%s" <%s>'|args:$config.org_name:$config.org_email}
+			{if $can_email}
+				{input type="radio" name="sender" value="self" required=true label="Membre : %s"|args:$self->getNameAndEmail()}
+			{/if}
 		{else}
 			<dd>{$self->getNameAndEmail()}</dd>
 		{/if}

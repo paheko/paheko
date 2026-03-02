@@ -362,7 +362,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
 | `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
-| `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. Si une chaîne de texte est indiquée, elle sera utilisée dans la clause `COUNT(<texte>)`. |
+| `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. |
 
 Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points `:` :
 
@@ -380,10 +380,6 @@ Exemples d'utilisation du paramètre `count` :
 {{#articles count=true assign="result"}}
 {{/articles}}
 Il y a {{$result.count}} articles.
-
-{{#articles count="DISTINCT title"}}
-	Il y a {{$count}} articles avec un titre différent.
-{{/articles}}
 ```
 
 # Membres

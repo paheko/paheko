@@ -76,7 +76,9 @@ abstract class AbstractRender
 			}
 		}
 
-		$out = $this->outputHTML($out);
+		if (!($this instanceof Plaintext)) {
+			$out = $this->outputHTML($out);
+		}
 
 		return $out;
 	}

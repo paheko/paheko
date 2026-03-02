@@ -288,7 +288,7 @@ form#f_upload fieldset {
     font-size: .9em;
 }
 
-.web.preview article {
+.web.preview > article {
     margin: 1em auto;
     background: var(--gLightBackgroundColor);
     padding: 1em;
@@ -296,7 +296,7 @@ form#f_upload fieldset {
     border-radius: .5em;
 }
 
-.web.preview article .actions {
+.web.preview > article .actions {
     float: none;
     margin: 0;
     text-align: center;

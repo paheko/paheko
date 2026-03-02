@@ -130,8 +130,9 @@ Ce fichier décrit le module, au format INI (`clé=valeur`), en utilisant les cl
 * `author_url` : adresse web HTTP menant au site de l'auteur
 * `home_button` : indique si un bouton pour ce module doit être affiché sur la page d'accueil (`true` ou `false`)
 * `menu` : indique si ce module doit être listé dans le menu de gauche (`true` ou `false`)
-* `restrict_section` : indique la section auquel le membre doit avoir accès pour pouvoir voir le menu de ce module, parmi `web, documents, users, accounting, connect, config`
+* `restrict_section` : indique la section auquel le membre doit avoir accès pour pouvoir voir le menu de ce module, parmi `web, documents, users, accounting, connect, config`. Ceci est une valeur par défaut, et à moins de mettre `allow_user_restrict=false`, l'administrateur pourra modifier cette restriction.
 * `restrict_level` : indique le niveau d'accès que le membre doit avoir dans la section indiquée pour pouvoir voir le menu de ce module, parmi `read, write, admin`.
+* `allow_user_restrict` (depuis 1.3.18) : indique si l'administrateur peut modifier les restrictions d'accès au module (via l'onglet ==Permissions== de l'extension). `true` ou `false`. Défaut si non spécifié : `true`.
 * `restrict_details` : petit texte d'explication supplémentaire (qui sera affiché dans la page des détails de l'extension) sur les droits d'accès requis pour accéder à certaines parties du module.
 * `doc_url` : adresse web HTTP menant à la documentation du module
 

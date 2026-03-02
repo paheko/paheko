@@ -45,6 +45,8 @@ g.script('scripts/lib/query_builder.js', () => {
 
 	// Add specific condition just to have the column show up in result
 	q.operators["1"] = "afficher cette colonne";
+	q.types_operators['money'] = q.types_operators['integer'];
+	q.types_operators['tel'] = q.types_operators['text'];
 
 	for (var i in q.types_operators) {
 		q.types_operators[i]["1"] = q.operators["1"];

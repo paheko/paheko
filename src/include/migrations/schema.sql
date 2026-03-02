@@ -296,6 +296,8 @@ CREATE TABLE IF NOT EXISTS services
 	archived INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE INDEX IF NOT EXISTS services_archived ON services (archived);
+
 CREATE TABLE IF NOT EXISTS services_fees
 -- Services fees
 (
@@ -528,6 +530,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 
 	id_project INTEGER NULL REFERENCES acc_projects(id) ON DELETE SET NULL,
 
+	status INTEGER NOT NULL DEFAULT 0, -- bitmask
+
 	CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
 	CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
 );
@@ -536,6 +540,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transaction
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_status ON acc_transactions_lines (status);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_links
 (
@@ -560,6 +565,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 CREATE INDEX IF NOT EXISTS acc_transactions_users_transaction ON acc_transactions_users (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_user);
 CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_users (id_subscription);
+CREATE UNIQUE INDEX IF NOT EXISTS acc_transactions_users_unique ON acc_transactions_users (id_user, id_transaction, COALESCE(id_service_user, 0));
 
 ---------- FILES ----------------
 

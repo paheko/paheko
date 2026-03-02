@@ -368,17 +368,19 @@ class Addresses
 			// Ignore auto-responders
 			return $return;
 		}
-		elseif ($return['type'] === 'genuine') {
+		elseif ($return['type'] === 'genuine'
+			|| $return['type'] === 'captcha') {
 			// Forward emails that are not automatic to the organization email
 			$config = Config::getInstance();
 
 			$new = new Mail_Message;
 			$new->setHeaders([
 				'To'      => $config->org_email,
-				'Subject' => 'Réponse à un message que vous avez envoyé',
+				'Subject' => 'Fw: ' . $message->getHeader('Subject'),
+				'From'    => self::getFromHeader(),
 			]);
 
-			$new->setBody('Veuillez trouver ci-joint une réponse à un message que vous avez envoyé à un de vos membre.');
+			$new->setBody('Veuillez trouver ci-joint un message reçu à l\'attention de votre association.');
 
 			$new->attachMessage($message->output());
 

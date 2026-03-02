@@ -123,7 +123,6 @@ class Subscriptions
 
 		$list->orderBy('date', true);
 		$list->groupBy('sub.id');
-		$list->setCount('COUNT(DISTINCT sub.id)');
 		return $list;
 	}
 

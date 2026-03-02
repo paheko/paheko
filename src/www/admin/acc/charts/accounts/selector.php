@@ -25,6 +25,10 @@ $codes = array_filter($codes);
 $id_chart = intval($_GET['id_chart'] ?? 0);
 $id_year = intval($_GET['id_year'] ?? 0);
 
+if (isset($_GET['year'])) {
+	$id_year = (int) $_GET['year'];
+}
+
 if ($id_chart && $id_year) {
 	throw new UserException('Invalid call: id_chart and id_year cannot be specified at the same time', 400);
 }

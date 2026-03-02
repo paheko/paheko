@@ -108,10 +108,12 @@ class AdvancedSearch extends A_S
 				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $identifier);
 			}
 
-			if ($field->type == 'checkbox')
-			{
+			if ($field->type == 'checkbox') {
 				$column['type'] = 'boolean';
 				$column['null'] = false;
+			}
+			elseif ($field->type == 'boolean') {
+				$column['type'] = 'boolean';
 			}
 			elseif ($field->type == 'select')
 			{
@@ -151,9 +153,8 @@ class AdvancedSearch extends A_S
 				$column['type'] = $type;
 				$column['null'] = $field->hasNullValues();
 			}
-
-			if ($field->type == 'tel') {
-				$column['normalize'] = 'tel';
+			elseif ($field->type == 'tel') {
+				$column['type'] = 'tel';
 			}
 
 			$columns[$name] = $column;
