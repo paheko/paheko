@@ -21,6 +21,8 @@ class DynamicList implements \Countable
 	 * - If the key 'order' exists and is NULL, then this column will not have sort buttons
 	 * - If the key 'order' exists and is a string it will be used for the ORDER BY clause when the
 	 *   column sort buttons are clicked. '%s' will be replaced by either ASC or DESC.
+	 * - If the key 'only_with_order' exists and is a column alias (key), this column will only appear
+	 * if the order is using the designated column for ORDER BY clause.
 	 * - If the key 'export' is TRUE, then the column will ONLY be included in CSV/ODS/XLSX exports
 	 * - If the key 'export' is FALSE, then the column will NOT be included in exports
 	 * (if the key `export` is NULL, or not set, then the column will be included both in HTML and in exports)
