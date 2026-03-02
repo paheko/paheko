@@ -1,18 +1,23 @@
 {if !$dialog}
 <nav class="tabs">
 	<aside>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $current != 'reminders'}
-			{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
-		{elseif $current == 'reminders'}
-			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus" target="_dialog"}
+		{if $current === 'history'}
+			{exportmenu right=true}
+		{elseif $current === 'reminders'}
+			{linkbutton href="!services/reminders/new.php" label="Nouveau rappel automatique" shape="plus"}
+		{elseif $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+			{linkbutton href="!services/subscription/select.php" label="Inscrire à une activité" shape="plus"}
 		{/if}
 	</aside>
 
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
+		<li{if $current == 'history'} class="current"{/if}><a href="{$admin_url}services/history.php">Inscriptions</a></li>
 		{if !DISABLE_EMAIL && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Rappels automatiques</a></li>
+		{/if}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $current == 'import'} class="current"{/if}><a href="{$admin_url}services/import.php">Import</a></li>
-			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
 		{/if}
 	</ul>
 
@@ -36,9 +41,6 @@
 		&& isset($current_service)
 		&& !isset($current_fee)}
 	<aside>
-		{if $service_page !== 'index'}
-			{exportmenu right=true label="Historique complet…" href="?id=%d&type=%s&history=1"|args:$current_service.id:$type}
-		{/if}
 		{exportmenu right=true}
 	</aside>
 	{/if}
@@ -59,9 +61,6 @@
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
 		&& isset($current_fee)}
 	<aside>
-		{if $fee_page !== 'index'}
-			{exportmenu right=true label="Historique complet…" href="?id=%d&type=%s&history=1"|args:$current_fee.id:$type}
-		{/if}
 		{exportmenu right=true}
 	</aside>
 	{/if}

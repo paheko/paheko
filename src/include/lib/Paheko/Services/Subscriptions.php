@@ -284,6 +284,7 @@ class Subscriptions
 			'date' => [
 				'label' => 'Date d\'inscription',
 				'select' => 'sub.date',
+				'order' => 'sub.date %s, sub.id %1$s',
 			],
 			'expiry_date' => [
 				'label' => 'Date d\'expiration',
@@ -306,8 +307,8 @@ class Subscriptions
 		$list->groupBy('sub.id');
 		$list->setTitle('Historique des inscriptions');
 		$list->setModifier(function (&$row) {
-			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
-			$row->expiry_date = \DateTime::createFromFormat('!Y-m-d', $row->expiry_date);
+			$row->date = Utils::parseDateTime($row->date);
+			$row->expiry_date = Utils::parseDateTime($row->expiry_date);
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->paid = $row->paid ? 'Oui' : '';

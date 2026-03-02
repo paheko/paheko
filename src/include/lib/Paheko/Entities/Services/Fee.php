@@ -133,7 +133,7 @@ class Fee extends Entity
 		return EntityManager::findOneById(Service::class, $this->id_service);
 	}
 
-	public function allUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
+	public function allUsersList(bool $include_hidden_categories = false): DynamicList
 	{
 		$identity = DynamicFields::getNameFieldsSQL('u');
 
@@ -207,14 +207,7 @@ class Fee extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-
-		if ($group) {
-			$list->groupBy('sub.id_user');
-		}
-		else {
-			$list->groupBy('sub.id');
-		}
-
+		$list->groupBy('sub.id_user');
 		$list->orderBy('paid', true);
 
 		$list->setExportCallback(function (&$row) {
@@ -225,9 +218,9 @@ class Fee extends Entity
 		return $list;
 	}
 
-	public function activeUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
+	public function activeUsersList(bool $include_hidden_categories = false): DynamicList
 	{
-		$list = $this->allUsersList($include_hidden_categories, $group);
+		$list = $this->allUsersList();
 		$conditions = sprintf('sub.id_fee = %d AND (sub.expiry_date >= date() OR sub.expiry_date IS NULL)
 			AND sub.paid = 1', $this->id());
 
@@ -239,9 +232,9 @@ class Fee extends Entity
 		return $list;
 	}
 
-	public function unpaidUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
+	public function unpaidUsersList(bool $include_hidden_categories = false): DynamicList
 	{
-		$list = $this->allUsersList($include_hidden_categories, $group);
+		$list = $this->allUsersList();
 		$conditions = sprintf('sub.id_fee = %d AND sub.paid = 0', $this->id());
 
 		if (!$include_hidden_categories) {
@@ -252,9 +245,9 @@ class Fee extends Entity
 		return $list;
 	}
 
-	public function expiredUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
+	public function expiredUsersList(bool $include_hidden_categories = false): DynamicList
 	{
-		$list = $this->allUsersList($include_hidden_categories, $group);
+		$list = $this->allUsersList();
 		$conditions = sprintf('sub.id_fee = %d AND sub.expiry_date < date()', $this->id());
 
 		if (!$include_hidden_categories) {
