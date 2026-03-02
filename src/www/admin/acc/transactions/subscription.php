@@ -16,7 +16,7 @@ if (!$id) {
 }
 
 $user = (int)qg('user');
-$self_url = sprintf('!acc/transactions/service_user.php?id=%d&user=%d', $id, $user);
+$self_url = sprintf('!acc/transactions/subscription.php?id=%d&user=%d', $id, $user);
 
 $form->runIf(qg('unlink') !== null, function () use ($id) {
 	$t = Transactions::get((int)qg('unlink'));
@@ -29,7 +29,7 @@ $action = ['shape' => 'delete', 'href' => $self_url . '&unlink=%d', 'label' => '
 $tpl->assign('balance', Reports::getAccountsBalances($criterias));
 $tpl->assign('journal', Reports::getJournal($criterias));
 $tpl->assign('user_id', $user);
-$tpl->assign('service_user_id', $id);
+$tpl->assign('subscription_id', $id);
 $tpl->assign(compact('action'));
 
-$tpl->display('acc/transactions/service_user.tpl');
+$tpl->display('acc/transactions/subscription.tpl');

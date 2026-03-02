@@ -120,7 +120,7 @@ class Fee extends Entity
 		try {
 			$db = DB::getInstance();
 			$sql = $this->getFormulaSQL();
-			$db->protectSelect(['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null], $sql);
+			$db->protectSelect(['users' => null, 'services_subscriptions' => null, 'services' => null, 'services_fees' => null], $sql);
 			return null;
 		}
 		catch (DB_Exception $e) {
@@ -139,7 +139,7 @@ class Fee extends Entity
 
 		$columns = [
 			'id_user' => [
-				'select' => 'su.id_user',
+				'select' => 'sub.id_user',
 			],
 			'service_label' => [
 				'select' => 's.label',
@@ -163,16 +163,16 @@ class Fee extends Entity
 			],
 			'paid' => [
 				'label' => 'Payé ?',
-				'select' => 'su.paid',
-				'order' => 'su.paid %s, su.date %1$s',
+				'select' => 'sub.paid',
+				'order' => 'sub.paid %s, sub.date %1$s',
 			],
 			'paid_amount' => [
 				'label' => 'Montant payé',
-				'select' => 'CASE WHEN tu.id_service_user IS NOT NULL THEN SUM(l.credit) ELSE NULL END',
+				'select' => 'CASE WHEN link.id_subscription IS NOT NULL THEN SUM(l.credit) ELSE NULL END',
 			],
 			'date' => [
 				'label' => 'Date',
-				'select' => 'su.date',
+				'select' => 'sub.date',
 			],
 			'_user_name_index' => [
 				'select' => DynamicFields::getNameFieldsSearchableSQL('us'),
@@ -193,14 +193,14 @@ class Fee extends Entity
 			];
 		}
 
-		$tables = 'services_users su
-			INNER JOIN users u ON u.id = su.id_user
+		$tables = 'services_subscriptions sub
+			INNER JOIN users u ON u.id = sub.id_user
 			INNER JOIN users_search us ON us.id = u.id
-			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			INNER JOIN services_fees sf ON sf.id = sub.id_fee
 			INNER JOIN services s ON s.id = sf.id_service
-			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
-			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_fee = %d', $this->id());
+			LEFT JOIN acc_transactions_users link ON link.id_subscription = sub.id
+			LEFT JOIN acc_transactions_lines l ON l.id_transaction = link.id_transaction';
+		$conditions = sprintf('sub.id_fee = %d', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -209,10 +209,10 @@ class Fee extends Entity
 		$list = new DynamicList($columns, $tables, $conditions);
 
 		if ($group) {
-			$list->groupBy('su.id_user');
+			$list->groupBy('sub.id_user');
 		}
 		else {
-			$list->groupBy('su.id');
+			$list->groupBy('sub.id');
 		}
 
 		$list->orderBy('paid', true);
@@ -228,8 +228,8 @@ class Fee extends Entity
 	public function activeUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
 		$list = $this->allUsersList($include_hidden_categories, $group);
-		$conditions = sprintf('su.id_fee = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND su.paid = 1', $this->id());
+		$conditions = sprintf('sub.id_fee = %d AND (sub.expiry_date >= date() OR sub.expiry_date IS NULL)
+			AND sub.paid = 1', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -242,7 +242,7 @@ class Fee extends Entity
 	public function unpaidUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
 		$list = $this->allUsersList($include_hidden_categories, $group);
-		$conditions = sprintf('su.id_fee = %d AND su.paid = 0', $this->id());
+		$conditions = sprintf('sub.id_fee = %d AND sub.paid = 0', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -255,7 +255,7 @@ class Fee extends Entity
 	public function expiredUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
 		$list = $this->allUsersList($include_hidden_categories, $group);
-		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date()', $this->id());
+		$conditions = sprintf('sub.id_fee = %d AND sub.expiry_date < date()', $this->id());
 
 		if (!$include_hidden_categories) {
 			$conditions .= ' AND u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)';
@@ -270,12 +270,12 @@ class Fee extends Entity
 	{
 		$where = $paid_only ? 'AND paid = 1' : '';
 		$id_field = DynamicFields::getNameFieldsSQL('u');
-		$sql = sprintf('SELECT su.id_user, %s FROM services_users su INNER JOIN users u ON u.id = su.id_user WHERE su.id_fee = ? %s;', $id_field, $where);
+		$sql = sprintf('SELECT sub.id_user, %s FROM services_subscriptions sub INNER JOIN users u ON u.id = sub.id_user WHERE sub.id_fee = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 
 	public function hasSubscriptions(): bool
 	{
-		return DB::getInstance()->test('services_users', 'id_fee = ?', $this->id());
+		return DB::getInstance()->test('services_subscriptions', 'id_fee = ?', $this->id());
 	}
 }

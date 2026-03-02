@@ -189,7 +189,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'Inscrit\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s)',
+			'where'  => 'id IN (SELECT id_user FROM services_subscriptions WHERE id_service %s)',
 		];
 
 		$columns['fee'] = [
@@ -198,7 +198,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT f.id, s.label || \' — \' || f.label FROM services_fees f INNER JOIN services s ON s.id = f.id_service ORDER BY s.label COLLATE U_NOCASE, f.label COLLATE U_NOCASE;'),
 			'select' => '\'Inscrit\'',
-			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_fee %s)',
+			'where'  => 'id IN (SELECT id_user FROM services_subscriptions WHERE id_fee %s)',
 		];
 
 		$columns['service_not'] = [
@@ -207,7 +207,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'Inscrit\'',
-			'where'  => 'id NOT IN (SELECT id_user FROM services_users WHERE id_service %s)',
+			'where'  => 'id NOT IN (SELECT id_user FROM services_subscriptions WHERE id_service %s)',
 		];
 
 		$columns['service_active'] = [
@@ -216,7 +216,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'À jour\'',
-			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate >= date())',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_subscriptions WHERE id_service %s GROUP BY id_user) WHERE edate >= date())',
 		];
 
 		$columns['service_expired'] = [
@@ -225,7 +225,7 @@ class AdvancedSearch extends A_S
 			'null'   => false,
 			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
 			'select' => '\'Expiré\'',
-			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_users WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
+			'where'  => 'id IN (SELECT id_user FROM (SELECT id_user, MAX(expiry_date) AS edate FROM services_subscriptions WHERE id_service %s GROUP BY id_user) WHERE edate < date())',
 		];
 
 		$columns['date_login'] = [
@@ -250,7 +250,7 @@ class AdvancedSearch extends A_S
 			'users_categories' => 'Catégories de membres',
 			'services' => 'Activités',
 			'services_fees' => 'Tarifs des activités',
-			'services_users' => 'Inscriptions aux activités',
+			'services_subscriptions' => 'Inscriptions aux activités',
 		];
 	}
 

@@ -54,13 +54,13 @@
 			<td class="actions">
 			{if !$row.paid}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && $row.id_account}
-					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
+					{linkbutton shape="plus" label="Nouveau règlement" href="!services/subscription/payment.php?id=%d"|args:$row.id}
 				{/if}
 				<br />
 			{/if}
 
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
+				{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/subscription.php?id=%d&user=%d"|args:$row.id,$user_id}
 			{/if}
 
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
@@ -70,8 +70,8 @@
 					{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 				{/if}
 				<br />
-				{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
-				{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
+				{linkbutton shape="edit" label="Modifier" href="!services/subscription/edit.php?id=%d"|args:$row.id}
+				{linkbutton shape="delete" label="Supprimer" href="!services/subscription/delete.php?id=%d"|args:$row.id}
 			{/if}
 
 			</td>

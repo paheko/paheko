@@ -24,7 +24,7 @@ if ($action === 'ods' || $action === 'csv' || $action === 'xlsx') {
 	return;
 }
 elseif ($action === 'subscribe') {
-	Utils::redirect('!services/user/subscribe.php?users=' . implode(',', $list));
+	Utils::redirect('!services/subscription/new.php?users=' . implode(',', $list));
 }
 elseif ($action === 'move' || $action === 'delete' || $action === 'delete_files') {
 	Session::getInstance()->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);

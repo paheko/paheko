@@ -7,47 +7,47 @@ use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Utils;
 use Paheko\UserException;
-use Paheko\Entities\Services\Service_User;
+use Paheko\Entities\Services\Subscription;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 
 use KD2\DB\EntityManager;
 use KD2\DB\Date;
 
-class Services_User
+class Subscriptions
 {
 	static public function get(int $id)
 	{
-		return EntityManager::findOneById(Service_User::class, $id);
+		return EntityManager::findOneById(Subscription::class, $id);
 	}
 
 	static public function countForUser(int $user_id)
 	{
-		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
+		return DB::getInstance()->count(Subscription::TABLE, 'id_user = ?', $user_id);
 	}
 
-	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $multiple = 1): Service_User
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $qty = 1): Subscription
 	{
-		$su = new Service_User;
+		$su = new Subscription;
 		$su->date = new Date;
 		// Required, also to calculate expiry date
 		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);
-		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'multiple'));
+		$su->importForm(compact('id_service', 'id_fee', 'id_user', 'paid', 'expected_amount', 'qty'));
 		return $su;
 	}
 
 	static public function listDistinctForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT
-			s.label, MAX(su.date) AS last_date, su.expiry_date AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
-			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status,
+			s.label, MAX(sub.date) AS last_date, sub.expiry_date AS expiry_date, sf.label AS fee_label, sub.paid, s.end_date,
+			CASE WHEN sub.expiry_date < date() THEN -1 WHEN sub.expiry_date >= date() THEN 1 ELSE 0 END AS status,
 			CASE WHEN s.end_date < date() THEN 1 ELSE 0 END AS archived
-			FROM services_users su
-			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
-			WHERE su.id_user = ?
+			FROM services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
+			WHERE sub.id_user = ?
 			AND s.archived = 0
-			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
+			GROUP BY sub.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id, ?int $only_id = null, ?\DateTime $after = null): DynamicList
@@ -57,7 +57,7 @@ class Services_User
 				'select' => 's.archived',
 			],
 			'id' => [
-				'select' => 'su.id',
+				'select' => 'sub.id',
 			],
 			'id_account' => [
 				'select' => 'sf.id_account',
@@ -69,7 +69,7 @@ class Services_User
 				'select' => 'a.code',
 			],
 			'has_transactions' => [
-				'select' => 'tu.id_user',
+				'select' => 'tu.id_transaction',
 			],
 			'label' => [
 				'select' => 's.label',
@@ -81,38 +81,38 @@ class Services_User
 			],
 			'date' => [
 				'label' => 'Date d\'inscription',
-				'select' => 'su.date',
+				'select' => 'sub.date',
 			],
 			'expiry' => [
 				'label' => 'Date d\'expiration',
-				'select' => 'MAX(su.expiry_date)',
+				'select' => 'MAX(sub.expiry_date)',
 			],
 			'paid' => [
 				'label' => 'Payé',
-				'select' => 'su.paid',
+				'select' => 'sub.paid',
 			],
 			'amount' => [
 				'label' => 'Reste à régler',
-				'select' => 'CASE WHEN su.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
+				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
 					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
 			],
 			'expected_amount' => [],
 		];
 
-		$tables = 'services_users su
-			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
+		$tables = 'services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
 			LEFT JOIN acc_accounts a ON sf.id_account = a.id
-			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
+			LEFT JOIN acc_transactions_users tu ON tu.id_subscription = sub.id
 			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_user = %d', $user_id);
+		$conditions = sprintf('sub.id_user = %d', $user_id);
 
 		if ($only_id) {
-			$conditions .= sprintf(' AND su.id = %d', $only_id);
+			$conditions .= sprintf(' AND sub.id = %d', $only_id);
 		}
 
 		if ($after) {
-			$conditions .= sprintf(' AND su.date >= %s', DB::getInstance()->quote($after->format('Y-m-d')));
+			$conditions .= sprintf(' AND sub.date >= %s', DB::getInstance()->quote($after->format('Y-m-d')));
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -122,7 +122,7 @@ class Services_User
 		});
 
 		$list->orderBy('date', true);
-		$list->groupBy('su.id');
+		$list->groupBy('sub.id');
 		return $list;
 	}
 
@@ -169,11 +169,18 @@ class Services_User
 					}
 				}
 
-				$su = new Service_User;
-				$su->set('id_user', $id_user);
-				$su->set('id_service', $id_service);
-				$su->set('id_fee', $id_fee);
-				unset($row->fee, $row->service, $row->$number_field);
+				if (!empty($row->id)) {
+					$su = self::get((int)$row->id);
+
+					if (!$su) {
+						throw new UserException(sprintf('L\'inscription numéro %d n\'existe pas', $row->id));
+					}
+				}
+				else {
+					$su = self::create($id_user, $id_service, $id_fee);
+				}
+
+				unset($row->fee, $row->service, $row->$number_field, $row->id_service, $row->id_fee, $row->id);
 
 				if (empty($row->paid) || strtolower(trim($row->paid)) === 'non') {
 					$row->paid = false;
@@ -186,7 +193,7 @@ class Services_User
 					$row->expected_amount = Utils::moneyToInteger($row->expected_amount);
 				}
 
-				$su->import((array)$row);
+				$su->importForm((array)$row);
 
 				yield $i => $su;
 			}
@@ -201,13 +208,12 @@ class Services_User
 		}
 	}
 
-	static public function create(int $id_user, int $id_service, ?int $id_fee): Service_User
+	static public function create(int $id_user, int $id_service, ?int $id_fee): Subscription
 	{
-		$su = new Service_User;
+		$su = new Subscription;
 		$su->set('id_user', $id_user);
 		$su->set('id_service', $id_service);
 		$su->set('id_fee', $id_fee);
-		$su->set('date', new Date);
 		return $su;
 	}
 
@@ -228,11 +234,94 @@ class Services_User
 		$db->commit();
 	}
 
+	static public function getList(): DynamicList
+	{
+		$number_field = DynamicFields::getNumberFieldSQL('u');
+		$name_field = DynamicFields::getNameFieldsSQL('u');
+
+		$columns = [
+			'number' => [
+				'label' => 'Numéro de membre',
+				'select' => $number_field,
+				'export' => true,
+			],
+			'name' => [
+				'label' => 'Nom du membre',
+				'select' => $name_field,
+			],
+			'id' => [
+				'label' => 'Numéro d\'inscription',
+				'select' => 'sub.id',
+				'export' => true,
+			],
+			'service' => [
+				'label' => 'Activité',
+				'select' => 's.label',
+			],
+			'fee' => [
+				'label' => 'Tarif',
+				'select' => 'sf.label',
+			],
+			'paid' => [
+				'label' => 'Payé',
+				'select' => 'sub.paid',
+			],
+			'expected_amount' => [
+				'label' => 'Montant de l\'inscription',
+				'select' => 'sub.expected_amount',
+				'export' => true,
+			],
+			'paid_amount' => [
+				'label' => 'Montant réglé',
+				'select' => 'SUM(tl.credit)',
+				'export' => true,
+			],
+			'left_amount' => [
+				'label' => 'Reste à régler',
+				'select' => 'CASE WHEN sub.paid = 1 AND COUNT(tl.debit) = 0 THEN NULL
+					ELSE MAX(0, expected_amount - IFNULL(SUM(tl.debit), 0)) END',
+			],
+			'date' => [
+				'label' => 'Date d\'inscription',
+				'select' => 'sub.date',
+			],
+			'expiry_date' => [
+				'label' => 'Date d\'expiration',
+				'select' => 'sub.expiry_date',
+			],
+			'id_user' => ['select' => 'sub.id_user'],
+			'id_fee' => ['select' => 'sub.id_fee'],
+			'id_service' => ['select' => 'sub.id_service'],
+		];
+
+		$tables = 'services_subscriptions sub
+			INNER JOIN services s ON s.id = sub.id_service
+			INNER JOIN users u ON u.id = sub.id_user
+			LEFT JOIN services_fees sf ON sf.id = sub.id_fee
+			LEFT JOIN acc_transactions_users tu ON tu.id_subscription = sub.id
+			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
+
+		$list = new DynamicList($columns, $tables);
+		$list->orderBy('id', true);
+		$list->groupBy('sub.id');
+		$list->setTitle('Historique des inscriptions');
+		$list->setModifier(function (&$row) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+			$row->expiry_date = \DateTime::createFromFormat('!Y-m-d', $row->expiry_date);
+		});
+		$list->setExportCallback(function (&$row) {
+			$row->paid = $row->paid ? 'Oui' : '';
+		});
+
+		return $list;
+	}
+
 	static public function listImportColumns(): array
 	{
 		$number_field = DynamicFields::getNumberField();
 
 		return [
+			'id'              => 'Numéro d\'inscription',
 			$number_field     => 'Numéro de membre',
 			'service'         => 'Activité',
 			'fee'             => 'Tarif',

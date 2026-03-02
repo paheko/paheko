@@ -255,7 +255,7 @@ class Page extends Entity
 		$this->dir()->indexForSearch($content, $this->title, 'text/html');
 	}
 
-	public function saveNewVersion(?int $user_id): bool
+	public function saveNewVersion(?int $user_id = null): bool
 	{
 		$content_modified = $this->isModified('content');
 		$prev_content = $this->getModifiedProperty('content');
@@ -272,7 +272,7 @@ class Page extends Entity
 				'date'    => new \DateTime,
 				'content' => $this->content,
 				'size'    => $l,
-				'changes' => $l - mb_strlen($prev_content),
+				'changes' => $l - mb_strlen((string)$prev_content),
 			];
 
 			$db->insert('web_pages_versions', $version);
@@ -292,6 +292,23 @@ class Page extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$dir = null;
+
+		// Set default status
+		if (!isset($this->status)) {
+			$this->set('status', self::STATUS_ONLINE);
+		}
+
+		if (!isset($this->type)) {
+			$this->set('type', self::TYPE_PAGE);
+		}
+
+		if (!isset($this->format)) {
+			$this->set('format', self::FORMAT_MARKDOWN);
+		}
+
+		if (!isset($this->published)) {
+			$this->set('published', new \DateTime);
+		}
 
 		// Set default inherited status value
 		// This might be overwritten by updateChildrenInheritedStatus just after save
@@ -350,6 +367,14 @@ class Page extends Entity
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
+		$this->assert(isset($this->uri), 'URI not set');
+		$this->assert(isset($this->title), 'Title not set');
+		$this->assert(isset($this->type), 'Type not set');
+		$this->assert(isset($this->status), 'Status not set');
+		$this->assert(isset($this->format), 'Format not set');
+		$this->assert(isset($this->published), 'Publication date not set');
+		$this->assert(isset($this->modified), 'Modification date not set');
+
 		$this->assert($this->type === self::TYPE_CATEGORY || $this->type === self::TYPE_PAGE, 'Unknown page type');
 		$this->assert(array_key_exists($this->status, self::STATUS_LIST), 'Unknown page status');
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
@@ -388,7 +413,7 @@ class Page extends Entity
 			$source['published'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
-		if (isset($source['title']) && !$this->exists()) {
+		if (isset($source['title']) && !isset($source['uri']) && !$this->exists()) {
 			$source['uri'] = Modifiers::remove_leading_number($source['title']);
 		}
 

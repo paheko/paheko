@@ -17,9 +17,9 @@ use Paheko\Entities\Accounting\Line;
 
 use KD2\DB\Date;
 
-class Service_User extends Entity
+class Subscription extends Entity
 {
-	const TABLE = 'services_users';
+	const TABLE = 'services_subscriptions';
 
 	protected ?int $id;
 	protected int $id_user;
@@ -29,7 +29,7 @@ class Service_User extends Entity
 	 * @var null|int
 	 */
 	protected ?int $id_fee = null;
-	protected bool $paid;
+	protected bool $paid = false;
 	protected ?int $expected_amount = null;
 	protected Date $date;
 	protected ?Date $expiry_date = null;
@@ -47,10 +47,35 @@ class Service_User extends Entity
 		}
 
 		$db = DB::getInstance();
+
 		// don't allow an id_fee that does not match a service
-		if (null !== $this->id_fee && !$db->test(Fee::TABLE, 'id = ? AND id_service = ?', $this->id_fee, $this->id_service)) {
+		if (isset($this->id_fee)
+			&& !$db->test(Fee::TABLE, 'id = ? AND id_service = ?', $this->id_fee, $this->id_service)) {
 			$this->set('id_fee', null);
 		}
+
+		parent::selfCheck();
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		if (!isset($this->date)) {
+			$this->set('date', new Date);
+		}
+
+		if (!isset($this->expected_amount)) {
+			$this->updateExpectedAmount();
+		}
+
+		if (isset($this->expiry_date)
+			&& $this->service()->isOneOff()) {
+			$this->set('expiry_date', null);
+		}
+		elseif (!isset($this->expiry_date)) {
+			$this->updateExpiryDate();
+		}
+
+		return parent::save($selfcheck);
 	}
 
 	public function isDuplicate(bool $using_date = true): bool
@@ -65,7 +90,7 @@ class Service_User extends Entity
 			'id_fee' => $this->id_fee,
 		];
 
-		if ($using_date) {
+		if ($using_date && isset($this->date)) {
 			$params['date'] = $this->date->format('Y-m-d');
 		}
 
@@ -94,7 +119,11 @@ class Service_User extends Entity
 				throw new UserException('The requested service is not found');
 			}
 
-			$multiple = intval($source['multiple'] ?? 1);
+			// This is used for creating multiple subscriptions for a user from the caisse, see Subscriptions::createFromFee
+			$qty = intval($source['qty'] ?? 1);
+
+			$this->updateExpiryDate($qty);
+
 			$date = null;
 
 			if (isset($source['date'])) {
@@ -108,14 +137,14 @@ class Service_User extends Entity
 				$this->set('expiry_date', $date);
 			}
 			elseif ($service->end_date) {
-				if ($multiple > 1) {
+				if ($qty > 1) {
 					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité à date fixe.');
 				}
 
 				$this->set('expiry_date', $service->end_date);
 			}
 			else {
-				if ($multiple > 1) {
+				if ($qty > 1) {
 					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité sans durée.');
 				}
 
@@ -127,6 +156,10 @@ class Service_User extends Entity
 			if (!$service) {
 				$service = $this->_service = Services::get((int) $source['id_service']);
 			}
+		}
+
+		if (!empty($source['expected_amount'])) {
+			$source['expected_amount'] = abs(Utils::moneyToInteger($source['expected_amount']));
 		}
 
 		return parent::importForm($source);
@@ -159,11 +192,9 @@ class Service_User extends Entity
 		return $this->_fee;
 	}
 
-	public function addPayment(?int $user_id, ?array $source = null): Transaction
+	public function addPayment(?Session $session, ?array $source = null): Transaction
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (!$this->id_fee) {
 			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
@@ -202,7 +233,7 @@ class Service_User extends Entity
 			'id_year' => $this->fee()->id_year,
 		]));
 
-		$transaction->id_creator = $user_id;
+		$transaction->setCreatorFromSession($session);
 		$transaction->id_year = $this->fee()->id_year;
 		$transaction->type = Transaction::TYPE_REVENUE;
 
@@ -216,7 +247,7 @@ class Service_User extends Entity
 	{
 		$fee = $this->fee();
 
-		if ($fee && $fee->id_account && $this->id_user) {
+		if ($fee && isset($this->id_user) && ($fee->amount || $fee->formula)) {
 			$this->set('expected_amount', $fee->getAmountForUser($this->id_user));
 		}
 		else {
@@ -224,11 +255,39 @@ class Service_User extends Entity
 		}
 	}
 
-	static public function createFromForm(array &$users, ?int $creator_id, bool $from_copy = false, ?array $source = null): self
+	/**
+	 * @param  int $qty Quantity of duration periods to create. This is for the "caisse" plugin,
+	 * where you can specify a quantity for a subscription. If your service is valid for one year, and quantity
+	 * is "2", then the subscription will be valid for 2 years.
+	 */
+	public function updateExpiryDate(int $qty = 1): void
 	{
-		if (null === $source) {
-			$source = $_POST;
+		$service = $this->service();
+
+		if ($service->duration) {
+			$dt = new Date;
+			$dt->modify(sprintf('+%d days', $service->duration * $qty));
+			$this->set('expiry_date', $dt);
 		}
+		elseif ($service->end_date) {
+			if ($qty > 1) {
+				throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité à date fixe.');
+			}
+
+			$this->set('expiry_date', $service->end_date);
+		}
+		else {
+			if ($qty > 1) {
+				throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité sans durée.');
+			}
+
+			$this->set('expiry_date', null);
+		}
+	}
+
+	static public function createFromForm(array &$users, ?Session $session, bool $from_copy = false, ?array $source = null): self
+	{
+		$source ??= $_POST;
 
 		$db = DB::getInstance();
 		$db->begin();
@@ -274,7 +333,7 @@ class Service_User extends Entity
 				&& !empty($source['amount'])
 				&& !empty($source['create_payment'])) {
 				try {
-					$su->addPayment($creator_id, $source);
+					$su->addPayment($session, $source);
 				}
 				catch (ValidationException $e) {
 					if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
