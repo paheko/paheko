@@ -152,8 +152,8 @@ class AdvancedSearch extends A_S
 				'type'   => 'boolean',
 				'label'  => 'Est liée à des inscriptions',
 				'null'   => false,
-				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_service_user IS NOT NULL) IS NOT NULL',
-				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_service_user IS NOT NULL) IS NOT NULL %s',
+				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_subscription IS NOT NULL) IS NOT NULL',
+				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_subscription IS NOT NULL) IS NOT NULL %s',
 			],
 			'reconciled' => [
 				'type'   => 'boolean',

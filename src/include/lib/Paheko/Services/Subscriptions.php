@@ -26,9 +26,9 @@ class Subscriptions
 		return DB::getInstance()->count(Subscription::TABLE, 'id_user = ?', $user_id);
 	}
 
-	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $qty = 1): Service_User
+	static public function createFromFee(int $id_fee, int $id_user, ?int $expected_amount, bool $paid, int $qty = 1): Subscription
 	{
-		$su = new Service_User;
+		$su = new Subscription;
 		$su->date = new Date;
 		// Required, also to calculate expiry date
 		$id_service = DB::getInstance()->firstColumn('SELECT id_service FROM services_fees WHERE id = ?;', $id_fee);

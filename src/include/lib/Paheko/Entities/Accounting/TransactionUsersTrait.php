@@ -32,7 +32,7 @@ trait TransactionUsersTrait
 
 		foreach ($users as $id) {
 			try {
-				$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, NULL);', $this->id(), (int)$id);
+				$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_subscription) VALUES (?, ?, NULL);', $this->id(), (int)$id);
 			}
 			catch (DB_Exception $e) {
 				if (false !== strpos($e->getMessage(), 'FOREIGN KEY constraint failed')) {
