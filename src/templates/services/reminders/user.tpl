@@ -12,7 +12,7 @@
 				<td>{if $row.delay > 0}{$row.delay} jours après l'expiration{elseif $row.delay < 0}{$row.delay|abs} jours avant l'expiration{else}le jour de l'expiration{/if}</td>
 				<td>{$row.date|date_short}</td>
 				<td>
-					{linkbutton shape="menu" label="Inscriptions après ce rappel" href="!services/user/?id=%d&after=%s"|args:$user_id,$row.date}
+					{linkbutton shape="menu" label="Inscriptions après ce rappel" href="!users/subscriptions.php?id=%d&after=%s"|args:$user_id,$row.date}
 				</td>
 			</tr>
 		{/foreach}
