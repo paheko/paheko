@@ -48,8 +48,7 @@
 	<fieldset>
 		<legend>Créer un nouvel identifiant</legend>
 		<p class="help">
-			Cet identifiant vous permettra de faire des requêtes vers l'API, pour modifier ou récupérer les informations de votre association.<br />
-			{linkbutton shape="help" label="Documentation de l'API" href="%swiki?name=API"|args:$website}
+			Cet identifiant vous permettra de faire des requêtes vers <a href="{$api_doc_url}" target="_dialog">l'API</a>, pour modifier ou récupérer les informations de votre association.<br />
 		</p>
 		<dl>
 			{input type="text" name="label" label="Description" required=true}

@@ -1,0 +1,1107 @@
+components:
+  schemas:
+    DateTime:
+      type: string
+      format: YYYY-MM-DD HH:MM:SS
+      example: 2025-08-20 13:49:50
+
+    Date:
+      type: string
+      format: YYYY-MM-DD
+      example: 2025-08-20
+
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    WebPageSummary:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        uri:
+          type: string
+          example: info
+        title:
+          type: string
+          example: Infos
+        type:
+          type: number
+          example: 2
+          enum: [1, 2]
+          description: |
+            * `1`: Catégorie
+            * `2`: Page
+        path:
+          type: string
+          example: Ateliers
+          nullable: true
+        status:
+          type: number
+          example: 2
+          enum: [0, 1, 2]
+          description: |
+            * `0`: Brouillon
+            * `1`: Réservée aux membres
+            * `2`: En ligne
+        published:
+          $ref: '#/components/schemas/DateTime'
+        modified:
+          $ref: '#/components/schemas/DateTime'
+
+    WebPageMetaData:
+      type: object
+      properties:
+        id_parent:
+          type: number
+          example: null
+          nullable: true
+        uri:
+          type: string
+          example: info
+        title:
+          type: string
+          example: Infos
+        type:
+          type: number
+          example: 2
+          enum: [1, 2]
+          description: |
+            * `1`: Catégorie
+            * `2`: Page
+        status:
+          type: number
+          example: 2
+          enum: [0, 1, 2]
+          description: |
+            * `0`: Brouillon
+            * `1`: Réservée aux membres
+            * `2`: En ligne
+        format:
+          type: string
+          example: markdown
+          enum: ['markdown', 'encrypted', 'skriv']
+          description: |
+            * `markdown`: MarkDown
+            * `encrypted`: Chiffré
+            * `skriv`: SkrivML
+        published:
+          $ref: '#/components/schemas/DateTime'
+        modified:
+          $ref: '#/components/schemas/DateTime'
+        content:
+          type: string
+          example: |-
+            ## Horaires
+            * Samedi 14h-18h
+
+    WebPage:
+      allOf:
+        - $ref: '#/components/schemas/WebPageMetaData'
+        - type: object
+          properties:
+            id:
+              type: number
+              example: 1
+            inherited_status:
+              type: number
+              example: 2
+              enum: [0, 1, 2]
+              description: |
+                * `0`: Brouillon
+                * `1`: Réservée aux membres
+                * `2`: En ligne
+            html:
+              type: string
+              example: |-
+                <div class="web-content"><h2 id="horaires">Horaires</h2>
+                <ul>
+                <li>Samedi 14h-18</li>
+                </ul></div>
+
+    File:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 5
+        hash_id:
+          type: string
+          example: 7ski02t6iakg
+        parent:
+          type: string
+          example: web/info
+        name:
+          type: string
+          example: planning.pdf
+        path:
+          type: string
+          example: web/info/planning.pdf
+        type:
+          type: number
+          enum: [1, 2]
+          description: |
+            * `1`: Fichier
+            * `2`: Dossier
+          example: 1
+        mime:
+          type: string
+          example: application/pdf
+        size:
+          type: number
+          example: 1652
+        modified:
+          $ref: '#/components/schemas/DateTime'
+        image:
+          type: number
+          enum: [0, 1]
+          description: |
+            * `O`: N'est pas une image
+            * `1`: Est une image
+        md5:
+          type: string
+          example: 57576b0ac906cb5a137fccf839ab2051
+        trash:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+        url:
+          type: string
+          example: https://paheko.example.net/info/planning.pdf
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: Membres actifs
+        perm_web:
+          type: number
+          example: 0
+          enum: [0, 1, 2, 9]
+          description: |
+            * `0`: Pas d'accès
+            * `1`: Lecture uniquement
+            * `2`: Lecture & écriture
+            * `9`: Administration
+        perm_documents:
+          type: number
+          example: 0
+          enum: [0, 1, 2, 9]
+          description: |
+            * `0`: Pas d'accès
+            * `1`: Lecture uniquement
+            * `2`: Lecture & écriture
+            * `9`: Administration
+        perm_users:
+          type: number
+          example: 0
+          enum: [0, 1, 2, 9]
+          description: |
+            * `0`: Pas d'accès
+            * `1`: Lecture uniquement
+            * `2`: Lecture & écriture
+            * `9`: Administration
+        perm_accounting:
+          type: number
+          example: 0
+          enum: [0, 1, 2, 9]
+          description: |
+            * `0`: Pas d'accès
+            * `1`: Lecture uniquement
+            * `2`: Lecture & écriture
+            * `9`: Administration
+        perm_subscribe:
+          type: number
+          example: 0
+        perm_connect:
+          type: number
+          enum: [0, 1]
+          example: 1
+          description: |
+            * `0`: N'a pas le droit de se connecter
+            * `1`: A le droit de se connecter
+        perm_config:
+          type: number
+          example: 0
+          enum: [0, 9]
+          description: |
+            * `0`: Ne peut pas modifier la configuration
+            * `9`: Peut modifier la configuration
+        hidden:
+          type: number
+          enum: [0, 1]
+          example: 0
+        allow_passwordless_login:
+          type: number
+          enum: [0, 1]
+          example: 0
+        force_otp:
+          type: number
+          enum: [0, 1]
+          example: 0
+        force_pgp:
+          type: number
+          enum: [0, 1]
+          example: 0
+        count:
+          type: number
+          example: 24
+          description: Nombre de membres dans la catégorie
+
+    MemberSearchResult:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 67
+        identity:
+          type: string
+          example: Ada Lovelace
+        number:
+          type: number
+          example: 55
+        email:
+          type: string
+          example: ada@example.net
+          description: Seulement inclus si la recherche se fait sur une adresse e-mail.
+        hidden:
+          type: string
+          enum: [ 'Oui', 'Non' ]
+          example: 'Non'
+
+    CreateMember:
+      type: object
+      properties:
+        id_category:
+          type: number
+          example: 1
+          description: Indique l'ID d'une catégorie, si absent la catégorie par défaut sera utilisée.
+        id_parent:
+          type: number
+          description: Indique l'ID ou le numéro d'un membre responsable, si absent, le membre n'aura pas de membre responsable.
+          example: 5
+        password:
+          type: string
+          description:  Mot de passe du membre.
+          example: p4ssw0rd!
+        force_duplicate:
+          type: boolean
+          description: Ne pas renvoyer une erreur si le nom du membre à ajouter est identique au nom d'un membre existant.
+      additionalProperties:
+        nullable: true
+        description: champs de la fiche de membre
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 73
+        date_login:
+          $ref: '#/components/schemas/DateTime'
+        date_updated:
+          $ref: '#/components/schemas/DateTime'
+        has_password:
+          type: boolean
+          example: true
+        has_otp:
+          type: boolean
+          example: false
+        has_pgp_key:
+          type: boolean
+          example: false
+        id_category:
+          type: number
+          example: 1
+        id_parent:
+          type: number
+          example: 5
+        is_parent:
+          type: boolean
+          example: false
+      additionalProperties:
+        nullable: true
+        description: champs de la fiche de membre
+
+    UpdateMember:
+      type: object
+      properties:
+        id_parent:
+          type: number
+          example: 5
+      additionalProperties:
+        nullable: true
+        description: champs de la fiche de membre
+
+    MemberSubscriptionCommon:
+      type: object
+      properties:
+        id_service:
+          type: number
+          description: Identifiant de l'activité
+        id_fee:
+          type: number
+          description: Identifiant du tarif de l'activité
+          nullable: true
+        paid:
+          type: boolean
+          description: Si l'inscription doit être marquée comme réglée ou non
+        date:
+          description: Date de l'inscription à l'activité
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+        expiry_date:
+          description: Date de l'expiration de l'inscription à l'activité. Si non spécifié, sera calculé à partir de l'activité. N'aura aucun effet si l'activité est ponctuelle.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+        expected_amount:
+          type: string
+          format: float
+          description: |-
+            Montant attendu en paiement de l'inscription à cette activité, en nombre flottant (exemple : `42,99`). Si non spécifié, il sera calculé à partir du tarif fourni.
+          nullable: true
+      required:
+        - id_service
+
+    MemberSubscriptionRequest:
+      allOf:
+        - $ref: '#/components/schemas/MemberSubscriptionCommon'
+        - type: object
+          properties:
+            force_duplicate:
+              type: boolean
+              description: |-
+                Par défaut, si une inscription existe déjà pour la même activité, le même jour et le même membre, une erreur sera renvoyée. Pour pouvoir inscrire le membre à la même activité et le même jour plusieurs fois, passer `true` à ce paramètre.
+
+    MemberSubscriptionResponse:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: number
+              description: Identifiant de l'inscription
+            id_user:
+              type: number
+              description: Identifiant du membre
+        - $ref: '#/components/schemas/MemberSubscriptionCommon'
+
+    ImportMembers:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [ 'auto', 'create', 'update' ]
+          description: |
+            _(Depuis la version 1.2.8)_
+
+            Mode d'import du fichier.
+
+            * `auto` (défaut si le mode n'est pas spécifié) : met à jour la fiche d'un membre si son numéro existe, sinon crée un membre si le numéro de membre indiqué n'existe pas ou n'est pas renseigné
+            * `create` : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite
+            * `update` : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite
+        skip_lines:
+          type: number
+          description: |
+            Nombre de lignes à ignorer. Défaut : `1`.
+        column:
+          type: array
+          items:
+            type: string
+          description: |
+            Correspondance entre la colonne (clé, commence à zéro) et le champ de la fiche membre (valeur).
+        file:
+          type: string
+          format: binary
+
+    ImportMembersPreview:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+          description: |
+            Liste des erreurs d'import.
+        created:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+              nullable: true
+          description: |
+            Liste des membres ajoutés, chaque objet contenant tous les champs de la fiche membre qui serait créée.
+        modified:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+              changed:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    old: {}
+                    new: {}
+          description: |
+            Liste des membres modifiés, chaque membre aura une clé `id` et une clé `name`, ainsi qu'un objet `changed` contenant la liste des champs modifiés. Chaque champ modifié aura 2 propriétés `old` et `new`, contenant respectivement l'ancienne valeur du champ et la nouvelle.
+        unchanged:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+          description: |
+            Liste des membres mentionnés dans l'import, mais qui ne seront pas affectés. Pour chaque membre une clé `name` et une clé `id` indiquant le nom et l'identifiant unique numérique du membre.
+
+    ErrorReport:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              errorCode:
+                type: string
+              type:
+                type: string
+              backtrace:
+                type: object
+                properties:
+                  file:
+                    type: string
+                  line:
+                    type: number
+                  code:
+                    type: string
+                  function:
+                    type: string
+                  args:
+                    type: object
+                    additionalProperties:
+                      type: string
+        context:
+          type: object
+          properties:
+            id:
+              type: string
+            date:
+              type: string
+            os:
+              type: string
+            language:
+              type: string
+            environment:
+              type: string
+            remote_ip:
+              type: string
+              nullable: true
+            http_method:
+              type: string
+            http_files:
+              type: string
+            http_post:
+              type: string
+            http_referer:
+              type: string
+            http_user_agent:
+              type: string
+            paheko_data_root:
+              type: string
+            paheko_version:
+              type: string
+            php_sapi:
+              type: string
+            root_directory:
+              type: string
+            sqlite_journal:
+              type: string
+            user_addr:
+              type: string
+            duration:
+              type: number
+              nullable: true
+            memory_peak:
+              type: number
+            memory_used:
+              type: number
+            url:
+              type: string
+            hostname:
+              type: string
+
+    AccountingChart:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        label:
+          type: string
+          example: 'Plan comptable associatif (révision 2025)'
+        country:
+          type: string
+          example: FR
+          enum:
+            - BE
+            - CH
+            - FR
+        code:
+          type: string
+          example: PCA_2025
+        archived:
+          type: boolean
+          example: false
+
+    AccountingAccountPosition:
+      type: number
+      enum: [0, 1, 2, 3, 4, 5]
+      description: |
+        * `0`: Inconnu
+        * `1`: Actif
+        * `2`: Passif
+        * `3`: Actif ou passif
+        * `4`: Charge
+        * `5`: Produit
+
+    AccountingChartAccount:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 276
+        id_chart:
+          type: number
+          example: 1
+        code:
+          type: string
+          example: '607'
+        label:
+          type: string
+          example: Achats de marchandises
+        description:
+          type: string
+          example: "Marchandises destinées à être revendues en l'état (sans transformation)."
+        position:
+          allOf:
+            - $ref: '#/components/schemas/AccountingAccountPosition'
+            - example: 4
+        type:
+          type: number
+          enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          example: 5
+          description: |
+            * `0`: Inconnue
+            * `1`: Banque
+            * `2`: Caisse
+            * `3`: Attente d'encaissement
+            * `4`: Tiers
+            * `5`: Dépenses
+            * `6`: Recettes
+            * `7`: Bénévolat — Emploi
+            * `8`: Bénévolat — Contribution
+            * `9`: Ouverture
+            * `10`: Clôture
+            * `11`: Résultat excédentaire
+            * `12`: Résultat déficitaire
+            * `13`: Affectation du résultat
+            * `14`: Report à nouveau créditeur
+            * `15`: Report à nouveau débiteur
+            * `16`: Mouvements internes
+        user:
+          type: boolean
+          example: false
+        bookmark:
+          type: boolean
+          example: true
+
+    AccountingYear:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        label:
+          type: string
+          example: Exercice 2025
+        start_date:
+          type: string
+          example: '2025-01-01'
+        end_date:
+          type: string
+          example: '2025-12-31'
+        status:
+          type: number
+          enum: [0, 1, 2]
+          description: |
+            * `0`: En cours
+            * `1`: Clôturé
+            * `2`: Verrouillé
+        id_chart:
+          type: number
+          example: 1
+        nb_transactions:
+          type: number
+          example: 36
+        nb_fees:
+          type: number
+        chart_name:
+          type: string
+          example: 'Plan comptable associatif (révision 2025)'
+        status_tag_preset:
+          type: string
+          enum:
+            - open
+            - closed
+            - locked
+
+    AccountingTransactionType:
+      type: number
+      enum: [0, 1, 2, 3, 4, 5]
+      description: |
+        * `0`: Avancé
+        * `1`: Recette
+        * `2`: Dépense
+        * `3`: Virement
+        * `4`: Dette
+        * `5`: Créance
+      example: 0
+
+    AccountingTransactionStatus:
+      type: number
+      example: 0
+      enum: [0, 1, 2, 4, 16]
+      description: |
+        * `0`: Aucun
+        * `1`: En attente de règlement
+        * `2`: Réglé
+        * `4`: Déposé en banque
+        * `8`: Erreur
+        * `16`: Balance d'ouverture
+
+    AccountingJournalTransaction:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        label:
+          type: string
+          example: Achat légumes
+        date:
+          $ref: '#/components/schemas/DateTime'
+        reference:
+          type: string
+          nullable: true
+          example: FA001
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              account_label:
+                type: string
+                example: 'Achats stockés - Matières premières et fournitures'
+              account_code:
+                type: string
+                example: '601'
+              label:
+                type: string
+                nullable: true
+              reference:
+                type: string
+                nullable: true
+              id_account:
+                type: number
+                example: 251
+              credit:
+                type: number
+                example: 0
+              debit:
+                type: number
+                example: 6500
+              id_year: 1
+
+    AccountingAcountTransaction:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 2
+        id_line:
+          type: number
+          example: 3
+        date:
+          $ref: '#/components/schemas/DateTime'
+        debit:
+          type: number
+          example: 0
+        credit:
+          type: number
+          example: 6500
+        change:
+          type: number
+          example: -6500
+        sum:
+          type: number
+          example: 400
+        reference:
+          type: string
+          example: 'FA001'
+        type:
+          $ref: '#/components/schemas/AccountingTransactionType'
+        label:
+          type: string
+          example: 'Règlement de dette — Achat légumes'
+        line_label:
+          type: string
+          example: 'Achat légumes'
+        line_reference:
+          type: string
+          nullable: true
+        id_project:
+          type: number
+          nullable: true
+        files:
+          type: number
+          example: 1
+        status:
+          $ref: '#/components/schemas/AccountingTransactionStatus'
+
+    AccountingNewTransaction:
+      allOf:
+        - type: object
+          properties:
+            id_year:
+              type: number
+              description: Identifiant de l'exercice.
+            date:
+              allOf:
+                - $ref: '#/components/schemas/Date'
+                - description: Date de l'écriture
+            type:
+              type: string
+              enum:
+                - expense
+                - revenue
+                - transfer
+                - debt
+                - credit
+                - advanced
+              description: |
+                * `expense`: Dépense
+                * `revenue`: Recette
+                * `transfer`: Virement
+                * `debt`: Dette
+                * `credit`: Créance
+                * `advanced`: Saisie avancée
+
+                Les écritures avancées (multi-lignes) ont obligatoirement le type `advanced`. Les autres écritures sont appelées *"écritures simplifiées"* et ne peuvent comporter que deux lignes.
+            reference:
+              type: string
+              nullable: true
+              description: Numéro de pièce comptable
+            notes:
+              type: string
+              nullable: true
+              description: Remarques (texte multi ligne)
+            linked_transactions:
+              type: array
+              items:
+                type: number
+              nullable: true
+              description: Tableau des IDs des écritures à lier à l'écriture *(depuis 1.3.5)*
+            linked_users:
+              type: array
+              items:
+                type: number
+              nullable: true
+              description: Tableau des IDs des membres à lier à l'écriture *(depuis 1.3.3)*
+            linked_subscriptions:
+              type: array
+              items:
+                type: number
+              nullable: true
+              description: Tableau des IDs des inscriptions à lier à l'écriture *(depuis 1.4.0)*
+        - oneOf:
+            - $ref: '#/components/schemas/AccountingNewTransactionLineSimple'
+            - $ref: '#/components/schemas/AccountingNewTransactionLineAdvanced'
+          descriminator:
+            propertyName: type
+            mapping:
+              expense: '#/components/schemas/AccountingNewTransactionLineSimple'
+              revenue: '#/components/schemas/AccountingNewTransactionLineSimple'
+              transfer: '#/components/schemas/AccountingNewTransactionLineSimple'
+              debt: '#/components/schemas/AccountingNewTransactionLineSimple'
+              advanced: '#/components/schemas/AccountingNewTransactionLineAdvanced'
+
+    AccountingNewTransactionLineSimple:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Montant de l'écriture, au format flottant (`53,34`)
+        credit:
+          type: string
+          description: Code du compte porté au crédit
+        debit:
+          type: string
+          description: Code du compte porté au débit
+        id_project:
+          type: number
+          nullable: true
+          description: ID du projet à affecter
+        payment_reference:
+          type: string
+          nullable: true
+          description: Référence de paiement
+
+    AccountingNewTransactionLineAdvanced:
+      type: object
+      properties:
+        line:
+          type: array
+          items:
+            type: object
+            properties:
+              account:
+                type: string
+                description: Code du compte
+              id_account:
+                type: string
+                description: Identifiant du compte (ID). Peut être utilisé en alternative au code du compte.
+              credit:
+                type: string
+                description: Montant à inscrire au crédit (doit être zéro ou non renseigné si `debit` est renseigné, et vice-versa)
+              debit:
+                type: string
+                description: Montant à inscrire au débit
+              label:
+                type: string
+                nullable: true
+                description: Libellé de la ligne
+              reference:
+                type: string
+                nullable: true
+                description: Référence de la ligne (aussi appelé référence du paiement pour les écritures simplifiées)
+              id_project:
+                type: number
+                nullable: true
+                description: ID du projet à affecter à cette ligne
+          description: Un tableau dont chaque élément est un objet correspondant à une ligne de l'écriture.
+
+    AccountingTransaction:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 9302
+        type:
+          $ref: '#/components/schemas/AccountingTransactionType'
+        status:
+          $ref: '#/components/schemas/AccountingTransactionStatus'
+        label:
+          type: string
+          example: Session de casse n°439
+        notes:
+          type: string
+          nullable: true
+        reference:
+          type: string
+          nullable: true
+        date:
+          $ref: '#/components/schemas/Date'
+        hash:
+          type: string
+          nullable: true
+        prev_id:
+          type: number
+          nullable: true
+        prev_hash:
+          type: string
+          nullable: true
+        id_year:
+          type: number
+          example: 12
+        id_creator:
+          type: number
+          nullable: true
+          example: 5883
+        url:
+          type: string
+          example: http://dev.paheko.localhost/admin/acc/transactions/details.php?id=9302
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 22421
+              id_transaction:
+                type: number
+                example: 9302
+              id_account:
+                type: number
+                example: 542
+              credit:
+                type: number
+                example: 0
+              debit:
+                type: number
+                example: 3000
+              reference:
+                type: string
+                nullable: true
+                example: CE342
+              label:
+                type: string
+                nullable: true
+              reconciled:
+                type: boolean
+                example: false
+              id_project:
+                type: number
+                nullable: true
+              account_code:
+                type: string
+                example: 5112
+              account_label:
+                type: string
+                example: Chèques à encaisser
+              account_position:
+                allOf:
+                  - $ref: '#/components/schemas/AccountingAccountPosition'
+                  - example: 3
+              project_name:
+                type: string
+                nullable: true
+              account_selector:
+                type: object
+
+    AccountingTransactionLinkedMember:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 67
+        identity:
+          type: string
+          example: Ada Lovelace
+        number:
+          type: number
+          example: 55
+
+    AccountingTransactionLinkedSubscription:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 56
+        id_user:
+          type: number
+          example: 67
+        id_service:
+          type: number
+          example: 5
+        id_fee:
+          type: number
+          example: 2
+        expected_amount:
+          type: number
+          nullable: true
+        date:
+          $ref: '#/components/schemas/Date'
+        expiry_date:
+          allOff:
+            - $ref: '#/components/schemas/Date'
+            - nullable: true
+        label:
+          type: string
+          example: Cotisation
+        user_identity:
+          type: string
+          example: Ada Lovelace
+        user_number:
+          type: number
+          example: 55
+        id_subscription:
+          type: number
+          example: 2
+
+    AccountingTransactionLinkedTransaction:
+      type: number
+      example: 6
+
+  parameters:
+    ImportMembersMode:
+      name: mode
+      in: query
+      schema:
+        type: string
+        enum: [ 'auto', 'create', 'update' ]
+      description: |
+        _(Depuis la version 1.2.8)_
+
+        Mode d'import du fichier.
+
+        * `auto` (défaut si le mode n'est pas spécifié) : met à jour la fiche d'un membre si son numéro existe, sinon crée un membre si le numéro de membre indiqué n'existe pas ou n'est pas renseigné
+        * `create` : ne fait que créer de nouvelles fiches de membre, si le numéro de membre existe déjà une erreur sera produite
+        * `update` : ne fait que mettre à jour les fiches de membre en utilisant le numéro de membre comme référence, si le numéro de membre n'existe pas une erreur sera produite
+
+    ImportMembersSkipLines:
+      name: skip_lines
+      in: query
+      schema:
+        type: number
+      description: |
+        Nombre de lignes à ignorer. Défaut : `1`.
+
+    ImportMembersColumns:
+      name: column
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+      description: |
+        Correspondance entre la colonne (clé, commence à zéro) et le champ de la fiche membre (valeur).
+
+    AccountingYearId:
+      name: id_year
+      in: path
+      schema:
+        oneOf:
+          - type: number
+          - type: string
+            enum: [ 'current' ]
+      required: true
+      description: |
+        Il est possible d'utiliser `current` comme paramètre pour `{id_year}` pour désigner l'exercice ouvert en cours. S'il y a plusieurs exercices ouverts, alors celui qui est le plus proche de la date actuelle sera utilisé.
+
+    AccountingTransactionId:
+      in: path
+      name: id_transaction
+      schema:
+        type: number
+      required: true
+      description: ID de l'écriture
