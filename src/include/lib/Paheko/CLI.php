@@ -670,8 +670,19 @@ class CLI
 	/**
 	 * Usage: paheko db COMMAND
 	 *
-	 * paheko db backup FILE
+	 * paheko db backup [--with-files] [--quota=SIZE] FILE
 	 *   Create a backup of the database to the provided file path.
+	 *
+	 *   Options:
+	 *   --with-files
+	 *     If specified, files contents will be integrated in the database backup,
+	 *     even if they were stored outside of the database.
+	 *
+	 *   --quota=SIZE
+	 *     Specifies the maximum size of all files stored in the database backup.
+	 *     Use this to only copy a subset of the files to the backup.
+	 *     The size can be specified exactly as in PHP ini files, as an integer
+	 *     that can be followed by K, M, or G.
 	 *
 	 * paheko db check
 	 *   Check database integrity and foreign keys.
@@ -715,8 +726,25 @@ class CLI
 			$db->commit();
 		}
 		elseif ($command === 'backup') {
-			@list($file) = $this->parseOptions($args, [], 1);
+			$o = $this->parseOptions($args, ['--with-files', '--quota='], 1);
+
+			$file = $o[0] ?? null;
+			$quota = $o['quota'] ?? null;
+			$with_files = array_key_exists('with-files', $o);
+
+			if (empty($file)) {
+				$this->fail('Missing target file');
+			}
+
+			if (!empty($quota)) {
+				$quota = Utils::return_bytes($quota);
+			}
+
 			Backup::make($file);
+
+			if ($with_files && FILE_STORAGE_BACKEND !== 'SQLite') {
+				Storage::export($file, $quota);
+			}
 		}
 		else {
 			$this->help(['db']);

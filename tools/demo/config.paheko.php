@@ -6,8 +6,10 @@ namespace Paheko;
 
 use KD2\ErrorManager;
 
+ErrorManager::setLogFile(__DIR__ . '/error.log');
+
 // Make sure we never disclose errors in production
-ErrorManager::enable(ErrorManager::PRODUCTION);
+ErrorManager::setEnvironment(ErrorManager::PRODUCTION);
 
 // Block bots
 if (stristr($_SERVER['REQUEST_URI'] ?? '', 'robots.txt')) {
@@ -61,8 +63,6 @@ function demo_email_check($signal)
 	}
 }
 
-const ALERT_MESSAGE = 'Compte de test temporaire — <strong style="color: darkred">Toutes les données seront effacées au bout de quelques jours&nbsp;!</strong> — L\'envoi d\'e-mail est désactivé';
-
 /** Setting the demo hash **/
 $hash = null;
 
@@ -72,9 +72,10 @@ if (preg_match('/^demo-([a-z0-9]+)\./', $_SERVER['SERVER_NAME'] ?? '', $match)) 
 
 // Hash was supplied in URL
 if ($hash) {
-	$path = sprintf(DEMO_STORAGE_PATH, $hash);
+	$path = DEMO_STORAGE_PATH . '/' . $hash;
 	if (ctype_alnum($hash)
-		&& is_dir($path)) {
+		&& is_dir($path)
+		&& !demo_prune($path)) {
 		define('Paheko\DATA_ROOT', $path);
 	}
 	else {
@@ -87,14 +88,19 @@ if ($hash) {
 			<p><a href="https://' . DEMO_PARENT_DOMAIN . '/">Retour</a></p>');
 	}
 }
-// Re-create demo-account from local client
-elseif (isset($_GET['f'])
+// Re-create demo-account from local backup
+elseif (trim($_SERVER['REQUEST_URI'], '/') === ''
+	&& isset($_GET['f'])
 	&& ctype_alnum($_GET['f'])
-	&& ($source = \apcu_fetch('demo_' . $_GET['f']))) {
+	&& ($source = \apcu_fetch('demo_' . $_GET['f']))
+	&& 0 === strpos(realpath($source), realpath(sys_get_temp_dir()))
+) {
 	\apcu_delete('demo_' . $_GET['f']);
 	$id = \apcu_fetch('demo_login_' . $_GET['f']) ?: null;
 	\apcu_delete('demo_login_' . $_GET['f']);
-	create_demo($source, $id);
+	demo_create(null, $source, $id);
+	@unlink($source);
+	exit;
 }
 // Demo form
 else {
@@ -127,3 +133,21 @@ elseif (!empty($_COOKIE['__login'])
 		\apcu_delete('demo_user_' . $hash);
 	}
 }
+
+$days = DEMO_DELETE_DAYS;
+$delete_hash = sha1(SECRET_KEY . DATA_ROOT);
+
+if (!empty($_POST['delete_demo']) && $_POST['delete_demo'] === $delete_hash) {
+	demo_delete(DATA_ROOT);
+	header('Location: /');
+	exit;
+}
+
+$message = <<<EOF
+<strong>Bac à sable temporaire</strong>
+— L'envoi d'e-mail est désactivé
+— <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
+— <form method="post" style="display: inline; float: right" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; margin: 0; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</button></form>
+EOF;
+
+define('Paheko\ALERT_MESSAGE', $message);

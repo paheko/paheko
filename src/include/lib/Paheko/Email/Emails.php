@@ -77,7 +77,10 @@ class Emails
 				try {
 					$css_parser = new CSSParser;
 					$style_tag = $css_parser->xpath($doc, '//style', 0);
-					$css_parser->import($style_tag->textContent);
+
+					if ($style_tag) {
+						$css_parser->import($style_tag->textContent);
+					}
 				}
 				catch (\InvalidArgumentException $e) {
 					$css_parser = false;

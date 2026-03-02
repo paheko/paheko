@@ -226,14 +226,10 @@ class Backup
 			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($tmp)));
 
 			DB::toggleAuthorizer($db, true);
-
-			// Make sure the backup file has DELETE journal mode so the WAL file is squashed
-			$dest_db = new \SQLite3($tmp);
-			$dest_db->exec('PRAGMA journal_mode = DELETE;');
 		}
+		// use ::backup since PHP 7.4.0+
+		// https://www.php.net/manual/en/sqlite3.backup.php
 		else {
-			// use ::backup since PHP 7.4.0+
-			// https://www.php.net/manual/en/sqlite3.backup.php
 			$dest_db = new \SQLite3($tmp);
 			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
@@ -244,9 +240,8 @@ class Backup
 
 			// Make sure we reduce the final backup
 			$dest_db->exec('VACUUM;');
+			$dest_db->close();
 		}
-
-		$dest_db->close();
 
 		if (null !== $destination) {
 			rename($tmp, $destination);

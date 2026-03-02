@@ -246,17 +246,19 @@ Résultat :
 
 Pour créer un tableau vous devez séparer les colonnes avec des barres verticales (`|`, obtenu avec les touches [AltGr + 6](https://fr.wikipedia.org/wiki/Barre_verticale#Saisie)). Il doit y avoir une ligne vide avant le tableau, et une autre ligne vide après le tableau.
 
-La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau.
+La première ligne contient les noms des colonnes, la seconde ligne contient la ligne de séparation (chaque cellule doit contenir un ou plusieurs tirets), et les lignes suivantes représentent le contenu du tableau. Pour avoir une cellule vide il suffit d'y mettre un espace.
 
 ```
 | Colonne 1 | Colonne 2 |
 | - | - | - |
 | AB | CD |
+| | YZ |
 ```
 
 | Colonne 1 | Colonne 2 |
 | - | - |
 | AB | CD |
+| | YZ |
 
 Par défaut les colonnes sont centrées. On peut aussi aligner le texte à gauche ou à droite en mettant deux points après le ou les tirets de la ligne suivant l'entête :
 
@@ -320,12 +322,12 @@ Certains services vidéo comme les instances Peertube permettent l'intégration 
 Pour cela il faut recopier le code d'intégration donné par le service vidéo. Voici un exemple :
 
 ```
-<iframe title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" width="560" height="315" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+<iframe title="Le DéMAILnagement : il est temps de quitter gmail !" width="560" height="315" src="https://tube.picasoft.net/videos/embed/7P96PD7o2Z9n9w9GPWGBjB" allow="fullscreen" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" style="border: 0px;"></iframe>
 ```
 
 Résultat :
 
-<iframe title="ENQUÊTE : Brûler la Forêt pour Sauver le Climat ? | EP 3 - Le bois énergie" width="560" height="315" src="https://peertube.stream/videos/embed/12c52265-e3b3-4bad-93f3-f2c1df5bbe4f" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+<iframe title="Le DéMAILnagement : il est temps de quitter gmail !" width="560" height="315" src="https://tube.picasoft.net/videos/embed/7P96PD7o2Z9n9w9GPWGBjB" allow="fullscreen" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" style="border: 0px;"></iframe>
 
 ## Identifiant et classe CSS sur les titres
 

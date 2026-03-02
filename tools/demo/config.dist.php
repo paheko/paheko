@@ -8,12 +8,12 @@ namespace Paheko;
 const DEMO_PARENT_DOMAIN = 'example.org';
 
 // Where each demo account will be stored
-const DEMO_STORAGE_PATH = __DIR__ . '/../data/%s';
+const DEMO_STORAGE_PATH = __DIR__ . '/../data';
 
-// List of example organizations, each has a directory with "association.sqlite" and a "files" directory
+// List of example organizations, each is a ".sqlite" file
 const EXAMPLE_ORGANIZATIONS = [
-	"L'asso du coin" => __DIR__ . '/../examples/asso',
-	"L'atelier vélo" => __DIR__ . '/../examples/bike',
+	"L'asso du coin" => __DIR__ . '/../examples/asso.sqlite',
+	"L'atelier vélo" => __DIR__ . '/../examples/bike.sqlite',
 ];
 
 const MAIL_ERRORS = 'root@example.org';

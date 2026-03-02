@@ -67,6 +67,7 @@ class Plugins
 		if (file_exists(PLUGINS_ROOT . '/' . $name)) {
 			return PLUGINS_ROOT . '/' . $name;
 		}
+		// @FIXME remove phar support in 1.4.0
 		elseif (file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
 			return 'phar://' . PLUGINS_ROOT . '/' . $name . '.tar.gz';
 		}
@@ -277,6 +278,7 @@ class Plugins
 			return null;
 		}
 
+		// @FIXME remove phar support in 1.4.0
 		if (!file_exists(PLUGINS_ROOT . '/' . $name)
 			&& !file_exists(PLUGINS_ROOT . '/' . $name . '.tar.gz')) {
 			return null;
@@ -314,6 +316,7 @@ class Plugins
 				$file = basename($file);
 				$name = $file;
 			}
+			// @FIXME remove phar support in 1.4.0
 			elseif (substr($file, -7) == '.tar.gz'
 				&& preg_match(Plugin::VALID_NAME_REGEXP, substr(Utils::basename($file), 0, -7))
 				&& file_exists('phar://' . $file . '/' . Plugin::META_FILE)) {

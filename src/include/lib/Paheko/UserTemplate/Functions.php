@@ -356,16 +356,14 @@ class Functions
 		$document = $value;
 
 		if (!$result) {
-			// If replacing, delete then insert
-			if ($replace) {
-				$db->begin();
+			$db->begin();
+
+			if ($field && $where_value) {
 				$db->delete($table, $field . ' = ?', $where_value);
-				$db->insert($table, compact('id', 'document', 'key'));
-				$db->commit();
 			}
-			else {
-				$db->insert($table, compact('id', 'document', 'key'));
-			}
+
+			$db->insert($table, compact('id', 'document', 'key'));
+			$db->commit();
 
 			if ($assign_new_id) {
 				$tpl->assign($assign_new_id, $db->lastInsertId());
@@ -608,11 +606,13 @@ class Functions
 
 	static public function error(array $params, UserTemplate $tpl, int $line)
 	{
-		if (isset($params['admin'])) {
-			throw new Brindille_Exception($params['admin']);
+		$message = $params['message'] ?? 'Erreur du module';
+
+		if (!empty($params['admin'])) {
+			throw new Brindille_Exception($message);
 		}
 
-		throw new UserException($params['message'] ?? 'Erreur du module', intval($params['code'] ?? 0));
+		throw new UserException($message, intval($params['code'] ?? 0));
 	}
 
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)

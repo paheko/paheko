@@ -14,19 +14,20 @@ if (!$fee) {
 
 $type = qg('type');
 $include_hidden_categories = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && qg('hidden');
+$group = qg('history') ? false : true;
 
 if ('unpaid' == $type) {
-	$list = $fee->unpaidUsersList($include_hidden_categories);
+	$list = $fee->unpaidUsersList($include_hidden_categories, $group);
 }
 elseif ('expired' == $type) {
-	$list = $fee->expiredUsersList($include_hidden_categories);
+	$list = $fee->expiredUsersList($include_hidden_categories, $group);
 }
 elseif ('active' == $type) {
-	$list = $fee->activeUsersList($include_hidden_categories);
+	$list = $fee->activeUsersList($include_hidden_categories, $group);
 }
 else {
 	$type = 'all';
-	$list = $fee->allUsersList($include_hidden_categories);
+	$list = $fee->allUsersList($include_hidden_categories, $group);
 }
 
 $list->loadFromQueryString();
