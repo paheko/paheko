@@ -154,6 +154,19 @@ class Services
 		$list = new DynamicList($columns, 'services', 'archived = 0');
 		$list->setPageSize(null);
 		$list->orderBy('label', false);
+
+		$list->setModifier(function (&$row) {
+			if ($row->duration) {
+				$row->date = sprintf('%d jours', $row->duration);
+			}
+			elseif ($row->start_date) {
+				$row->date = sprintf('%s au %s', Utils::shortDate($row->start_date), Utils::shortDate($row->end_date));
+			}
+			else {
+				$row->date = 'ponctuelle';
+			}
+		});
+
 		return $list;
 	}
 

@@ -16,6 +16,15 @@
 		{/if}
 	</ul>
 
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
+		&& !isset($current_service)
+		&& !isset($current_fee)
+		&& $current === 'index'}
+	<aside>
+		{exportmenu right=true}
+	</aside>
+	{/if}
+
 	{if !empty($has_archived_services)}
 	<ul class="sub">
 		<li{if !$show_archived_services} class="current"{/if}>{link href="!services/" label="Activités courantes"}</li>
