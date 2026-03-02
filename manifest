@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Remove\semail\spart\sof\sthe\sAPI,\sas\semail\srefactoring\sis\snot\sready\syet
-D 2026-03-02T21:21:49.836
+C Delete\sremnant\sof\sAPI\srefactor
+D 2026-03-02T21:26:06.948
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -75,7 +75,7 @@ F src/apache-bots.conf d24d844e684db8953d189146219998efaeec5a6a3683107c5a5a895b8
 F src/apache-htaccess.conf b627aebb1852c80ca663e469eecab2401f6af58387fd4e4cf332c366d59a85c1
 F src/apache-vhost.conf f6f869348481746ee6ca3eb93ca12c384725bf2fd015b59d4b537758b2823479
 F src/bin/paheko 1d03ce88e817ebfef9b3b459c7fd490c838ee5b9c996eae9228f4159d7f12912 x
-F src/config.dist.php d0904bf215180f84be3a4731175065ad80832bbfc1323397f6f2e7f3e5addaa4
+F src/config.dist.php 1dff4e78f3fe320cc983a27bbb3285be33911a060a50417b5dbdb36ae5193adf
 F src/data/index.html abe89f9bfb756bbdfb2f535420e10bb5625eb4e2
 F src/include/data/1.1.0_schema.sql ab4753bbe0e71c8e5910b94a4c73243191543e942a62304032a77f2060b130ab
 F src/include/data/1.1.21_migration.sql 6a26982b556b4e91cab24c577b94b0d621cbcc6042aea0d1aa220bdb2126c7c0
@@ -862,24 +862,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 8f223c2b857f67da2b95a497bd6c621861c39f628dba15af30ec6f63b2d5708b
-R 97cee2fc85975f8c91192e3a0bc7c1cd
+P 8cbac4eb8966c1f276a28340299cc97769a8b054bebe7ebd5c0b8b57c314ba33
+R eb1995a0f8b9105b4c7d2371c244f016
 U bohwaz
-Z 03187c7e52d1476c2b0e71cfcc8d43b1
+Z 424707da6f2bdb716ef1a1c2f8374c2c
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmml/20ACgkQksnacbiI
-6jReXw//Si6z5G3PrfhGuFFJlX1nhNdA/Okak/Bh7wzD6X//orNQOtL+nYdBvUCx
-vUbjgudUA7fU21r2XTRBrKpv6Ft1PkpOrTTuXesqN/YE+YetJ3QpG8fVtYtW6Tpu
-2jB9ysy1/9xo6f7uVYyOHcNn7C4uNM+/ZpZzWn5uI88pp+dvKDA8vM+bgwxVaD6j
-nr6kwLBmsQz91SMqiASAu65pNaQnjxtob3m/4pNyZJayFX1xwc4CsqXDcEnV0/vB
-0a4ysIOVmguCzgC8gg5uLKt0wkztpRRiu5NlrGY5cyUpmJbhnUMOE453SjrQ0PVm
-MF+N7mxtQlIPbL+9qWPYJMzNZfUVfkZ2rYZ9RkJdgNgetrYiIwaWWDq2YNDQMnt4
-XIcmB8d2Yi4Y5SNHWumePzLyc5Lp2ldFNU9xinY09N6HhSCXxtM2k+idDvd7ZCHp
-n/cegFhn9PMI2ivYtzp8vElV8Z7N4HbVi67JaM6PYYLW3x5hSjSt+PZXOr9nFx7Y
-apF8OmQ7ci0LMP7uEmBBAlvj5ZkIy+zg6lyQKLaE3Z0mZlfh8DSIK4BeRMzD7wgB
-R3KBGGMhHwhll0/zPTFko7vyhBljm1LvVhp0Mak2WNovLdatgNEuf3ufQKM3xcpt
-BhZBDv+P0lqSdEb8xbBQMbwWhtECCwBI4cVpBOU1zEsokpuFov4=
-=962Y
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmmAG4ACgkQksnacbiI
+6jQmQw/+MV1lgu85mF06o7iJn/v5mWjOAGhvhkuXLzRaeGqvFZBm4CLoF534mqpm
+IseIvEvBrVF/VfAEK2MKpeHEFhGdPpA0USd/QAyf6czPZreR/oFaZX6nWlUdiWOF
+qFE4rh8Fn1q38yM8pBZQxO7Vz+jnUDkUPOpKixHHOAv/1R5GVnbs16dkGZ25T/u3
+PQKcYyYW5XZUNvQQrLgJ5XX2Wsv+U/3yTnuNPZnLLiQtuP7c0/D6Pdqq7CfqL/VK
+sD03V/X8siA4nn+0HDUL7ZUTHpZ1e2wXfFsz0rrF+/fBgkOK/CI1/wtOKQElLOq/
+KC/iW3HVH4SL9Gk7gsOfC8XYmFqrya6fJNoAmcqE1kDBqkvYmDIfysNO26zlEkpH
+qETod9/eg7iW5b3S5YPmX5rjw0sGyr5LgJ7Q/PuNQj3WzzqkwLQq7XHODoZOjeyr
+nQG5cTVc46p5M7PXblSzRPdNRl8N5wheYh6gOymanxO9E6K5w0lXbJ6HkNENEWe8
+mYNcJLrqhgBjLAz2iwoZ0u/meqtA4+pOy+5mvdjtN+doPewop1kIsX4d22KdLatU
+GxZ/SxjNMQUxlFPlIeA0h3MBEeXQPVCMb7oK+BP6RgcYZbs+Y3R/NcVOuRtFdufw
+sTgQO1DHiemYmyUh8+86HTD3W70Eni/K+HNvbV1HYV6PrT6OjOA=
+=qMoW
 -----END PGP SIGNATURE-----
