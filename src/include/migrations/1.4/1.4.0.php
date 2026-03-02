@@ -2,6 +2,8 @@
 
 namespace Paheko;
 use Paheko\Accounting\Charts;
+use Paheko\Entities\Files\File;
+use Paheko\Files\Files;
 
 $db::toggleAuthorizer($db, false);
 $db->beginSchemaUpdate();
