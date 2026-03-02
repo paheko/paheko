@@ -3,7 +3,6 @@ namespace Paheko;
 
 use Paheko\Accounting\Transactions;
 use Paheko\UserTemplate\Modules;
-use Paheko\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -35,7 +34,7 @@ $variables = compact('csrf_key', 'transaction') + [
 	'simple'               => isset($_GET['advanced']) ? !$_GET['advanced'] : !$expert,
 	'details'              => $transaction->getDetails(),
 	'files'                => $transaction->listFiles(),
-	'creator_name'         => $transaction->id_creator ? Users::getName($transaction->id_creator) : null,
+	'creator_name'         => $transaction->getCreatorName(),
 	'files_edit'           => $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE),
 	'file_parent'          => $transaction->getAttachementsDirectory(),
 	'linked_users'         => $transaction->listLinkedUsers(),

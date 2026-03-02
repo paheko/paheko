@@ -117,6 +117,7 @@ class Transaction extends Entity
 
 	protected int $id_year;
 	protected ?int $id_creator = null;
+	protected ?string $creator_name = null;
 
 	protected $_lines;
 	protected $_old_lines = [];
@@ -1260,6 +1261,26 @@ class Transaction extends Entity
 		return $this->_year;
 	}
 
+	public function setCreatorFromSession(Session $session): void
+	{
+		if (!$session->isLogged()) {
+			return;
+		}
+
+		$user = $session->user();
+		$this->set('id_creator', $user->id);
+		$this->set('creator_name', $user->id ? null : $user->name());
+	}
+
+	public function getCreatorName(): ?string
+	{
+		if ($this->id_creator) {
+			return Users::getName($this->id_creator);
+		}
+
+		return $this->creator_name;
+	}
+
 	public function listFiles()
 	{
 		return Files::list($this->getAttachementsDirectory());
@@ -1332,7 +1353,7 @@ class Transaction extends Entity
 				'accounts' => [
 					[
 						'label' => 'De',
-						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_INTERNAL],
 						'direction' => 'credit',
 						'defaults' => [
 							self::TYPE_EXPENSE => 'credit',
@@ -1341,7 +1362,7 @@ class Transaction extends Entity
 					],
 					[
 						'label' => 'Vers',
-						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'types' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_INTERNAL],
 						'direction' => 'debit',
 					],
 				],

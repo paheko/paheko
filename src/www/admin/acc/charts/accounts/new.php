@@ -67,7 +67,7 @@ $form->runIf('save', function () use ($account, $chart, $current_year) {
 
 	if (!empty(f('opening_amount')) && $current_year) {
 		$t = $account->createOpeningBalance($current_year, Utils::moneyToInteger(f('opening_amount')));
-		$t->id_creator = Session::getUserId();
+		$t->setCreatorFromSession(Session::getInstance());
 		$t->save();
 	}
 

@@ -8,6 +8,7 @@ use Paheko\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
+$session = Session::getInstance();
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
 if (!CURRENT_YEAR_ID) {
@@ -37,7 +38,7 @@ $only_this_year = boolval($_GET['only'] ?? true);
 $journal = $account->getDepositJournal(CURRENT_YEAR_ID, $only_this_year, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
-$transaction->id_creator = $session->getUser()->id;
+$transaction->setCreatorFromSession($session);
 $csrf_key = 'acc_deposit_' . $account->id();
 $types = $account::TYPE_BANK;
 

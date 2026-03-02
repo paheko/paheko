@@ -242,7 +242,8 @@ CREATE TABLE IF NOT EXISTS logs
 	type INTEGER NOT NULL,
 	details TEXT NULL,
 	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
-	ip_address TEXT NULL
+	ip_address TEXT NULL,
+	user_name TEXT NULL
 );
 
 CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, type, created);
@@ -491,7 +492,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 	prev_hash TEXT NULL,
 
 	id_year INTEGER NOT NULL REFERENCES acc_years(id),
-	id_creator INTEGER NULL REFERENCES users(id) ON DELETE SET NULL
+	id_creator INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+	creator_name TEXT NULL
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
