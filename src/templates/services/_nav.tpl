@@ -23,10 +23,11 @@
 	</ul>
 	{/if}
 
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && (isset($current_service) || isset($current_fee))}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
+		&& isset($current_service)
+		&& !isset($current_fee)}
 	<aside>
-		{if isset($current_service) && $service_page !== 'index'}
-			<?php $type ??= null; ?>
+		{if $service_page !== 'index'}
 			{exportmenu right=true label="Historique complet…" href="?id=%d&type=%s&history=1"|args:$current_service.id:$type}
 		{/if}
 		{exportmenu right=true}
@@ -44,6 +45,16 @@
 		<li{if $service_page == 'expired'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=expired">Inscription expirée</a></li>
 		<li{if $service_page == 'unpaid'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=unpaid">En attente de règlement</a></li>
 	</ul>
+	{/if}
+
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
+		&& isset($current_fee)}
+	<aside>
+		{if $fee_page !== 'index'}
+			{exportmenu right=true label="Historique complet…" href="?id=%d&type=%s&history=1"|args:$current_fee.id:$type}
+		{/if}
+		{exportmenu right=true}
+	</aside>
 	{/if}
 
 	{if isset($current_fee)}
