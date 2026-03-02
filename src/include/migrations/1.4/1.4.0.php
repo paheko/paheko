@@ -34,3 +34,16 @@ if (isset($config->rules)) {
 }
 
 $db->commitSchemaUpdate();
+
+$old_path = File::CONTEXT_CONFIG . '/admin_homepage.skriv';
+$file = Files::get($old_path);
+
+if ($file && ($content = $file->fetch())) {
+	$new_path = Config::FILES['admin_homepage'];
+	$content = Utils::skrivToMarkdown($content);
+	Files::createFromString($new_path, $content);
+}
+
+if ($file) {
+	$file->delete();
+}
