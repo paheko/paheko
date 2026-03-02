@@ -1,0 +1,8 @@
+apis:
+  paheko:
+    root: ./routes.yml
+
+openapi:
+  schemasExpansionLevel: 'all'
+  jsonSamplesExpandLevel: '+Infinity'
+  expandResponses: 'all'

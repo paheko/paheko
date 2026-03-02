@@ -1,0 +1,1630 @@
+openapi: '3.1.0'
+info:
+  description: |
+    ## Débuter
+
+    Une API de type REST est disponible dans Paheko.
+
+    Pour accéder à l'API il faut un identifiant et un mot de passe, à créer dans le menu ==Configuration==, onglet ==Fonctions avancées==, puis ==API==.
+
+    L'API peut ensuite recevoir des requêtes REST sur l'URL `https://adresse_association/api{route}`.
+
+    Remplacer =={route}== par une des routes de l'API (voir ci-dessous).
+
+    La méthode HTTP (`GET`, `POST`, etc.) à utiliser est spécifiée pour chaque route.
+
+    Des exemples sont donnés pour l'utilisation de l'outil `curl` en ligne de commande, si vous souhaitez utiliser un autre langage de programmation il faudra adapter votre code.
+
+    ## Formats des requêtes et réponses
+
+    Les paramètres peuvent être fournis sous les formes suivantes :
+
+    * dans les paramètres de l'URL (query string) : pour toutes les méthodes : `…/api/{route}?param1=value1&param2=valeur2`
+    * formulaire HTTP classique pour les requêtes `POST` :
+      * `Content-Type: application/x-www-form-urlencoded`
+      * ou `Content-Type: multipart/form-data`
+    * objet JSON pour les requêtes `POST`. Il faut alors indiquer `Content-Type: application/json` dans la requête.
+
+    Les réponses sont renvoyées en JSON par défaut, sauf quand la route permet de choisir un autre format.
+
+    Les formats ODS et XLSX ne sont disponibles à l'import que si le serveur est configuré pour convertir ces formats.
+
+    ## Utiliser l'API
+
+    N'importe quel client HTTP capable de gérer TLS (HTTPS) et l'authentification basique fonctionnera.
+
+    En ligne de commande il est possible d'utiliser `curl`. Exemple pour télécharger la base de données :
+
+    ```
+    curl -u test:secret https://[identifiant_association].paheko.cloud/api/download -o association.sqlite
+    ```
+
+    On peut aussi utiliser `wget` en n'oubliant pas l'option `--auth-no-challenge` sinon l'authentification ne fonctionnera pas :
+
+    ```
+    wget https://test:secret@[identifiant_association].paheko.cloud/api/download \
+      --auth-no-challenge \
+      -O association.sqlite
+    ```
+
+    Exemple pour créer une écriture sous forme de formulaire :
+
+    ```
+    curl -v -u test:secret \
+      https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+      -F id_year=1 \
+      -F label=Test \
+      -F "date=01/02/2023"
+      …
+    ```
+
+    Ou sous forme d'objet JSON :
+
+    ```
+    curl -v -u test:secret \
+      https://[identifiant_association].paheko.cloud/api/accounting/transaction \
+      -H 'Content-Type: application/json' \
+      -d '{"id_year":1, "label": "Test écriture", "date": "01/02/2023", …}'
+    ```
+
+    ## Authentification
+
+    L'API utilise l'authentification [`Basic` de HTTP](https://fr.wikipedia.org/wiki/Authentification_HTTP#M%C3%A9thode_%C2%AB_Basic_%C2%BB).
+
+    ## Erreurs
+
+    En cas d'erreur un code HTTP 4XX sera fourni, et le contenu sera un objet JSON avec une clé `error` contenant le message d'erreur.
+
+
+  version: '1'
+  title: API REST de Paheko
+
+paths:
+  '/sql{format}':
+    parameters:
+      - name: format
+        in: path
+        schema:
+          type: string
+          enum:
+            - .json
+            - .csv
+            - .ods
+            - .xlsx
+          default: .json
+        required: false
+    get:
+      tags:
+       - SQL
+      summary: Executer des requêtes SQL
+      parameters:
+        - name: sql
+          in: query
+          description: Requête SQL à exécuter.
+          example: SELECT * FROM users LIMIT 5;
+          schema:
+            type: string
+          required: true
+        - name: format
+          in: query
+          description: Format de retour
+          schema:
+            type: string
+            enum:
+              - json
+              - csv
+              - ods
+              - xlsx
+            default: json
+          required: false
+        - name: header
+          in: query
+          description: Indiquer `header=false` pour ne pas avoir une première ligne d'en-tête dans les formats CSV, ODS ou XLSX.
+          schema:
+            type: boolean
+            default: true
+          required: false
+
+      description: |
+        Exécute une requête SQL en lecture
+
+        Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
+
+        Permet d'exécuter une requête SQL `SELECT` sur la base de données.
+
+        S'il n'y a pas de limite à la requête, une limite à 1000 résultats sera ajoutée obligatoirement.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/sql \
+          -G --data-urlencode sql='SELECT nom, code_postal FROM users LIMIT 2;'
+        ```
+
+        Exemple de réponse :
+
+        ```response
+        {
+            "count": 65,
+            "results":
+            [
+                {
+                    "nom": "Ada Lovelace",
+                    "code_postal": null
+                },
+                {
+                    "nom": "James Coincoin",
+                    "code_postal": "78990"
+                }
+            ]
+        }
+        ```
+
+        **Attention :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        anyOf:
+                          - type: string
+                          - type: number
+                          - type: 'null'
+    post:
+      tags:
+       - SQL
+      summary: Executer des requêtes SQL (alternative)
+      description: |
+        Idem que la méthode en `GET`, mais la requête peut être passée dans le corps de la requête HTTP :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/sql \
+          -d 'SELECT nom, code_postal FROM users LIMIT 2;'
+        ```
+
+      requestBody:
+        content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                sql:
+                  description: Requête SQL à exécuter.
+                  type: string
+                  example: SELECT * FROM users LIMIT 5;
+                format:
+                  description:  Format de retour
+                  type: string
+                  enum:
+                    - json
+                    - csv
+                    - ods
+                    - xlsx
+                  default: json
+                header:
+                  description: |
+                    Indiquer `"header": false` pour ne pas avoir une première ligne d\'en-tête dans les formats CSV, ODS ou XLSX.
+                  type: boolean
+                  default: true
+              required:
+                - sql
+           application/sql:
+            schema:
+              type: string
+              description: La requête SQL
+              example: SELECT * FROM users LIMIT 5;
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        anyOf:
+                          - type: string
+                          - type: number
+                          - type: 'null'
+
+  '/download':
+    get:
+      tags:
+        - Téléchargement
+      summary: Télécharger la base de données
+      description: |
+        Télécharger la base de données
+
+        Renvoie directement le fichier SQLite de la base de données.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite
+        ```
+      responses:
+        '200':
+          description: ''
+          content:
+            application/vnd.sqlite3:
+              schema:
+                type: string
+                format: binary
+
+  '/download/files':
+    get:
+      tags:
+        - Téléchargement
+      summary: Télécharger tous les fichiers
+      description: |
+        Télécharger un fichier ZIP contenant tous les fichiers
+
+        _(Depuis la version 1.3.4)_
+
+        Les fichiers inclus sont :
+
+        * documents
+        * fichiers liés aux écritures,
+        * fichiers liés des membres,
+        * fichiers joints aux pages du site web
+        * code des modules modifiés
+        * corbeille
+        * configuration : logo, icônes, etc.
+        * anciennes versions des fichiers
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/download/files -o backup_files.zip
+        ```
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+
+  '/web':
+    get:
+      tags:
+        - Site web
+      summary: Lister les pages du site web.
+      description: |
+        Liste de toutes les pages du site web.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/WebPageSummary'
+
+  '/web/{page_uri}':
+    parameters:
+      - name: page_uri
+        in: path
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Site web
+      parameters:
+        - name: html
+          in: query
+          schema:
+            type: boolean
+
+      summary: Récupérer les informations sur une page
+      description: |
+        Renvoie un objet JSON avec toutes les infos de la page donnée.
+
+        Rajouter le paramètre `?html` à l'URL pour obtenir en plus une clé `html` dans l'objet JSON qui contiendra la page au format HTML.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/WebPage'
+
+    post:
+      tags:
+        - Site web
+      summary: Créer ou modifier une page
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Modifie les métadonnées de la page ou créé la page si elle n'existe pas.
+
+        Les champs suivants sont requis pour la création d'une nouvelle page:
+          * `title`
+          * `content`
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -F title="Bourse aux vélos du 28 septembre"
+        ```
+      requestBody:
+        content:
+           application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/WebPageMetaData'
+
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: './components.yml#/components/schemas/WebPage'
+
+    put:
+      tags:
+        - Site web
+      summary: Modifier le contenu d'une Page
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Modifie le contenu de la page.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X PUT -d 'La bourse aura lieu le 28 septembre'
+        ```
+      requestBody:
+        content:
+           text/plain:
+            schema:
+              type: string
+            example: |
+              ## Horaires
+              * Samedi 14h-18h
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: './components.yml#/components/schemas/WebPage'
+
+    delete:
+      tags:
+        - Site web
+      summary: Supprimer une page
+      description: |
+        Supprime la page et ses fichiers joints.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre -X DELETE
+        ```
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+  '/web/{page_uri}.html':
+    parameters:
+      - name: page_uri
+        in: path
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Site web
+      summary: Récupérer le contenu HTML d'une page
+      description: |
+        Contenu de la page web au format HTML.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/web/bourse-28-septembre.html
+        ```
+      responses:
+        '200':
+          description: ''
+          content:
+            'text/html':
+              schema:
+                type: string
+                example: |
+                  <div class="web-content"><h2 id="horaires">Horaires</h2>
+                  <ul>
+                  <li>Samedi 14h-18</li>
+                  </ul></div>
+
+  '/web/{page_uri}/children':
+    parameters:
+      - name: page_uri
+        in: path
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Site web
+      summary: Lister le contenu d'une catégories
+      description: |
+        Liste des pages et sous-catégories dans cette catégorie.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://paheko.monasso.tld/api/web/actualite/children
+        ```
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/WebPageSummary'
+
+  '/web/{page_uri}/attachments':
+    parameters:
+      - name: page_uri
+        in: path
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Site web
+      summary: Lister les fichiers joints d'une page
+      description: |
+        Liste des fichiers joints à la page
+      responses:
+        '200':
+          description: ''
+          content:
+              application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: './components.yml#/components/schemas/File'
+
+  '/web/{page_uri}/{file_name}':
+    parameters:
+      - name: page_uri
+        in: path
+        schema:
+          type: string
+        required: true
+
+      - name: file_name
+        in: path
+        schema:
+          type: string
+        required: true
+    get:
+      tags:
+        - Site web
+      summary: Récupérer un fichier joint d'une page
+      description: |
+        Renvoie le fichier `{file_name}` joint à la page.
+      responses:
+        '200':
+          description: ''
+
+    put:
+      tags:
+        - Site web
+      summary: Créer ou modifier un fichier joint d'une page
+      description: |
+        Crée le fichier `{file_name}` joint à la page ou modifie son contenu.
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+    delete:
+      tags:
+        - Site web
+      summary: Supprimer un fichier joint d'une page
+      description: |
+        Supprime le fichier `{file_name}` joint à la page.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+  '/user/categories':
+    get:
+      tags:
+        - Membres
+      summary: Lister les catégories
+      description: |
+        Liste des catégories de membres
+
+        _(Depuis la version 1.4.0)_
+
+        La liste est triée par nom, et inclue le nombre de membres de la catégorie dans la clé `count`.
+
+        Exemple de réponse :
+
+        ```response
+        {
+            "12": {
+                "id": 12,
+                "name": "Administration technique",
+                "perm_web": 9,
+                "perm_documents": 9,
+                "perm_users": 9,
+                "perm_accounting": 9,
+                "perm_subscribe": 0,
+                "perm_connect": 1,
+                "perm_config": 9,
+                "hidden": 0,
+                "count": 1
+            }
+        }
+        ```
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: './components.yml#/components/schemas/Category'
+
+  '/user/category/{id}{format}':
+    get:
+      tags:
+        - Membres
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: number
+          description: 'ID de la catégorie'
+          required: true
+        - name: format
+          in: path
+          schema:
+            type: string
+            enum:
+              - .json
+              - .csv
+              - .ods
+              - .xlsx
+            default: .json
+          required: false
+
+      summary: Exporter catégories
+      description: |
+        Exporte la liste des membres d'une catégorie.
+
+        _(Depuis la version 1.4.0)_
+
+        Les champs de type fichier retournent une liste (séparée par des retours à la ligne) des noms des fichiers de ce champ. Il est ensuite possible de télécharger le fichier via l'URL `https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}`, en utilisant les mêmes identifiants d'authentification HTTP que pour l'API.
+
+      responses:
+        '200':
+          description: ''
+
+  '/user/search':
+    get:
+      tags:
+        - Membres
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+
+      summary: Rechercher des membres
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Recherche simple de membre.
+
+        Si le texte contient une arobase (`@`), la recherche s'effectuera sur l'adresse e-mail.
+        Si le texte contient uniquement des chiffres, la recherche se fera sur le numéro de membre.
+        Sinon, la recherche se fera sur l'identité du membre (telle que configurée).
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/MemberSearchResult'
+
+  '/user/new':
+    post:
+      tags:
+        - Membres
+
+      summary: Créer un membre
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Permet de créer un nouveau membre.
+
+        Attention, cette méthode comporte des restrictions :
+
+        * il n'est pas possible de créer un membre dans une catégorie ayant accès à la configuration
+        * il n'est pas possible de définir l'OTP ou la clé PGP du membre créé
+        * seul un identifiant API ayant le droit "Administration" pourra créer des membres administrateurs
+
+        Il est possible d'utiliser tous les champs de la fiche membre en utilisant leur clé unique.
+
+        Sera renvoyée la liste des infos de la fiche membre.
+
+        Si un membre avec le même nom existe déjà (et que `force_duplicate` n'est pas utilisé), une erreur `409` sera renvoyée.
+
+        ```
+        curl -F nom="Bla bla" -F id_category=3 -F password=abcdef123456 https://test:abcd@monpaheko.tld/api/user/new
+        ```
+
+      requestBody:
+        content:
+           application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/CreateMember'
+
+      responses:
+        '200':
+          description: 'Renvoie le membre nouvellement créé'
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Member'
+        '409':
+          description: 'Conflit: un membre avec le même nom existe déjà'
+
+  '/user/{id}':
+    parameters:
+      - name: id
+        in: path
+        schema:
+          type: number
+        description: Identifiant unique du membre (différent du numéro)
+        required: true
+    get:
+      tags:
+        - Membres
+
+      summary: Récupérer les information sur un membre
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Plusieurs clés supplémentaires sont retournées, en plus des champs de la fiche membre :
+
+        * `has_password`
+        * `has_pgp_key`
+        * `has_otp`
+
+        Les champs de type fichier retournent un tableau JSON contenant la liste des noms des fichiers de ce champ. Il est ensuite possible de télécharger le fichier via l'URL `https://monpaheko.example.com/user/{ID}/{NOM_CHAMP}/{NOM_FICHIER}`, en utilisant les même identifiants d'authentification HTTP que pour l'API.
+
+        Exemple de réponse :
+
+        ```response
+        {
+            "has_password": true,
+            "has_otp": false,
+            "has_pgp_key": false,
+            "id": 1,
+            "id_category": 8,
+            "date_login": "2021-06-06 09:17:39",
+            "date_updated": null,
+            "id_parent": null,
+            "is_parent": false,
+            "preferences": null,
+            "numero": 1,
+            "nom": "Ada Lovelace",
+            "notes": null,
+            "groupe_information": true,
+            "groupe_benevoles": false,
+            "email": "ada@lovelace.org",
+            "telephone": "010101010101",
+            "adresse": null,
+            "code_postal": "21000",
+            "ville": "DIJON",
+            "pays": "FR",
+            "date_inscription": "2012-02-25",
+            "photo": ["ma_photo.jpg"]
+        }
+        ```
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Member'
+
+    delete:
+      tags:
+        - Membres
+
+      summary: Supprimer un membre
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Supprime un membre
+
+        Seuls les identifiants d'API ayant le droit "Administration" pourront supprimer des membres.
+
+        Note : il n'est pas possible de supprimer via l'API un membre appartenant à une catégorie ayant accès à la configuration.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+        '403':
+          description: 'Le membre appartient à une catégorie ayant accès à la configuration'
+
+    post:
+      tags:
+        - Membres
+
+      summary: Modifier un membre
+      description: |
+        _(Depuis la version 1.4.0)_
+
+        Modifie les infos de la fiche d'un membre
+
+        Notes :
+
+        * il n'est pas possible de modifier la catégorie d'un membre
+        * il n'est pas possible de modifier un membre appartenant à une catégorie ayant accès à la configuration.
+        * il n'est pas possible de modifier le mot de passe, l'OTP ou la clé PGP du membre créé
+        * il n'est pas possible de modifier des membres ayant accès à la configuration
+        * seul un identifiant d'API ayant l'accès en "Administration" pourra modifier un membre administrateur
+
+      requestBody:
+        content:
+           application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/UpdateMember'
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Member'
+
+  '/user/{id}/subscribe':
+    parameters:
+      - name: id
+        in: path
+        schema:
+          type: number
+        description: Identifiant unique du membre (différent du numéro)
+        required: true
+    get:
+      tags:
+        - Membres
+
+      summary: Inscrire un membre à une activité
+      description: |
+        Inscrit un membre à une activité.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/MemberSubscriptionRequest'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/MemberSubscriptionResponse'
+
+  '/user/import':
+    post:
+      tags:
+        - Membres
+
+      summary: Importer des membres
+      description: |
+        Importe un fichier de tableur de la liste des membres. Formats de fichiers acceptés : CSV, ODS, XLSX.
+
+        Cette route nécessite une clé d'API ayant les droits d'administration, car importer un fichier peut permettre de modifier l'identifiant de connexion d'un administrateur et donc potentiellement d'obtenir l'accès à l'interface d'administration.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://monpaheko.tld/api/user/import \
+          -F mode=create \
+          -F 'column[0]=nom_prenom' \
+          -F 'column[1]=code_postal' \
+          -F skip_lines=0 \
+          -F file=@membres.csv
+        ```
+
+        Si aucun paramètre `column` n'est fourni, Paheko s'attend alors à ce que la première est ligne du tableau contienne le nom des colonnes, et que le nom des colonnes correspond au nom des champs de la fiche membre (ou à leur nom unique). Par exemple si votre fiche membre contient les champs *Nom et prénom* et *Adresse postale*, alors le fichier fourni devra ressembler à ceci :
+
+        | Nom et prénom | Adresse postale |
+        | :- | :- |
+        | Ada Lovelace | 42 rue du binaire, 21000 DIJON |
+
+        Ou à ceci :
+
+        | nom_prenom | adresse_postale |
+        | :- | :- |
+        | Ada Lovelace | 42 rue du binaire, 21000 DIJON |
+
+        La méthode renvoie un code HTTP `200 OK` si l'import s'est bien passé, sinon un code 400 et un message d'erreur JSON dans le corps de la réponse.
+
+        Utilisez la route `user/import/preview` avant pour vérifier que l'import correspond à ce que vous attendez.
+
+        Exemple pour modifier le nom du membre n°42 :
+
+        ```
+        echo 'numero,nom' > membres.csv
+        echo '42,"Nouveau nom"' >> membres.csv
+        curl -u test:abcd https://monpaheko.tld/api/user/import -F file=@membres.csv
+        ```
+
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: './components.yml#/components/schemas/ImportMembers'
+            encoding:
+              file:
+                contentType: text/csv, application/vnd.ms-excel, application/vnd.oasis.opendocument.spreadsheet
+
+      responses:
+        '200':
+          description: ''
+
+    put:
+      tags:
+        - Membres
+      parameters:
+        - $ref: './components.yml#/components/parameters/ImportMembersMode'
+        - $ref: './components.yml#/components/parameters/ImportMembersSkipLines'
+        - $ref: './components.yml#/components/parameters/ImportMembersColumns'
+      summary: Importer des membres (alternative)
+      description: |
+        Importer un fichier de tableur de la liste des membresFormats de fichiers acceptés : CSV, ODS, XLSX.
+
+        Identique à la même méthode en `POST`, mais les paramètres sont passés dans l'URL, et le fichier en contenu de la requête.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://monpaheko.tld/api/user/import?mode=create&column[0]=nom_prenom&skip_lines=0 \
+          -T membres.csv
+        ```
+      requestBody:
+        content:
+          text/csv:
+            example: |
+              numero,nom
+              42,"Nouveau nom"
+          application/vnd.ms-excel: {}
+          application/vnd.oasis.opendocument.spreadsheet: {}
+
+      responses:
+        '200':
+          description: ''
+
+  '/user/import/preview':
+    post:
+      tags:
+        - Membres
+
+      summary: Prévisualiser l'import des membres
+      description: |
+        Prévisualise un import de membres, sans modifier les membres.
+
+        Identique à `user/import`, mais l'import n'est pas enregistré. À la place l'API indique les modifications qui seraient apportées.
+
+        Note : si `errors` n'est pas vide, alors il sera impossible d'importer le fichier avec `user/import`.
+
+        Exemple de requête :
+
+        ```request
+        curl -u test:abcd https://monpaheko.tld/api/user/import/preview -F mode=update -F file=@/tmp/membres.csv
+        ```
+
+        Exemple de réponse :
+
+        ```response
+        {
+            "created": [
+                {
+                    "numero": 3434351,
+                    "nom": "Bla Bli Blu"
+                }
+            ],
+            "modified": [
+                {
+                    "id": 1,
+                    "name": "Ada Lovelace",
+                    "changed": {
+                        "nom": {
+                            "old": "Ada Lvelavce",
+                            "new": "Ada Lovelace"
+                        }
+                    }
+                }
+            ],
+            "unchanged": [
+                {
+                    "id": 2,
+                    "name": "Paul Muad'Dib"
+                }
+            ]
+        }
+        ```
+
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: './components.yml#/components/schemas/ImportMembers'
+            encoding:
+              file:
+                contentType: text/csv, application/vnd.ms-excel, application/vnd.oasis.opendocument.spreadsheet
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/ImportMembersPreview'
+    put:
+      tags:
+        - Membres
+      parameters:
+        - $ref: './components.yml#/components/parameters/ImportMembersMode'
+        - $ref: './components.yml#/components/parameters/ImportMembersSkipLines'
+        - $ref: './components.yml#/components/parameters/ImportMembersColumns'
+
+      summary: Prévisualiser l'import des membres (alternative)
+      description: |
+        Prévisualise un import de membres, sans modifier les membres.
+
+        Idem que la méthode en `POST` mais les paramètres doivent être passés dans l'URL, et le fichier dans le corps de la requête.
+
+      requestBody:
+        content:
+          text/csv:
+            example: |
+              numero,nom
+              42,"Nouveau nom"
+          application/vnd.ms-excel: {}
+          application/vnd.oasis.opendocument.spreadsheet: {}
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/ImportMembersPreview'
+
+  '/services/subscriptions/import':
+    put:
+      tags:
+        - Activités
+      summary: Importer les inscriptions aux activités
+      description: |
+        _(Depuis Paheko 1.3.2)_
+
+        Importe les inscriptions des membres aux activités. Fichiers acceptés : CSV, XLSX, ODS.
+
+        Les activités et tarifs doivent déjà exister avant l'import.
+
+        Les colonnes suivantes peuvent être utilisées :
+
+        * `Numéro de membre` (obligatoire)
+        * `Activité` (obligatoire)
+        * `Tarif`
+        * `Date d'inscription` (obligatoire)
+        * `Date d'expiration`
+        * `Montant à régler`
+        * `Payé ?`
+
+        Exemple :
+
+        ```
+        echo '"Numéro de membre","Activité","Tarif","Date d\'inscription","Date d\'expiration","Montant à régler","Payé ?"' > /tmp/inscriptions.csv
+        echo '42,"Cours de théâtre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"' >> /tmp/inscriptions.csv
+        curl -u test:abcd https://monpaheko.tld/api/services/subscriptions/import -T /tmp/inscriptions.csv
+        ```
+
+      requestBody:
+        content:
+          text/csv:
+            example: |
+              "Numéro de membre","Activité","Tarif","Date d'inscription","Date d'expiration","Montant à régler","Payé ?"
+              42,"Cours de théâtre","Tarif adulte","01/09/2023","01/07/2023","123,50","Non"
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  'Numéro de membre':
+                    type: number
+                  'Activité':
+                    type: string
+                  'Tarif':
+                    type: string
+                  "Date d'inscription":
+                    type: string
+                  "Date d'expiration":
+                    type: string
+                  'Montant à régler':
+                    type: number
+                  'Payé ?':
+                    type: boolean
+      responses:
+        '200':
+          description: ''
+
+  '/errors/report':
+    post:
+      tags:
+        - Erreurs
+      summary: Envoyer un rapport d'erreur
+      description: |
+        Permet d'envoyer un rapport d'erreur (au format Airbrake / Errbit / Paheko), comme si c'était une erreur locale.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/ErrorReport'
+
+      responses:
+        '200':
+          description: ''
+
+  '/errors/log':
+    get:
+      tags:
+        - Erreurs
+      summary: Récupérer la liste des erreurs système
+      description: |
+        Renvoie le log d'erreurs système, au format airbrake/errbit ([voir la doc AirBrake pour un exemple du format](https://airbrake.io/docs/api/#create-notice-v3))
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/ErrorReport'
+
+  '/accounting/charts':
+    get:
+      tags:
+        - Comptabilité
+      summary: Lister les plans comptables
+      description: |
+        Renvoie la liste des plans comptables.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingChart'
+
+  '/accounting/charts/{id_chart}/accounts':
+    parameters:
+      - name: id_chart
+        in: path
+        schema:
+          type: number
+        description: ID du plan comptable
+        required: true
+    get:
+      tags:
+        - Comptabilité
+      summary: Lister les comptes d'un plan comptable
+      description: |
+        Renvoie la liste des comptes pour le plan comptable indiqué
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingChartAccount'
+
+  '/accounting/years':
+    get:
+      tags:
+        - Comptabilité
+      summary: Lister les exercices comptables
+      description: |
+        Renvoie la liste des exercices.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingYear'
+
+  '/accounting/years/{id_year}/journal':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingYearId'
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer le journal des écritures pour un exercice
+      description: |
+        Renvoie le journal général des écritures de l'exercice indiqué.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingJournalTransaction'
+
+  '/accounting/years/{id_year}/export/{format}{file_type}':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingYearId'
+      - name: format
+        in: path
+        schema:
+          type: string
+          enum:
+            - full
+            - grouped
+            - simple
+            - fec
+        required: true
+        description: |
+          Les formats suivants sont disponibles :
+
+          * `full` : complet
+          * `grouped` : complet groupé
+          * `simple` : simple (ne comporte pas les écritures avancées, car seules les écritures comportant simplifiées sont concernées)
+          * `fec` : format FEC (Fichier des Écritures Comptables)
+      - name: file_type
+        in: path
+        schema:
+          type: string
+          enum:
+            - .csv
+            - .ods
+            - .xlsx
+            - .json
+          default: .json
+        required: false
+        description: |
+          L'extension indique le type de fichier :
+
+          * `.csv` : Tableur CSV
+          * `.ods` : LibreOffice Calc
+          * `.xlsx` : Microsoft OOXML (Excel) - seulement disponible si l'instance le permet
+          * `.json` : Texte JSON
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Exporter un exercice
+      description: |
+        _(Depuis la version 1.3.6)_
+
+        Exporte l'exercice indiqué au format indiqué.
+
+      responses:
+        '200':
+          description: ''
+
+  '/accounting/years/{id_year}/journal/{code}':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingYearId'
+      - name: code
+        in: path
+        schema:
+          type: string
+        required: true
+        example: 512A
+      - name: id
+        in: query
+        schema:
+          type: number
+        required: false
+        example: 276
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer le journal des écritures pour un compte (par code)
+      description: |
+        Renvoie le journal des écritures d'un compte pour l'exercice indiqué.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingAcountTransaction'
+
+  '/accounting/years/{id_year}/journal/={id}':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingYearId'
+      - name: id
+        in: path
+        schema:
+          type: number
+        required: true
+        example: 276
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer le journal des écritures pour un compte (par ID)
+      description: |
+        Renvoie le journal des écritures d'un compte pour l'exercice indiqué.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingAcountTransaction'
+
+  '/accounting/transaction':
+    post:
+      tags:
+        - Comptabilité
+      summary: Créer une nouvelle écriture
+      description: |
+        Crée une nouvelle écriture
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/AccountingNewTransaction'
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/AccountingTransaction'
+
+  '/accounting/transaction/{id_transaction}':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingTransactionId'
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer les information d'une écriture
+      description: |
+        Renvoie les détails de l'écriture
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/AccountingTransaction'
+
+    post:
+      tags:
+        - Comptabilité
+      summary: Modifier une écriture
+      description: |
+        Modifie et renvoie une écriture.
+
+        Si l'écriture est verrouillée, ou dans un exercice clôturé, la modification sera impossible.
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './components.yml#/components/schemas/AccountingNewTransaction'
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/AccountingTransaction'
+
+  '/accounting/transaction/{id_transaction}/users':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingTransactionId'
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer la liste des membres liés à une écriture
+      description: |
+        Renvoie la liste des membres liés à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingTransactionLinkedMember'
+
+    post:
+      tags:
+        - Comptabilité
+      summary: Modifier la liste des membres liés à une écriture
+      description: |
+        Met à jour la liste des membres liés à une écriture.
+
+        Exemple de requête :
+
+        ```
+        curl -v "https://…/api/accounting/transaction/9337/users"  -F 'users[]=2'
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: number
+                    example: 2
+                  description: ID des membres
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+    delete:
+      tags:
+        - Comptabilité
+      summary: Effacer la liste des membres liés à une écriture
+      description: |
+        Efface la liste des membres liés à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+  '/accounting/transaction/{id_transaction}/subscriptions':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingTransactionId'
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer la liste des inscriptions liés à une écriture
+      description: |
+        _(Depuis la version 1.3.6)_
+
+        Renvoie la liste des inscriptions (aux activités) liées à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingTransactionLinkedSubscription'
+
+    post:
+      tags:
+        - Comptabilité
+      summary: Modifier la liste des inscriptions liées à une écriture
+      description: |
+        _(Depuis la version 1.3.6)_
+
+        Met à jour la liste des inscriptions liées à une écriture.
+
+        Exemple de requête :
+
+        ```
+        curl -v "https://…/api/accounting/transaction/9337/subscriptions" -F 'subscriptions[]=2'
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  items:
+                    type: number
+                    example: 2
+                  description: ID des inscriptions
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+    delete:
+      tags:
+        - Comptabilité
+      summary: Effacer la liste des inscriptions liées à une écriture
+      description: |
+        _(Depuis la version 1.3.6)_
+
+        Efface la liste des inscriptions liées à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+  '/accounting/transaction/{id_transaction}/transactions':
+    parameters:
+      - $ref: './components.yml#/components/parameters/AccountingTransactionId'
+
+    get:
+      tags:
+        - Comptabilité
+      summary: Récupérer la liste des écritures liés à une écriture
+      description: |
+        _(Depuis la version 1.3.7)_
+
+        Renvoie la liste des écritures liées à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './components.yml#/components/schemas/AccountingTransactionLinkedTransaction'
+
+    post:
+      tags:
+        - Comptabilité
+      summary: Modifier la liste des écritures liées à une écriture
+      description: |
+        _(Depuis la version 1.3.7)_
+
+        Met à jour la liste des écritures liées à une écriture.
+
+        Exemple de requête :
+
+        ```
+        curl -v "http://…/api/accounting/transaction/9337/transactions" -F 'transactions[]=2'
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactions:
+                  type: array
+                  items:
+                    type: number
+                    example: 2
+                  description: ID des écritures
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
+
+    delete:
+      tags:
+        - Comptabilité
+      summary: Effacer la liste des écritures liées à une écriture
+      description: |
+        _(Depuis la version 1.3.7)_
+
+        Efface la liste des écritures liées à une écriture.
+
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: './components.yml#/components/schemas/Success'
