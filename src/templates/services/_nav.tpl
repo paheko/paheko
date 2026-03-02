@@ -23,6 +23,16 @@
 	</ul>
 	{/if}
 
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && (isset($current_service) || isset($current_fee))}
+	<aside>
+		{if isset($current_service) && $service_page !== 'index'}
+			<?php $type ??= null; ?>
+			{exportmenu right=true label="Historique complet…" href="?id=%d&type=%s&history=1"|args:$current_service.id:$type}
+		{/if}
+		{exportmenu right=true}
+	</aside>
+	{/if}
+
 	{if isset($current_service)}
 	<ul class="sub">
 		<li class="title">

@@ -71,7 +71,7 @@ class Service extends Entity
 		return new Fees($this->id());
 	}
 
-	public function allUsersList(bool $include_hidden_categories = false): DynamicList
+	public function allUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 		$columns = [
@@ -105,7 +105,7 @@ class Service extends Entity
 			],
 			'expiry' => [
 				'label' => 'Date d\'expiration',
-				'select' => 'MAX(su.expiry_date)',
+				'select' => $group ? 'MAX(su.expiry_date)' : 'su.expiry_date',
 			],
 			'fee' => [
 				'label' => 'Tarif',
@@ -138,8 +138,7 @@ class Service extends Entity
 			INNER JOIN users u ON u.id = su.id_user
 			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services s ON s.id = su.id_service
-			LEFT JOIN services_fees sf ON sf.id = su.id_fee
-			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
+			LEFT JOIN services_fees sf ON sf.id = su.id_fee';
 		$conditions = sprintf('su.id_service = %d', $this->id());
 
 		if (!$include_hidden_categories) {
@@ -147,20 +146,26 @@ class Service extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->groupBy('su.id_user');
+
+		if ($group) {
+			$list->groupBy('su.id_user');
+		}
+
 		$list->orderBy('paid', true);
 
 		$list->setExportCallback(function (&$row) {
 			$row->status = $row->status == -1 ? 'En retard' : ($row->status == 1 ? 'En cours' : '');
 			$row->paid = $row->paid ? 'Oui' : 'Non';
+			$row->expiry = Utils::parseDateTime($row->expiry, Date::class);
+			$row->date = Utils::parseDateTime($row->date, Date::class);
 		});
 
 		return $list;
 	}
 
-	public function activeUsersList(bool $include_hidden_categories = false): DynamicList
+	public function activeUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
-		$list = $this->allUsersList();
+		$list = $this->allUsersList($include_hidden_categories, $group);
 		$conditions = sprintf('su.id_service = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
 			AND su.paid = 1', $this->id());
 
@@ -172,9 +177,9 @@ class Service extends Entity
 		return $list;
 	}
 
-	public function unpaidUsersList(bool $include_hidden_categories = false): DynamicList
+	public function unpaidUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
-		$list = $this->allUsersList();
+		$list = $this->allUsersList($include_hidden_categories, $group);
 		$conditions = sprintf('su.id_service = %d AND su.paid = 0', $this->id());
 
 		if (!$include_hidden_categories) {
@@ -185,9 +190,9 @@ class Service extends Entity
 		return $list;
 	}
 
-	public function expiredUsersList(bool $include_hidden_categories = false): DynamicList
+	public function expiredUsersList(bool $include_hidden_categories = false, bool $group = true): DynamicList
 	{
-		$list = $this->allUsersList();
+		$list = $this->allUsersList($include_hidden_categories, $group);
 		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date()', $this->id());
 
 		if (!$include_hidden_categories) {
