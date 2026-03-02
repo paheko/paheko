@@ -112,17 +112,17 @@ class Subscription extends Entity
 
 		$service = null;
 
-		if (!empty($source['id_service']) && empty($source['expiry_date'])) {
+		if (!empty($source['id_service'])) {
 			$service = $this->_service = Services::get((int) $source['id_service']);
 
 			if (!$service) {
 				throw new UserException('The requested service is not found');
 			}
+		}
 
-			// This is used for creating multiple subscriptions for a user from the caisse, see Subscriptions::createFromFee
-			$qty = intval($source['qty'] ?? 1);
-
-			$this->updateExpiryDate($qty);
+		// Set expiry date from date
+		if (empty($source['expiry_date'])) {
+			$service = $this->_service = Services::get((int) $source['id_service']);
 
 			$date = null;
 
@@ -132,30 +132,9 @@ class Subscription extends Entity
 
 			$date ??= new Date;
 
-			if ($service->duration) {
-				$date->modify(sprintf('+%d days', $service->duration * $multiple));
-				$this->set('expiry_date', $date);
-			}
-			elseif ($service->end_date) {
-				if ($qty > 1) {
-					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité à date fixe.');
-				}
-
-				$this->set('expiry_date', $service->end_date);
-			}
-			else {
-				if ($qty > 1) {
-					throw new UserException('Il n\'est pas possible d\'inscrire plusieurs fois un membre à une activité sans durée.');
-				}
-
-				$this->set('expiry_date', null);
-			}
-		}
-
-		if (!empty($source['id_service'])) {
-			if (!$service) {
-				$service = $this->_service = Services::get((int) $source['id_service']);
-			}
+			// This is used for creating multiple subscriptions for a user from the caisse, see Subscriptions::createFromFee
+			$qty = intval($source['qty'] ?? 1);
+			$this->updateExpiryDate($qty);
 		}
 
 		if (!empty($source['expected_amount'])) {
