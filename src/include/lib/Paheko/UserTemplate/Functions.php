@@ -356,11 +356,12 @@ class Functions
 		$document = $value;
 
 		if (!$result) {
-			// Always delete then replace
-			// in some rare cases (race condition) the item will already exist
-			// but will not be fetched in $result, in that case just overwrite what exists
 			$db->begin();
-			$db->delete($table, $field . ' = ?', $where_value);
+
+			if ($field && $where_value) {
+				$db->delete($table, $field . ' = ?', $where_value);
+			}
+
 			$db->insert($table, compact('id', 'document', 'key'));
 			$db->commit();
 
