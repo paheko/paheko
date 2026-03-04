@@ -848,21 +848,27 @@ class Functions
 			'edit' => $params['edit'] ?? false,
 		];
 
-		$tpl_params['upload'] ??= $params['edit'];
+		$tpl_params['upload'] ??= $tpl_params['edit'];
 
-		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
-			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		$path = '';
+
+		if (isset($params['path'])) {
+			if (!preg_match('!^([a-z0-9_-]+/?){1,5}$!i', $params['path'])) {
+				throw new Brindille_Exception(sprintf('"path" parameter is invalid (only [a-z0-9_/-] is allowed): "%s"', $params['path']));
+			}
+
+			$path = trim($params['path'], '/');
 		}
-
-		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
 
 		if (!$ut->module->restrict_section
 			&& 0 !== strpos($path, 'public')) {
 			throw new Brindille_Exception('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
 		}
 
+		$path = rtrim($ut->module->storage_root() . '/' . $path, '/');
+
 		$tpl->assign($tpl_params);
-		$tpl->assign('path', $ut->module->storage_root() . $path);
+		$tpl->assign('path', $path);
 		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
 	}
 
