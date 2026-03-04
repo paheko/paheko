@@ -89,7 +89,7 @@ class Users
 			$db->exec('DROP TABLE IF EXISTS users_active_services;
 				CREATE TEMPORARY TABLE IF NOT EXISTS users_active_services (id, service);
 				INSERT INTO users_active_services SELECT id_user, id_service FROM (
-					SELECT id_user, id_service, MAX(expiry_date) FROM services_users
+					SELECT id_user, id_service, MAX(expiry_date) FROM services_subscriptions
 					WHERE expiry_date IS NULL OR expiry_date >= date()
 					GROUP BY id_user, id_service
 				);
@@ -480,7 +480,7 @@ class Users
 
 	static public function getFirstAdmin(): ?User
 	{
-		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
 			Session::ACCESS_ADMIN);
 	}
 
@@ -501,7 +501,7 @@ class Users
 	{
 		$db = DB::getInstance();
 		$login_field = $db->quoteIdentifier(DynamicFields::getLoginField());
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s = ? LIMIT 1;', $login_field);
+		$sql = sprintf('SELECT * FROM @TABLE_view WHERE %s = ? LIMIT 1;', $login_field);
 		$user = EM::findOne(User::class, $sql, $login);
 
 		if (!$user || !$user->password) {
