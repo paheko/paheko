@@ -20,6 +20,7 @@ use KD2\DB\Date;
 class Subscription extends Entity
 {
 	const TABLE = 'services_subscriptions';
+	const NAME = 'Inscription à une activité';
 
 	protected ?int $id;
 	protected int $id_user;

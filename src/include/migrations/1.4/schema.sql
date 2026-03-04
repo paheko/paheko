@@ -236,14 +236,19 @@ CREATE TABLE IF NOT EXISTS users_sessions
 );
 
 CREATE TABLE IF NOT EXISTS logs
+-- Logged events
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	id_user INTEGER NULL REFERENCES users (id) ON DELETE CASCADE,
-	type INTEGER NOT NULL,
-	details TEXT NULL,
-	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
-	ip_address TEXT NULL,
-	user_name TEXT NULL
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE SET NULL, -- The user who is responsible for the action
+	user_name TEXT NULL, -- The name of the user responsible for the action, at the time of the action
+	user_ip TEXT NULL,
+	date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
+
+	type INTEGER NOT NULL, -- Event type
+	entity TEXT NULL, -- Entity class name
+	id_entity INTEGER NULL, -- Entity ID
+	id_linked_user INTEGER NULL, -- The user that is being affected by the action (eg. it is being modified, added, a subscription is added, etc.)
+	details TEXT NULL -- Optional details (JSON object)
 );
 
 CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, type, created);

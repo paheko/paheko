@@ -701,7 +701,7 @@ class Backup
 
 		$name = Utils::basename($file);
 		$name = self::getReadableName($name);
-		Log::add(Log::MESSAGE, ['message' => 'Sauvegarde restaurée : ' . $name], $session::getUserId());
+		Log::addEventWithMessage(Log::MESSAGE,  'Sauvegarde restaurée : ' . $name, $session::getUserId());
 
 		return $return;
 	}

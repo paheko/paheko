@@ -62,7 +62,7 @@ $form->runIf('login_as', function () use ($user, $session, $can_login) {
 
 	$session->logout();
 	$session->forceLogin($user->id);
-	Log::add(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
+	Log::addEventWithDetails(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
 }, $csrf_key, '!?login_as=1');
 
 $services = Subscriptions::listDistinctForUser($user->id);

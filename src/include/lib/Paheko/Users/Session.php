@@ -340,7 +340,7 @@ class Session extends \KD2\UserSession
 
 		if (true === $success) {
 			$id_user = $this->getUser()->id;
-			Log::add(Log::LOGIN_SUCCESS, compact('user_agent'), $id_user);
+			Log::addEventWithDetails(Log::LOGIN_SUCCESS, compact('user_agent'), $id_user);
 
 			// Mettre à jour la date de connexion
 			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $id_user]);
@@ -348,10 +348,10 @@ class Session extends \KD2\UserSession
 		// $success can be 'OTP' as well
 		elseif (!$success) {
 			if ($user = $this->getUserForLogin($login)) {
-				Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
+				Log::addEventWithDetails(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			}
 			else {
-				Log::add(Log::LOGIN_FAIL, compact('user_agent'));
+				Log::addEventWithDetails(Log::LOGIN_FAIL, compact('user_agent'));
 			}
 		}
 
@@ -376,13 +376,13 @@ class Session extends \KD2\UserSession
 		$success = parent::loginOTP($code);
 
 		if ($success) {
-			Log::add(Log::LOGIN_SUCCESS, $details, $user_id);
+			Log::addEventWithDetails(Log::LOGIN_SUCCESS, $details, $user_id);
 
 			// Mettre à jour la date de connexion
 			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
 		}
 		else {
-			Log::add(Log::LOGIN_FAIL_OTP, $details, $user_id);
+			Log::addEventWithDetails(Log::LOGIN_FAIL_OTP, $details, $user_id);
 		}
 
 		Plugins::fire('user.login.otp', false, compact('success', 'user_id'));
@@ -458,7 +458,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->preparedQuery('UPDATE users SET otp_recovery_codes = ? WHERE id = ?;', json_encode($codes), $user->id);
 
-		Log::add(Log::OTP_RECOVERY_USED, null, $user->id);
+		Log::addEventWithDetails(Log::OTP_RECOVERY_USED, null, $user->id);
 	}
 
 	/**
@@ -499,7 +499,7 @@ class Session extends \KD2\UserSession
 		Email::validateAddress($email, true, true);
 
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
-		Log::add(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);
+		Log::addEventWithDetails(Log::LOGIN_RECOVER, compact('user_agent'), $user->id);
 
 		$query = $this->makePasswordRecoveryQuery($user);
 

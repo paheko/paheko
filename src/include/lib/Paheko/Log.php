@@ -44,6 +44,8 @@ class Log
 	const EDIT = 12;
 	const SENT = 13;
 
+	const IMPORT = 20;
+
 	const ACTIONS = [
 		self::LOGIN_FAIL => 'Connexion refusée',
 		self::LOGIN_SUCCESS => 'Connexion réussie',
@@ -63,31 +65,78 @@ class Log
 		self::MESSAGE => '',
 	];
 
-	static public function add(int $type, ?array $details = null, ?int $id_user = null): void
+	static public function addEntityEvent(int $action, Entity $entity, ?int $id_user = null, ?string $message = null): void
 	{
-		if (isset($details['entity'])) {
-			$details['entity'] = str_replace('Paheko\Entities\\', '', $details['entity']);
+		if (!$entity::NAME
+			|| !property_exists($entity, 'id')) {
+			return;
 		}
 
-		$ip = Utils::getIP();
-		$session = Session::getInstance();
-		$user_name = null;
+		$name = get_class($entity);
+		$name = str_replace('Paheko\Entities\\', '', $name);
+		$id_linked_user = null;
 
-		if (null === $id_user
-			&& $session->isLogged()) {
-			$user = $session->user();
-			$id_user ??= $user->id;
-			$user_name = $user->name();
+		if ($name === 'Users\User') {
+			$id_linked_user = $entity->id;
+		}
+		elseif (property_exists($entity, 'id_user')) {
+			$id_linked_user = $entity->id_user;
+		}
+
+		$params = [
+			'id_linked_user' => $id_linked_user,
+			'entity' => $name,
+			'id_entity' => $entity->id,
+		];
+
+		if ($message) {
+			$params['details'] = compact('message');
+		}
+
+		self::add($action, $params, $id_user);
+	}
+
+	static public function addEventWithDetails(int $action, array $details, ?int $id_user = null): void
+	{
+		self::add($action, compact('details'), $id_user);
+	}
+
+	static public function addEventWithMessage(int $action, string $message, ?int $id_user = null): void
+	{
+		self::add($action, compact('message'), $id_user);
+	}
+
+	static public function add(int $action, ?array $params = null, ?int $id_user = null): void
+	{
+		$params ??= [];
+		$params['user_ip'] ??= Utils::getIP();
+		$params['id_user'] ??= $id_user;
+		$params['user_name'] ??= null;
+		$params['entity'] ??= null;
+
+		if (!isset($params['user_name'], $params['id_user'])) {
+			$session = Session::getInstance();
+
+			if ($session->isLogged()) {
+				$user = $session->user();
+				$params['id_user'] = $user->id;
+				$params['user_name'] = $user->name();
+			}
+		}
+
+		if (isset($params['id_user']) && !isset($params['user_name'])) {
+			$params['user_name'] = Users::getName($params['id_user']);
 		}
 
 		// Log to text file
 		if (AUDIT_LOG_FILE) {
-			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s, USER=%s) %s' . PHP_EOL,
+			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s, ID_USER=%d, USER_NAME=%s) %s' . PHP_EOL,
 				date('Y-m-d H:i:s'),
 				self::ACTIONS[$type] ?? 'Action',
 				$ip,
-				$id_user ?? '[' . $user_name . ']',
-				json_encode($details)
+				$params['id_user'],
+				$params['user_name'],
+				$params['entity'] ? ($params['entity'] . ' = ' . ($params['id'] ?? '')) : json_encode($details)
 			), FILE_APPEND);
 
 			$i = random_int(0, 100);
@@ -111,7 +160,7 @@ class Log
 			return;
 		}
 
-		if ($type != self::LOGIN_FAIL) {
+		if ($type !== self::LOGIN_FAIL) {
 			$keep = Config::getInstance()->log_retention;
 
 			// Don't log anything
@@ -120,14 +169,10 @@ class Log
 			}
 		}
 
-		DB::getInstance()->insert('logs', [
-			'id_user'    => $id_user,
-			'type'       => $type,
-			'details'    => $details ? json_encode($details) : null,
-			'ip_address' => $ip,
-			'user_name'  => $user_name,
-			'created'    => new \DateTime,
-		]);
+		$params['created'] ??= new \DateTime;
+		$params['details'] = isset($params['details']) ? json_encode($params['details']) : null;
+
+		DB::getInstance()->insert('logs', $params);
 	}
 
 	static public function clean(): void
@@ -243,7 +288,7 @@ class Log
 			$conditions = sprintf('l.id_user = %d AND l.type < 10', (int)$params['id_self']);
 		}
 		elseif (isset($params['history'])) {
-			$conditions = sprintf('l.type IN (%d, %d, %d) AND json_extract(l.details, \'$.entity\') = \'Users\\User\' AND json_extract(l.details, \'$.id\') = %d', self::CREATE, self::EDIT, self::DELETE, (int)$params['history']);
+			$conditions = sprintf('l.id_linked_user = %d',(int)$params['history']);
 		}
 		else {
 			$conditions = '1';

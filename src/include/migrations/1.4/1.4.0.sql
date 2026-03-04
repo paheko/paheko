@@ -77,8 +77,41 @@ CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_u
 CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_users (id_subscription);
 CREATE UNIQUE INDEX IF NOT EXISTS acc_transactions_users_unique ON acc_transactions_users (id_user, id_transaction, COALESCE(id_subscription, 0));
 
--- Store user name in audit logs
-ALTER TABLE logs ADD COLUMN user_name TEXT NULL;
+-- Add columns to audit table
+ALTER TABLE logs RENAME TO logs_old;
+
+CREATE TABLE IF NOT EXISTS logs
+-- Logged events
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE SET NULL, -- The user who is responsible for the action
+	user_name TEXT NULL, -- The name of the user responsible for the action, at the time of the action
+	user_ip TEXT NULL,
+	created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
+
+	type INTEGER NOT NULL, -- Event type
+	entity TEXT NULL, -- Entity class name
+	id_entity INTEGER NULL, -- Entity ID
+	id_linked_user INTEGER NULL, -- The user that is being affected by the action (eg. it is being modified, added, a subscription is added, etc.)
+	details TEXT NULL -- Optional details (JSON object)
+);
+
+INSERT INTO logs SELECT
+	id,
+	id_user,
+	NULL,
+	ip_address,
+	created,
+	type,
+	json_extract(details, '$.entity'),
+	CASE WHEN json_extract(details, '$.entity') IS NOT NULL THEN json_extract(details, '$.id') ELSE NULL END,
+	NULL, -- NULL, as the user might not exist anymore, or it might be another user
+	CASE WHEN json_extract(details, '$.entity') IS NOT NULL THEN NULL ELSE details END
+FROM logs_old;
+
+CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, type, created);
+CREATE INDEX IF NOT EXISTS logs_user ON logs (id_user, type, created);
+CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 
 -- Store user name for transaction creation
 ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;

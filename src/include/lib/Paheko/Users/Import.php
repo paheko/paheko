@@ -86,7 +86,7 @@ class Import
 		$db = DB::getInstance();
 		$db->begin();
 
-		Log::add(Log::MESSAGE, ['message' => 'Import de membres'], $session ? $session->user()->id : null);
+		Log::addEventWithMessage(Log::IMPORT, 'Import de membres');
 
 		foreach (self::iterateImport($csv, $mode, $safe_categories) as $i => $user) {
 			// Skip logged user, to avoid changing own login field

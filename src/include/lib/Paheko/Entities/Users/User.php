@@ -549,12 +549,12 @@ class User extends Entity
 	public function setOTPSecret(?string $secret, ?string $code = null)
 	{
 		if ($secret === null) {
-			Log::add(Log::OTP_CHANGED, ['action' => 'disabled'], $this->id);
+			Log::addEventWithDetails(Log::OTP_CHANGED, ['action' => 'disabled'], $this->id);
 			$this->set('otp_secret', null);
 			$this->set('otp_recovery_codes', null);
 		}
 		else {
-			Log::add(Log::OTP_CHANGED, ['action' => 'enabled'], $this->id);
+			Log::addEventWithDetails(Log::OTP_CHANGED, ['action' => 'enabled'], $this->id);
 			$this->assert(trim($code ?? '') !== '', 'Le code doit être renseigné pour confirmer l\'opération');
 			$this->assert(Security_OTP::TOTP($secret, $code), 'Le code entré n\'est pas valide.');
 

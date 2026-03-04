@@ -104,6 +104,8 @@ class Year extends Entity
 
 		$this->set('status', self::CLOSED);
 		$this->save();
+
+		Log::addEntityEvent(Log::MESSAGE, $this, null, 'Clôture de l\'exercice');
 	}
 
 	public function reopen(?int $user_id): void
@@ -121,11 +123,7 @@ class Year extends Entity
 		$this->set('status', self::OPEN);
 		$this->save();
 
-		Log::add(Log::MESSAGE, [
-			'message' => 'Réouverture de l\'exercice',
-			'entity'  => self::class,
-			'id'      => $this->id(),
-		]);
+		Log::addEntityEvent(Log::MESSAGE, $this, null, 'Réouverture de l\'exercice');
 
 		// Create validated transaction to show that someone has reopened the year
 		$t = new Transaction;

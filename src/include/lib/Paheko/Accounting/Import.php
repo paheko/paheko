@@ -170,7 +170,7 @@ class Import
 
 		$db = DB::getInstance();
 		$db->begin();
-		Log::add(Log::MESSAGE, ['message' => 'Import d\'écritures comptables'], $session::getUserId());
+		Log::addEventWithMessage(Log::IMPORT, 'Import d\'écritures comptables', $session::getUserId());
 
 		$accounts = $year->accounts();
 		$transaction = null;

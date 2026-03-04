@@ -108,8 +108,8 @@ class Entity extends AbstractEntity
 		$params['success'] = parent::save(false);
 
 		// Log creation/edit, but don't record stuff that doesn't change anything
-		if ($this::NAME && ($new || $modified)) {
-			Log::add($new ? Log::CREATE : Log::EDIT, ['entity' => get_class($this), 'id' => $this->id()]);
+		if ($new || $modified) {
+			Log::addEntityEvent($new ? Log::CREATE : Log::EDIT, $this);
 		}
 
 		foreach ($signals as $signal_name) {
@@ -144,9 +144,7 @@ class Entity extends AbstractEntity
 
 		$success = parent::delete();
 
-		if ($this::NAME) {
-			Log::add(Log::DELETE, ['entity' => get_class($this), 'id' => $id]);
-		}
+		Log::addEntityEvent(Log::DELETE, $this);
 
 		Plugins::fire($name . '.after', false, compact('entity', 'success', 'id'));
 		Plugins::fire('entity.delete.after', false, compact('entity', 'success', 'id'));

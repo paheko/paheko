@@ -461,7 +461,7 @@ class Mailing extends Entity
 
 		DB::getInstance()->preparedQuery($sql, $this->id());
 
-		Log::add(Log::SENT, ['entity' => get_class($this), 'id' => $this->id()]);
+		Log::addEntityEvent(Log::SENT, $this);
 	}
 
 	public function getDelivrabilityHints(): array
