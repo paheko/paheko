@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Make\ssure\swe\sbetter\svalidate\sthe\svalue\stype\spassed\sto\smin\sand\smax\smodifiers
-D 2026-03-07T15:49:54.330
+C Add\sprecisions\son\stypes\sin\sBrindille\sdoc.
+D 2026-03-07T15:50:10.298
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -46,7 +46,7 @@ F build/windows/paheko.ico 969b2f968c7bc5f8474f2fbdbadf515be1ed1798da2fd845faf6f
 F build/windows/paheko.nsis 5527f49e29afcde54ca8590048f5121fc24b76a45e47e667d9d05d9d9783615b
 F build/windows/php.ini 43ac89d6777fa71801cac6eb1d6515ce5f3bd460b022f328b75df0c27f2313be
 F doc/admin/api.md 74af5a60e48cc71634805a39fadb544cf7bbe8be7af350e00fd10e851a0ab740
-F doc/admin/brindille.md 62565048ae59c201d8c168bf4d1b861d5d2f689860719f04b946f05de9ff6624
+F doc/admin/brindille.md 6d9fdba3143c4d56d7de26495093e3d60e9e12b0b12b260ea2ff2f277e218f82
 F doc/admin/brindille_functions.md 101fefc689c2783572d39f777eeca41f17b58c8c8016cc26973b49e230ff818d
 F doc/admin/brindille_modifiers.md f6a2b297068dd2a2be4074af1a1b3a71a035a64859b4057c26da375690f1fffc
 F doc/admin/brindille_sections.md b2aa772be048a674df3fe4edcd6b6e6acf6f85a5f2e825012ad9cf5da50bf20f
@@ -690,7 +690,7 @@ F src/www/admin/static/admin.css f9f2e79abecd42af7ad2b43d92533a18a1436c7322427ef
 F src/www/admin/static/bg.png bb11a55a0d2630f7f225e01109c2fc8dddf1e9e6c989ef1d17d18852703f8438
 F src/www/admin/static/bg_dev.png 890be2cba33ae3a2e874ceb33167005cab3474a1e61810baad37ad2b46920dd1
 F src/www/admin/static/doc/api.html 080663f921032af00e9eb6e92e11b6db55430cab0fd0582deb26798953ada9c1
-F src/www/admin/static/doc/brindille.html dfdf0412b2f7d6fb730fed749ef65ec97f8de0e2f1f0b4edfbe61eb591713ae1
+F src/www/admin/static/doc/brindille.html 3ff67cb047789822bdb0234ebdb6d39aa6d5b5219178d5712908c77fba5b5ce5
 F src/www/admin/static/doc/brindille_functions.html 77c01f19fdf685aecf993ddd51b570c54f86cfcc0de15fa45c83a9f9b1929b37
 F src/www/admin/static/doc/brindille_modifiers.html 40f33dd0fafdedc63adf578a3b1fbca2f7b6d2c3823292166d06f67322f03f18
 F src/www/admin/static/doc/brindille_sections.html 3bbb74fca9d8584bbc7fa10c0a44b8938d1f87a98174ce18d5e94887483c8acc
@@ -844,24 +844,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 2efadc7548f05e49efdca9ac13e935fde4a0f5b77ce3acbaffac8bd516c0cea4
-R 1b33484cc80eb2a91f1331418c7e0692
+P d9ab1d7ef35d87aef7a963b8560b8c045f96e0ec7e4ebe46d1a557f072dc4b02
+R ccffc315257e483532e573922dbba9f6
 U bohwaz
-Z af78126bd93cdf3796edcb858096b240
+Z 0ea1ec0ab63edbaa717bdff350f1b713
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmsSSIACgkQksnacbiI
-6jS3LRAArJo7bDwALC2qS6zsEyjX5omCn38cpSGyrV9HIxKbP/n1M7pNZ6TX4BUv
-b+dv84moEKPpvnK5MyRS2H2x14dX/AQshIJ8554ATzGRcPjdYXinBVJT/Sb6DKO6
-o3UKRmzHU9oAbOY4y4n7aHLbH/VfphgO+LfLmNmOlx8TquzGq46pJ6IgWMy2QyVz
-yLKXoMDOaGREG9UO85trdgBbCRxA5cEpCgqBQe+liHrGBoxKZwTFTK8pvUIjjR+3
-I1FkETnronhktmoOyUsTWdVuXn+1kqmMm8VbwqPuLaZ92BCLKiU/bY5/Ory6V+NM
-59t++6G7x5jW/EbxRSNfku70yiIBnn/v3ozZWlLZmvMqe8R2jENolWwXEiZyEWsK
-HYwkAEd54mU+Xe2ExcOi374uBC739RCGyzTugdFJpZTnnSooEmSoWMW+LrTfzz+D
-U+5qYCTz7sQGg4GCsN4gD37Qmu5t73QjNnlElAwzjfm7UMob6mYyHx5XqREZ0c2E
-mV0udcW5lWgAzIAwqwt3RXICu8ztEZThzoJnJWlzWCDvI8r/NLHVg2tJMc6fA78k
-Lq4YcFoZUY0ug+7XgbT6EtjMIA8W4PNitb2SfFGXn9+Skux4xFvq79U/+6IAEzzH
-w/3tKTYvrFaiQPsS01ubyRykf30sUsea2yWeGbbTjsNIyax8VvM=
-=lgXQ
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmsSTIACgkQksnacbiI
+6jRTpw/7BEiSwoMjvvre9OduVk6LRALgSY6AFoHim4J/zBVBSqIdV7/pqkp81c8I
+CkzErvDSlUBPcuhKwLr9xHQ8jrwkXaZ6wtWgU4QaBFX8A+QlHlDb02DNZFfzKlJN
+o9ddZqdMJwGE2qgrTBjoMn6eMkBAi+7wOasAvBv1uD3UXONtlxR6nvEXG7QVw1ln
+VGviozttQEC91YKki7T4m6PqrDTCz2H6/eRLGvat76QhAEYxSfv7UFsF0wisBZd+
+MZpxTIGcYEV7ykoXMw9NDst8yw0hjCAF67LCKcIzLGFs5LnPgsUMZvPu2MVPKTxR
++c8nv3R/ojAMGAA34CJ2joo4IeQ1tzyPYOdUuuMyYQ7k8bgT+oV+nOSmjQt+7G/r
+GsLo1YJf9CcQNLV4q6FqAQ8iBRguHZGtMpLqZMgd3yksnI2jVkgEq/jFvkggperw
+SRvJ+5hKTaEXRUpmeJcpyWy48AYNskp1nCLJWrCKgMLwCwTw4m1R6oGJzVyu8CwT
+WJmkUQ1GRHeWwWCmgT3TMflklxhK8bAfjmdXcSv/KwWXmn9JsNiRvmQgxB+erX1N
+gwSkMtOsM9n0HsBk+x8GaImUK0HVJH8HmDLf/1Y8oHROVg78rGvoKZpdb7yXjBPR
+5/LbxyuPQeXQAv+vlQJp4mcWmpya0tvF8zed2aaRXR99oouNiMQ=
+=XCtk
 -----END PGP SIGNATURE-----

@@ -56,6 +56,8 @@ Dans Brindille, une variable peut avoir un des types suivants :
 * `string` : chaîne de texte (aussi appelé chaîne de caractères, car c'est une suite de caractères). Exemple : `coucou`.
 * `array` : tableau.
 
+Certaines fonctions acceptent une valeur "scalaire" (ou "scalar" en anglais). Une valeur est considérée comme scalaire si elle est de type `boolean`, `integer`, `float` ou `string`.
+
 ### Tableaux
 
 Les tableaux sont une sorte de dictionnaire, ou pour chaque entrée (appelée "clé") on peut associer une valeur. qui peut être de n'importe lequel des types listés ci-dessus, y compris un autre tableau.
@@ -82,6 +84,8 @@ Exemple de tableau associatif :
   'deux' => 'Texte 2'
 ]
 ```
+
+Comme en PHP, il est possible de rajouter des éléments indexés à un tableau, même s'il est associatif.
 
 ## Affichage de variable
 
