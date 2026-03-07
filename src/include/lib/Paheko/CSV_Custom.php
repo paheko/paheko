@@ -232,7 +232,12 @@ class CSV_Custom
 			throw new UserException(sprintf('Ce fichier est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
 		}
 
-		$ext = substr($file_name, strrpos($file_name, '.')+1);
+		if (null !== $file_name) {
+			$ext = substr($file_name, strrpos($file_name, '.')+1);
+		}
+		else {
+			$ext = null;
+		}
 
 		$this->rows = null;
 		$this->sheets = null;
