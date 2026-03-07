@@ -890,7 +890,7 @@ class File extends Entity
 			return 'image';
 		}
 		elseif ($this->isDir()) {
-			return 'directory';
+			return 'folder';
 		}
 
 		return Files::getIconShape($this->name);

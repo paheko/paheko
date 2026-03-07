@@ -480,7 +480,7 @@ class Users
 
 	static public function getFirstAdmin(): ?User
 	{
-		return EM::findOne(User::class, 'SELECT * FROM @TABLE WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
+		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config >= ?) LIMIT 1;',
 			Session::ACCESS_ADMIN);
 	}
 
@@ -501,7 +501,7 @@ class Users
 	{
 		$db = DB::getInstance();
 		$login_field = $db->quoteIdentifier(DynamicFields::getLoginField());
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s = ? LIMIT 1;', $login_field);
+		$sql = sprintf('SELECT * FROM @TABLE_view WHERE %s = ? LIMIT 1;', $login_field);
 		$user = EM::findOne(User::class, $sql, $login);
 
 		if (!$user || !$user->password) {

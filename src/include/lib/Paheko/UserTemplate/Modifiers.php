@@ -5,6 +5,7 @@ namespace Paheko\UserTemplate;
 use Paheko\DB;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\ValidationException;
 
 use Paheko\Users\DynamicFields;
@@ -60,8 +61,8 @@ class Modifiers
 		'ksort' => ['?array'],
 		'reverse' => ['?array'],
 		'filter' => ['?array'],
-		'max',
-		'min',
+		'max' => ['array|scalar', '...' => 'scalar'],
+		'min' => ['array|scalar', '...' => 'scalar'],
 		'array_to_list' => ['?array'],
 		'quote_sql_identifier' => ['scalar+', 'scalar+'],
 		'quote_sql' => ['scalar+'],
@@ -585,11 +586,25 @@ EOS;
 
 	static public function max(...$values)
 	{
+		if (count($values) === 1 && !is_array($values[0])) {
+			throw new TemplateException('invalid parameter type: must be an array');
+		}
+		elseif (count($values) > 1 && is_array($values[0])) {
+			throw new TemplateException('invalid first parameter type: must be a scalar value');
+		}
+
 		return max(...$values);
 	}
 
 	static public function min(...$values)
 	{
+		if (count($values) === 1 && !is_array($values[0])) {
+			throw new TemplateException('invalid parameter type: must be an array');
+		}
+		elseif (count($values) > 1 && is_array($values[0])) {
+			throw new TemplateException('invalid first parameter type: must be a scalar value');
+		}
+
 		return min(...$values);
 	}
 

@@ -133,6 +133,7 @@ $nom_de_variable_long</code></pre>
 <li><code>string</code> : chaîne de texte (aussi appelé chaîne de caractères, car c'est une suite de caractères). Exemple : <code>coucou</code>.</li>
 <li><code>array</code> : tableau.</li>
 </ul>
+<p>Certaines fonctions acceptent une valeur "scalaire" (ou "scalar" en anglais). Une valeur est considérée comme scalaire si elle est de type <code>boolean</code>, <code>integer</code>, <code>float</code> ou <code>string</code>.</p>
 <h3 id="tableaux">Tableaux</h3>
 <p>Les tableaux sont une sorte de dictionnaire, ou pour chaque entrée (appelée "clé") on peut associer une valeur. qui peut être de n'importe lequel des types listés ci-dessus, y compris un autre tableau.</p>
 <p>Les tableaux peuvent être de deux types :</p>
@@ -150,6 +151,7 @@ $nom_de_variable_long</code></pre>
   'un' =&gt; 'Texte 1',
   'deux' =&gt; 'Texte 2'
 ]</code></pre>
+<p>Comme en PHP, il est possible de rajouter des éléments indexés à un tableau, même s'il est associatif.</p>
 <h2 id="affichage-de-variable">Affichage de variable</h2>
 <p>Une variable est affichée à l'aide de la syntaxe : <code>{{$date}}</code> affichera la valeur brute de la date par exemple : <code>2020-01-31 16:32:00</code>.</p>
 <p>La variable peut être modifiée à l'aide de filtres de modification, qui sont ajoutés avec le symbole de la barre verticale (pipe <code>|</code>) : <code>{{$date|date_long}}</code> affichera une date au format long : <code>jeudi 7 mars 2021</code>.</p>
