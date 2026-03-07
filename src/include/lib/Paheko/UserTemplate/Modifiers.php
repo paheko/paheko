@@ -479,6 +479,10 @@ EOS;
 				return 'array';
 			case 'double':
 				return 'float';
+			case 'boolean':
+				return 'bool';
+			case 'integer':
+				return 'int';
 			case 'NULL':
 				return 'null';
 			case 'resource':

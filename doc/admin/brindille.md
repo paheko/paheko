@@ -50,13 +50,13 @@ $nom_de_variable_long
 Dans Brindille, une variable peut avoir un des types suivants :
 
 * `null` : utilisé pour une variable qui n'est pas définie, ou une variable définie qui n'a pas de valeur
-* `boolean` : valeur booléenne, peut seulement avoir `true` ou `false` comme valeur
-* `integer` : nombre entier (sans virgule). Exemple : `4200`.
+* `bool` : valeur booléenne, peut seulement avoir `true` ou `false` comme valeur
+* `int` : nombre entier (sans virgule). Exemple : `4200`.
 * `float` : nombre à virgule flottante, exemple `3.14`. Leur usage est déconseillé, car les erreurs de calcul sont possibles, les ordinateurs ne sachant pas compter de manière précise avec les nombres à virgule flottante. Exemple : `0.2+0.3` est différent de `0.5`.
 * `string` : chaîne de texte (aussi appelé chaîne de caractères, car c'est une suite de caractères). Exemple : `coucou`.
 * `array` : tableau.
 
-Certaines fonctions acceptent une valeur "scalaire" (ou "scalar" en anglais). Une valeur est considérée comme scalaire si elle est de type `boolean`, `integer`, `float` ou `string`.
+Certaines fonctions acceptent une valeur "scalaire" (ou "scalar" en anglais). Une valeur est considérée comme scalaire si elle est de type `bool`, `int`, `float` ou `string`.
 
 ### Tableaux
 
