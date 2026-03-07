@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Add\sprecisions\son\stypes\sin\sBrindille\sdoc.
-D 2026-03-07T15:50:10.298
+C Fix\slisting\sof\ssubscribed\susers
+D 2026-03-07T19:37:05.740
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -138,10 +138,10 @@ F src/include/lib/Paheko/Entities/Files/Share.php 8812be81f0e699af672fed2501ee3e
 F src/include/lib/Paheko/Entities/Module.php 39629f8127649ac13daa6f5b2c51fa31b3d7635be6b6e2c063f5b78ede38b9b0
 F src/include/lib/Paheko/Entities/Plugin.php 259faf5c0e27f9bdbcdd0267af43154c3573fe20d313d5584187aefc904b78c2
 F src/include/lib/Paheko/Entities/Search.php 381ecb77f0ff5811a75032177f495f23a6f6796231a6bb20acb4d05b691cdd15
-F src/include/lib/Paheko/Entities/Services/Fee.php cf48c6551c80f5c31f49c3be12595fce60c3d59846c682c9d17030bf201401cf
+F src/include/lib/Paheko/Entities/Services/Fee.php f08e935066c68aaac8c20ae5337d9bcf10a996f924ac242e02af27ef5a33a34a
 F src/include/lib/Paheko/Entities/Services/Reminder.php 6b96346054b0a179e089fb5a545ab9e075eb8e39b57dc9eea4aaaf0867536015
 F src/include/lib/Paheko/Entities/Services/ReminderMessage.php 16bfb7f3c72bf4662ce0b5dea7164158242b18cd858ec413eb370e5bfdb600e2
-F src/include/lib/Paheko/Entities/Services/Service.php 01ae31bfbe150dbf1c40de65c97119964df8e68b2aa37230553e5f6d19857fb0
+F src/include/lib/Paheko/Entities/Services/Service.php b30796fdb4527954b44e740970d242564b3b58c10868c632ef3ff0e5ef664520
 F src/include/lib/Paheko/Entities/Services/Service_User.php a3036f0b59a39c2093735fbf7644d735a7143995777e332154c6b6bd851081db
 F src/include/lib/Paheko/Entities/Signal.php a5e7ac2ccc7fbdcacdde3769249f0d267012785acf1362592939730c2c9c66be
 F src/include/lib/Paheko/Entities/Users/Category.php d829d42250ed88efeec8015291adaab6908947c2b7b532a5e6816630c7c38597
@@ -844,24 +844,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P d9ab1d7ef35d87aef7a963b8560b8c045f96e0ec7e4ebe46d1a557f072dc4b02
-R ccffc315257e483532e573922dbba9f6
+P 479451771937f09408aadb5d3794257328bd07e9ef4677aac83fbb7ce3a4bd4a
+R 7bf0796dbfefdeec20e51b8970accbed
 U bohwaz
-Z 0ea1ec0ab63edbaa717bdff350f1b713
+Z 4d87ec676957c5754a8f8c2ab9427bf0
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmsSTIACgkQksnacbiI
-6jRTpw/7BEiSwoMjvvre9OduVk6LRALgSY6AFoHim4J/zBVBSqIdV7/pqkp81c8I
-CkzErvDSlUBPcuhKwLr9xHQ8jrwkXaZ6wtWgU4QaBFX8A+QlHlDb02DNZFfzKlJN
-o9ddZqdMJwGE2qgrTBjoMn6eMkBAi+7wOasAvBv1uD3UXONtlxR6nvEXG7QVw1ln
-VGviozttQEC91YKki7T4m6PqrDTCz2H6/eRLGvat76QhAEYxSfv7UFsF0wisBZd+
-MZpxTIGcYEV7ykoXMw9NDst8yw0hjCAF67LCKcIzLGFs5LnPgsUMZvPu2MVPKTxR
-+c8nv3R/ojAMGAA34CJ2joo4IeQ1tzyPYOdUuuMyYQ7k8bgT+oV+nOSmjQt+7G/r
-GsLo1YJf9CcQNLV4q6FqAQ8iBRguHZGtMpLqZMgd3yksnI2jVkgEq/jFvkggperw
-SRvJ+5hKTaEXRUpmeJcpyWy48AYNskp1nCLJWrCKgMLwCwTw4m1R6oGJzVyu8CwT
-WJmkUQ1GRHeWwWCmgT3TMflklxhK8bAfjmdXcSv/KwWXmn9JsNiRvmQgxB+erX1N
-gwSkMtOsM9n0HsBk+x8GaImUK0HVJH8HmDLf/1Y8oHROVg78rGvoKZpdb7yXjBPR
-5/LbxyuPQeXQAv+vlQJp4mcWmpya0tvF8zed2aaRXR99oouNiMQ=
-=XCtk
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmmsfmEACgkQksnacbiI
+6jT5IQ/6AuXVyDuFagQJMMcwzF6tciG0Kg7iej/JNoJyG8zh7w/IKoF8jLZijj8R
+D6dQiiVTAoukEY+dtAvr7i9+oT5BiTzvRCv7PyqfkeEVv7UMkfm85aciS6H/cLav
+37nACFa9mP8prFlNvt19baWt2Fg7iiGvMtrnUWlPzEXCL03no4o+6KK3wEIsrTLl
+ITYs3ewlY4hdDeOPkLcaTOmHSejyRmnTx+QI7TS4gzr/BOP2MXP3mI6ErmNlwBIE
+n+3rfeGzONc8I0OJfJ76t5My3T96UEuiGL+m8qnbrvRVb7l030i932JD1X68PzcW
+kSf/lPyD5gCoD3aAlj7bhWDuDffzG4dIp7mzaDcuC/0a2crT0goV5ptLjlV/GI1g
+eBzC8xzKxtVAuDHtlmrnpibqByrNUrL4NX+ok+bfj6iAaSfGrtcLYDYqAQ0FJ9hY
+VeCkeZvnWy/SB3uVV1N9oL51145BnIFuZTLfl1j3gEtu56TUhj5AvlLUzxuxll7e
+Z2teXgmJzGjbGLLmIw5F++A4cz+QV3JH0m5+ezS6bKn40MTg6mLiLFTr+RNP46BD
+VN5aCj/fnH/At2nym00EmYde+NycuS7lEFoSAsv8RnYT243DD0sBmXt8/RdH3+hM
+wpQWpcBSKp4irvVNuRXWEBIndZwlauMyBUpxQj2Rat5+hTUqwag=
+=SP/Y
 -----END PGP SIGNATURE-----

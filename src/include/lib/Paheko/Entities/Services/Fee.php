@@ -198,6 +198,8 @@ class Fee extends Entity
 			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN services s ON s.id = sf.id_service
+			-- Required to get only last subscription for each user
+			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) AS su2 ON su2.id = su.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
 		$conditions = sprintf('su.id_fee = %d', $this->id());
