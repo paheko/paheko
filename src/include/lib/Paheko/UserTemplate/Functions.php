@@ -569,13 +569,13 @@ class Functions
 				foreach ($match[1] as $m) {
 					$allowed = false;
 
-					if (0 === strpos($m, WWW_URL)) {
+					if (str_starts_with($m, WWW_URL)) {
 						$allowed = true;
 					}
-					elseif (0 === strpos($m, BASE_URL)) {
+					elseif (str_starts_with($m, BASE_URL)) {
 						$allowed = true;
 					}
-					elseif ($config->org_web && 0 === strpos($m, $config->org_web)) {
+					elseif ($config->org_web && str_starts_with($m, $config->org_web)) {
 						$allowed = true;
 					}
 
@@ -861,7 +861,8 @@ class Functions
 		}
 
 		if (!$ut->module->restrict_section
-			&& 0 !== strpos($path, 'public')) {
+			&& $path !== 'public'
+			&& !str_starts_with($path, 'public/')) {
 			throw new Brindille_Exception('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
 		}
 
@@ -957,7 +958,7 @@ class Functions
 			$code = $r->status;
 			$return = $r->body;
 
-			if ($assign && isset($r->headers['Content-Type']) && false !== strpos($r->headers['Content-Type'], '/json')) {
+			if ($assign && isset($r->headers['Content-Type']) && str_contains($r->headers['Content-Type'], '/json')) {
 				$return = @json_decode($return);
 			}
 		}

@@ -22,7 +22,7 @@ if (qg('table') && array_key_exists(qg('table'), $tables_list)) {
 		throw new UserException('This table does not exist');
 	}
 
-	$is_module = 0 === strpos($table, 'module_data_');
+	$is_module = str_starts_with($table, 'module_data_');
 
 	$columns = [];
 

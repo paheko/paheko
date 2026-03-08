@@ -78,7 +78,7 @@ class API
 			return false;
 		}
 
-		return 0 === strpos($path, $this->allowed_files_root);
+		return str_starts_with($path, $this->allowed_files_root);
 	}
 
 	public function setAccessLevelByName(string $level): void
@@ -546,7 +546,7 @@ class API
 				$api->setFilePointer(fopen('php://input', 'rb'));
 			}
 			// Parse JSON passed as request body
-			elseif ($method === 'POST' && false !== strpos($type, '/json')) {
+			elseif ($method === 'POST' && str_contains($type, '/json')) {
 				$api->setParams((array) json_decode(trim(file_get_contents('php://input')), true));
 			}
 			elseif ($method === 'POST') {
