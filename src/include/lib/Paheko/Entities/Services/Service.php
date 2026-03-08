@@ -143,6 +143,8 @@ class Service extends Entity
 			INNER JOIN users u ON u.id = sub.id_user
 			INNER JOIN users_search us ON us.id = u.id
 			INNER JOIN services s ON s.id = sub.id_service
+			-- Required to get only last subscription for each user
+			INNER JOIN (SELECT id, MAX(date) FROM services_subscriptions GROUP BY id_user, id_service) AS sub2 ON sub2.id = sub.id
 			LEFT JOIN services_fees sf ON sf.id = sub.id_fee';
 		$conditions = sprintf('sub.id_service = %d', $this->id());
 
