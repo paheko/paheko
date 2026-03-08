@@ -140,7 +140,7 @@
 				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{else}
 				<td></td>
-				<td colspan="2"><b>Total</b></td>
+				<td><b>Total</b></td>
 				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{/if}
 			{else}
