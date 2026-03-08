@@ -1068,17 +1068,7 @@ class Utils
 			return false;
 		}
 
-		if (PHP_VERSION_ID >= 80200) {
-			return ini_parse_quantity($size_str);
-		}
-
-		switch (substr($size_str, -1))
-		{
-			case 'G': case 'g': return (int)$size_str * pow(1024, 3);
-			case 'M': case 'm': return (int)$size_str * pow(1024, 2);
-			case 'K': case 'k': return (int)$size_str * 1024;
-			default: return $size_str;
-		}
+		return ini_parse_quantity($size_str);
 	}
 
 	static public function format_bytes($size, bool $bytes = false)
