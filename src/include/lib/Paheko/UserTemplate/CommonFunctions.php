@@ -188,6 +188,10 @@ class CommonFunctions
 				unset($attributes['checked']);
 			}
 
+			if (!is_scalar($value)) {
+				throw new TemplateException(sprintf('Invalid value type for "%s": %s', $type, get_debug_type($value)));
+			}
+
 			$attributes['value'] = $value;
 		}
 		elseif ($type == 'date') {
