@@ -114,7 +114,7 @@ use Paheko\Accounting\Export;
 		<legend>Configuration de l'import</legend>
 		<dl>
 			{if $type === Export::FEC}
-				{input type="radio" name="fec_number_per_journal" value=0 default=0 label="Le numéro d'écriture est unique" help="recommandé en général" prefix_title="Numéros d'écriture du fichier FEC" prefix_required=true}
+				{input type="radio" name="fec_number_per_journal" value=0 default=0 label="Le numéro d'écriture est unique" help="recommandé en général" prefix_label="Numéros d'écriture du fichier FEC" prefix_required=true}
 				{input type="radio" name="fec_number_per_journal" value=1 label="Le numéro d'écriture est propre à chaque journal" help="pour certains logiciels inhabituels"}
 			{/if}
 

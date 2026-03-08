@@ -49,11 +49,11 @@
 			{if $address_required}
 				{input type="email" required=true name="email" label="Adresse e-mail"}
 			{/if}
-				{input type="radio" name="accepts_mailings" value=1 source=$email label="Recevoir" prefix_title="Messages collectifs" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les lettres d'information, appels à bénévoles, convocations à l'assemblée générale, etc."}
+				{input type="radio" name="accepts_mailings" value=1 source=$email label="Recevoir" prefix_label="Messages collectifs" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les lettres d'information, appels à bénévoles, convocations à l'assemblée générale, etc."}
 				{input type="radio" name="accepts_mailings" value=0 source=$email label="Ne pas recevoir"}
-				{input type="radio" name="accepts_messages" value=1 source=$email label="Recevoir" prefix_title="Messages personnels" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les e-mails envoyés par un autre membre ou un⋅e administrateur⋅trice."}
+				{input type="radio" name="accepts_messages" value=1 source=$email label="Recevoir" prefix_label="Messages personnels" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les e-mails envoyés par un autre membre ou un⋅e administrateur⋅trice."}
 				{input type="radio" name="accepts_messages" value=0 source=$email label="Ne pas recevoir"}
-				{input type="radio" name="accepts_reminders" value=1 source=$email label="Recevoir" prefix_title="Notifications" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les rappels de cotisation ou d'activité, confirmation d'inscription à un événement, etc."}
+				{input type="radio" name="accepts_reminders" value=1 source=$email label="Recevoir" prefix_label="Notifications" prefix_required=true prefix_help="Indiquez si vous souhaitez recevoir les rappels de cotisation ou d'activité, confirmation d'inscription à un événement, etc."}
 				{input type="radio" name="accepts_reminders" value=0 source=$email label="Ne pas recevoir"}
 			</dl>
 		</fieldset>

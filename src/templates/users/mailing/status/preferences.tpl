@@ -5,7 +5,7 @@
 		<legend>Préférences de l'adresse {$address}</legend>
 		<dl>
 			<?php $disabled = !$email->accepts_messages; $help = $disabled ? '*' : null; ?>
-			{input type="checkbox" disabled=$disabled name="accepts_messages" source=$email value=1 label="Messages personnels et notifications" prefix_title="Ce destinataire accepte les messages suivants" prefix_required=true help=$help}
+			{input type="checkbox" disabled=$disabled name="accepts_messages" source=$email value=1 label="Messages personnels et notifications" prefix_label="Ce destinataire accepte les messages suivants" prefix_required=true help=$help}
 			<?php $disabled = !$email->accepts_reminders; $help = $disabled ? '*' : null; ?>
 			{input type="checkbox" disabled=$disabled source=$email name="accepts_reminders" value=1 label="Rappels de cotisation" help=$help}
 			<?php $disabled = !$email->accepts_mailings; $help = $disabled ? '*' : null; ?>
