@@ -129,7 +129,7 @@ Section: web
 Priority: optional
 Maintainer: Paheko <paheko@paheko.eu>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.4), php-sqlite3, php-intl, php-mbstring, sensible-utils
+Depends: dash | bash, php-cli (>=8.2), php-sqlite3 (>=3.34), php-intl, php-mbstring, sensible-utils
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: php-imagick
 Replaces: garradin (<< 1.2.3~)
