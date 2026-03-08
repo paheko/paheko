@@ -29,11 +29,13 @@ $tpl->assign('downloaded', false);
 $tpl->assign('can_verify', Security::canUseEncryption());
 
 $form->runIf('download', function () use ($i, $tpl) {
-	$i->download(f('download'));
+	$version = $_POST['download'];
+
+	$i->download($version);
 	$tpl->assign('downloaded', true);
-	$tpl->assign('verified', $i->verify(f('download')));
-	$tpl->assign('diff', $i->diff(f('download')));
-	$tpl->assign('version', f('download'));
+	$tpl->assign('verified', $i->verify($version));
+	$tpl->assign('diff', $i->diff($version));
+	$tpl->assign('version', $version);
 }, $csrf_key);
 
 $form->runIf('upgrade', function () use ($i) {
