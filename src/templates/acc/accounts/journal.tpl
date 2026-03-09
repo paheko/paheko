@@ -137,7 +137,7 @@
 				<td><b>Total</b></td>
 				<td class="money">{$sum.debit|raw|money:false}</td>
 				<td class="money">{$sum.credit|raw|money:false}</td>
-				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
+				<td class="money"><strong>{$sum.balance_real|raw|money:false}</strong></td>
 				{else}
 				<td></td>
 				<td><b>Total</b></td>

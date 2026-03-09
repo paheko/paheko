@@ -560,8 +560,7 @@ class Account extends Entity
 			LEFT JOIN acc_projects p ON p.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
-		$sum = null;
-		$reverse = $this->isReversed($simple, $year_id) ? -1 : 1;
+		$reverse = $this->isReversed($simple) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
@@ -584,6 +583,8 @@ class Account extends Entity
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
 		$list->setPageSize(null); // Because with paging we can't calculate the running sum
+
+		$sum = null;
 		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
 			if (property_exists($row, 'sum')) {
 				$desc = $list->getOrderIsDesc();
@@ -625,21 +626,9 @@ class Account extends Entity
 	 * Renvoie TRUE si le solde du compte est inversé en vue simplifiée (= crédit - débit, au lieu de débit - crédit)
 	 * @return boolean
 	 */
-	public function isReversed(bool $simple, int $id_year): bool
+	public function isReversed(bool $simple): bool
 	{
-		$is_reversed = Accounts::isReversed($simple, $this->type);
-
-		if (!$is_reversed) {
-			return $is_reversed;
-		}
-
-		$position = $this->getPosition($id_year);
-
-		if ($position == self::ASSET || $position == self::EXPENSE) {
-			return false;
-		}
-
-		return true;
+		return Accounts::isReversed($simple, $this->type);
 	}
 
 	public function getPosition(int $id_year): int
@@ -839,7 +828,7 @@ class Account extends Entity
 			Transaction::STATUS_OPENING_BALANCE
 		);
 
-		$account_balance = $this->getSum($id_year)->balance ?? 0;
+		$account_balance = $this->getBalance($id_year)->balance ?? 0;
 
 		return $account_balance - $deposit_balance;
 	}
@@ -855,15 +844,16 @@ class Account extends Entity
 		DB::getInstance()->exec($sql);
 	}
 
-	public function getSum(int $year_id): ?\stdClass
+	public function getBalance(int $year_id): ?\stdClass
 	{
-		$sum = DB::getInstance()->first('SELECT balance, credit, debit
+		// balance_real is for journal in expert mode, as balance is automatically made positive when
+		// an account moves from asset to liability or vice-versa
+		$sum = DB::getInstance()->first('SELECT balance, credit, debit, credit - debit AS balance_real
 			FROM acc_accounts_balances
 			WHERE id = ? AND id_year = ?;', $this->id(), $year_id);
 
 		return $sum ?: null;
 	}
-
 
 	public function getSumAtDate(int $year_id, DateTime $date, bool $reconciled_only = false): int
 	{
