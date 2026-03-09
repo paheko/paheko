@@ -147,7 +147,7 @@
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="6">
+			<td class="actions" colspan="{if $simple}6{else}8{/if}">
 				{if $can_edit}
 					{include file="acc/_table_actions.tpl"}
 				{/if}
