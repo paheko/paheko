@@ -9,6 +9,7 @@ use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Files\Files;
+use Paheko\UserTemplate\Modules;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Users\Session;
 use Paheko\Web\Cache;
@@ -19,7 +20,7 @@ use KD2\ZipWriter;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
 
-use const Paheko\{ROOT, WWW_URL, BASE_URL};
+use const Paheko\{ROOT, WWW_URL, BASE_URL, PLUGINS_BLOCKLIST};
 
 class Module extends Entity
 {
@@ -109,6 +110,9 @@ class Module extends Entity
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
 			$this->assert(!DB::getInstance()->test(Plugin::TABLE, 'name = ?', $this->name), 'Un plugin existe déjà avec ce nom unique');
+			$this->assert(!Modules::distExists($this->name), 'Un module existe déjà avec ce nom unique');
+			$this->assert(!Plugins::exists($this->name), 'Un plugin existe déjà avec ce nom unique');
+			$this->assert(!in_array($this->name, PLUGINS_BLOCKLIST ?? [], true), 'Ce nom unique de module ne peut être utilisé, merci d\'en choisir un autre');
 		}
 	}
 
