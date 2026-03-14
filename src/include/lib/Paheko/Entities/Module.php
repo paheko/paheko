@@ -110,10 +110,14 @@ class Module extends Entity
 		if (!$this->exists()) {
 			$this->assert(!DB::getInstance()->test(self::TABLE, 'name = ?', $this->name), 'Un module existe déjà avec ce nom unique');
 			$this->assert(!DB::getInstance()->test(Plugin::TABLE, 'name = ?', $this->name), 'Un plugin existe déjà avec ce nom unique');
-			$this->assert(!Modules::distExists($this->name), 'Un module existe déjà avec ce nom unique');
-			$this->assert(!Plugins::exists($this->name), 'Un plugin existe déjà avec ce nom unique');
-			$this->assert(!in_array($this->name, PLUGINS_BLOCKLIST ?? [], true), 'Ce nom unique de module ne peut être utilisé, merci d\'en choisir un autre');
 		}
+	}
+
+	public function selfCheckUser(): void
+	{
+		$this->assert(!Modules::distExists($this->name), 'Un module existe déjà avec ce nom unique');
+		$this->assert(!Plugins::exists($this->name), 'Un plugin existe déjà avec ce nom unique');
+		$this->assert(!in_array($this->name, PLUGINS_BLOCKLIST ?? [], true), 'Ce nom unique de module ne peut être utilisé, merci d\'en choisir un autre');
 	}
 
 	public function importForm(?array $source = null)

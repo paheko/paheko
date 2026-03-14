@@ -506,6 +506,8 @@ class Modules
 				throw new ValidationException('Le fichier module.ini est invalide.');
 			}
 
+			$module->selfCheckUser();
+
 			$module->save();
 			$module->updateTemplates();
 
