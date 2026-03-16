@@ -735,8 +735,13 @@ class Session extends \KD2\UserSession
 		if (!isset($this->_files_permissions[$base])) {
 			$read = $write = false;
 			// Public files
-			if (!$this->isLogged() && $public) {
-				$read = true;
+			if ($public) {
+				if ($this->isLogged()) {
+					$read = $write = true;
+				}
+				else {
+					$read = true;
+				}
 			}
 			// Other files are private
 			elseif ($this->isLogged()) {
