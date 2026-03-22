@@ -67,6 +67,7 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
 * `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
 * `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (`<svg …>`) doit comporter les attributs suivants : `id="img" width="100%" height="100%"`.
+* `migration.tpl` : code Brindille permettant la création et la mise à jour du schéma de base de données SQL du module, si nécessaire
 
 ## Snippets
 
@@ -255,65 +256,44 @@ Exemple :
 		}
 	[...]
 
-### Stockage JSON dans SQLite (pour information)
+### Stockage de données dans les modules
 
-Explication du fonctionnement technique derrière la fonction `save`.
-
-En pratique chaque enregistrement sera placé dans une table SQL dont le nom commence par `module_data_`. Ici la table sera donc nommée `module_data_factures` si le nom unique du module est `factures`.
-
-Le schéma de cette table est le suivant :
+Les modules peuvent stocker un tableau simple dans la configuration interne, disponible via la variable `$module.config` et modifiable avec la fonction `{{:save …}}` :
 
 ```
-CREATE TABLE module_data_factures (
-  id INTEGER PRIMARY KEY NOT NULL,
-  key TEXT NULL,
-  document TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX module_data_factures_key ON module_data_factures (key);
+{{:save key="config" ma_preference="oui"}}
+Vous préférez vivre sans capitalisme : {{$module.config.ma_preference}}
 ```
 
-Comme on peut le voir, chaque ligne dans la table peut avoir une clé unique (`key`), et un ID ou juste un ID auto-incrémenté. La clé unique n'est pas obligatoire, mais peut être utile pour différencier certains documents.
+Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.
 
-Par exemple le code suivant :
-
-```
-{{:save key="facture_43" nom="Facture de courses"}}
-```
-
-Est l'équivalent de la requête SQL suivante :
+Pour cela il convient de définir une version dans le fichier `module.ini` :
 
 ```
-INSERT OR REPLACE INTO module_data_factures (key, document) VALUES ('facture_43', '{"nom": "Facture de courses"}');
+version = "1.0.0"
 ```
 
-### Récupération et liste de documents
+Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.
 
-Il sera ensuite possible d'utiliser la boucle `load` pour récupérer les données :
+Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette `migration.tpl` sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.
 
-```
-{{#load id=42}}
-	Ce document est de type {{$type}} créé le {{$date}}.
-	<h2>{{$label}}</h2>
-	À payer : {{$total}} €
-	{{else}}
-	Le document numéro 42 n'a pas été trouvé.
-{{/load}}
-```
+Pour cela il faut utiliser les variables suivantes :
 
-Cette boucle `load` permet aussi de faire des recherches sur les valeurs du document :
+* `$module.db_version` : contient la version de la base de données (`NULL` si la base de données n'a pas été créée)
+* `$module.version` : contient la version du module, issue du fichier `module.ini`
+
+Voici un exemple de fichier `migration.tpl` :
 
 ```
-<ul>
-{{#load where="$$.type = 'facture'" order="date DESC"}}
-	<li>{{$label}} ({{$total}} €)</li>
-{{/load}}
-</ul>
+{{if !$module.db_version}}
+  {{:table create="personnes" nom="TEXT NOT NULL"}}
+{{elseif $module.db_version|version_compare:"<":1.1.0"}}
+  {{:column table="personnes" create="prenom" type="TEXT" null=false}}
+{{/if}}
 ```
 
-La syntaxe `$$.type` indique d'aller extraire la clé `type` du document JSON.
-
-C'est un raccourci pour la syntaxe SQLite `json_extract(document, '$.type')`.
+<!-- FIXME: supprimer quand sera supprimé le stockage JSON dans les modules -->
+Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. [Voir l'ancienne documentation](brindille_storage_json.md).
 
 # Export et import de modules
 
