@@ -422,18 +422,27 @@ class TableFunctions
 		$assign = $params['assign'] ?? null;
 		unset($params['id'], $params['assign'], $params['table'], $params['where']);
 
-		$columns = array_map(function ($value) {
-			if (!is_scalar($value)) {
+		// Make sure arrays and objects are saved as strings
+		foreach ($params as &$value) {
+			if (!is_scalar($value) && !is_null($value)) {
 				$value = json_encode($value);
 			}
-			return $value;
-		}, $params);
+		}
+
+		unset($value);
 
 		if ($where) {
-			$db->update($table, $columns, $where, $sql_params);
+			$db->update($table, $params, $where, $sql_params);
 		}
 		else {
-			$db->insert($table, $columns);
+			$params['key'] = Utils::uuid();
+			$db->insert($table, $params);
+			$id = $db->lastInsertId();
+		}
+
+		// Assign new row values
+		if ($assign) {
+			$tpl->assign($assign, $db->first(sprintf('SELECT * FROM %s WHERE id = ?;', $db->quoteIdentifier($table)), $id));
 		}
 	}
 

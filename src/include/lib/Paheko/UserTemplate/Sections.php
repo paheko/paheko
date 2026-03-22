@@ -365,7 +365,16 @@ class Sections
 			return LegacySections::load($params, $tpl, $line);
 		}
 
+		$db = DB::getInstance();
+		$module_name = $params['module'] ?? $tpl->module->name;
+		$table = Modules::getModuleTableName($module_name, $params['table']);
 
+		$params['where'] ??= '1';
+		$params['select'] ??= '*';
+
+		$assign = $params['assign'] ?? null;
+
+		return self::sql($params, $tpl, $line);
 	}
 
 	static public function list(array $params, UserTemplate $tpl, int $line): \Generator
@@ -379,9 +388,7 @@ class Sections
 		}
 
 		$db = DB::getInstance();
-
 		$module_name = $params['module'] ?? $tpl->module->name;
-
 		$table = Modules::getModuleTableName($module_name, $params['table']);
 
 		$params['where'] ??= '1';
@@ -448,20 +455,20 @@ class Sections
 			}
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
+			throw new TemplateException(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
 		}
 
 		$tpl = new Template('common/dynamic_list_head.tpl', Template::getInstance());
 
-		if (!empty($params['export'])) {
+		if (!empty($params['export_button'])) {
 			$export_params = ['right' => true];
 
 			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu($export_params));
 		}
 
 		$tpl->assign(compact('list'));
-		$tpl->assign('check', $params['check'] ?? false);
-		$tpl->assign('disable_user_sort', boolval($params['disable_user_sort'] ?? ($params['disable_user_ordering'] ?? false)));
+		$tpl->assign('check', $params['checkable'] ?? false);
+		$tpl->assign('disable_user_sort', boolval($params['user_sorting'] ?? false));
 		$tpl->display();
 
 		yield from $i;

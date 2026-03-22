@@ -348,7 +348,7 @@ class UserTemplate extends \KD2\Brindille
 			Modules\TableFunctions::class,
 		];
 
-		foreach ($classes as $class) {
+		foreach ($functions_classes as $class) {
 			foreach ($class::FUNCTIONS_LIST as $name) {
 				$this->registerFunction($name, [$class, $name]);
 			}

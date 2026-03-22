@@ -724,7 +724,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `user_sorting` | *optionnel* | Booléen. Si ce paramètre est `false`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
-| `export_button` | *optionnel* | Booléen. Si ce paramètre est `false`, le bouton d'export ne s'affichera pas au dessus de la liste. |
+| `export_button` | *optionnel* | Booléen. Si ce paramètre est `true`, un bouton d'export s'affichera au dessus de la liste. |
 | `checkable` | *optionnel* | Booléen. Si ce paramètre est `true`, le tableau comportera une première colonne permettant de cocher la ligne. |
 
 Comme pour `load`, il est possible d'utiliser d'autres paramètres supplémentaires, correspondant à la valeur des colonnes recherchées : `nom="Dulcie"` par exemple.

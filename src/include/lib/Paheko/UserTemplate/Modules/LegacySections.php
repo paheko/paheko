@@ -3,15 +3,18 @@
 namespace Paheko\UserTemplate\Modules;
 
 use Paheko\UserTemplate\Functions;
+use Paheko\UserTemplate\Sections;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\DB;
+use Paheko\DynamicList;
+use Paheko\Template;
 use Paheko\TemplateException;
 
 /**
  * @deprecated
  * @todo remove when all modules have been migrated to tables
  */
-class Sections
+class LegacySections
 {
 	/**
 	 * @deprecated
@@ -85,7 +88,7 @@ class Sections
 		// Replace '$.name = "value"' parameters with json_extract
 		foreach ($params as $key => $value) {
 			$k = substr($key, 0, 1);
-			if ($k == ':' || in_array($key, self::SQL_RESERVED_PARAMS)) {
+			if ($k == ':' || in_array($key, Sections::SQL_RESERVED_PARAMS)) {
 				continue;
 			}
 
@@ -132,7 +135,7 @@ class Sections
 		$assign = $params['assign'] ?? null;
 		unset($params['assign']);
 
-		$query = self::sql($params, $tpl, $line);
+		$query = Sections::sql($params, $tpl, $line);
 
 		foreach ($query as $row) {
 			if (isset($row['json'])) {
@@ -184,7 +187,7 @@ class Sections
 			$db->exec($sql);
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
+			throw new TemplateException(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
 		}
 	}
 
@@ -258,7 +261,7 @@ class Sections
 	static public function list(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (empty($params['schema']) && empty($params['select'])) {
-			throw new Brindille_Exception('Missing schema parameter');
+			throw new TemplateException('Missing schema parameter');
 		}
 		$db = DB::getInstance();
 
@@ -273,7 +276,7 @@ class Sections
 			$has_table = $tpl->module->hasDataTable();
 		}
 		else {
-			throw new Brindille_Exception('Unique module name could not be found');
+			throw new TemplateException('Unique module name could not be found');
 		}
 
 		if (!$has_table) {
@@ -305,7 +308,7 @@ class Sections
 				}
 
 				if ($select === '*') {
-					throw new Brindille_Exception(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
+					throw new TemplateException(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
 				}
 
 				$select = self::_moduleReplaceJSONExtract($select, $table);
@@ -315,7 +318,7 @@ class Sections
 
 			if (isset($params['order'])) {
 				if (!is_int($params['order']) && !ctype_digit($params['order'])) {
-					throw new Brindille_Exception(sprintf('Line %d: "order" parameter must be the number of the column (starting from 1)', $line));
+					throw new TemplateException(sprintf('Line %d: "order" parameter must be the number of the column (starting from 1)', $line));
 				}
 
 				$params['order'] = 'col' . (int)$params['order'];
@@ -410,7 +413,7 @@ class Sections
 			}
 		}
 		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
+			throw new TemplateException(sprintf("Line %d: invalid SQL query: %s\nQuery: %s", $line, $e->getMessage(), $list->SQL()));
 		}
 
 		$tpl = new Template('common/dynamic_list_head.tpl', Template::getInstance());
