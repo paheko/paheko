@@ -1,0 +1,380 @@
+<?php
+
+namespace Paheko\UserTemplate;
+
+use Paheko\TemplateException;
+use Paheko\UserTemplate\UserTemplate;
+
+class TableFunctions
+{
+	const FUNCTIONS_LIST = [
+		'table',
+		'column',
+	];
+
+	const MODULE_TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z])*$/';
+
+	const MODULE_TABLE_COLUMN_TYPES = [
+		'TEXT',
+		'INTEGER',
+		'DATETIME',
+		'REAL',
+		'NUMERIC',
+	];
+
+	const MODULE_COLUMN_DEFINITION_REGEXP = '/^(TEXT|INT|INTEGER|DATETIME|REAL|FLOAT|NUMERIC)
+			(?:\s+(NOT\s+NULL|NULL))?
+			(?:\s+DEFAULT\s+("[^"]*"|\'[^\']*\'|\d+|CURRENT_TIMESTAMP))?
+			(?:\s+REFERENCES\s+((?-i)[a-z0-9_]+)\s*\((?-i)[a-z0-9_]+\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|RESTRICT|CASCADE))?)?
+			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
+			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
+
+	static protected function _getModuleTableName(Module $module, string $name): string
+	{
+		if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $name)) {
+			throw new TemplateException('Invalid table name: ' . $name);
+		}
+
+		return sprintf('module_table_%s_%s', $module->name, $name);
+	}
+
+	static protected function _getModuleTableSQLDefinition(string $name, ?string $comment, array $columns): string
+	{
+		if (null !== $comment) {
+			// Make sure comment doesn't have line breaks, and is not too long
+			$comment = mb_substr(preg_replace('/\s+/', ' ', $comment), 0, 150);
+			$comment = '-- ' . $comment . "\n";
+		}
+
+		$columns = [
+			'id INTEGER NOT NULL,',
+			'key TEXT NOT NULL UNIQUE,',
+		];
+
+		foreach ($columns as $name => $definition) {
+			$columns[] = $definition->sql;
+		}
+
+		// putting the primary key definition here instead of in the column definition
+		// is better as it avoids having to delete the comma from the last column definition
+		$columns[] = 'PRIMARY KEY (id)';
+
+		$db = DB::getInstance();
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n%s(\n  %s);", $db->quoteIdentifier($table), $comment, implode("\n  ", $columns));
+		return $sql;
+	}
+
+	/**
+	 * Verify column definition and export it to SQL code
+	 */
+	static protected function _getModuleColumnDefinition(Module $module, string $name, ?string $definition_str, ?array $definition, array &$unique_indexes): stdClass
+	{
+		if (null !== $definition_str) {
+			if (!preg_match(self::MODULE_COLUMN_DEFINITION_REGEXP, $definition_str, $match)) {
+				throw new TemplateException(sprintf('Invalid column "%s" definition: %s', $name, $definition_str));
+			}
+
+			$definition = (object) [
+				'type'         => $match[1],
+				'null'         => str_contains(strtoupper($match[2] ?? ''), 'NOT NULL') ? false : true,
+				'default'      => isset($match[3]) && $match[3] !== '' ? $match[3] : null,
+				'fk_table'     => !empty($match[4]) ? trim($match[4], '\'" ') : null,
+				'fk_column'    => !empty($match[5]) ? trim($match[5], '\'" ') : null,
+				'fk_on_delete' => !empty($match[6]) ? $match[6] : null,
+				'unique'       => !empty($match[8]) ? $match[8] : (!empty($match[7]) ? true : null),
+				'comment'      => !empty($match[11]) ? trim($match[11], '\'"') : null,
+			];
+		}
+		else {
+			static $keys = null;
+
+			if (null === $keys) {
+				$keys = ['type', 'null', 'default', 'fk_table', 'fk_column', 'fk_on_delete', 'unique', 'comment'];
+				$keys = array_flip($keys);
+			}
+
+			$definition = (object) array_intersect_key($definition, $keys);
+		}
+
+		$db = DB::getInstance();
+
+		$definition->type = strtoupper($type);
+		$definition->fk_on_delete = isset($definition->fk_on_delete) ? strtoupper($definition->fk_on_delete) : null;
+		$definition->constraint = null;
+
+		if ($definition->type === 'INT') {
+			$definition->type === 'INTEGER';
+		}
+		elseif ($definition->type === 'FLOAT') {
+			$definition->type === 'REAL';
+		}
+		elseif ($definition->type === 'DATETIME') {
+			$definition->constraint = sprintf('CHECK (%s IS NULL OR datetime(%1$s) = %1$s)', $db->quoteIdentifier($name));
+		}
+
+		if (!in_array($definition->type, self::MODULE_TABLE_COLUMN_TYPES, true)) {
+			throw new TemplateException(sprintf('Invalid column "%s": unknown type "%s"', $definition->type));
+		}
+		elseif (!is_bool($definition->null)) {
+			throw new TemplateException(sprintf('Invalid column "%s": null can only be a boolean', $name));
+		}
+		elseif (strtoupper($definition->default) === 'CURRENT_TIMESTAMP'
+			&& !$definition->type !== 'DATETIME') {
+			throw new TemplateException(sprintf('Invalid column "%s": default value "%s" is only valid for DATETIME type', $name, $definition->default));
+		}
+		elseif (!in_array($definition->fk_on_delete, ['SET NULL', 'RESTRICT', 'CASCADE'], true)) {
+			throw new TemplateException(sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $definition->fk_on_delete));
+		}
+		elseif (isset($definition->fk_table)
+			&& !isset($definition->fk_column)) {
+			throw new TemplateException(sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
+		}
+		elseif (isset($definition->fk_table)
+			&& !isset($definition->fk_column)) {
+			throw new TemplateException(sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
+		}
+		elseif (isset($definition->fk_table)
+			&& !preg_match('/^!?[a-z]+(?:_[a-z]+)$/', $definition->fk_table)) {
+			throw new TemplateException(sprintf('Invalid column "%s" foreign key table name "%s"', $name, $definition->fk_table));
+		}
+		elseif (isset($definition->fk_column)
+			&& !preg_match(self::MODULE_TABLE_NAME_REGEXP, $definition->fk_column)) {
+			throw new TemplateException(sprintf('Invalid column "%s" foreign key column name "%s"', $name, $definition->fk_column));
+		}
+		elseif (strtoupper($definition->fk_on_delete) === 'RESTRICT'
+			&& substr($definition->fk_table, 0, 1) === '!') {
+			throw new TemplateException(sprintf('Invalid column "%s": foreign key constraint "%s" is only valid for internal module tables', $name, $definition->fk_on_delete));
+		}
+		elseif (isset($definition->unique)
+			&& $definition->unique !== true
+			&& !preg_match(self::MODULE_TABLE_NAME_REGEXP, $definition->unique)) {
+			throw new TemplateException(sprintf('Invalid column "%s": invalid unique index name "%s"', $name, $definition->unique));
+		}
+
+		if (isset($definition->fk_table)) {
+			if (substr($definition->fk_table, 0, 1) === '!') {
+				$definition->fk_table = substr($definition->fk_table, 1);
+			}
+			else {
+				$definition->fk_table = self::_getModuleTableName($module, $definition->fk_table);
+			}
+		}
+
+		$sql = $definition->type . ' ' . $definition->null ? 'NULL' : 'NOT NULL';
+
+		if (isset($definition->default)) {
+			$sql .= ' DEFAULT ';
+
+			if (strtoupper($definition->default) === 'CURRENT_TIMESTAMP'
+				|| ctype_digit($definition->default)) {
+				$sql .= $definition->default;
+			}
+			else {
+				$sql .= $db->quote($definition->default);
+			}
+		}
+
+		if (isset($definition->fk_table)) {
+			$sql .= sprintf(' REFERENCES %s (%s) ON DELETE %s',
+				$db->quoteIdentifier($definition->fk_table),
+				$db->quoteIdentifier($definition->fk_column),
+				$definition->fk_on_delete ?? 'SET NULL'
+			);
+		}
+
+		if (isset($definition->unique)) {
+			if ($definition->unique === true) {
+				$sql .= ' UNIQUE';
+			}
+			else {
+				$unique_indexes[$definition->unique] ??= [];
+				$unique_indexes[$definition->unique][] = $name;
+			}
+		}
+
+		$sql .= ',';
+
+		if (isset($definition->comment)) {
+			// Make sure the user cannot escape comment
+			$comment = preg_replace('/[^a-zA-Z0-9_\p{L}]+/u', ' ', $definition->comment);
+			$comment = mb_substr($comment, 0, 150);
+
+			if (trim($comment) !== '') {
+				$sql .= ' -- ' . $comment;
+			}
+		}
+
+		$definition->sql = $sql;
+		return $definition;
+	}
+
+	/**
+	 * Create/rename/delete module table
+	 */
+	static public function table(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (!$tpl->module) {
+			throw new TemplateException('Module name could not be found');
+		}
+
+		if (!empty($params['create'])) {
+			$action = 'create';
+		}
+		elseif (!empty($params['delete'])) {
+			$action = 'delete';
+		}
+		elseif (!empty($params['rename'])) {
+			$action = 'rename';
+		}
+		else {
+			throw new TemplateException('No action parameter was supplied');
+		}
+
+		$name = $params[$action];
+		unset($params[$action]);
+
+		$db = DB::getInstance();
+		$table = self::_getModuleTableName($tpl->module, $name);
+
+		if ($action === 'create') {
+			foreach ($params as $name => $definition) {
+				if ($name === 'comment') {
+					continue;
+				}
+
+				$columns[] = self::_getModuleColumnDefinition($tpl->module, $name, $code);
+			}
+
+			$sql = self::_getModuleTableSQLDefinition($table, $params['comment'] ?? null, $columns);
+		}
+		elseif ($action === 'rename') {
+			$new_name = $params['to'] ?? '';
+
+			if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $new_name)) {
+				throw new TemplateException('Invalid new table name: ' . $new_name);
+			}
+
+			$new_name = 'module_' . $tpl->module->name . '_' . $new_name;
+			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($new_name));
+		}
+		elseif ($action === 'delete') {
+			$sql = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table));
+		}
+
+		// FIXME: set authorizer to only allow working on this specific table
+		$db->exec($sql);
+	}
+
+	static public function column(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (!$tpl->module) {
+			throw new TemplateException('Module name could not be found');
+		}
+
+		if (!empty($params['create'])) {
+			$action = 'create';
+		}
+		elseif (!empty($params['delete'])) {
+			$action = 'delete';
+		}
+		elseif (!empty($params['rename'])) {
+			$action = 'rename';
+		}
+		elseif (!empty($params['modify'])) {
+			$action = 'modify';
+		}
+		else {
+			throw new TemplateException('No action parameter was supplied');
+		}
+
+		$column = $params[$action];
+		unset($params[$action]);
+
+		if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $column)) {
+			throw new TemplateException('Invalid column name: ' . $column);
+		}
+
+		$table = $params['table'] ?? '';
+		$table = self::_getModuleTableName($tpl->module, $name);
+
+		$db = DB::getInstance();
+
+		if (!$db->hasTable($table)) {
+			throw new TemplateException('This table doesn\'t exist: ' . $table);
+		}
+
+		if ($action === 'rename') {
+			$new_name = $params['to'] ?? '';
+
+			if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $new_name)) {
+				throw new TemplateException('Invalid new column name: ' . $new_name);
+			}
+
+			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
+		}
+		else {
+			$columns = self::_getModuleTableColumns($params['table']);
+
+			if ($action === 'delete') {
+				if (!array_key_exists($column, $columns)) {
+					throw new TemplateException('Cannot delete this column as it doesn\'t exist: ' . $column);
+				}
+
+				unset($columns[$column]);
+			}
+			elseif ($action === 'modify') {
+				if (!array_key_exists($column, $columns)) {
+					throw new TemplateException('Cannot modify this column as it doesn\'t exist: ' . $column);
+				}
+
+				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
+				$columns[$column] = $definition;
+			}
+			else {
+				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
+				$columns[$column] = $definition;
+			}
+
+			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($table . '_old'));
+			$sql .= "\n";
+			$sql .= $this->_getModuleTableSQLDefinition($params['table'], $columns);
+			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
+		}
+	}
+
+	/**
+	 * Create or re-create a module table
+	 * If the table exists already, it will be renamed, to recopy old data
+	 */
+	static protected function _createModuleTable(Module $module, string $name, array $columns): void
+	{
+		$table = self::_getModuleTableName($module, $name);
+		$overwrite = false;
+
+		$db->begin();
+
+		if ($db->hasTable($table)) {
+			$overwrite = true;
+			$db->exec(sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($table . '_old')));
+		}
+
+		// Actually create table
+		$db->exec(self::_getModuleTableSQLDefinition($table, $columns));
+
+		if ($overwrite) {
+			$columns_names = array_keys($columns);
+			$columns_names = array_map([$db, 'quoteIdenfier'], $columns_names);
+
+			$sql = sprintf('INSERT INTO %s (%s) SELECT %s FROM %2$s;',
+				$db->quoteIdentifier($table),
+				$columns_names,
+				$db->quoteIdentifier($table . '_old')
+			);
+
+			$sql .= sprintf("\nDROP TABLE %s;", $db->quoteIdentifier($table . '_old'));
+			$db->exec($sql);
+		}
+
+		$db->commit();
+	}
+}

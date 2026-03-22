@@ -342,13 +342,21 @@ class UserTemplate extends \KD2\Brindille
 	{
 		$this->registerDefaults();
 
-		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
-			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
+		// Modules functions
+		static $functions_classes = [
+			Functions::class,
+			Modules\DatabaseFunctions::class,
+			Modules\TableFunctions::class,
+		];
+
+		foreach ($classes as $class) {
+			foreach ($class::FUNCTIONS_LIST as $name) {
+				$this->registerFunction($name, [$class, $name]);
+			}
 		}
 
-		// Local functions
-		foreach (Functions::FUNCTIONS_LIST as $name) {
-			$this->registerFunction($name, [Functions::class, $name]);
+		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
+			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
 		foreach (Functions::COMPILE_FUNCTIONS_LIST as $name => $callback) {
