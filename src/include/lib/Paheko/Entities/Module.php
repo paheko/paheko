@@ -202,6 +202,11 @@ class Module extends Entity
 			return null;
 		}
 
+		if (isset($ini->version)) {
+			$this->_broken_message = 'Ce module nécessite Paheko 1.4.0 ou supérieur';
+			return null;
+		}
+
 		// Don't allow user code to set itself as a system module
 		if (!$from_dist) {
 			unset($ini->system);
