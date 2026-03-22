@@ -548,7 +548,7 @@ class Modules
 			return sprintf('module_data_%s', $module);
 		}
 
-		if (!preg_match('/^[a-z]+(?:_[a-z])*$/', $table) || strlen($table) > 70) {
+		if (!preg_match(Module::TABLE_NAME_REGEXP, $table) || strlen($table) > 70) {
 			return \InvalidArgumentException('Invalid table name: ' . $table);
 		}
 

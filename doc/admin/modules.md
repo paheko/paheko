@@ -51,11 +51,10 @@ Une connaissance de la programmation informatique est souhaitable pour commencer
 * Utilisation de la syntaxe Brindille
 * Les modules peuvent utiliser toutes les fonctions et boucles de Brindille
 * Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module
-* Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension [JSON de SQLite](https://www.sqlite.org/json1.html)
-* Les données peuvent être validées avant enregistrement en utilisant [JSON Schema](https://json-schema.org/understanding-json-schema/)
+* Les données du module sont stockées dans des tables SQL
 * Un module peut également accéder aux données des autres modules
 * Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)
-* Un module ne peut pas modifier les données de la base de données
+* Un module ne peut pas modifier les données de la base de données, en dehors de ses tables
 * Paheko crée automatiquement des index sur les requêtes SQL des modules, permettant de rendre les requêtes rapides
 
 # Structure des répertoires
@@ -164,106 +163,25 @@ Toutes les pages d'un module disposent de la variable `$module` qui contient l'e
 
 # Stockage de données
 
-Un module peut stocker des données de deux manières : dans sa configuration, ou dans son stockage de documents JSON.
+Un module peut stocker des données de deux manières : dans sa configuration, ou dans des tables SQL.
 
 ## Configuration
 
 La première manière est de stocker des informations dans la configuration du module. Pour cela on utilise la fonction `save` et la clé `config` :
 
 ```
-{{:save key="config" accounts_list="512A,512B" check_boxes=true}}
+{{:save key="config" accounts="512A" check_boxes=true}}
 ```
 
 On pourra retrouver ces valeurs dans la variable `$module.config` :
 
 ```
 {{if $module.config.check_boxes}}
-  {{$module.config.accounts_list}}
+  {{$module.config.account}}
 {{/if}}
 ```
 
-## Stockage de documents JSON
-
-Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.
-
-Grâce aux [fonctions JSON de SQLite](https://www.sqlite.org/json1.html) on pourra ensuite effectuer des recherches sur ces documents.
-
-Pour enregistrer il suffit d'utiliser la fonction `save` :
-
-```
-{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}
-```
-
-Si la clé indiquée (dans le paramètre `key`) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.
-
-### Validation
-
-On peut utiliser un [schéma JSON](https://json-schema.org/understanding-json-schema/) pour valider que le document qu'on enregistre est valide :
-
-```
-{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}
-```
-
-Le fichier `document.schema.json` devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :
-
-```
-{
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"type": "object",
-	"properties": {
-		"date": {
-			"description": "Date d'émission",
-			"type": "string",
-			"format": "date"
-		},
-		"type": {
-			"description": "Type de document",
-			"type": "string",
-			"enum": ["devis", "facture"]
-		},
-		"total": {
-			"description": "Montant total",
-			"type": "integer",
-			"minimum": 0
-		},
-		"label": {
-			"description": "Libellé",
-			"type": "string"
-		},
-		"description": {
-			"description": "Description",
-			"type": ["string", "null"]
-		}
-	},
-	"required": [ "type", "date", "total", "label"]
-}
-```
-
-Si le document fourni n'est pas conforme au schéma, il ne sera pas enregistré et une erreur sera affichée.
-
-#### Propriété non requise
-
-Si vous souhaitez utiliser dans votre document une propriété non requise, il ne faut pas la fournir en paramètre de la fonction `save`.
-
-Si elle est fournie mais vide, il faut aussi autoriser le type `null` (en minuscules) au type de votre propriété.
-
-Exemple :  
-
-	[...]
-		"description": {
-			"description": "Description",
-			"type": ["string", "null"]
-		}
-	[...]
-
-### Stockage de données dans les modules
-
-Les modules peuvent stocker un tableau simple dans la configuration interne, disponible via la variable `$module.config` et modifiable avec la fonction `{{:save …}}` :
-
-```
-{{:save key="config" ma_preference="oui"}}
-Vous préférez vivre sans capitalisme : {{$module.config.ma_preference}}
-```
+## Tables SQL
 
 Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.
 
@@ -274,6 +192,8 @@ version = "1.0.0"
 ```
 
 Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.
+
+Un module sans version ne peut pas créer de tables.
 
 Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette `migration.tpl` sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.
 

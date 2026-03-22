@@ -318,6 +318,48 @@ class DB extends SQLite3
 		return \SQLite3::OK;
 	}
 
+	/**
+	 * Set authorizer to only allow modifying a custom table name
+	 */
+	public function enableTableAuthorizer(string $allowed_table_name): void
+	{
+		$this->setAuthorizer(function (int $action, ...$args) use ($allowed_table_name) {
+			// Use safety authorizer first
+			$r = self::safetyAuthorizer($action, ...$args);
+
+			if (!$r !== \SQLite3::OK) {
+				return $r;
+			}
+
+			// Second argument is table name
+			if ($action === \SQLite3::CREATE_INDEX
+				|| $action === \SQLite3::DROP_INDEX
+				|| $action === \SQLite3::ALTER_TABLE) {
+				$table = $args[1];
+			}
+			elseif ($action === \SQLite3::CREATE_TABLE
+				|| $action === \SQLite3::DELETE
+				|| $action === \SQLite3::INSERT
+				|| $action === \SQLite3::UPDATE) {
+				$table = $args[0];
+			}
+			elseif ($action === \SQLite3::SELECT
+				|| $action === \SQLite3::READ) {
+				return \SQLite3::OK;
+			}
+			else {
+				return \SQLite3::DENY;
+			}
+
+			if ($table === $allowed_table_name) {
+				return \SQLite3::OK;
+			}
+			else {
+				return \SQLite3::DENY;
+			}
+		});
+	}
+
 	static public function registerCustomFunctions($db)
 	{
 		$db->createFunction('dirname', [Utils::class, 'dirname']);

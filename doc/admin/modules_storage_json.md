@@ -18,6 +18,25 @@ Cette documentation n'est présente qu'à titre informatif.
 
 Il est recommandé d'utiliser le stockage sous forme de tables SQL.
 
+# Migrer vers le stockage en tables SQL
+
+1. Ajouter une version dans module.ini
+2. Créer les tables
+3. Insérer les données dans les tables, depuis `migration.tpl`
+4. Supprimer l'ancienne table de document avec `{{:delete legacy_data_table=true}}`
+
+Exemple de migration :
+
+```
+{{if !$module.version}}
+	{{:table create="personnes" nom="TEXT NOT NULL"}}
+	{{#load type="personne"}}
+		{{:save table="personnes" id=$id key=$key nom=$nom}}
+	{{/load}}
+	{{:delete legacy_data_table=true}}
+{{/if}}
+```
+
 # Généralités
 
 ## Enregistrement

@@ -667,7 +667,8 @@ Précisions sur les clés étrangères :
 
 * elles doivent forcément faire référence à une table et une colonne qui existe déjà
 * l'action par défaut est `SET NULL` si la clé étrangère est une table en dehors du module
-* l'action `RESTRICT` ne peut être utilisée pour une table en dehors du module
+* l'action `RESTRICT` ne peut être utilisée pour une table externe au module (sinon cela pourrait bloquer des actions normales dans Paheko)
+* pour faire référence à une table externe au module il faut ajouter le caractère `!` devant le nom de la table, sinon la table sera considérée comme interne au module
 
 Si la définition est un tableau il convient d'utiliser les clés suivantes :
 

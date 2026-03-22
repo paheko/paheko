@@ -410,6 +410,9 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
+		// Make sure we cannot get unauthorized data
+		$list->setAllowedTables(self::SQL_TABLES);
+
 		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'columns', 'where', 'module', 'user_sorting', 'checkable', 'group', 'export_button'];
 
 		foreach ($params as $key => $value) {
@@ -1324,8 +1327,8 @@ class Sections
 
 		if (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->table_name();
-			$sql = self::_moduleReplaceJSONExtract($sql, $table);
+			$table = $tpl->module->data_table_name();
+			$sql = LegacySections::_moduleReplaceJSONExtract($sql, $table); // FIXME: remove in Paheko 1.5+ (?)
 		}
 
 		$db = DB::getInstance();
@@ -1334,7 +1337,7 @@ class Sections
 			// Lock database against changes
 			$db->setReadOnly(true);
 
-			$statement = $db->protectSelect($allowed_tables, $sql);
+			$statement = $db->prepareRestricted($allowed_tables, $sql);
 
 			$args = [];
 

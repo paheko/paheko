@@ -4,6 +4,13 @@ namespace Paheko\UserTemplate\Modules;
 
 use Paheko\TemplateException;
 use Paheko\UserTemplate\UserTemplate;
+use Paheko\UserTemplate\Modules;
+use Paheko\DB;
+use Paheko\Utils;
+
+use Paheko\Entities\Module;
+
+use KD2\DB\DB_Exception;
 
 class TableFunctions
 {
@@ -13,8 +20,6 @@ class TableFunctions
 		'save',
 		'delete',
 	];
-
-	const MODULE_TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z])*$/';
 
 	const MODULE_TABLE_COLUMN_TYPES = [
 		'TEXT',
@@ -135,7 +140,7 @@ class TableFunctions
 			throw new TemplateException(sprintf('Invalid column "%s" foreign key table name "%s"', $name, $definition->fk_table));
 		}
 		elseif (isset($definition->fk_column)
-			&& !preg_match(self::MODULE_TABLE_NAME_REGEXP, $definition->fk_column)) {
+			&& !preg_match(Module::TABLE_NAME_REGEXP, $definition->fk_column)) {
 			throw new TemplateException(sprintf('Invalid column "%s" foreign key column name "%s"', $name, $definition->fk_column));
 		}
 		elseif (strtoupper($definition->fk_on_delete) === 'RESTRICT'
@@ -144,9 +149,10 @@ class TableFunctions
 		}
 		elseif (isset($definition->unique)
 			&& $definition->unique !== true
-			&& !preg_match(self::MODULE_TABLE_NAME_REGEXP, $definition->unique)) {
+			&& !preg_match(Module::TABLE_NAME_REGEXP, $definition->unique)) {
 			throw new TemplateException(sprintf('Invalid column "%s": invalid unique index name "%s"', $name, $definition->unique));
 		}
+
 
 		if (isset($definition->fk_table)) {
 			if (substr($definition->fk_table, 0, 1) === '!') {
@@ -155,6 +161,19 @@ class TableFunctions
 			else {
 				$definition->fk_table = Modules::getModuleTableName($module->name, $definition->fk_table);
 			}
+
+			// Validate foreign key table and column exists
+			static $fk_tables = [];
+
+			$fk_tables[$definition->fk_table] ??= $db->getTableSchema($definition->fk_table);
+
+			if (!$fk_tables[$definition->fk_table]) {
+				throw new TemplateException(sprintf('Invalid foreign key: "%s" table does not exist', $definition->fk_table));
+			}
+			elseif (!array_key_exists($definition->fk_column, $fk_tables[$definition->fk_table]['columns'])) {
+				throw new TemplateException(sprintf('Invalid foreign key: "%s" column does not exist', $definition->fk_column));
+			}
+			// apparently sqlite doesn't care about column type matching foreign key column and local column, that's good
 		}
 
 		$sql = $definition->type . ' ' . $definition->null ? 'NULL' : 'NOT NULL';
@@ -214,6 +233,10 @@ class TableFunctions
 			throw new TemplateException('Module name could not be found');
 		}
 
+		if (!$tpl->module->version) {
+			throw new TemplateException('A module cannot use the "table" function if it doesn\'t have a "version" in module.ini');
+		}
+
 		if (!empty($params['create'])) {
 			$action = 'create';
 		}
@@ -234,6 +257,10 @@ class TableFunctions
 		$table = Modules::getModuleTableName($tpl->module->name, $name);
 
 		if ($action === 'create') {
+			if ($db->hasTable($table)) {
+				throw new TemplateException('This table already exists: ' . $table);
+			}
+
 			foreach ($params as $name => $definition) {
 				if ($name === 'comment') {
 					continue;
@@ -247,25 +274,51 @@ class TableFunctions
 		elseif ($action === 'rename') {
 			$new_name = $params['to'] ?? '';
 
-			if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $new_name)) {
+			if (!preg_match(Module::TABLE_NAME_REGEXP, $new_name)) {
 				throw new TemplateException('Invalid new table name: ' . $new_name);
 			}
 
 			$new_name = 'module_' . $tpl->module->name . '_' . $new_name;
+
+			if (!$db->hasTable($table)) {
+				throw new TemplateException('This table does not exist: ' . $table);
+			}
+
+			if ($db->hasTable($new_name)) {
+				throw new TemplateException('Cannot rename, as target table name exists: ' . $new_name);
+			}
+
 			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($new_name));
 		}
 		elseif ($action === 'delete') {
+			if (!$db->hasTable($table)) {
+				throw new TemplateException('This table does not exist: ' . $table);
+			}
+
 			$sql = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table));
 		}
 
-		// FIXME: set authorizer to only allow working on this specific table
+		// set authorizer to only allow working on this specific table
+		$db->enableTableAuthorizer($table);
+
+		// There shouldn't be any error due to the user here, so we don't try/catch
 		$db->exec($sql);
+
+		// fall back to safety authorizer
+		$db->enableSafetyAuthorizer();
 	}
 
+	/**
+	 * Create/rename/delete/modify table column
+	 */
 	static public function column(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
 			throw new TemplateException('Module name could not be found');
+		}
+
+		if (!$tpl->module->version) {
+			throw new TemplateException('A module cannot use the "column" function if it doesn\'t have a "version" in module.ini');
 		}
 
 		if (!empty($params['create'])) {
@@ -287,7 +340,7 @@ class TableFunctions
 		$column = $params[$action];
 		unset($params[$action]);
 
-		if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $column)) {
+		if (!preg_match(Module::TABLE_NAME_REGEXP, $column)) {
 			throw new TemplateException('Invalid column name: ' . $column);
 		}
 
@@ -300,18 +353,22 @@ class TableFunctions
 			throw new TemplateException('This table doesn\'t exist: ' . $table);
 		}
 
+			$columns = self::_getModuleTableColumns($params['table']);
+
 		if ($action === 'rename') {
 			$new_name = $params['to'] ?? '';
 
-			if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $new_name)) {
+			if (!preg_match(Module::TABLE_NAME_REGEXP, $new_name)) {
 				throw new TemplateException('Invalid new column name: ' . $new_name);
+			}
+
+			if (array_key_exists($new_name, $columns)) {
+				throw new TemplateException(sprintf('Cannot rename "%s" column to "%s": target column already exists', $column, $new_name));
 			}
 
 			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
 		}
 		else {
-			$columns = self::_getModuleTableColumns($params['table']);
-
 			if ($action === 'delete') {
 				if (!array_key_exists($column, $columns)) {
 					throw new TemplateException('Cannot delete this column as it doesn\'t exist: ' . $column);
@@ -327,9 +384,16 @@ class TableFunctions
 				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
 				$columns[$column] = $definition;
 			}
-			else {
+			elseif ($action === 'create') {
+				if (array_key_exists($column, $columns)) {
+					throw new TemplateException(sprintf('Cannot create "%s": target column name already exists', $column));
+				}
+
 				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
 				$columns[$column] = $definition;
+			}
+			else {
+				throw new \LogicException('Invalid action: ' . $action);
 			}
 
 			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($table . '_old'));
@@ -337,6 +401,15 @@ class TableFunctions
 			$sql .= $this->_getModuleTableSQLDefinition($params['table'], $columns);
 			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
 		}
+
+		// set authorizer to only allow working on this specific table
+		$db->enableTableAuthorizer($table);
+
+		// There shouldn't be any error due to the user here, so we don't try/catch
+		$db->exec($sql);
+
+		// fall back to safety authorizer
+		$db->enableSafetyAuthorizer();
 	}
 
 	/**
@@ -375,6 +448,9 @@ class TableFunctions
 		$db->commit();
 	}
 
+	/**
+	 * UPDATE or INSERT into module table
+	 */
 	static public function save(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
@@ -390,6 +466,7 @@ class TableFunctions
 		}
 
 		unset($params['key']);
+		$db = DB::getInstance();
 
 		// Save module config
 		if ($key === 'config') {
@@ -431,14 +508,25 @@ class TableFunctions
 
 		unset($value);
 
-		if ($where) {
-			$db->update($table, $params, $where, $sql_params);
+		// set authorizer to only allow working on this specific table
+		$db->enableTableAuthorizer($table);
+
+		try {
+			if ($where) {
+				$db->update($table, $params, $where, $sql_params);
+			}
+			else {
+				$params['key'] = Utils::uuid();
+				$db->insert($table, $params);
+				$id = $db->lastInsertId();
+			}
 		}
-		else {
-			$params['key'] = Utils::uuid();
-			$db->insert($table, $params);
-			$id = $db->lastInsertId();
+		catch (DB_Exception $e) {
+			throw new TemplateException($e->getMessage(), 0, $e);
 		}
+
+		// Re-enable default authorizer
+		$db->enableSafetyAuthorizer();
 
 		// Assign new row values
 		if ($assign) {
@@ -446,10 +534,21 @@ class TableFunctions
 		}
 	}
 
+	/**
+	 * DELETE from module table
+	 */
 	static public function delete(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
 			throw new TemplateException('Module name could not be found');
+		}
+
+		$db = DB::getInstance();
+
+		// TODO: remove when support for JSON documents is removed
+		if (!empty($params['legacy_data_table'])) {
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->data_table_name())));
+			return;
 		}
 
 		if (!array_key_exists('table', $params)) {
@@ -457,7 +556,6 @@ class TableFunctions
 			return;
 		}
 
-		$db = DB::getInstance();
 		$table = Modules::getModuleTableName($tpl->module->name, $params['table']);
 
 		$sql_params = [];
@@ -479,6 +577,17 @@ class TableFunctions
 			throw new TemplateException('Missing where clause for delete function');
 		}
 
-		$db->delete($table, $where, $sql_params);
+		// set authorizer to only allow working on this specific table
+		$db->enableTableAuthorizer($table);
+
+		try {
+			// Delete rows
+			$db->delete($table, $where, $sql_params);
+		}
+		catch (DB_Exception $e) {
+			throw new TemplateException($e->getMessage(), 0, $e);
+		}
+
+		$db->enableSafetyAuthorizer();
 	}
 }

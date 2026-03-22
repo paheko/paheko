@@ -583,7 +583,7 @@ class Functions
 	static public function button(array $params): string
 	{
 		// Always add CSRF protection when a submit button is present in the form
-		if (isset($params['type']) && $params['type'] == 'submit') {
+		if (($params['type'] ?? null) === 'submit') {
 			$key = self::_getFormKey();
 			$params['csrf_key'] = $key;
 		}

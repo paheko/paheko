@@ -51,6 +51,7 @@ class Module extends Entity
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
 	const TABLE_PREFIX = 'module_table_';
+	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z])*$/';
 
 	const TABLE = 'modules';
 
