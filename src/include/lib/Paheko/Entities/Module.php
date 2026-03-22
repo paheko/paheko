@@ -72,6 +72,9 @@ class Module extends Entity
 	protected bool $enabled;
 	protected bool $web;
 
+	protected ?string $version;
+	protected ?string $db_version;
+
 	/**
 	 * System modules are always available, disabling them only hides the links
 	 */
@@ -235,6 +238,7 @@ class Module extends Entity
 			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
 
+		$this->set('version', $ini->version ?? null);
 		$this->set('label', $ini->name);
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
