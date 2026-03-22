@@ -320,27 +320,9 @@ class Sections
 			. '}); ?>';
 	}
 
-	static protected function _debug(string $str): void
+	static public function _debug(string $str): void
 	{
 		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap; color: #000">%s</pre>', htmlspecialchars($str));
-	}
-
-	static protected function _debugExplain(string $sql): void
-	{
-		$explain = '';
-
-		try {
-			$r = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $sql);
-
-			foreach ($r as $e) {
-				$explain .= $e->detail . "\n";
-			}
-		}
-		catch (DB_Exception $e) {
-			$explain = 'Error: ' . $e->getMessage();
-		}
-
-		self::_debug($explain);
 	}
 
 	static protected function cache(string $id, callable $callback)
@@ -377,143 +359,67 @@ class Sections
 		}
 	}
 
-	/**
-	 * Creates indexes for json_extract expressions
-	 */
-	static protected function _createModuleIndexes(string $table, string $where): void
-	{
-		preg_match_all('/json_extract\s*\(\s*document\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
-
-		if (!count($match)) {
-			return;
-		}
-
-		$search_params = [];
-
-		foreach ($match as $m) {
-			$search_params[$m[2] ?? $m[1]] = $m[0];
-		}
-
-		if (!count($search_params)) {
-			return;
-		}
-
-		ksort($search_params);
-		$hash = sha1(implode('', array_keys($search_params)));
-
-		$db = DB::getInstance();
-
-		$sql = sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params));
-
-		try {
-			$db->exec($sql);
-		}
-		catch (DB_Exception $e) {
-			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
-		}
-	}
-
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('table', $params)) {
 			return LegacySections::load($params, $tpl, $line);
 		}
 
-		// FIXME
+
 	}
 
 	static public function list(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		if (empty($params['schema']) && empty($params['select'])) {
-			throw new Brindille_Exception('Missing schema parameter');
+		if (!array_key_exists('table', $params)) {
+			return LegacySections::list($params, $tpl, $line);
 		}
+
+		if (!$tpl->module) {
+			throw new TemplateException('Module name could not be found');
+		}
+
 		$db = DB::getInstance();
 
-		if (isset($params['module'])) {
-			$name = $params['module'];
-			$table = 'module_data_' . $name;
-			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
-		}
-		elseif (isset($tpl->module->name)) {
-			$name = $tpl->module->name;
-			$table = $tpl->module->table_name();
-			$has_table = $tpl->module->hasTable();
-		}
-		else {
-			throw new Brindille_Exception('Unique module name could not be found');
+		$module_name = $params['module'] ?? $tpl->module->name;
+
+		$table = Modules::getModuleTableName($module_name, $params['table']);
+
+		$params['where'] ??= '1';
+
+		if (empty($params['columns'])
+			|| !is_array($params['columns'])) {
+			throw new TemplateException('Missing or invalid "columns" parameter');
 		}
 
-		if (!$has_table) {
-			return;
+		$columns = $params['columns'];
+
+		// Always select ID and key if not selected
+		$columns['id'] ??= [];
+		$columns['key'] ??= [];
+
+		if (!empty($params['join'])) {
+			$table .= ' ' . $params['join'];
 		}
-
-		if (!isset($params['where'])) {
-			$where = '1';
-		}
-		else {
-			$where = self::_moduleReplaceJSONExtract($params['where'], $table);
-		}
-
-		$columns = [];
-
-		if (!empty($params['select'])) {
-			foreach (explode(';', $params['select']) as $i => $c) {
-				$c = trim($c);
-
-				$pos = strripos($c, ' AS ');
-
-				if ($pos) {
-					$select = trim(substr($c, 0, $pos));
-					$label = str_replace("''", "'", trim(substr($c, $pos + 5), ' \'"'));
-				}
-				else {
-					$select = $c;
-					$label = null;
-				}
-
-				if ($select === '*') {
-					throw new Brindille_Exception(sprintf('Line %d: "*" cannot be used in "select" parameter', $line));
-				}
-
-				$select = self::_moduleReplaceJSONExtract($select, $table);
-
-				$columns['col' . ($i + 1)] = compact('label', 'select');
-			}
-
-			if (isset($params['order'])) {
-				if (!is_int($params['order']) && !ctype_digit($params['order'])) {
-					throw new Brindille_Exception(sprintf('Line %d: "order" parameter must be the number of the column (starting from 1)', $line));
-				}
-
-				$params['order'] = 'col' . (int)$params['order'];
-			}
-		}
-		else {
-			$columns = self::_getModuleColumnsFromSchema($params['schema'], $params['columns'] ?? null, $tpl, $line);
-		}
-
-		$columns['id'] = [];
-		$columns['key'] = [];
-		$columns['document'] = [];
 
 		$list = new DynamicList($columns, $table);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'disable_user_sort', 'check', 'export', 'group', 'count'];
+		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'columns', 'where', 'module', 'user_sorting', 'checkable', 'group', 'export_button'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
-				if (false !== strpos($where, $key)) {
+				if (!str_contains($params['where'], $key)) {
+					throw new TemplateException(sprintf('Parameter "%s" is not mentioned in "where" parameter', $key));
 					$list->setParameter(substr($key, 1), $value);
 				}
 			}
-			elseif (!in_array($key, $reserved_keywords)) {
+			elseif (!in_array($key, $reserved_keywords, true)) {
 				$hash = sha1($key);
-				$where .= sprintf(' AND json_extract(document, %s) = :quick_%s', $db->quote('$.' . $key), $hash);
-				$list->setParameter('quick_' . $hash, $value);
+				$where .= sprintf(' AND %s = :param_%s', $db->quoteIdentifier($key), $hash);
+				$list->setParameter('param_' . $hash, $value);
 			}
 		}
 
-		$list->setConditions($where);
+		$list->setConditions($params['where']);
 		$size = (int) ($params['max'] ?? 50);
 		$list->setPageSize($size === 0 ? null : $size);
 
@@ -522,54 +428,15 @@ class Sections
 		}
 
 		if (isset($params['group'])) {
-			$list->groupBy(self::_moduleReplaceJSONExtract($params['group'], $table));
+			$list->groupBy($params['group'], $table);
 		}
 
-		$list->setModifier(function(&$row) use ($columns) {
-			$row->original = clone $row;
-			unset($row->original->id, $row->original->key, $row->original->document);
-
-			// Decode arrays/objects
-			foreach ($columns as $name => $column) {
-				if (!empty($column['_json_decode']) && isset($row->$name) && is_string($row->$name)) {
-					$row->$name = json_decode($row->$name, true);
-				}
-			}
-
-			if (null !== $row->document) {
-				$row = array_merge(json_decode($row->document, true), (array)$row);
-			}
-			else {
-				$row = (array) $row;
-			}
-		});
-
-
-		$list->setExportCallback(function(&$row) {
-			$row = $row['original'];
-			foreach ($row as $key => $value) {
-				if (!is_string($value) || substr($value, 0, 1) !== '{' || substr($value, -1) !== '}') {
-					continue;
-				}
-
-				$row->$key = Utils::export_value(json_decode($value));
-			}
-		});
-
-		// Try to create an index if required
-		self::_createModuleIndexes($table, $where);
-
-		if (empty($params['disable_user_ordering'])
-			&& empty($params['disable_user_sort'])) {
+		if ($params['user_sorting'] ?? true) {
 			$list->loadFromQueryString();
 		}
 
 		if (!empty($params['debug'])) {
 			self::_debug($list->SQL());
-		}
-
-		if (!empty($params['explain'])) {
-			self::_debugExplain($list->SQL());
 		}
 
 		try {
@@ -588,7 +455,6 @@ class Sections
 
 		if (!empty($params['export'])) {
 			$export_params = ['right' => true];
-			//$export_params['table'] = $params['export'] === 'table'; // Table export is currently not working in modules FIXME
 
 			printf('<p class="actions">%s</p>', CommonFunctions::exportmenu($export_params));
 		}
@@ -1479,10 +1345,6 @@ class Sections
 
 			if (!empty($params['debug'])) {
 				self::_debug($statement->getSQL(true));
-			}
-
-			if (!empty($params['explain'])) {
-				self::_debugExplain($statement->getSQL(true));
 			}
 
 			$db->setReadOnly(false);

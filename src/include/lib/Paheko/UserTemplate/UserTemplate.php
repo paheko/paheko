@@ -834,7 +834,7 @@ class UserTemplate extends \KD2\Brindille
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => $module->hasTable() ? $module->table_name() : null,
+			'table'        => $module->hasDataTable() ? $module->data_table_name() : null,
 		]));
 	}
 

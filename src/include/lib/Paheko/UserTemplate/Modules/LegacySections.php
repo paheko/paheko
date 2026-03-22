@@ -27,8 +27,8 @@ class Sections
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->table_name();
-			$has_table = $tpl->module->hasTable();
+			$table = $tpl->module->data_table_name();
+			$has_table = $tpl->module->hasDataTable();
 		}
 		else {
 			throw new TemplateException('Unique module name could not be found');
@@ -152,6 +152,42 @@ class Sections
 		}
 	}
 
+	/**
+	 * Creates indexes for json_extract expressions
+	 */
+	static protected function _createModuleIndexes(string $table, string $where): void
+	{
+		preg_match_all('/json_extract\s*\(\s*document\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
+
+		if (!count($match)) {
+			return;
+		}
+
+		$search_params = [];
+
+		foreach ($match as $m) {
+			$search_params[$m[2] ?? $m[1]] = $m[0];
+		}
+
+		if (!count($search_params)) {
+			return;
+		}
+
+		ksort($search_params);
+		$hash = sha1(implode('', array_keys($search_params)));
+
+		$db = DB::getInstance();
+
+		$sql = sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params));
+
+		try {
+			$db->exec($sql);
+		}
+		catch (DB_Exception $e) {
+			throw new Brindille_Exception(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
+		}
+	}
+
 	static protected function _getModuleColumnsFromSchema(string $schema, ?string $columns, UserTemplate $tpl, int $line): array
 	{
 		$schema = Functions::_readFile($schema, 'schema', $tpl, $line);
@@ -233,8 +269,8 @@ class Sections
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->table_name();
-			$has_table = $tpl->module->hasTable();
+			$table = $tpl->module->data_table_name();
+			$has_table = $tpl->module->hasDataTable();
 		}
 		else {
 			throw new Brindille_Exception('Unique module name could not be found');
@@ -362,11 +398,7 @@ class Sections
 		}
 
 		if (!empty($params['debug'])) {
-			self::_debug($list->SQL());
-		}
-
-		if (!empty($params['explain'])) {
-			self::_debugExplain($list->SQL());
+			Sections::_debug($list->SQL());
 		}
 
 		try {

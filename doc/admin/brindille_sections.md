@@ -292,8 +292,7 @@ Il est aussi possible d'utiliser les paramètres suivants :
 
 | Paramètre | Fonction |
 | :- | :- |
-| `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `debug` | Si ce paramètre existe et vaut `true`, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne y sera assigné. | 
 
 Exemple avec `debug` :
@@ -360,8 +359,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
-| `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `debug` | Si ce paramètre existe et vaut `true`, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. |
 
 Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points `:` :
@@ -725,7 +723,9 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `disable_user_sort` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
+| `user_sorting` | *optionnel* | Booléen. Si ce paramètre est `false`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
+| `export_button` | *optionnel* | Booléen. Si ce paramètre est `false`, le bouton d'export ne s'affichera pas au dessus de la liste. |
+| `checkable` | *optionnel* | Booléen. Si ce paramètre est `true`, le tableau comportera une première colonne permettant de cocher la ligne. |
 
 Comme pour `load`, il est possible d'utiliser d'autres paramètres supplémentaires, correspondant à la valeur des colonnes recherchées : `nom="Dulcie"` par exemple.
 

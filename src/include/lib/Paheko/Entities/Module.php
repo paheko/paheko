@@ -50,6 +50,7 @@ class Module extends Entity
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+	const TABLE_PREFIX = 'module_table_';
 
 	const TABLE = 'modules';
 
@@ -415,6 +416,9 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function data_table_name(): string
 	{
 		return sprintf('module_data_%s', $this->name);
@@ -422,15 +426,28 @@ class Module extends Entity
 
 	public function table_prefix(): string
 	{
-		return sprintf('module_table_%s_', $this->name);
+		return self::TABLE_PREFIX . $this->name . '_';
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public function hasDataTable(): bool
+	{
+		return DB::getInstance()->test('sqlite_master',
+			'type = \'table\' AND name = ?',
+			$this->data_table_name()
+		);
 	}
 
 	public function hasData(): bool
 	{
-		$this->_has_data ??= DB::getInstance()->test('sqlite_master',
-			'type = \'table\' AND name = ? OR name LIKE ?',
+		$db = DB::getInstance();
+
+		$this->_has_data ??= $db->test('sqlite_master',
+			'type = \'table\' AND name = ? OR name LIKE ? ESCAPE \'\\\'',
 			$this->data_table_name(),
-			$this->table_prefix() . '%',
+			$db->escapeLike($this->table_prefix(), '\\') . '%',
 		);
 
 		return $this->_has_data;
@@ -641,10 +658,12 @@ class Module extends Entity
 	public function deleteData(): void
 	{
 		$db = DB::getInstance();
-		$table_name = $db->quoteIdentifier($this->table_name());
+		$table_name = $db->quoteIdentifier($this->data_table_name());
 		// Delete data table
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
-		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ?;', $this->table_prefix() . '%');
+		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ? ESCAPE \'\\\';',
+			$db->escapeLike($this->table_prefix()) . '%'
+		);
 
 		// Delete all tables
 		foreach ($i as $table) {

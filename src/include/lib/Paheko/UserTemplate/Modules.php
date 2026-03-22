@@ -537,4 +537,21 @@ class Modules
 			unset($zip);
 		}
 	}
+
+	static public function getModuleTableName(string $module, ?string $table): string
+	{
+		if (!preg_match(Module::VALID_NAME_REGEXP, $module)) {
+			return \InvalidArgumentException('Invalid module name : ' . $module);
+		}
+
+		if (null === $table) {
+			return sprintf('module_data_%s', $module);
+		}
+
+		if (!preg_match('/^[a-z]+(?:_[a-z])*$/', $table) || strlen($table) > 70) {
+			return \InvalidArgumentException('Invalid table name: ' . $table);
+		}
+
+		return Module::TABLE_PREFIX . sprintf('%s_%s', $module, $table);
+	}
 }

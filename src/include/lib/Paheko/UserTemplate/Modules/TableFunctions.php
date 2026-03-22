@@ -31,15 +31,6 @@ class TableFunctions
 			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
 			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
 
-	static protected function _getModuleTableName(Module $module, string $name): string
-	{
-		if (!preg_match(self::MODULE_TABLE_NAME_REGEXP, $name)) {
-			throw new TemplateException('Invalid table name: ' . $name);
-		}
-
-		return $module->table_prefix() . $name;
-	}
-
 	static protected function _getModuleTableSQLDefinition(string $name, ?string $comment, array $columns): string
 	{
 		if (null !== $comment) {
@@ -162,7 +153,7 @@ class TableFunctions
 				$definition->fk_table = substr($definition->fk_table, 1);
 			}
 			else {
-				$definition->fk_table = self::_getModuleTableName($module, $definition->fk_table);
+				$definition->fk_table = Modules::getModuleTableName($module->name, $definition->fk_table);
 			}
 		}
 
@@ -240,7 +231,7 @@ class TableFunctions
 		unset($params[$action]);
 
 		$db = DB::getInstance();
-		$table = self::_getModuleTableName($tpl->module, $name);
+		$table = Modules::getModuleTableName($tpl->module->name, $name);
 
 		if ($action === 'create') {
 			foreach ($params as $name => $definition) {
@@ -301,7 +292,7 @@ class TableFunctions
 		}
 
 		$table = $params['table'] ?? '';
-		$table = self::_getModuleTableName($tpl->module, $name);
+		$table = Modules::getModuleTableName($tpl->module->name, $name);
 
 		$db = DB::getInstance();
 
@@ -354,7 +345,7 @@ class TableFunctions
 	 */
 	static protected function _createModuleTable(Module $module, string $name, array $columns): void
 	{
-		$table = self::_getModuleTableName($module, $name);
+		$table = Modules::getModuleTableName($module->name, $name);
 		$overwrite = false;
 
 		$db->begin();
@@ -412,7 +403,7 @@ class TableFunctions
 			return;
 		}
 
-		$table = self::_getModuleTableName($tpl->module, $params['table']);
+		$table = Modules::getModuleTableName($tpl->module->name, $params['table']);
 		$sql_params = [];
 		$where = null;
 
@@ -458,7 +449,7 @@ class TableFunctions
 		}
 
 		$db = DB::getInstance();
-		$table = self::_getModuleTableName($tpl->module, $params['table']);
+		$table = Modules::getModuleTableName($tpl->module->name, $params['table']);
 
 		$sql_params = [];
 		$where = null;
