@@ -588,16 +588,6 @@ Il est conseillé d'ajouter dans la page du résultat un bouton pour annuler la 
 
 Quand on a terminé avec le CSV, de la même manière il faut faire appel à l'action `clear`.
 
-Note : il est possible de combiner l'usage de la fonction `csv` avec le paramètre `from` de `save` pour enregistrer en une fois toutes les lignes :
-
-```
-{{if $csv.ready}}
-  {{:save type="entry" from=$csv.rows validate_schema="./entry.schema.json"}}
-  {{:csv action="clear"}}
-  {{:redirect to="./"}}
-{{/if}}
-```
-
 ### Chargement d'un fichier local
 
 Si le paramètre `file` n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action `initialize`. Exemple :
@@ -618,118 +608,242 @@ Comme le fichier est chargé en mémoire lors de la première exécution de l'ac
 
 Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.
 
-# Fonctions relatives aux Modules
+# Fonctions des tables SQL des modules
+
+Les modules peuvent disposer de tables SQL, contenant chacune plusieurs colonnes.
+
+Voir la documentation sur les modules pour voir comment gérer les évolutions du schéma SQL des tables du module.
+
+Note : les fonctions `table` et `column` refuseront de s'exécuter si le module ne dispose pas de `version` dans son fichier `module.ini`.
+
+## table
+
+Permet de récupérer, créer ou modifier une table SQL du module.
+
+### Créer une table
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `create` | **obligatoire** | Nom de la table |
+| `comment` | optionnel | Commentaire sur la table |
+
+Toutes les tables ont automatiquement une colonne `id` qui est également la clé primaire, ainsi qu'une colonne `key` qui contient un identifiant UUID unique.
+
+Les colonnes doivent être passées sous forme de paramètres supplémentaires, avec le nom de la colonne en nom de paramètre, et sa définition en valeur. Voir plus bas pour la définition d'une colonne.
+
+```
+{{:table create="matable"
+  titre="TEXT NOT NULL"
+  id_user="INTEGER NOT NULL REFERENCES !users (id) ON DELETE CASCADE"
+  id_service="INTEGER NULL REFERENCES !services (id)"
+}}
+```
+
+### Définition d'une colonne
+
+Une définition de colonne peut être un tableau (array) ou une chaîne de texte (string).
+
+Si la définition est une chaîne de texte, il convient de respecter le format suivant :
+
+```
+TYPE[ NULL][ DEFAULT][ REFERENCES][ UNIQUE][ INDEX][ COMMENT]
+```
+
+| Paramètre | Description |
+| :- | :- |
+| `TYPE` | Type de la colonne : `TEXT`, `INTEGER`, `REAL`, `NUMERIC` ou `DATETIME` |
+| `NULL` | Indique si la valeur nulle est acceptée pour la colonne : `NULL` ou `NOT NULL`. Si non spécifié, la colonne accepte une valeur nulle. |
+| `DEFAULT` | Indique la valeur par défaut : `DEFAULT 'Du texte'`, `DEFAULT 1312`, `DEFAULT CURRENT_TIMESTAMP`. La valeur `CURRENT_TIMESTAMP` n'est valide que pour les colonnes de type `DATETIME`, et indique que la date et heure du moment seront enregistrés au moment de la création d'une ligne. |
+| `REFERENCES nom_table (nom_colonne)…` | Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : `REFERENCES !users (id)`. Il est possible de spécifier l'action à effectuer si la clé étrangère est supprimée : `ON DELETE SET NULL` par exemple. |
+| `UNIQUE` | Indique si la colonne doit avoir une contrainte de valeur unique : une seule ligne de la table pourra avoir cette valeur. Il est possible d'avoir une clé unique composite en lui donnant un nom : `UNIQUE ma_cle_unique` |
+| `INDEX` | Indique si la colonne doit avoir un index. Il est possible de créer un index composite en lui donnant un nom : `INDEX ma_cle_d_index` |
+| `COMMENT` | Permet de spécifier un commentaire pour la colonne : `COMMENT 'Ceci est une colonne'` |
+
+Aucun autre code SQL n'est accepté.
+
+Note : le type `DATETIME` n'existe pas réellement dans SQLite, mais si ce type est spécifié, Paheko ajoutera une contrainte pour n'accepter que des chaînes de date/heure dans cette colonne (`CHECK (datetime(nom_colonne) = nom_colonne)`).
+
+Précisions sur les clés étrangères :
+
+* elles doivent forcément faire référence à une table et une colonne qui existe déjà
+* l'action par défaut est `SET NULL` si la clé étrangère est une table en dehors du module
+* l'action `RESTRICT` ne peut être utilisée pour une table en dehors du module
+
+Si la définition est un tableau il convient d'utiliser les clés suivantes :
+
+| Paramètre | Type | Exemple
+| :- | :- | :- |
+| `type` | `string` | `text`, `integer`… |
+| `null` | `bool` | `true` ou `false` |
+| `default` | `string` | `Du texte`, `1312`, `CURRENT_TIMESTAMP`… |
+| `fk_table` | `string` | `users` |
+| `fk_column` | `string` | `id` |
+| `fk_on_delete` | `string` | `SET NULL` |
+| `unique` | `string` ou `bool` | `true`, `ma_cle` |
+| `index` | `string` ou `bool` | `true`, `ma_cle` |
+| `comment` | `string` | `Ceci est une colonne` |
+
+### Utilisation d'index uniques
+
+Il est possible de créer un index unique pour une colonne, pour indiquer qu'une seule ligne doit avoir la valeur :
+
+```
+{{:table create="personnes"
+  nom="TEXT NOT NULL UNIQUE"
+}}
+```
+
+Il est aussi possible de créer un index unique sur plusieurs colonnes en lui donnant un nom qui doit être partagé entre les différentes colonnes :
+
+```
+{{:table create="personnes"
+  nom="TEXT NOT NULL UNIQUE mon_index_composite"
+  prenom="TEXT NOT NULL UNIQUE mon_index_composite"
+}}
+```
+
+### Renommer une table
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `rename` | obligatoire | Nom de la table à renommer |
+| `to` | obligatoire | Nouveau nom de table |
+
+```
+{{:table rename="ma_table" to="nouvelle_table"}}
+```
+
+### Supprimer une table
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `delete` | obligatoire | Nom de la table à supprimer |
+
+```
+{{:table delete="matable"}}
+```
+
+## column
+
+Permet d'ajouter, renommer, modifier ou supprimer une colonne à une table existante.
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `table` | obligatoire | Nom de la table |
+
+### Ajouter une colonne à une table
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `create` | obligatoire | Nom de la colonne |
+| `definition` | obligatoire | Définition de la colonne |
+
+À la place de `definition` il est possible aussi de passer simplement les paramètres suivants : type, default, comment, fk_table, fk_column, fk_on_delete, index, unique.
+
+```
+{{:column table="matable" create="machin" type="text" null=false}}
+```
+
+### Renommer une colonne
+
+| Paramètre | Fonction |
+| :- | :- |
+| `rename` | Indique le nom de la colonne à renommer |
+| `to` | Indique le nom de la nouvelle colonne |
+
+```
+{{:column table="matable" rename="machin" to="truc"}}
+```
+
+### Supprimer une colonne
+
+| Paramètre | Fonction |
+| :- | :- |
+| `delete` | Indique le nom de la colonne à supprimer |
+
+```
+{{:column table="matable" delete="machin"}}
+```
+
+### Modifier une colonne
+
+| Paramètre | Fonction |
+| :- | :- | :- |
+| `modify` | obligatoire | Indique le nom de la colonne à modifier |
+
+La syntaxe est identique à celle de la fonction pour ajouter une nouvelle colonne.
 
 ## save
 
-Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.
+Enregistre une ligne dans une table SQL du module.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `key` | optionnel | Clé unique du document |
-| `id` | optionnel | Numéro unique du document |
-| `validate_schema` | optionnel | Fichier de schéma JSON à utiliser pour valider les données avant enregistrement |
-| `validate_only` | optionnel | Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules. |
-| `assign_new_id` | optionnel | Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable. |
-| `from` | optionnel | Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer. |
-| `replace` | optionnel | (Booléen) Si ce paramètre vaut `true`, alors le contenu du document sera écrasé, au lieu d'être fusionné. |
-| … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans le document |
+| `table` | **obligatoire** | Nom de la table SQL |
+| `id` | optionnel | Numéro unique de la ligne |
+| `key` | optionnel | Clé UUID unique de la ligne |
+| `assign` | optionnel | Si renseigné, les informations de la nouvelle ligne seront indiqués dans cette variable, y compris l'ID et la clé, si la ligne est nouvelle. |
+| … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans la ligne |
 
-Si ni `key` ni `id` ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.
+Si ni `key` ni `id` ne sont indiqués, une nouvelle ligne sera créée avec un nouveau numéro (ID) unique.
 
-### Mise à jour
+Si d'autres colonnes existent mais ne sont pas spécifiées, la valeur par défaut, ou `NULL` sera inscrit comme valeur. Si une colonne est `NOT NULL` et que sa valeur n'est pas spécifiée, une erreur se produira.
 
-Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (`NULL`) seront effacées.
+Si une valeur est de type `array` (tableau), elle sera enregistrée sous forme de chaîne JSON dans la table SQL.
 
-```
-{{:save key="facture_43" nom="Atelier mobile" montant=250}}
-```
-
-Enregistrera dans la base de données le document suivant sous la clé `facture_43` :
+Exemple pour créer une nouvelle ligne dans la table :
 
 ```
-{"nom": "Atelier mobile", "montant": 250}
+{{:save table="personnes" nom="Dulcie" assign="personne"}}
+Le numéro de cette personne est {{$personne.id}}
 ```
 
-Exemple de mise à jour :
+Exemple de mise à jour de ligne :
 
 ```
-{{:save key="facture_43" montant=300}}
+{{:save table="personnes" id=42 nom="Albert-Charlie-Antoine-Baptiste"}}
 ```
 
-Seul le montant sera modifié, le nom ne sera pas modifié.
+### Enregistrer la configuration du module
 
-Par contre en utilisant le paramètre `replace`, le document sera écrasé :
-
-```
-{{:save key="facture_43" replace=true nom="Vente de vélo"}}
-```
-
-Donnera :
+Il est aussi possible de stocker des clés dans la configuration du module, toujours avec la fonction save. Pour cela il suffit de spécifier `key="config"` et aucune table :
 
 ```
-{"nom": "Vente de vélo"}
+{{:save key="config" ma_preference="oui"}}
 ```
 
-Le montant est donc supprimé.
-
-### Récupérer l'identifiant du document ajouté
-
-Exemple de récupération du nouvel ID :
+Cela sera ensuite disponible dans la variable `$module.config` :
 
 ```
-{{:save titre="Coucou !" assign_new_id="id"}}
-Le document n°{{$id}} a bien été enregistré.
-```
-
-### Enregistrer plusieurs documents en une fois
-
-Le paramètre `from` est équivalent à appeler la fonction `save` dans une boucle. Ainsi au lieu de :
-
-```
-{{:assign var="documents." title="Titre 1"}}
-{{:assign var="documents." title="Titre 2"}}
-{{#foreach from=$documents item="doc"}}
-  {{:save title=$doc.title validate_schema="./document.schema.json"}}
-{{/foreach}}
-```
-
-On peut simplement utiliser :
-
-```
-{{:assign var="documents." title="Titre 1"}}
-{{:assign var="documents." title="Titre 2"}}
-{{:save from=$documents validate_schema="./document.schema.json"}}
-```
-
-### Validation avec un schéma JSON
-
-```
-{{:save titre="Coucou" texte="Très long" validate_schema="./document.schema.json"}}
-```
-
-Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise à jour du document :
-
-```
-{{:save key="test" titre="Coucou" validate_schema="./document.schema.json" validate_only="titre"}}
+Vous préférez vivre sans capitalisme : {{$module.config.ma_preference}}
 ```
 
 ## delete
 
-Supprime un document lié au module courant.
+Supprime une ou plusieurs lignes d'une table SQL du module.
 
 | Paramètre | Obligatoire ou optionnel ? | Fonction |
 | :- | :- | :- |
-| `key` | optionnel | Clé unique du document |
-| `id` | optionnel | Numéro unique du document |
+| `table` | **obligatoire** | Nom de la table SQL |
+| `id` | optionnel | Numéro unique de la ligne |
+| `key` | optionnel | Clé UUID unique de la ligne |
+| `where` | optionnel | Critère de suppression |
 
-Il est possible de spécifier d'autres paramètres, ou une clause `where` et des paramètres dont le nom commence par deux points.
+Si ni `key`, ni `id`, ni aucun autre critère n'est indiqué, une erreur sera renvoyée, car cela supprimerait toutes les lignes de la table.
 
-* Supprimer le document avec la clé `facture_43` : `{{:delete key="facture_43"}}`
-* Supprimer le document avec la clé `ABCD` et dont la propriété `type` du document correspond à la valeur `facture` : `{{:delete key="ABCD" type="facture"}}`
-* Supprimer tous les documents : `{{:delete}}`
-* Supprimer tous les documents ayant le type `facture` : `{{:delete type="facture"}}`
-* Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime()"}}`
+Il est possible de spécifier d'autres colonnes comme critères de suppression. Exemple pour supprimer toutes les personnes ayant comme code postal `21000` :
+
+```
+{{:delete table="personnes" code_postal="21000"}}
+```
+
+C'est l'équivalent de :
+
+```
+{{:delete table="personnes" where="code_postal = '21000'"}}
+```
+
+# Autres fonctions des modules
 
 ## read
 
