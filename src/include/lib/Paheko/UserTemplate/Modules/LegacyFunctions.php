@@ -18,7 +18,7 @@ class LegacyFunctions
 	/**
 	 * @deprecated
 	 */
-	static protected function save(array $params, UserTemplate $tpl, int $line): void
+	static public function save(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
 			throw new TemplateException('Module name could not be found');

@@ -77,7 +77,7 @@ class Module extends Entity
 	 */
 	protected bool $system;
 
-	protected bool $_table_exists;
+	protected bool $_has_data;
 
 	protected ?\stdClass $_ini;
 
@@ -411,20 +411,30 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	public function table_name(): string
+	public function data_table_name(): string
 	{
 		return sprintf('module_data_%s', $this->name);
 	}
 
-	public function hasTable(): bool
+	public function table_prefix(): string
 	{
-		$this->_table_exists ??= DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $this->table_name());
-		return $this->_table_exists;
+		return sprintf('module_table_%s_', $this->name);
+	}
+
+	public function hasData(): bool
+	{
+		$this->_has_data ??= DB::getInstance()->test('sqlite_master',
+			'type = \'table\' AND name = ? OR name LIKE ?',
+			$this->data_table_name(),
+			$this->table_prefix() . '%',
+		);
+
+		return $this->_has_data;
 	}
 
 	public function getDataSize(): int
 	{
-		return (int) DB::getInstance()->getTableSize($this->table_name());
+		return (int) DB::getInstance()->getTableSize($this->data_table_name());
 	}
 
 	public function getConfigSize(): int
@@ -523,7 +533,7 @@ class Module extends Entity
 
 	public function canDeleteData(): bool
 	{
-		return !empty($this->config) || $this->hasTable();
+		return !empty($this->config) || $this->hasData();
 	}
 
 	public function listFiles(?string $path = null): array
@@ -628,7 +638,14 @@ class Module extends Entity
 	{
 		$db = DB::getInstance();
 		$table_name = $db->quoteIdentifier($this->table_name());
+		// Delete data table
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
+		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ?;', $this->table_prefix() . '%');
+
+		// Delete all tables
+		foreach ($i as $table) {
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table->name)));
+		}
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {

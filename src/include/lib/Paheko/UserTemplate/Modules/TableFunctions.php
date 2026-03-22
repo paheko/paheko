@@ -1,6 +1,6 @@
 <?php
 
-namespace Paheko\UserTemplate;
+namespace Paheko\UserTemplate\Modules;
 
 use Paheko\TemplateException;
 use Paheko\UserTemplate\UserTemplate;
@@ -10,6 +10,8 @@ class TableFunctions
 	const FUNCTIONS_LIST = [
 		'table',
 		'column',
+		'save',
+		'delete',
 	];
 
 	const MODULE_TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z])*$/';
@@ -35,7 +37,7 @@ class TableFunctions
 			throw new TemplateException('Invalid table name: ' . $name);
 		}
 
-		return sprintf('module_table_%s_%s', $module->name, $name);
+		return $module->table_prefix() . $name;
 	}
 
 	static protected function _getModuleTableSQLDefinition(string $name, ?string $comment, array $columns): string
@@ -52,6 +54,10 @@ class TableFunctions
 		];
 
 		foreach ($columns as $name => $definition) {
+			if ($name === 'id' || $name === 'key') {
+				throw new TemplateException(sprintf('The column name "%s" is already used (built-in default of table)', $name));
+			}
+
 			$columns[] = $definition->sql;
 		}
 
@@ -376,5 +382,103 @@ class TableFunctions
 		}
 
 		$db->commit();
+	}
+
+	static public function save(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (!$tpl->module) {
+			throw new TemplateException('Module name could not be found');
+		}
+
+		$key = $params['key'] ?? null;
+
+		if (!array_key_exists('table', $params)
+			&& $key !== 'config') {
+			LegacyFunctions::save($params, $tpl, $line);
+			return;
+		}
+
+		unset($params['key']);
+
+		// Save module config
+		if ($key === 'config') {
+			$config = array_merge((array) $module->config, $params);
+
+			// Don't save NULL values, NULL means removed
+			$config = array_filter($config, fn($a) => !is_null($a));
+
+			$module->set('config', (object) $config);
+			$module->save();
+			return;
+		}
+
+		$table = self::_getModuleTableName($tpl->module, $params['table']);
+		$sql_params = [];
+		$where = null;
+
+		if (!empty($params['id'])) {
+			$where = 'id = :id';
+			$sql_params['id'] = $id;
+		}
+		elseif ($key) {
+			$where = 'key = :key';
+			$sql_params['key'] = $key;
+		}
+		elseif (!empty($params['where'])) {
+			$where = $params['where'];
+		}
+
+		$assign = $params['assign'] ?? null;
+		unset($params['id'], $params['assign'], $params['table'], $params['where']);
+
+		$columns = array_map(function ($value) {
+			if (!is_scalar($value)) {
+				$value = json_encode($value);
+			}
+			return $value;
+		}, $params);
+
+		if ($where) {
+			$db->update($table, $columns, $where, $sql_params);
+		}
+		else {
+			$db->insert($table, $columns);
+		}
+	}
+
+	static public function delete(array $params, UserTemplate $tpl, int $line): void
+	{
+		if (!$tpl->module) {
+			throw new TemplateException('Module name could not be found');
+		}
+
+		if (!array_key_exists('table', $params)) {
+			LegacyFunctions::delete($params, $tpl, $line);
+			return;
+		}
+
+		$db = DB::getInstance();
+		$table = self::_getModuleTableName($tpl->module, $params['table']);
+
+		$sql_params = [];
+		$where = null;
+
+		if (!empty($params['id'])) {
+			$where = 'id = :id';
+			$sql_params['id'] = $id;
+		}
+		elseif ($key) {
+			$where = 'key = :key';
+			$sql_params['key'] = $key;
+		}
+		elseif (!empty($params['where'])) {
+			$where = $params['where'];
+		}
+
+		if (!$where) {
+			throw new TemplateException('Missing where clause for delete function');
+		}
+
+		$db->delete($table, $where, $sql_params);
 	}
 }

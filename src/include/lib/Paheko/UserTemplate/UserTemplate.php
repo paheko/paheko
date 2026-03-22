@@ -345,7 +345,6 @@ class UserTemplate extends \KD2\Brindille
 		// Modules functions
 		static $functions_classes = [
 			Functions::class,
-			Modules\DatabaseFunctions::class,
 			Modules\TableFunctions::class,
 		];
 

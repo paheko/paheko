@@ -783,6 +783,7 @@ Enregistre une ligne dans une table SQL du module.
 | `id` | optionnel | Numéro unique de la ligne |
 | `key` | optionnel | Clé UUID unique de la ligne |
 | `assign` | optionnel | Si renseigné, les informations de la nouvelle ligne seront indiqués dans cette variable, y compris l'ID et la clé, si la ligne est nouvelle. |
+| `where` | optionnel | Si renseigné, sera utilisé comme clause `WHERE` pour mettre à jour plusieurs lignes en une fois. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans la ligne |
 
 Si ni `key` ni `id` ne sont indiqués, une nouvelle ligne sera créée avec un nouveau numéro (ID) unique.
@@ -831,13 +832,7 @@ Supprime une ou plusieurs lignes d'une table SQL du module.
 
 Si ni `key`, ni `id`, ni aucun autre critère n'est indiqué, une erreur sera renvoyée, car cela supprimerait toutes les lignes de la table.
 
-Il est possible de spécifier d'autres colonnes comme critères de suppression. Exemple pour supprimer toutes les personnes ayant comme code postal `21000` :
-
-```
-{{:delete table="personnes" code_postal="21000"}}
-```
-
-C'est l'équivalent de :
+Exemple d'utilisation du paramètre `where` :
 
 ```
 {{:delete table="personnes" where="code_postal = '21000'"}}

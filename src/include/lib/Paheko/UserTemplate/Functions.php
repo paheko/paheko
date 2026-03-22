@@ -6,7 +6,6 @@ use KD2\Brindille_Exception;
 use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 use KD2\HTTP;
-use KD2\JSONSchema;
 use KD2\Security;
 
 use Paheko\API;
