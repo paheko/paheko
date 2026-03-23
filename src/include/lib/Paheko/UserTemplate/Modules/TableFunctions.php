@@ -328,11 +328,13 @@ class TableFunctions
 	 */
 	static public function column(array $params, UserTemplate $tpl, int $line): void
 	{
-		if (!$tpl->module) {
+		$module = $tpl->module ?? null;
+
+		if (!$module) {
 			throw new TemplateException('Module name could not be found');
 		}
 
-		if (!$tpl->module->version) {
+		if (!$module->version) {
 			throw new TemplateException('A module cannot use the "column" function if it doesn\'t have a "version" in module.ini');
 		}
 
@@ -359,16 +361,23 @@ class TableFunctions
 			throw new TemplateException('Invalid column name: ' . $column);
 		}
 
-		$table = $params['table'] ?? '';
-		$table = Modules::getModuleTableName($tpl->module->name, $name);
+		$table_name = $params['table'] ?? '';
+		$table_name = Modules::getModuleTableName($module->name, $table_name);
 
 		$db = DB::getInstance();
 
-		if (!$db->hasTable($table)) {
-			throw new TemplateException('This table doesn\'t exist: ' . $table);
+		if (!$db->hasTable($table_name)) {
+			throw new TemplateException('This table doesn\'t exist: ' . $table_name);
 		}
 
-			$columns = self::_getModuleTableColumns($params['table']);
+		$table = $module->getTable($params['table']);
+
+		if (!$table) {
+			throw new \LogicException('Missing metadata for table: ' . $table_name);
+
+		}
+
+		$columns = $table->columns;
 
 		if ($action === 'rename') {
 			$new_name = $params['to'] ?? '';
@@ -473,6 +482,7 @@ class TableFunctions
 		}
 
 		$key = $params['key'] ?? null;
+		$id = $params['id'] ?? null;
 
 		if (!array_key_exists('table', $params)
 			&& $key !== 'config') {
@@ -480,7 +490,7 @@ class TableFunctions
 			return;
 		}
 
-		unset($params['key']);
+		unset($params['key'], $params['id']);
 		$db = DB::getInstance();
 
 		// Save module config
@@ -499,7 +509,7 @@ class TableFunctions
 		$sql_params = [];
 		$where = null;
 
-		if (!empty($params['id'])) {
+		if ($id) {
 			$where = 'id = :id';
 			$sql_params['id'] = $id;
 		}

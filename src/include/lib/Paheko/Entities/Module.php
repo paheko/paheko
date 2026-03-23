@@ -16,6 +16,7 @@ use Paheko\Web\Cache;
 use Paheko\Web\Router;
 
 use KD2\ZipWriter;
+use KD2\DB\EntityManager as EM;
 
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
@@ -1033,5 +1034,18 @@ class Module extends Entity
 
 		$this->set('enabled', false);
 		$this->save();
+	}
+
+	public function createTable(string $name, ?string $comment, array $columns): ModuleTable
+	{
+		$table = new ModuleTable;
+		$table->import(compact('name', 'comment', 'columns'));
+		$table->id_module = $this->id();
+		return $table;
+	}
+
+	public function getTable(string $name): ?ModuleTable
+	{
+		return EM::findOne(ModuleTable::class, 'SELECT * FROM @TABLE WHERE id_module = ? AND name = ?;', $this->id(), $name);
 	}
 }

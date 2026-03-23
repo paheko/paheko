@@ -372,7 +372,8 @@ class Sections
 		$params['where'] ??= '1';
 		$params['select'] ??= '*';
 
-		$assign = $params['assign'] ?? null;
+		unset($params['table'], $params['module']);
+		$params['tables'] = $table;
 
 		return self::sql($params, $tpl, $line);
 	}
