@@ -159,7 +159,7 @@ class DynamicList implements \Countable
 
 	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
-		$this->columns = $columns;
+		$this->setColumns($columns);
 		$this->tables = $tables;
 		$this->conditions = $conditions;
 		$this->order = key($columns);
@@ -232,6 +232,17 @@ class DynamicList implements \Countable
 
 	public function setColumns(array $columns)
 	{
+		foreach ($columns as &$column) {
+			if (is_string($column)) {
+				$column = ['label' => $column];
+			}
+			elseif (is_null($column)) {
+				$column = [];
+			}
+		}
+
+		unset($column);
+
 		$this->columns = $columns;
 	}
 

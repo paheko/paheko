@@ -28,7 +28,7 @@ Il est recommandé d'utiliser le stockage sous forme de tables SQL.
 Exemple de migration :
 
 ```
-{{if !$module.version}}
+{{if !$module.db_version}}
 	{{:table create="personnes" nom="TEXT NOT NULL"}}
 	{{#load type="personne"}}
 		{{:save table="personnes" id=$id key=$key nom=$nom}}

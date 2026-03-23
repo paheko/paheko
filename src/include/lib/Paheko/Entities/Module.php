@@ -30,6 +30,7 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
+	const MIGRATION_FILE = 'migration.tpl';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -51,7 +52,7 @@ class Module extends Entity
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
 	const TABLE_PREFIX = 'module_table_';
-	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z])*$/';
+	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z]+)*$/';
 
 	const TABLE = 'modules';
 
@@ -291,6 +292,41 @@ class Module extends Entity
 		}
 
 		Files::createFromString($this->path('module.ini'), $ini);
+	}
+
+	public function upgradeIfRequired(): void
+	{
+		if (!$this->version
+			|| $this->version === $this->db_version
+			|| version_compare((string) $this->version, (string) $this->db_version, '==')) {
+			return;
+		}
+
+		if (!$this->hasFile(self::MIGRATION_FILE)) {
+			return;
+		}
+
+		// Execute migration
+		$db = DB::getInstance();
+		$db->begin();
+		$r = $this->fetch(self::MIGRATION_FILE, []);
+		$db->commit();
+		$r = trim($r);
+
+		// If the template returned something display it and stop there
+		if ($r !== '') {
+			if (!str_starts_with($r, '<!DOCTYPE')
+				&& !str_starts_with($r, '<')) {
+				echo '<!DOCTYPE html><meta charset="utf-8" />';
+			}
+
+			echo $r;
+
+			exit;
+		}
+
+		$this->set('db_version', $this->version);
+		$this->save();
 	}
 
 	public function updateTemplates(): void
@@ -730,6 +766,8 @@ class Module extends Entity
 
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
+		$this->upgradeIfRequired();
+
 		if (substr(Utils::basename($path), 0, 1) === '.') {
 			throw new UserException('Unknown path', 404);
 		}

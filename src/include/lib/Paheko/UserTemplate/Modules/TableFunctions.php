@@ -12,6 +12,8 @@ use Paheko\Entities\Module;
 
 use KD2\DB\DB_Exception;
 
+use stdClass;
+
 class TableFunctions
 {
 	const FUNCTIONS_LIST = [
@@ -32,11 +34,11 @@ class TableFunctions
 	const MODULE_COLUMN_DEFINITION_REGEXP = '/^(TEXT|INT|INTEGER|DATETIME|REAL|FLOAT|NUMERIC)
 			(?:\s+(NOT\s+NULL|NULL))?
 			(?:\s+DEFAULT\s+("[^"]*"|\'[^\']*\'|\d+|CURRENT_TIMESTAMP))?
-			(?:\s+REFERENCES\s+((?-i)[a-z0-9_]+)\s*\((?-i)[a-z0-9_]+\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|RESTRICT|CASCADE))?)?
+			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|RESTRICT|CASCADE))?)?
 			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
 			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
 
-	static protected function _getModuleTableSQLDefinition(string $name, ?string $comment, array $columns): string
+	static protected function _getModuleTableSQLDefinition(string $table, ?string $comment, array $columns): string
 	{
 		if (null !== $comment) {
 			// Make sure comment doesn't have line breaks, and is not too long
@@ -44,36 +46,44 @@ class TableFunctions
 			$comment = '-- ' . $comment . "\n";
 		}
 
-		$columns = [
-			'id INTEGER NOT NULL,',
-			'key TEXT NOT NULL UNIQUE,',
-		];
+		$columns_str = [];
 
 		foreach ($columns as $name => $definition) {
 			if ($name === 'id' || $name === 'key') {
 				throw new TemplateException(sprintf('The column name "%s" is already used (built-in default of table)', $name));
 			}
 
-			$columns[] = $definition->sql;
+			$columns_str[] = $definition->sql;
 		}
+
+		$columns_str = array_merge([
+			'id INTEGER NOT NULL,',
+			'key TEXT NOT NULL UNIQUE,',
+		], $columns_str);
+
 
 		// putting the primary key definition here instead of in the column definition
 		// is better as it avoids having to delete the comma from the last column definition
-		$columns[] = 'PRIMARY KEY (id)';
+		$columns_str[] = 'PRIMARY KEY (id)';
 
 		$db = DB::getInstance();
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n%s(\n  %s);", $db->quoteIdentifier($table), $comment, implode("\n  ", $columns));
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n%s(\n  %s\n);", $db->quoteIdentifier($table), $comment, implode("\n  ", $columns_str));
+
 		return $sql;
 	}
 
 	/**
 	 * Verify column definition and export it to SQL code
 	 */
-	static protected function _getModuleColumnDefinition(Module $module, string $name, ?string $definition_str, ?array $definition, array &$unique_indexes): stdClass
+	static protected function _getModuleColumnDefinition(Module $module, string $name, string|array $definition): stdClass
 	{
-		if (null !== $definition_str) {
-			if (!preg_match(self::MODULE_COLUMN_DEFINITION_REGEXP, $definition_str, $match)) {
-				throw new TemplateException(sprintf('Invalid column "%s" definition: %s', $name, $definition_str));
+		if (!preg_match(Module::TABLE_NAME_REGEXP, $name)) {
+			throw new TemplateException('Invalid column name: ' . $name);
+		}
+
+		if (is_string($definition)) {
+			if (!preg_match(self::MODULE_COLUMN_DEFINITION_REGEXP, $definition, $match)) {
+				throw new TemplateException(sprintf('Invalid column "%s" definition: %s', $name, $definition));
 			}
 
 			$definition = (object) [
@@ -87,7 +97,7 @@ class TableFunctions
 				'comment'      => !empty($match[11]) ? trim($match[11], '\'"') : null,
 			];
 		}
-		else {
+		elseif (is_array($definition)) {
 			static $keys = null;
 
 			if (null === $keys) {
@@ -97,10 +107,18 @@ class TableFunctions
 
 			$definition = (object) array_intersect_key($definition, $keys);
 		}
+		else {
+			throw new TemplateException('Invalid column definition for: ' . $name);
+		}
 
 		$db = DB::getInstance();
+		$definition->name = $name;
 
-		$definition->type = strtoupper($type);
+		if (empty($definition->type)) {
+			throw new TemplateException('Missing type for column: ' . $name);
+		}
+
+		$definition->type = strtoupper($definition->type);
 		$definition->fk_on_delete = isset($definition->fk_on_delete) ? strtoupper($definition->fk_on_delete) : null;
 		$definition->constraint = null;
 
@@ -120,12 +138,14 @@ class TableFunctions
 		elseif (!is_bool($definition->null)) {
 			throw new TemplateException(sprintf('Invalid column "%s": null can only be a boolean', $name));
 		}
-		elseif (strtoupper($definition->default) === 'CURRENT_TIMESTAMP'
-			&& !$definition->type !== 'DATETIME') {
+		elseif (isset($definition->default)
+			&& strtoupper($definition->default) === 'CURRENT_TIMESTAMP'
+			&& $definition->type !== 'DATETIME') {
 			throw new TemplateException(sprintf('Invalid column "%s": default value "%s" is only valid for DATETIME type', $name, $definition->default));
 		}
-		elseif (!in_array($definition->fk_on_delete, ['SET NULL', 'RESTRICT', 'CASCADE'], true)) {
-			throw new TemplateException(sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $definition->fk_on_delete));
+		elseif (isset($definition->fk_on_delete)
+			&& !in_array($definition->fk_on_delete, ['SET NULL', 'RESTRICT', 'CASCADE'], true)) {
+			throw new TemplateException(sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $name, $definition->fk_on_delete));
 		}
 		elseif (isset($definition->fk_table)
 			&& !isset($definition->fk_column)) {
@@ -136,14 +156,15 @@ class TableFunctions
 			throw new TemplateException(sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
 		}
 		elseif (isset($definition->fk_table)
-			&& !preg_match('/^!?[a-z]+(?:_[a-z]+)$/', $definition->fk_table)) {
-			throw new TemplateException(sprintf('Invalid column "%s" foreign key table name "%s"', $name, $definition->fk_table));
+			&& !preg_match('/^!?[a-z]+(?:_[a-z]+)*$/', $definition->fk_table)) {
+			throw new TemplateException(sprintf('Invalid column "%s" foreign key: invalid table name "%s"', $name, $definition->fk_table));
 		}
 		elseif (isset($definition->fk_column)
 			&& !preg_match(Module::TABLE_NAME_REGEXP, $definition->fk_column)) {
 			throw new TemplateException(sprintf('Invalid column "%s" foreign key column name "%s"', $name, $definition->fk_column));
 		}
-		elseif (strtoupper($definition->fk_on_delete) === 'RESTRICT'
+		elseif (isset($definition->fk_on_delete)
+			&& strtoupper($definition->fk_on_delete) === 'RESTRICT'
 			&& substr($definition->fk_table, 0, 1) === '!') {
 			throw new TemplateException(sprintf('Invalid column "%s": foreign key constraint "%s" is only valid for internal module tables', $name, $definition->fk_on_delete));
 		}
@@ -176,7 +197,7 @@ class TableFunctions
 			// apparently sqlite doesn't care about column type matching foreign key column and local column, that's good
 		}
 
-		$sql = $definition->type . ' ' . $definition->null ? 'NULL' : 'NOT NULL';
+		$sql = sprintf('%s %s %s', $db->quoteIdentifier($name), $definition->type, $definition->null ? 'NULL' : 'NOT NULL');
 
 		if (isset($definition->default)) {
 			$sql .= ' DEFAULT ';
@@ -198,14 +219,8 @@ class TableFunctions
 			);
 		}
 
-		if (isset($definition->unique)) {
-			if ($definition->unique === true) {
-				$sql .= ' UNIQUE';
-			}
-			else {
-				$unique_indexes[$definition->unique] ??= [];
-				$unique_indexes[$definition->unique][] = $name;
-			}
+		if ($definition->unique === true) {
+			$sql .= ' UNIQUE';
 		}
 
 		$sql .= ',';
@@ -266,7 +281,7 @@ class TableFunctions
 					continue;
 				}
 
-				$columns[] = self::_getModuleColumnDefinition($tpl->module, $name, $code);
+				$columns[$name] = self::_getModuleColumnDefinition($tpl->module, $name, $definition);
 			}
 
 			$sql = self::_getModuleTableSQLDefinition($table, $params['comment'] ?? null, $columns);

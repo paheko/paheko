@@ -413,7 +413,7 @@ class Sections
 		// Make sure we cannot get unauthorized data
 		$list->setAllowedTables(self::SQL_TABLES);
 
-		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'columns', 'where', 'module', 'user_sorting', 'checkable', 'group', 'export_button'];
+		static $reserved_keywords = ['table', 'max', 'order', 'desc', 'debug', 'explain', 'columns', 'where', 'module', 'user_sorting', 'checkable', 'group', 'export_button'];
 
 		foreach ($params as $key => $value) {
 			if ($key[0] == ':') {
@@ -424,7 +424,7 @@ class Sections
 			}
 			elseif (!in_array($key, $reserved_keywords, true)) {
 				$hash = sha1($key);
-				$where .= sprintf(' AND %s = :param_%s', $db->quoteIdentifier($key), $hash);
+				$params['where'] .= sprintf(' AND %s = :param_%s', $db->quoteIdentifier($key), $hash);
 				$list->setParameter('param_' . $hash, $value);
 			}
 		}
@@ -474,7 +474,9 @@ class Sections
 		$tpl->assign('disable_user_sort', boolval($params['user_sorting'] ?? false));
 		$tpl->display();
 
-		yield from $i;
+		foreach ($i as $row) {
+			yield (array) $row;
+		}
 
 		echo '</tbody>';
 		echo '</table>';
