@@ -212,6 +212,10 @@ Voici un exemple de fichier `migration.tpl` :
 {{/if}}
 ```
 
+Ce squelette ne doit rien afficher. Si quelque chose est affiché, l'exécution du module sera stoppée, car on considère que le squelette a produit une erreur ou le développeur veut afficher quelque chose pour faire du debug.
+
+Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.
+
 <!-- FIXME: supprimer quand sera supprimé le stockage JSON dans les modules -->
 Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. [Voir l'ancienne documentation](brindille_storage_json.md).
 
