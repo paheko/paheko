@@ -3,8 +3,9 @@
 namespace Paheko\UserTemplate\Modules;
 
 use Paheko\TemplateException;
-use Paheko\UserTemplate\UserTemplate;
+use Paheko\UserTemplate\Functions;
 use Paheko\UserTemplate\LegacySections;
+use Paheko\UserTemplate\UserTemplate;
 use Paheko\DB;
 use Paheko\Utils;
 use KD2\JSONSchema;
@@ -110,7 +111,7 @@ class LegacyFunctions
 			static $schemas = [];
 
 			if (!isset($schemas[$validate])) {
-				$schema = self::_readFile($validate, 'validate_schema', $tpl, $line);
+				$schema = Functions::_readFile($validate, 'validate_schema', $tpl, $line);
 
 				if ($validate_only && is_string($validate_only)) {
 					$validate_only = explode(',', $validate_only);

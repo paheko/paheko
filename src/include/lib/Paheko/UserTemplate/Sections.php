@@ -362,7 +362,8 @@ class Sections
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('table', $params)) {
-			return LegacySections::load($params, $tpl, $line);
+			yield from LegacySections::load($params, $tpl, $line);
+			return;
 		}
 
 		$db = DB::getInstance();
@@ -381,7 +382,8 @@ class Sections
 	static public function list(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('table', $params)) {
-			return LegacySections::list($params, $tpl, $line);
+			yield from LegacySections::list($params, $tpl, $line);
+			return;
 		}
 
 		if (!$tpl->module) {

@@ -263,6 +263,7 @@ class LegacySections
 		if (empty($params['schema']) && empty($params['select'])) {
 			throw new TemplateException('Missing schema parameter');
 		}
+
 		$db = DB::getInstance();
 
 		if (isset($params['module'])) {
