@@ -1084,13 +1084,20 @@ class Module extends Entity
 	public function createTable(string $name, ?string $comment, array $columns): ModuleTable
 	{
 		$table = new ModuleTable;
+		$table->set('id_module', $this->id());
 		$table->import(compact('name', 'comment', 'columns'));
-		$table->id_module = $this->id();
+		$table->setModule($this);
 		return $table;
 	}
 
 	public function getTable(string $name): ?ModuleTable
 	{
-		return EM::findOne(ModuleTable::class, 'SELECT * FROM @TABLE WHERE id_module = ? AND name = ?;', $this->id(), $name);
+		$table = EM::findOne(ModuleTable::class, 'SELECT * FROM @TABLE WHERE id_module = ? AND name = ?;', $this->id(), $name);
+
+		if ($table) {
+			$table->setModule($this);
+		}
+
+		return $table;
 	}
 }

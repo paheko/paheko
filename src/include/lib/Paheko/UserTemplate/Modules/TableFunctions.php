@@ -104,67 +104,48 @@ class TableFunctions
 		unset($params[$action]);
 
 		$db = DB::getInstance();
-		$table_name = Modules::getModuleTableName($module->name, $name);
+		$table = $module->getTable($name);
 
 		if ($action === 'create') {
-			if ($db->hasTable($table_name)) {
-				throw new TemplateException('This table already exists: ' . $table_name);
+			if ($table) {
+				throw new TemplateException('This table already exists: ' . $name);
 			}
 
-			foreach ($params as $name => $definition) {
-				if ($name === 'comment') {
-					continue;
-				}
+			$comment = $params['comment'] ?? null;
+			unset($params['comment']);
 
-				$columns[$name] = self::_getModuleColumnDefinition($module, $name, $definition);
+			$table = $module->createTable($name, $comment, $params);
+		}
+		elseif (!$table) {
+			throw new TemplateException('This table does not exist: ' . $name);
+		}
+
+		if ($action === 'export') {
+			if (empty($params['assign'])) {
+				throw new TemplateException('Missing "assign" parameter for export');
 			}
 
-			$table->set('columns', $columns);
-
-
-			$sql = self::_getModuleTableSQLDefinition($table_name, $params['comment'] ?? null, $columns);
+			$export = $table->asArray();
+			unset($export['id']);
+			$export['sql'] = $table->getSQL();
+			$tpl->assign($params['assign'], $export);
+			return;
 		}
 		elseif ($action === 'rename') {
-			$new_name = $params['to'] ?? '';
-
-			if (!preg_match(Module::TABLE_NAME_REGEXP, $new_name)) {
-				throw new TemplateException('Invalid new table name: ' . $new_name);
-			}
-
-			$table->set('name', $new_name);
-			$new_name = Modules::getTableName($module->name, $new_name);
-
-			if (!$db->hasTable($table_name)) {
-				throw new TemplateException('This table does not exist: ' . $table_name);
-			}
-
-			if ($db->hasTable($new_name)) {
-				throw new TemplateException('Cannot rename, as target table name exists: ' . $new_name);
-			}
-
-			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table_name), $db->quoteIdentifier($new_name));
-		}
-		elseif ($action === 'delete') {
-			if (!$db->hasTable($table_name)) {
-				throw new TemplateException('This table does not exist: ' . $table_name);
-			}
-
-			$sql = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name));
+			$table->set('name', $params['to']);
 		}
 
-		// set authorizer to only allow working on this specific table
-		$db->enableTableAuthorizer($table_name);
-
-		$db->begin();
-
-		// There shouldn't be any error due to the user here, so we don't try/catch
-		$db->exec($sql);
-
-		$table->save();
-		$db->commit();
-
-		// fall back to safety authorizer
-		$db->enableSafetyAuthorizer();
+		try {
+			if ($action === 'delete') {
+				$table->delete();
+			}
+			else {
+				$table->save();
+			}
+		}
+		catch (\InvalidArgumentException|UserException $e) {
+			throw new TemplateException($e->getMessage(), $e->getCode(), $e);
+		}
 	}
 
 	/**

@@ -18,11 +18,19 @@ class ModuleTable extends Entity
 	protected array $columns;
 
 	protected array $_renamed_columns = [];
+	protected ?Module $_module;
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match(self::NAME_REGEXP, $this->name), 'The table name is invalid: ' . $this->name);
+		$this->assert(preg_match(Module::TABLE_NAME_REGEXP, $this->name), 'The table name is invalid: ' . $this->name);
 		$this->assert(is_null($this->comment) || strlen($this->comment) <= 70, 'The table comment cannot be longer than 70 characters');
+
+		if ($this->exists() && $this->isModified('name')) {
+			$this->assert(!$db->test(self::TABLE, 'name = ? AND id != ?', $this->getRealName($this->name), $this->id()), 'This table name is already used: ' . $this->name);
+		}
+		elseif (!$this->exists()) {
+			$this->assert(!$db->test(self::TABLE, 'name = ?', $this->getRealName($this->name), $this->id()), 'This table name is already used: ' . $this->name);
+		}
 
 		parent::selfCheck();
 	}
@@ -77,6 +85,24 @@ class ModuleTable extends Entity
 		return $columns[$name];
 	}
 
+	public function getRealName(?string $name = null): string
+	{
+		return Modules::getModuleTableName($this->module()->name, $name ?? $this->name);
+	}
+
+	public function delete(): bool
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$sql = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name));
+		$db->exec($sql);
+
+		$r = parent::delete();
+		$db->commit();
+		return $r;
+	}
+
 	public function save(bool $selfcheck = true): bool
 	{
 		$db = DB::getInstance();
@@ -94,7 +120,7 @@ class ModuleTable extends Entity
 
 		$sql = [];
 
-		$table_name = Modules::getModuleTableName($this->module()->name, $this->name);
+		$table_name = $this->getRealName();
 
 		// Just rename table
 		if ($exists
@@ -320,4 +346,18 @@ class ModuleTable extends Entity
 		return $definition;
 	}
 
+	public function getSize(): int
+	{
+		return DB::getInstance()->getTableSize($this->getRealName());
+	}
+
+	public function countRows(): int
+	{
+		return DB::getInstance()->count($this->getRealName());
+	}
+
+	public function setModule(Module $module): void
+	{
+		$this->_module = $module;
+	}
 }
