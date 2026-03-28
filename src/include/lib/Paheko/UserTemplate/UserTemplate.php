@@ -488,9 +488,6 @@ class UserTemplate extends \KD2\Brindille
 				throw new UserException($message, 0, $e);
 			}
 		}
-		catch (\Throwable $e) {
-			throw $e;
-		}
 
 		// If template returned 'STOP' string (eg. from the redirect function),
 		// call exit now. Don't call exit in Brindille functions, or it might mess
@@ -659,7 +656,7 @@ class UserTemplate extends \KD2\Brindille
 			];
 
 			if (!isset($codes[$code])) {
-				throw new Brindille_Exception('Code HTTP inconnu: ' . $code);
+				throw new TemplateException('Code HTTP inconnu: ' . $code);
 			}
 
 			header(sprintf('HTTP/1.1 %d %s', $code, $codes[$code]), true);
@@ -730,8 +727,9 @@ class UserTemplate extends \KD2\Brindille
 	 * Because we want to give the admin enough information on the issue
 	 * so they can fix the issue in the code.
 	 */
-	public function error(Brindille_Exception $e, string $message)
+	public function error(TemplateException $e, string $message)
 	{
+		/*
 		// Make sure we report exceptions outside of Brindille templates
 		$p = $e;
 
@@ -743,6 +741,7 @@ class UserTemplate extends \KD2\Brindille
 				throw new \RuntimeException('Uncaught Brindille Exception', 0, $e);
 			}
 		}
+		*/
 
 		// Fetch HTML error header from error_prepend_string (see ErrorManager)
 		$header = ini_get('error_prepend_string');
@@ -791,22 +790,15 @@ class UserTemplate extends \KD2\Brindille
 	}
 
 	/**
-	 * Override parent Brindille class _callFunction, just to make sure UserException
-	 * (eg. invalid user-entry) are thrown and not converted to Brindille_Exception
-	 * (eg. syntax errors).
+	 * Override parent Brindille class _callFunction, to throw TemplateException
 	 */
 	public function _callFunction(string $name, array $params, int $line) {
 		try {
 			return call_user_func($this->_functions[$name], $params, $this, $line);
 		}
-		catch (UserException $e) {
-			throw $e;
-		}
-		catch (Brindille_Exception $e) {
-			throw new Brindille_Exception(sprintf("line %d: %s", $line, $e->getMessage()), 0, $e);
-		}
-		catch (\Exception $e) {
-			throw new Brindille_Exception(sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), $this->printVariable($params, true)), 0, $e);
+		catch (Brindille_Exception | TemplateException $e) {
+			$message = sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params));
+			throw new TemplateException($message, $e->getCode(), $e);
 		}
 	}
 
@@ -849,7 +841,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		if (!array_key_exists($name, $this->{'user_' . $context . 's'})) {
-			throw new Brindille_Exception(sprintf('call to undefined user %s \'%s\'', $context, $name));
+			throw new TemplateException(sprintf('call to undefined user %s \'%s\'', $context, $name));
 		}
 
 		return $this->{'user_' . $context . 's'}[$name]($params, $line);
@@ -865,7 +857,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		if (!preg_match(self::RE_VALID_VARIABLE_NAME, $name)) {
-			throw new Brindille_Exception(sprintf('Invalid syntax for function name \'%s\'', $name));
+			throw new TemplateException(sprintf('Invalid syntax for function name \'%s\'', $name));
 		}
 
 		$this->{'user_' . $context . 's'}[$name] = $function;

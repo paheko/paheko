@@ -15,7 +15,6 @@ use KD2\Smartyer;
 use KD2\SMTP;
 
 use KD2\Brindille;
-use KD2\Brindille_Exception;
 
 class Modifiers
 {
@@ -381,7 +380,7 @@ EOS;
 		];
 
 		if (is_array($expression) || is_object($expression) || trim((string)$expression) === '') {
-			throw new Brindille_Exception('Invalid empty or array value passed to math modifier');
+			throw new TemplateException('Invalid empty or array value passed to math modifier');
 		}
 
 		// Treat comma as dot in strings
@@ -397,7 +396,7 @@ EOS;
 			$tokens = Brindille::tokenize($expression, $tokens_list);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception('Invalid value: ' . $e->getMessage());
+			throw new TemplateException('Invalid value: ' . $e->getMessage());
 		}
 
 		$stack = [];
@@ -416,12 +415,12 @@ EOS;
 				$last = array_pop($stack);
 
 				if (!$last) {
-					throw new Brindille_Exception('Invalid closing parenthesis, on position ' . $token->offset);
+					throw new TemplateException('Invalid closing parenthesis, on position ' . $token->offset);
 				}
 			}
 			elseif ($token->type == 'separator') {
 				if (empty(end($stack)['function'])) {
-					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
+					throw new TemplateException('Invalid comma outside of a function, on position ' . $token->offset);
 				}
 			}
 			elseif ($token->type === 'number') {
@@ -430,7 +429,7 @@ EOS;
 			}
 			elseif ($token->type === 'sign') {
 				if ($tokens[$i-1]->type === 'sign') {
-					throw new Brindille_Exception('Invalid sign following a sign, on position ' . $token->offset);
+					throw new TemplateException('Invalid sign following a sign, on position ' . $token->offset);
 				}
 			}
 
@@ -438,14 +437,14 @@ EOS;
 		}
 
 		if (count($stack)) {
-			throw new Brindille_Exception('Unmatched open parenthesis, on position ' . $token->offset);
+			throw new TemplateException('Unmatched open parenthesis, on position ' . $token->offset);
 		}
 
 		try {
 			return @eval('return ' . $expression . ';') ?: 0;
 		}
 		catch (\Throwable $e) {
-			throw new Brindille_Exception(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
+			throw new TemplateException(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
 		}
 	}
 
@@ -455,11 +454,11 @@ EOS;
 	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
 	{
 		if (!is_array($array)) {
-			throw new Brindille_Exception('Supplied argument is not an array');
+			throw new TemplateException('Supplied argument is not an array');
 		}
 
 		if (!$tpl->checkModifierExists($modifier)) {
-			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
+			throw new TemplateException('Unknown modifier: ' . $modifier);
 		}
 
 		$out = [];
