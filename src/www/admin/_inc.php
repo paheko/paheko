@@ -32,14 +32,11 @@ $config = Config::getInstance();
 
 if (!defined('Paheko\LOGIN_PROCESS'))
 {
-	if (!$session->isLogged())
-	{
-		if ($session->isOTPRequired())
-		{
+	if (!$session->isLogged()) {
+		if ($session->isOTPRequired()) {
 			Utils::redirect(ADMIN_URL . 'login_otp.php');
 		}
-		else
-		{
+		else {
 			Utils::redirect(ADMIN_URL . 'login.php');
 		}
 	}

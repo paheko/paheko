@@ -36,7 +36,7 @@
 		Visualiser le schéma des tables et les données brutes de la base de données, ou y effectuer des requêtes SQL.
 	</dd>
 	<dd>
-		{linkbutton shape="code" label="Visualiser la base de données SQL" href="sql.php"}
+		{linkbutton shape="code" label="Visualiser la base de données SQL" href="sql/"}
 	</dd>
 
 	{if ENABLE_TECH_DETAILS}

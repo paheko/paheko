@@ -38,7 +38,7 @@
 				{if !empty($column.fk)}
 					&rarr;
 					{if !empty($fk_link)}
-						<a href="?table_info={$column.fk.table}">{$column.fk.table}</a>
+						<a href="table.php?name={$column.fk.table}">{$column.fk.table}</a>
 					{else}
 						{$column.fk.table}
 					{/if}

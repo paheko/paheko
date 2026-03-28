@@ -69,7 +69,6 @@ function paheko_manifest()
 	return false;
 }
 
-
 if (!defined('\SQLITE3_OPEN_READWRITE')) {
 	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
 	exit(1);
@@ -319,12 +318,6 @@ else {
 	define('Paheko\HOSTING_PROVIDER', null);
 }
 
-if (ENABLE_PROFILER) {
-	define('Paheko\PROFILER_START_TIME', $start_timer);
-
-	register_shutdown_function([Utils::class, 'showProfiler']);
-}
-
 // Open_basedir hardening, but only in a web context
 if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 	$paths = explode(':', OPEN_BASEDIR);
@@ -526,6 +519,12 @@ if (!defined('Paheko\LOCAL_SECRET_KEY')) {
 
 // Intégration du secret pour les tokens CSRF
 Form::tokenSetSecret(LOCAL_SECRET_KEY);
+
+if (ENABLE_PROFILER
+	|| Utils::hasProfilerCookie()) {
+	define('Paheko\PROFILER_START_TIME', $start_timer);
+	register_shutdown_function([Utils::class, 'showProfiler']);
+}
 
 EntityManager::setGlobalDB(DB::getInstance());
 

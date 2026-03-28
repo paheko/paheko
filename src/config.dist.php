@@ -522,11 +522,14 @@ namespace Paheko;
 //const ENABLE_TECH_DETAILS = true;
 
 /**
- * Activation du profilage (option de développement)
+ * Activation du profileur (option de développement)
  *
  * Si cette option est activée, une barre sera affichée en bas des pages
  * indiquant les performances du code, des requêtes SQL, et la liste
  * des requêtes exécutées.
+ *
+ * Il est aussi possible d'afficher cette barre pour un seul membre, via
+ * Configuration -> Avancé -> SQL -> Options développeur⋅euse
  *
  * Défaut : false
  * @var bool

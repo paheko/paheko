@@ -31,7 +31,7 @@
 		<ul class="sub">
 			<li{if $sub_current == 'audit'} class="current"{/if}><a href="{$admin_url}config/advanced/audit.php">Journal d'audit</a></li>
 			<li{if $sub_current == 'api'} class="current"{/if}><a href="{$admin_url}config/advanced/api.php">Accès à l'API</a></li>
-			<li{if $sub_current == 'sql'} class="current"{/if}><a href="{$admin_url}config/advanced/sql.php">SQL</a></li>
+			<li{if $sub_current == 'sql'} class="current"{/if}><a href="{$admin_url}config/advanced/sql/">SQL</a></li>
 			{if ENABLE_TECH_DETAILS}
 				<li{if $sub_current == 'errors'} class="current"{/if}><a href="{$admin_url}config/advanced/errors.php">Erreurs système</a></li>
 				{if SQL_DEBUG}

@@ -2185,6 +2185,33 @@ class Utils
 		return $text;
 	}
 
+	static public function setProfilerCookie(bool $enable): void
+	{
+		if (!$enable) {
+			setcookie('profiler', '', 0, '/');
+			return;
+		}
+
+		setcookie('profiler', self::getProfilerCookieValue(), time() + 3600*24*365, '/');
+	}
+
+	static protected function getProfilerCookieValue(): string
+	{
+		return hash_hmac('sha1', $_SERVER['REMOTE_ADDR'], LOCAL_SECRET_KEY);
+	}
+
+	static public function hasProfilerCookie(): bool
+	{
+		$cookie = $_COOKIE['profiler'] ?? null;
+
+		if (empty($cookie)) {
+			return false;
+		}
+
+		$hash = self::getProfilerCookieValue();
+		return hash_equals($hash, $cookie);
+	}
+
 	static public function showProfiler(): void
 	{
 		if (!defined('Paheko\PROFILER_START_TIME')) {

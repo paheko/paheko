@@ -76,7 +76,7 @@ class DB extends SQLite3
 		parent::__construct($driver, $params);
 
 		// Enable SQL debug log if configured
-		if (SQL_DEBUG || ENABLE_PROFILER) {
+		if (SQL_DEBUG || defined('Paheko\PROFILER_START_TIME')) {
 			$this->callback = [$this, 'log'];
 			$this->_log_start = (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
 		}
@@ -656,5 +656,12 @@ class DB extends SQLite3
 
 			$this->exec(sprintf('DROP INDEX IF EXISTS %s;', $index));
 		}
+	}
+
+	public function getTablesList(): array
+	{
+		return $this->getGrouped('SELECT name, sql, NULL AS count, NULL AS schema FROM sqlite_master
+			WHERE type = \'table\' AND name NOT LIKE \'files_search_%\' AND name NOT IN (\'sqlite_stat1\')
+			ORDER BY name;');
 	}
 }
