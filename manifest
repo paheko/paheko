@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Use\snew\sModuleTable\sobject\sin\stable\sfunction
-D 2026-03-28T13:47:55.220
+C Fix\sweb_pages_versions\stable:\sforeign\skey\swas\sinvalid
+D 2026-03-28T14:19:48.825
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -244,8 +244,8 @@ F src/include/migrations/1.3/1.3.8.sql fa48aee2ee55d3eeec09c0a5b0b5ac8ff099af3c2
 F src/include/migrations/1.3/1.3.9.php b518754e6a65425e466f1f5810e5b607458d999e344e8ecbb3ee0334ea2d874f
 F src/include/migrations/1.3/1.3.9.sql e73d94df7284fd1690727f1ba62d0fd3c973e11b0460685f6306ada6f1f298f0
 F src/include/migrations/1.4/1.4.0.php 6172805b6cd5811323ec14f37de4c49a94cfd33b048d3295e62ae87ed937f3aa
-F src/include/migrations/1.4/1.4.0.sql 938b6f58f02f4390deb12e8a4e42511d3aaf5e1d6a041af0c6a435ac13f89c8b
-F src/include/migrations/1.4/schema.sql d6af12e98142b9c276f154c325c6ec5524b76122536e6acb3dc454645d3d9288
+F src/include/migrations/1.4/1.4.0.sql c24be2451e567e8025662ad57660fef4713f02b1391108ee51b309180b7d87d8
+F src/include/migrations/1.4/schema.sql 7c5c0fb92603aba53af15279b97b3e7f701b49c179cb68d835b7ebab809b8d15
 F src/include/test_required.php 2989c7c4fa81e6494f76ed4fb7283ee768a371a844b903c39dd391b50c407e06
 F src/index.php 3633bc39287a8bc3e4fc60b80287a12b61710f6e
 F src/pubkey.asc e8974cff9c91a4a2e6dc1749dfe79cc46ecd3750b57a829945aa748a932eb54a
@@ -867,24 +867,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P a94da71dda5a79741ace81da9f11a692043910317483d8867a8c3d6fbba25844
-R dfad15316cd0823dc8183c1abf488ba0
+P 580f974450f79270b97ddd698b96be367de73ad783e4a35127827e13fcc28af8
+R 3e014e2a7669019e27e016fdf60093b1
 U bohwaz
-Z c5440d91700fdb31ba5304edc0baa410
+Z 19d198b745d1962bc66934aacc0c5984
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnH3AsACgkQksnacbiI
-6jT9AxAAqQt2qtdGiZ8kPp99oK0V2F/MEfJ8A9mk1o4di91ppF5BnvIP7gORWAl8
-yAfi+fjcMnMRyeJdySHwDAGJ3heQ57FqtHdvM1ZrtkvBctFUAIsFoJ6V6ZqztqTA
-+PNuwjk2JlM/8X4NwxxGHZG4CivoPtdnINrBMTbhTVkToEGXI2WyAkZNn6B+XUpI
-xi5UtNucPvUJ/giplyHFWUR/YdKr2Ms1BNpbF2gfeS0CuUnBx7TUTyqZ9UcBgGKn
-T5zSFs5DfAxneYAh/oREjgg31AsI69iFXHKurB38CwzpCpkmoX2jwIuZ5bbxPP98
-H/SMjcPklieqOYiYefzwiHqUlzR0L4LoVhzUTI16fkRxyMmpCQkLgy9cRLP1lOrz
-emRhxMFtLrECfjPx+8fQ50NRnTp83ZxTOU5mJDirew+/ZZGu3KcxLUREMRnaB+j3
-0Lke2FcFg7ejzqDjEMytIwxo8Po/6mmu7ADjz6asIcFdQmDvaOcQmAuxxf+bC2Mr
-IwneOIcclVrDNycHlCYlxLa0V/ASO0S0zZC4OQMbJLd1tNxeWq7/FepD8Xs2Gsbv
-/4yOyoQ7fopysJ/cjdV5aCfl4MjfyYDB2xbwuETGIC6GEiVoBKsX2jCnvnn4sodc
-fvm47HQqZPy0keIbBV9Qx/lJ0uSjMiVN+0YExG9/GvOfDBA9Z5E=
-=w9Q8
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnH44QACgkQksnacbiI
+6jR/ng//RKFIQaru2n5aYwcCxF/2ecdxv8+fzMj0/NQu5/ixyEVfehcM/K27vU9m
+wPGvg9LY3fvjFJxYlVsaqX9haXr4OwkbuznPiIAs8FQqmJbvYaCuVCgOASajcbWY
+MWW677voOvW2skdFRFTEMthD0vwIJtzPtN8SN062/Uf16nSKBqyztOLKunI9D79M
+zOr6Teked1i6qnttoA+m2lAjIebRJWK4qjJJWSOK2BEduTa06lfN+kVhJl4NHiPp
+KM2IaNdRyO7oga5Xjjg+MrryUAe55vPsZ+DYqqif0VziqcxS14MCWtwQuVD5AjqY
+MXLWrNkHl8TVwwD4FxSIpe4oEASn4hawdIsvd4Wwort+QekWvcAZQ0OEZj7pUe1f
+oNO0D+6/DoMxH5GciDwmw0a3NvOY6+M9P+YT4h6dU+PuAp6y+PWPWMUENosK91mj
+ixHUM37HxFKGEuLKJwbMDX9HnpN80u6aAA+p9pTdwRM+A/GwgieFgsbT4ji3Gw2B
+w8JXoxDWdn9OnOrUFIN9UbOFy5wbS5lhNj+/oY0Rr8u2WM4AITeOK20pl3+g55lR
+GoxyOfNBosDH03ZuAmddWfOrxht1mtdPsZ5tVMxv4wBqENi/VbXkW4A7t57/BAOg
+1ycw6nfo7GnXeGboasLYUjlIbEDMLVBpxTE6kAOIavq68uw0Img=
+=VbqH
 -----END PGP SIGNATURE-----

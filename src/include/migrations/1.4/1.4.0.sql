@@ -128,3 +128,24 @@ CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 -- Store user name for transaction creation
 ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;
 
+-- Fix web_pages_versions table (invalid foreign key)
+DELETE FROM web_pages_versions WHERE id_page NOT IN (SELECT id FROM web_pages);
+
+ALTER TABLE web_pages_versions RENAME TO web_pages_versions_old;
+
+CREATE TABLE IF NOT EXISTS web_pages_versions
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_page INTEGER NOT NULL REFERENCES web_pages (id) ON DELETE CASCADE,
+	id_user INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
+	date TEXT NOT NULL CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+	size INTEGER NOT NULL,
+	changes INTEGER NOT NULL,
+	content TEXT NOT NULL
+);
+
+INSERT INTO web_pages_versions SELECT * FROM web_pages_versions_old;
+
+CREATE INDEX IF NOT EXISTS web_pages_versions_id_page ON web_pages_versions (id_page);
+
+DROP TABLE web_pages_versions_old;

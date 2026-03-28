@@ -696,10 +696,12 @@ CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
 CREATE TABLE IF NOT EXISTS web_pages_versions
 (
 	id INTEGER NOT NULL PRIMARY KEY,
-	id_page INTEGER NOT NULL REFERENCES web_pages ON DELETE CASCADE,
+	id_page INTEGER NOT NULL REFERENCES web_pages (id) ON DELETE CASCADE,
 	id_user INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
 	date TEXT NOT NULL CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
 	size INTEGER NOT NULL,
 	changes INTEGER NOT NULL,
 	content TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS web_pages_versions_id_page ON web_pages_versions (id_page);
