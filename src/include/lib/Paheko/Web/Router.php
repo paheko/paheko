@@ -35,12 +35,13 @@ class Router
 		'avatars',
 	];
 
-	static public function getRequestURI(?string $uri = null): string
+	static public function getRequestURI(?string $uri = null): ?string
 	{
 		$uri ??= !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-		$uri = parse_url($uri, \PHP_URL_PATH);
+		// parse_url($uri, PHP_URL_PATH) fails here when URI = "//index.html", we can't use it
+		$uri = preg_replace('!^https?://[^/]+|\?.*$!', '', $uri);
 
-		// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
+		// WWW_URI always includes the final slash, but we want to keep it here
 		$uri = substr($uri, strlen(WWW_URI) - 1);
 
 		return $uri;
@@ -49,6 +50,12 @@ class Router
 	static public function route(?string $uri = null): void
 	{
 		$uri = self::getRequestURI($uri);
+
+		// Redirect if there is a double slash
+		if (false !== strpos($uri, '//')) {
+			Utils::redirect(preg_replace('!//+!', '/', $uri));
+		}
+
 
 		// This might be changed later
 		http_response_code(200);

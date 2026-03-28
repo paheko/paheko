@@ -62,7 +62,7 @@ $list->loadFromQueryString();
 $sum = null;
 
 if (!$filter->start && !$filter->end) {
-	$sum = $account->getSum($year_id, $simple);
+	$sum = $account->getBalance($year_id);
 }
 
 $tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit', 'filter'));

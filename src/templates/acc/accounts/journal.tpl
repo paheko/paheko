@@ -137,17 +137,17 @@
 				<td><b>Total</b></td>
 				<td class="money">{$sum.debit|raw|money:false}</td>
 				<td class="money">{$sum.credit|raw|money:false}</td>
-				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
+				<td class="money"><strong>{$sum.balance_real|raw|money:false}</strong></td>
 				{else}
 				<td></td>
-				<td colspan="2"><b>Total</b></td>
+				<td><b>Total</b></td>
 				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{/if}
 			{else}
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="6">
+			<td class="actions" colspan="{if $simple}6{else}8{/if}">
 				{if $can_edit}
 					{include file="acc/_table_actions.tpl"}
 				{/if}

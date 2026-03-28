@@ -47,6 +47,15 @@ class Modules
 		return @file_get_contents(Module::DIST_ROOT . '/' . $path) ?: null;
 	}
 
+	static public function distExists(string $name): bool
+	{
+		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return false;
+		}
+
+		return is_dir(Module::DIST_ROOT . '/' . $name);
+	}
+
 	/**
 	 * Lists all modules from files and stores a cache
 	 */
@@ -493,6 +502,8 @@ class Modules
 			if (!$module->updateFromINI()) {
 				throw new ValidationException('Le fichier module.ini est invalide.');
 			}
+
+			$module->selfCheckUser();
 
 			$module->save();
 			$module->updateTemplates();

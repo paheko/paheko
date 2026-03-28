@@ -13,6 +13,7 @@ $form->runIf('create', function () {
 	$module = new Module;
 	$module->importForm();
 	$module->set('web', false);
+	$module->selfCheckUser();
 	$module->save();
 	$module->exportToIni();
 

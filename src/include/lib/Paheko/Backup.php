@@ -438,10 +438,6 @@ class Backup
 
 		// Append integrity hash
 		echo $hash;
-
-		if (null !== $name) {
-			Utils::safe_unlink($file);
-		}
 	}
 
 	/**

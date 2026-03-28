@@ -11,12 +11,14 @@
 		</h3>
 
 		<p class="alert block">
-			En cliquant sur le bouton ci-dessous, les lignes cochées seront marquées comme ayant été déposées.<br /><strong>Il ne sera pas possible de les remettre dans la liste des écritures à déposer en banque.</strong>
+			En cliquant sur le bouton ci-dessous, les lignes cochées seront marquées comme ayant été déposées.
 		</p>
 
 		<dl>
-			{input type="checkbox" name="yes" value=1 label="Je confirme vouloir supprimer ces lignes de la liste des dépôts en banque, il ne sera plus possible de revenir en arrière" required=true}
+			{input type="text" name="confirm_word" required=true label="Recopier ici le mot 'CONFIRMER' pour confirmer cette action IRRÉVERSIBLE"}
 		</dl>
+
+		<p class="error block">Il ne sera pas possible de les remettre dans la liste des écritures à déposer en banque&nbsp;!</p>
 
 		<p class="submit">
 			{csrf_field key=$csrf_key}

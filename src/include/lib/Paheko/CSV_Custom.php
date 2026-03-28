@@ -202,7 +202,14 @@ class CSV_Custom
 			$this->rows = [];
 
 			foreach ($sheets as $i => $name) {
-				$this->rows[$i] = iterator_to_array($s->iterate($i));
+				$rows = iterator_to_array($s->iterate($i));
+
+				// Ignore empty sheets
+				if (!count($rows)) {
+					continue;
+				}
+
+				$this->rows[$i] = $rows;
 			}
 
 			if (!$this->sheet_selection) {

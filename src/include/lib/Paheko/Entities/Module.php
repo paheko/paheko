@@ -9,6 +9,7 @@ use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Files\Files;
+use Paheko\UserTemplate\Modules;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Users\Session;
 use Paheko\Web\Cache;
@@ -21,7 +22,7 @@ use Paheko\Entities\Users\Category;
 
 use DateTime;
 
-use const Paheko\{ROOT, WWW_URL, BASE_URL};
+use const Paheko\{ROOT, WWW_URL, BASE_URL, PLUGINS_BLOCKLIST};
 
 class Module extends Entity
 {
@@ -154,6 +155,13 @@ class Module extends Entity
 		}
 	}
 
+	public function selfCheckUser(): void
+	{
+		$this->assert(!Modules::distExists($this->name), 'Un module existe déjà avec ce nom unique');
+		$this->assert(!Plugins::exists($this->name), 'Un plugin existe déjà avec ce nom unique');
+		$this->assert(!in_array($this->name, PLUGINS_BLOCKLIST ?? [], true), 'Ce nom unique de module ne peut être utilisé, merci d\'en choisir un autre');
+	}
+
 	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
@@ -233,6 +241,11 @@ class Module extends Entity
 
 		if (!isset($ini->name)) {
 			$this->_broken_message = 'Le fichier module.ini est invalide : la clé "name" n\'existe pas';
+			return null;
+		}
+
+		if (isset($ini->version)) {
+			$this->_broken_message = 'Ce module nécessite Paheko 1.4.0 ou supérieur';
 			return null;
 		}
 

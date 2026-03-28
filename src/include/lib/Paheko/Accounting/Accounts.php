@@ -384,7 +384,8 @@ class Accounts
 	 */
 	static public function isReversed(bool $simple, int $type): bool
 	{
-		if ($simple && in_array($type, [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_EXPENSE, Account::TYPE_THIRD_PARTY])) {
+		if ($simple
+			&& in_array($type, [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_EXPENSE, Account::TYPE_THIRD_PARTY])) {
 			return false;
 		}
 

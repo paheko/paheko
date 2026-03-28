@@ -75,29 +75,37 @@
 	</form>
 	{literal}
 	<script type="text/javascript">
-	var total = 0;
-	var count = 0;
-	$('tbody input[type=checkbox]').forEach((e) => {
-		e.addEventListener('change', () => {
+	function recalculateTotal() {
+		var total = 0;
+		var count = 0;
+
+		$('tbody input[type=checkbox]:checked').forEach(e => {
 			var v = e.getAttribute('data-debit') || e.getAttribute('data-credit');
 			v = parseInt(v, 10);
-			total += e.checked ? v : -v;
-			count += e.checked ? 1 : -1;
+
 			if (total < 0) {
 				total = 0;
 			}
+
 			if (count < 0) {
 				count = 0;
 			}
-			$('#lines_total').innerText = g.formatMoney(total);
-			$('#lines_count').innerText = count;
+
+			total += e.checked ? v : -v;
+			count += e.checked ? 1 : -1;
 		});
+
+		$('#lines_total').innerText = g.formatMoney(total);
+		$('#lines_count').innerText = count;
+	}
+
+	$('tbody input[type=checkbox]').forEach(e => {
+		e.addEventListener('change', recalculateTotal);
 	});
 
-	$('#f_all').addEventListener('change', (e) => {
-		$('#f_amount').value = '';
-		total = 0;
-	});
+	$('#f_all').addEventListener('change', recalculateTotal);
+
+	recalculateTotal();
 	</script>
 	{/literal}
 {/if}

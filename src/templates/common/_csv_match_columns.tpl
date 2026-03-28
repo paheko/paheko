@@ -17,7 +17,7 @@
 				<?php $selected = $csv->getSelectedTable(); ?>
 				{foreach from=$csv->getFirstLine() key="index" item="csv_field"}
 					<tr>
-						<th scope="row">{$csv_field}</th>
+						<th scope="row">{if $csv_field === ''}Colonne {$index} (sans libellé){else}{$csv_field}{/if}</th>
 						<td class="help">{icon shape="right"}</td>
 						<td>
 							<select name="translation_table[{$index}]">
