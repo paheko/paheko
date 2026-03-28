@@ -23,55 +23,6 @@ class TableFunctions
 		'delete',
 	];
 
-	const MODULE_TABLE_COLUMN_TYPES = [
-		'TEXT',
-		'INTEGER',
-		'DATETIME',
-		'REAL',
-		'NUMERIC',
-	];
-
-	const MODULE_COLUMN_DEFINITION_REGEXP = '/^(TEXT|INT|INTEGER|DATETIME|REAL|FLOAT|NUMERIC)
-			(?:\s+(NOT\s+NULL|NULL))?
-			(?:\s+DEFAULT\s+("[^"]*"|\'[^\']*\'|\d+|CURRENT_TIMESTAMP))?
-			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|RESTRICT|CASCADE))?)?
-			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
-			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
-
-	static protected function _getModuleTableSQLDefinition(string $table, ?string $comment, array $columns): string
-	{
-		if (null !== $comment) {
-			// Make sure comment doesn't have line breaks, and is not too long
-			$comment = mb_substr(preg_replace('/\s+/', ' ', $comment), 0, 150);
-			$comment = '-- ' . $comment . "\n";
-		}
-
-		$columns_str = [];
-
-		foreach ($columns as $name => $definition) {
-			if ($name === 'id' || $name === 'key') {
-				throw new TemplateException(sprintf('The column name "%s" is already used (built-in default of table)', $name));
-			}
-
-			$columns_str[] = $definition->sql;
-		}
-
-		$columns_str = array_merge([
-			'id INTEGER NOT NULL,',
-			'key TEXT NOT NULL UNIQUE,',
-		], $columns_str);
-
-
-		// putting the primary key definition here instead of in the column definition
-		// is better as it avoids having to delete the comma from the last column definition
-		$columns_str[] = 'PRIMARY KEY (id)';
-
-		$db = DB::getInstance();
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n%s(\n  %s\n);", $db->quoteIdentifier($table), $comment, implode("\n  ", $columns_str));
-
-		return $sql;
-	}
-
 	/**
 	 * Create/rename/delete module table
 	 */
@@ -163,138 +114,65 @@ class TableFunctions
 			throw new TemplateException('A module cannot use the "column" function if it doesn\'t have a "version" in module.ini');
 		}
 
-		if (!empty($params['create'])) {
-			$action = 'create';
-		}
-		elseif (!empty($params['delete'])) {
-			$action = 'delete';
-		}
-		elseif (!empty($params['rename'])) {
-			$action = 'rename';
-		}
-		elseif (!empty($params['modify'])) {
-			$action = 'modify';
-		}
-		else {
-			throw new TemplateException('No action parameter was supplied');
-		}
-
-		$column = $params[$action];
-		unset($params[$action]);
-
-		if (!preg_match(Module::TABLE_NAME_REGEXP, $column)) {
-			throw new TemplateException('Invalid column name: ' . $column);
-		}
-
 		$table_name = $params['table'] ?? '';
-		$table_name = Modules::getModuleTableName($module->name, $table_name);
+		$table = $module->getTable($table_name);
 
-		$db = DB::getInstance();
-
-		if (!$db->hasTable($table_name)) {
+		if (!$table) {
 			throw new TemplateException('This table doesn\'t exist: ' . $table_name);
 		}
 
-		$table = $module->getTable($params['table']);
+		$actions = ['create', 'delete', 'rename', 'modify'];
 
-		if (!$table) {
-			throw new \LogicException('Missing metadata for table: ' . $table_name);
+		$action = array_intersect_key($params, array_flip($actions));
 
+		if (count($action) > 1) {
+			throw new TemplateException('Cannot specify more than one column action');
+		}
+		elseif (!count($action)) {
+			throw new TemplateException('No column action was specified');
 		}
 
-		$columns = $table->columns;
+		$action = key($action);
+		$name = $params[$action];
 
-		if ($action === 'rename') {
-			$new_name = $params['to'] ?? '';
-
-			if (!preg_match(Module::TABLE_NAME_REGEXP, $new_name)) {
-				throw new TemplateException('Invalid new column name: ' . $new_name);
-			}
-
-			if (array_key_exists($new_name, $columns)) {
-				throw new TemplateException(sprintf('Cannot rename "%s" column to "%s": target column already exists', $column, $new_name));
-			}
-
-			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
-		}
-		else {
-			if ($action === 'delete') {
-				if (!array_key_exists($column, $columns)) {
-					throw new TemplateException('Cannot delete this column as it doesn\'t exist: ' . $column);
-				}
-
-				unset($columns[$column]);
-			}
-			elseif ($action === 'modify') {
-				if (!array_key_exists($column, $columns)) {
-					throw new TemplateException('Cannot modify this column as it doesn\'t exist: ' . $column);
-				}
-
-				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
-				$columns[$column] = $definition;
-			}
-			elseif ($action === 'create') {
-				if (array_key_exists($column, $columns)) {
-					throw new TemplateException(sprintf('Cannot create "%s": target column name already exists', $column));
-				}
-
-				$definition = self::_getModuleColumnDefinition($column, $params['definition'] ?? null, $params);
-				$columns[$column] = $definition;
-			}
-			else {
-				throw new \LogicException('Invalid action: ' . $action);
-			}
-
-			$sql = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($table . '_old'));
-			$sql .= "\n";
-			$sql .= $this->_getModuleTableSQLDefinition($params['table'], $columns);
-			$sql = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($column), $db->quoteIdentifier($new_name));
+		if (!is_string($name)) {
+			throw new TemplateException('Invalid column name: not a string');
 		}
 
-		// set authorizer to only allow working on this specific table
-		$db->enableTableAuthorizer($table);
-
-		// There shouldn't be any error due to the user here, so we don't try/catch
-		$db->exec($sql);
-
-		// fall back to safety authorizer
-		$db->enableSafetyAuthorizer();
-	}
-
-	/**
-	 * Create or re-create a module table
-	 * If the table exists already, it will be renamed, to recopy old data
-	 */
-	static protected function _createModuleTable(Module $module, string $name, array $columns): void
-	{
-		$table = Modules::getModuleTableName($module->name, $name);
-		$overwrite = false;
-
-		$db->begin();
-
-		if ($db->hasTable($table)) {
-			$overwrite = true;
-			$db->exec(sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table), $db->quoteIdentifier($table . '_old')));
+		// Verify parameters
+		if ($action === 'create' || $action === 'modify') {
+			if (!isset($params['definition'])) {
+				throw new TemplateException('No column definition was passed');
+			}
+			elseif (!is_string($params['definition']) && !is_array($params['definition'])) {
+				throw new TemplateException('Invalid column definition type: must be a string of an array');
+			}
+		}
+		elseif ($action === 'rename') {
+			if (!isset($params['to'])) {
+				throw new TemplateException('No target column name was passed');
+			}
+			elseif (!is_string($params['to'])) {
+				throw new TemplateException('Target column name is not a string');
+			}
 		}
 
-		// Actually create table
-		$db->exec(self::_getModuleTableSQLDefinition($table, $columns));
-
-		if ($overwrite) {
-			$columns_names = array_keys($columns);
-			$columns_names = array_map([$db, 'quoteIdenfier'], $columns_names);
-
-			$sql = sprintf('INSERT INTO %s (%s) SELECT %s FROM %2$s;',
-				$db->quoteIdentifier($table),
-				$columns_names,
-				$db->quoteIdentifier($table . '_old')
-			);
-
-			$sql .= sprintf("\nDROP TABLE %s;", $db->quoteIdentifier($table . '_old'));
-			$db->exec($sql);
+		if ($action === 'create') {
+			$table->addColumn($name, $params['definition']);
+		}
+		elseif ($action === 'rename') {
+			$table->renameColumn($name, $params['to']);
+		}
+		elseif ($action === 'delete') {
+			$table->dropColumn($name);
+		}
+		elseif ($action === 'modify') {
+			$table->modifyColumn($name, $params['definition']);
 		}
 
-		$db->commit();
+		// We are saving / recreating the table after each change
+		// This is not optimal, but because this is in a transaction, it should be OK
+		$table->save();
 	}
 
 	/**

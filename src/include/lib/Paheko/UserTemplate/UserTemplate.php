@@ -797,7 +797,7 @@ class UserTemplate extends \KD2\Brindille
 			return call_user_func($this->_functions[$name], $params, $this, $line);
 		}
 		catch (Brindille_Exception | TemplateException $e) {
-			$message = sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params));
+			$message = sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), self::printVariable($params));
 			throw new TemplateException($message, $e->getCode(), $e);
 		}
 	}

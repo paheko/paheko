@@ -71,7 +71,7 @@ class Modifiers
 		'url_decode' => ['scalar+'],
 		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
 		'count_words' => ['scalar+'],
-		'version_compare' => ['string', 'string', 'string'],
+		'version_compare' => ['string+', 'string', 'string+'],
 		'uuid' => [],
 		'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
 		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],

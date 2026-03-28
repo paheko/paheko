@@ -538,7 +538,7 @@ class Modules
 	static public function getModuleTableName(string $module, ?string $table): string
 	{
 		if (!preg_match(Module::VALID_NAME_REGEXP, $module)) {
-			return \InvalidArgumentException('Invalid module name : ' . $module);
+			throw new \InvalidArgumentException('Invalid module name : ' . $module);
 		}
 
 		if (null === $table) {
@@ -546,7 +546,7 @@ class Modules
 		}
 
 		if (!preg_match(Module::TABLE_NAME_REGEXP, $table) || strlen($table) > 70) {
-			return \InvalidArgumentException('Invalid table name: ' . $table);
+			throw new \InvalidArgumentException('Invalid table name: ' . $table);
 		}
 
 		return Module::TABLE_PREFIX . sprintf('%s_%s', $module, $table);

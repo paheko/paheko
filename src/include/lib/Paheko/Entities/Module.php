@@ -1085,8 +1085,9 @@ class Module extends Entity
 	{
 		$table = new ModuleTable;
 		$table->set('id_module', $this->id());
-		$table->import(compact('name', 'comment', 'columns'));
 		$table->setModule($this);
+		$table->import(compact('name', 'comment'));
+		$table->setColumns($columns);
 		return $table;
 	}
 
