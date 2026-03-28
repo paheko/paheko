@@ -540,6 +540,21 @@ Encode une chaîne de texte pour utilisation dans une adresse URL (alias de `raw
 
 Décode une chaîne de texte venant d'une URL (alias de `rawurldecode` en PHP).
 
+## version_compare
+
+Compare deux numéros de versions entre eux à l'aide d'un opérateur, alias de [la même fonction en PHP](https://www.php.net/version_compare).
+
+| Argument | Fonction |
+| :- | :- | :- |
+| 1 | Opérateur : `<`, `<=`, `>`, `>=`, `==` ou `!=` |
+| 2 | Version à comparer |
+
+```
+{{if "1.0.0"|version_compare:"<":"1.1.0"}}
+	1.0.0 < 1.1.0
+{{/if}}
+```
+
 ## Autres filtres de texte
 
 Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension `mbstring` est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.

@@ -51,11 +51,10 @@ Une connaissance de la programmation informatique est souhaitable pour commencer
 * Utilisation de la syntaxe Brindille
 * Les modules peuvent utiliser toutes les fonctions et boucles de Brindille
 * Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module
-* Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension [JSON de SQLite](https://www.sqlite.org/json1.html)
-* Les données peuvent être validées avant enregistrement en utilisant [JSON Schema](https://json-schema.org/understanding-json-schema/)
+* Les données du module sont stockées dans des tables SQL
 * Un module peut également accéder aux données des autres modules
 * Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)
-* Un module ne peut pas modifier les données de la base de données
+* Un module ne peut pas modifier les données de la base de données, en dehors de ses tables
 * Paheko crée automatiquement des index sur les requêtes SQL des modules, permettant de rendre les requêtes rapides
 
 # Structure des répertoires
@@ -67,6 +66,7 @@ Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais cer
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
 * `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
 * `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (`<svg …>`) doit comporter les attributs suivants : `id="img" width="100%" height="100%"`.
+* `migration.tpl` : code Brindille permettant la création et la mise à jour du schéma de base de données SQL du module, si nécessaire
 
 ## Snippets
 
@@ -163,157 +163,61 @@ Toutes les pages d'un module disposent de la variable `$module` qui contient l'e
 
 # Stockage de données
 
-Un module peut stocker des données de deux manières : dans sa configuration, ou dans son stockage de documents JSON.
+Un module peut stocker des données de deux manières : dans sa configuration, ou dans des tables SQL.
 
 ## Configuration
 
 La première manière est de stocker des informations dans la configuration du module. Pour cela on utilise la fonction `save` et la clé `config` :
 
 ```
-{{:save key="config" accounts_list="512A,512B" check_boxes=true}}
+{{:save key="config" accounts="512A" check_boxes=true}}
 ```
 
 On pourra retrouver ces valeurs dans la variable `$module.config` :
 
 ```
 {{if $module.config.check_boxes}}
-  {{$module.config.accounts_list}}
+  {{$module.config.account}}
 {{/if}}
 ```
 
-## Stockage de documents JSON
+## Tables SQL
 
-Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.
+Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.
 
-Grâce aux [fonctions JSON de SQLite](https://www.sqlite.org/json1.html) on pourra ensuite effectuer des recherches sur ces documents.
-
-Pour enregistrer il suffit d'utiliser la fonction `save` :
+Pour cela il convient de définir une version dans le fichier `module.ini` :
 
 ```
-{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}
+version = "1.0.0"
 ```
 
-Si la clé indiquée (dans le paramètre `key`) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.
+Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.
 
-### Validation
+Un module sans version ne peut pas créer de tables.
 
-On peut utiliser un [schéma JSON](https://json-schema.org/understanding-json-schema/) pour valider que le document qu'on enregistre est valide :
+Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette `migration.tpl` sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.
 
-```
-{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}
-```
+Pour cela il faut utiliser les variables suivantes :
 
-Le fichier `document.schema.json` devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :
+* `$module.db_version` : contient la version de la base de données (`NULL` si la base de données n'a pas été créée)
+* `$module.version` : contient la version du module, issue du fichier `module.ini`
 
-```
-{
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"type": "object",
-	"properties": {
-		"date": {
-			"description": "Date d'émission",
-			"type": "string",
-			"format": "date"
-		},
-		"type": {
-			"description": "Type de document",
-			"type": "string",
-			"enum": ["devis", "facture"]
-		},
-		"total": {
-			"description": "Montant total",
-			"type": "integer",
-			"minimum": 0
-		},
-		"label": {
-			"description": "Libellé",
-			"type": "string"
-		},
-		"description": {
-			"description": "Description",
-			"type": ["string", "null"]
-		}
-	},
-	"required": [ "type", "date", "total", "label"]
-}
-```
-
-Si le document fourni n'est pas conforme au schéma, il ne sera pas enregistré et une erreur sera affichée.
-
-#### Propriété non requise
-
-Si vous souhaitez utiliser dans votre document une propriété non requise, il ne faut pas la fournir en paramètre de la fonction `save`.
-
-Si elle est fournie mais vide, il faut aussi autoriser le type `null` (en minuscules) au type de votre propriété.
-
-Exemple :  
-
-	[...]
-		"description": {
-			"description": "Description",
-			"type": ["string", "null"]
-		}
-	[...]
-
-### Stockage JSON dans SQLite (pour information)
-
-Explication du fonctionnement technique derrière la fonction `save`.
-
-En pratique chaque enregistrement sera placé dans une table SQL dont le nom commence par `module_data_`. Ici la table sera donc nommée `module_data_factures` si le nom unique du module est `factures`.
-
-Le schéma de cette table est le suivant :
+Voici un exemple de fichier `migration.tpl` :
 
 ```
-CREATE TABLE module_data_factures (
-  id INTEGER PRIMARY KEY NOT NULL,
-  key TEXT NULL,
-  document TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX module_data_factures_key ON module_data_factures (key);
+{{if !$module.db_version}}
+  {{:table create="personnes" nom="TEXT NOT NULL"}}
+{{elseif $module.db_version|version_compare:"<":1.1.0"}}
+  {{:column table="personnes" create="prenom" type="TEXT" null=false}}
+{{/if}}
 ```
 
-Comme on peut le voir, chaque ligne dans la table peut avoir une clé unique (`key`), et un ID ou juste un ID auto-incrémenté. La clé unique n'est pas obligatoire, mais peut être utile pour différencier certains documents.
+Ce squelette ne doit rien afficher. Si quelque chose est affiché, l'exécution du module sera stoppée, car on considère que le squelette a produit une erreur ou le développeur veut afficher quelque chose pour faire du debug.
 
-Par exemple le code suivant :
+Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.
 
-```
-{{:save key="facture_43" nom="Facture de courses"}}
-```
-
-Est l'équivalent de la requête SQL suivante :
-
-```
-INSERT OR REPLACE INTO module_data_factures (key, document) VALUES ('facture_43', '{"nom": "Facture de courses"}');
-```
-
-### Récupération et liste de documents
-
-Il sera ensuite possible d'utiliser la boucle `load` pour récupérer les données :
-
-```
-{{#load id=42}}
-	Ce document est de type {{$type}} créé le {{$date}}.
-	<h2>{{$label}}</h2>
-	À payer : {{$total}} €
-	{{else}}
-	Le document numéro 42 n'a pas été trouvé.
-{{/load}}
-```
-
-Cette boucle `load` permet aussi de faire des recherches sur les valeurs du document :
-
-```
-<ul>
-{{#load where="$$.type = 'facture'" order="date DESC"}}
-	<li>{{$label}} ({{$total}} €)</li>
-{{/load}}
-</ul>
-```
-
-La syntaxe `$$.type` indique d'aller extraire la clé `type` du document JSON.
-
-C'est un raccourci pour la syntaxe SQLite `json_extract(document, '$.type')`.
+<!-- FIXME: supprimer quand sera supprimé le stockage JSON dans les modules -->
+Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. [Voir l'ancienne documentation](brindille_storage_json.md).
 
 # Export et import de modules
 

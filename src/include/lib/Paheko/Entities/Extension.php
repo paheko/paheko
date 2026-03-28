@@ -35,6 +35,7 @@ class Extension extends Entity
 	protected string $details_url;
 	protected ?string $config_url;
 	protected ?string $url = null;
+	protected ?string $version = null;
 
 	protected bool $installed;
 	protected bool $missing;
@@ -110,6 +111,7 @@ class Extension extends Entity
 		$this->set('ini', $item->getINIProperties());
 		$this->set('broken_message', $item->getBrokenMessage());
 		$this->set('doc_url', $this->ini->doc_url ?? null);
+		$this->set('version', $this->ini->version ?? null);
 
 		if ($item->hasFile($item::INDEX_FILE)) {
 			$this->set('url', $item->url($type == 'plugin' ? 'admin/' : ''));

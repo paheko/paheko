@@ -126,6 +126,13 @@ class DynamicList implements \Countable
 	private ?int $count_result = null;
 
 	/**
+	 * List of tables this SQL query should be limited to.
+	 * Set to NULL to allow any table.
+	 * @var array|null
+	 */
+	protected ?array $allowed_tables = null;
+
+	/**
 	 * Allow to navigate in list using prev(), first(), last() and next()
 	 * This will use more memory.
 	 */
@@ -154,7 +161,7 @@ class DynamicList implements \Countable
 
 	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
-		$this->columns = $columns;
+		$this->setColumns($columns);
 		$this->tables = $tables;
 		$this->conditions = $conditions;
 		$this->order = key($columns);
@@ -227,6 +234,17 @@ class DynamicList implements \Countable
 
 	public function setColumns(array $columns)
 	{
+		foreach ($columns as &$column) {
+			if (is_string($column)) {
+				$column = ['label' => $column];
+			}
+			elseif (is_null($column)) {
+				$column = [];
+			}
+		}
+
+		unset($column);
+
 		$this->columns = $columns;
 	}
 
@@ -342,6 +360,11 @@ class DynamicList implements \Countable
 		$this->count_tables = $tables;
 	}
 
+	public function setAllowedTables(?array $tables)
+	{
+		$this->allowed_tables = $tables;
+	}
+
 	public function getHeaderColumns(bool $export = false)
 	{
 		$columns = [];
@@ -391,7 +414,7 @@ class DynamicList implements \Countable
 			$this->iterator = EM::getInstance($this->entity)->iterate($this->SQL());
 		}
 		else {
-			$this->iterator = DB::getInstance()->iterate($this->SQL(), $this->parameters);
+			$this->iterator = DB::getInstance()->iterateRestricted($this->allowed_tables, $this->SQL(), $this->parameters);
 		}
 
 		$row = null;

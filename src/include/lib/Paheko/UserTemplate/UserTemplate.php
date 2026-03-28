@@ -342,13 +342,21 @@ class UserTemplate extends \KD2\Brindille
 	{
 		$this->registerDefaults();
 
+		// This must be in first place, as button function is override in Functions
 		foreach (CommonFunctions::FUNCTIONS_LIST as $key => $name) {
 			$this->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonFunctions::class, $name] : $name);
 		}
 
-		// Local functions
-		foreach (Functions::FUNCTIONS_LIST as $name) {
-			$this->registerFunction($name, [Functions::class, $name]);
+		// Modules functions
+		static $functions_classes = [
+			Functions::class,
+			Modules\TableFunctions::class,
+		];
+
+		foreach ($functions_classes as $class) {
+			foreach ($class::FUNCTIONS_LIST as $name) {
+				$this->registerFunction($name, [$class, $name]);
+			}
 		}
 
 		foreach (Functions::COMPILE_FUNCTIONS_LIST as $name => $callback) {
@@ -827,7 +835,7 @@ class UserTemplate extends \KD2\Brindille
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => $module->hasTable() ? $module->table_name() : null,
+			'table'        => $module->hasDataTable() ? $module->data_table_name() : null,
 		]));
 	}
 

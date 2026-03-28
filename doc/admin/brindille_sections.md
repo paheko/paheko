@@ -292,8 +292,7 @@ Il est aussi possible d'utiliser les paramètres suivants :
 
 | Paramètre | Fonction |
 | :- | :- |
-| `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `debug` | Si ce paramètre existe et vaut `true`, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne y sera assigné. | 
 
 Exemple avec `debug` :
@@ -360,8 +359,7 @@ Certaines sections (voir plus bas) héritent de `sql` et rajoutent des fonctionn
 | `having` | Contenu de la clause `HAVING` |
 | `order` | Ordre de tri des résultats. Si vide le tri sera fait par ordre d'ajout dans la base de données. |
 | `assign` | Si renseigné, une variable de ce nom sera créée, et le contenu de la ligne du résultat y sera assigné. | 
-| `debug` | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `explain` | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
+| `debug` | Si ce paramètre existe et vaut `true`, la requête SQL exécutée sera affichée avant le début de la boucle. |
 | `count` | Booléen ou texte. Si ce paramètre est `TRUE`, le nombre de résultats sera retourné. |
 
 Il est également possible de passer des arguments dans les paramètres à l'aides des arguments nommés qui commencent par deux points `:` :
@@ -655,146 +653,41 @@ Il est possible d'utiliser `{{:form_errors}}` en dehors du bloc `{{else}}` :
 {{:form_errors}}
 ```
 
-<!--
-NOTE (bohwaz, 24/05/2023) : l'utilisation des règles de validation de Laravel me semble donner du code peu lisible, ce n'est donc pas documenté/complètement implémenté pour le moment.
-
-Si l'élément dont le nom spécifié dans le paramètre `on` a été envoyé en `POST`, alors le formulaire est vérifié selon les autres paramètres. Une vérification de sécurité anti-CSRF est également appliquée. Si cette vérification échoue, le message d'erreur "Merci de bien vouloir renvoyer le formulaire." sera renvoyé.
-
-Chaque paramètre supplémentaire indique un champ du formulaire qui doit être récupéré et validé. Le nom du paramètre doit correspondre au nom du champ dans le formulaire. La valeur du paramètre doit contenir une liste de règles de validations, séparées par des virgules `,`. Chaque règle peut prendre des paramètres, après deux points `:`.
-
-Exemple pour un champ de formulaire nommé `titre` dont on veut qu'il soit présent et fasse entre 5 et 100 caractères : `titre="required,min:5,max:100"`
-
-Si le titre fait moins de 5 caractères, le message d'erreur suivant sera renvoyé : `Le champ "titre" fait moins de 5 caractères.`
-
-On peut spécifier une règle spéciale nommée `label` pour changer le nom du champ : `titre="required,min:5,max:100,label:Titre du texte"`. Cela modifiera le message d'erreur : `Le champ "Titre du texte" fait moins de 5 caractères.`
-
-Chacun de ces paramètres sera disponible à l'intérieur de la section sous la forme d'une variable :
-
-```
-{{#form titre="required,min:5"}}
-	{{:save title=$titre}}
-{{/form}}
-```
-
-
-Toute erreur dans le corps de la section `{{#form}}…{{/form}}` fera arrêter l'exécution, et le message d'erreur sera ajouté à la liste des erreurs du formulaire :
-
-```
-{{#form on="save"}}
-	{{if !$_POST.titre|trim}}
-		{{:error message="Pas de titre !"}}
-	{{/if}}
-	{{* La ligne suivante ne sera pas exécutée si le titre est vide. *}}
-	{{:save title=$_POST.titre}}
-{{/form}}
-```
-
-### Transformation des variables
-
-Certaines règles de validation ont un effet de transformation sur les variables présentes dans le corps de la section :
-
-* `string` s'assure que la variable est une chaîne de texte
-* `int` transforme la variable en nombre entier
-* `float` transforme la variable en nombre flottant
-* `bool` transforme la variable en booléen
-* `date` ou `date_format` transforment la variable en date
-
-### Exemple
-
-Considérons ce formulaire par exemple :
-
-```
-<form method="post" action="">
-	<fieldset>
-		<legend>Enregistrer un paiement</legend>
-		<dl>
-			{{:input type="text" required=true name="titre" label="Titre"}}
-			{{:input type="money" required=true name="montant" label="Montant"}}
-		</dl>
-		<p class="submit">
-			{{:button type="submit" label="Enregistrer" name="save"}}
-		</p>
-	</fieldset>
-</form>
-```
-
-On pourrait l'enregistrer comme ceci :
-
-```
-{{if $_POST.save}}
-	{{if $_POST.titre|trim === ''}}
-		{{:assign error="Le titre est vide"}}
-	{{elseif $_POST.montant|trim === '' || $_POST.montant|money_int < 0}}
-		{{:assign error="Le montant est vide ou négatif"}}
-	{{else}}
-		{{:save title=$_POST.titre|trim amount=$_POST.montant|money_int}}
-	{{/if}}
-{{/if}}
-
-{{if $error}}
-	<p class="error block">{{$error}}</p>
-{{/if}}
-```
-
-Mais alors dans ce cas il faut multiplier les conditions pour les champs.
-
-La section `{{#form …}}` permet de simplifier ces tests, et s'assurer qu'aucune attaque CSRF n'a lieu :
-
-```
-{{#form on="save"
-	titre="required,string,min:1,label:Titre"
-	montant="required,money,min:0,label:Montant du paiement"
-}}
-	{{:save title=$titre amount=$montant}}
-{{else}}
-	{{:form_errors}}
-{{/form}}
-
-```
-
-### Règles de validation
-
-| Nom de la règle | Description | Paramètres |
-| :- | :- | :- |
-| `required` | ...
--->
-
 ## load <sup>(sql)</sup>
 
 Note : cette section hérite de `sql` (voir plus haut). De ce fait, le nombre de résultats est limité à 10000 par défaut, si le paramètre `limit` n'est pas renseigné.
 
-Charge un ou des documents pour le module courant.
+Liste des lignes d'une table SQL appartenant au module courant.
 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
-| `module` | optionnel | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
+| `table` | obligatoire | Nom de la table |
+| `module` | optionnel | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé |
 | `key` | optionnel | Clé unique du document |
 | `id` | optionnel | Numéro unique du document |
-| `each` | optionnel | Traiter une clé du document comme un tableau |
 
-Il est possible d'utiliser d'autres paramètres : `{{#load cle="valeur"}}`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
+Il est possible d'utiliser d'autres colonnes comme paramètres : `{{#load table="personnes" nom="machin"}}`. Cela va comparer `"machin"` avec la valeur de la colonne `nom` dans la table `personnes`.
 
-Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte `$$…` dans le paramètre `where`. Ainsi `where="$$.nom LIKE 'Bourse%'` est l'équivalent de `where="json_extract(document, '$.nom') LIKE 'Bourse%'"`.
+Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser le nom de la colonne dans le paramètre `where`. Ainsi `where="nom LIKE 'Dulcie%'` va lister tous les noms qui commencent par `Dulcie`.
 
-Voir [la documentation de SQLite pour plus de détails sur la syntaxe de json_extract](https://www.sqlite.org/json1.html#jex).
+Chaque itération renverra toutes les colonnes du tableau.
 
-Note : un index SQL dynamique est créé pour chaque requête utilisant une clause `json_extract`.
+Si aucun résultat n'est trouvé, aucune itération ne sera effectuée, il sera possible de détecter ce cas avec la syntaxe suivante :
 
-Chaque itération renverra ces deux variables :
-
-| Variable | Valeur |
-| :- | :- |
-| `$key` | Clé unique du document |
-| `$id` | Numéro unique du document |
-
-Ainsi que chaque élément du document JSON lui-même.
+```
+{{#load table="personnes" nom="Dulcie"}}
+	{{$nom}}
+{{else}}
+	Aucune personne trouvée avec ce prénom.
+{{/load}}
+```
 
 ### Exemples
 
-Afficher le nom du document dont la clé est `facture_43` :
+Afficher le nom de la ligne dont la clé est `facture_43` :
 
 ```
-{{#load key="facture_43"}}
+{{#load table="factures" key="facture_43"}}
 {{$nom}}
 {{/load}}
 ```
@@ -802,39 +695,9 @@ Afficher le nom du document dont la clé est `facture_43` :
 Afficher la liste des devis du module `invoice` depuis un autre module par exemple :
 
 ```
-{{#load module="invoice" type="quote"}}
-<h1>Titre du devis : {{$subject}}</h1>
+{{#load module="invoice" table="factures" type="devis"}}
+<h1>Titre du devis : {{$sujet}}</h1>
 <h2>Montant : {{$total}}</h2>
-{{/load}}
-```
-
-### Utilisation du paramètre `each`
-
-Le paramètre `each` est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple `membres[1].noms` pour boucler sur le tableau `noms`, du premier élément du tableau `membres`. Voir la documentation [de la fonction json_each de SQLite pour plus de détails](https://www.sqlite.org/json1.html#jeach).
-
-Pour chaque itération de la section, la variable `{{$value}}` contiendra l'élément recherché dans le critère `each`.
-
-Par exemple nous pouvons avoir un élément `membres` dans notre document JSON qui contient un tableau de noms de membres :
-
-```
-{{:assign var="membres." value="Greta Thunberg}}
-{{:assign var="membres." value="Valérie Masson-Delmotte"}}
-{{:save membres=$membres}}
-```
-
-Nous pouvons utiliser `each` pour faire une liste :
-
-```
-{{#load each="membres"}}
-- {{$value}}
-{{/load}}
-```
-
-Ou pour récupérer les documents qui correspondent à un critère :
-
-```
-{{#load each="membres" where="value = 'Greta Thunberg'"}}
-Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}
 ```
 
@@ -842,7 +705,7 @@ Le document n°{{$id}} est celui qui parle de Greta.
 
 Attention : cette section n'hérite **PAS de `sql`**.
 
-Un peu comme `{{#load}}` cette section charge les documents d'un module, mais au sein d'une liste (tableau HTML).
+Un peu comme `{{#load}}` cette section charge les lignes d'une table SQL d'un module, mais au sein d'une liste (tableau HTML).
 
 Cette liste gère automatiquement l'ordre selon les préférences des utilisateurs, ainsi que la pagination.
 
@@ -850,84 +713,77 @@ Cette section est très puissante et permet de générer des listes simplement, 
 
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
-| `schema` | **requis** si `select` n'est pas fourni | Chemin vers un fichier de schéma JSON qui représenterait le document |
-| `select` | **requis** si `schema` n'est pas fourni | Liste des colonnes à sélectionner, sous la forme `$$.colonne AS "Colonne"`, chaque colonne étant séparée par un point-virgule. |
+| `table` | **requis** | Nom de la table |
+| `columns` | **requis** | Liste des colonnes à lister, sous forme de tableau (voir ci-dessous) |
 | `module` | *optionnel* | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
-| `columns` | *optionnel* | Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules. |
+| `join` | *optionnel* | Tables à joindre à la requête, comme dans une requête SQL. Exemple : `INNER JOIN users ON users.id = personnes.id_user` |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
+| `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri par défaut sera inversé. |
 | `group` | *optionnel* | Expression SQL utilisée pour le groupement des résultats (`GROUP BY`). |
-| `count` | *optionnel* | Expression SQL utilisée pour le décompte des résultats. Défaut : `COUNT(*)`. Principalement utile avec la clause `group`. |
-| `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri sera inversé. |
 | `max` | *optionnel* | Nombre d'éléments à afficher sur chaque page. Mettre à `null` pour ne pas paginer la liste. |
 | `where` | *optionnel* | Condition `WHERE` de la requête SQL. |
 | `debug` | *optionnel* | Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle. |
-| `explain` | *optionnel* | Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle. | 
-| `disable_user_sort` | *optionnel* | Booléen. Si ce paramètre est `true`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
+| `user_sorting` | *optionnel* | Booléen. Si ce paramètre est `false`, il ne sera pas possible à l'utilisateur d'ordonner les colonnes. |
+| `export_button` | *optionnel* | Booléen. Si ce paramètre est `true`, un bouton d'export s'affichera au dessus de la liste. |
+| `checkable` | *optionnel* | Booléen. Si ce paramètre est `true`, le tableau comportera une première colonne permettant de cocher la ligne. |
 
-Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre `schema` pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la `description` indiquée dans le schéma), soit le paramètre `select`, où il faut alors indiquer le nom et le libellé des colonnes sous la forme `$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"`.
+Comme pour `load`, il est possible d'utiliser d'autres paramètres supplémentaires, correspondant à la valeur des colonnes recherchées : `nom="Dulcie"` par exemple.
 
-Comme pour `load`, il est possible d'utiliser des paramètres supplémentaires : `cle="valeur"`. Cela va comparer `"valeur"` avec la valeur de la clé `cle` dans le document JSON. C'est l'équivalent d'écrire `where="json_extract(document, '$.cle') = 'valeur'"`.
+Chaque itération renverra toutes les colonnes de la table.
 
-Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte `$$…` dans le paramètre `where`. Ainsi `where="$$.nom LIKE 'Bourse%'` est l'équivalent de `where="json_extract(document, '$.nom') LIKE 'Bourse%'"`.
-
-Voir [la documentation de SQLite pour plus de détails sur la syntaxe de json_extract](https://www.sqlite.org/json1.html#jex).
-
-Note : un index SQL dynamique est créé pour chaque requête utilisant une clause `json_extract`.
-
-Chaque itération renverra toujours ces deux variables :
-
-| Variable | Valeur |
-| :- | :- |
-| `$key` | Clé unique du document |
-| `$id` | Numéro unique du document |
-
-Ainsi que chaque élément du document JSON lui-même.
-
-La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section **doit** être une ligne de tableau HTML (`<tr>`).
+La section ouvre un tableau HTML (`<table>…<tbody>`) et le ferme automatiquement, donc le contenu de la section **doit** être une ligne de tableau HTML (`<tr>`).
 
 Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans `columns` ou `select`. Une dernière colonne est réservée aux boutons d'action : `<td class="actions">...</td>`.
 
-**Attention :** une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.
+**Attention :** une seule liste peut être utilisée dans une même page, à moins d'indiquer le paramètre `disable_user_sort=true`. Appeler plusieurs fois cette fonction sans ce paramètre provoquera une erreur.
+
+### Tableau des colonnes
+
+Chaque clé du tableau doit correspondre au nom d'une colonne de la table.
+
+La valeur peut être soit juste le libellé sous forme de chaîne de caractère comme ceci :
+
+```
+{{:assign var="columns" name="Nom de la personne"}}
+```
+
+Sinon la valeur peut également être un tableau permettant d'avoir quelque chose de plus complexe, avec les clés suivantes :
+
+| Clé | Description |
+| :- | :-|
+| `label` | Libellé de la colonne |
+| `select` | Clause du SELECT à utiliser pour cette colonne, si on souhaite que cela soit autre chose que le nom de la colonne |
+| `order` | Clause utilisée dans le `ORDER BY` si un tri est opéré sur cette colonne. Le mot-clé `%1$s` sera remplacé par la clause `DESC` ou `ASC` selon la requête de l'usager. |
+| `export` | Booléen. Si la valeur est `true`, la colonne uniquement sera inclue dans l'export ODS/XLSX/CSV, elle ne s'affichera pas dans l'interface HTML. Si la valeur est `false`, la colonne ne sera pas inclue dans l'export, uniquement sur l'interface. Si ce paramètre est absent, la colonne apparaîtra à la fois dans l'export et dans l'interface. |
+
+Exemple :
+
+```
+{{:assign var="name" label="Nom du membre" select="users.name" order="users.name COLLATE U_NOCASE %1$s" export=false}}
+{{:assign var="columns" name=$name}}
+{{#list table="personnes" join="INNER JOIN users ON users.id = personnes.id_user" columns=$columns}}
+	<tr>
+		<th>{{$nom}}</th>
+		<td><a href="fiche.html?id={{$id}}">Fiche personne</td>
+	</tr>
+{{/list}}
+```
 
 ### Exemples
 
-Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :
+Lister le nom, la date et le montant des reçus fiscaux :
 
 ```
-{
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"type": "object",
-	"properties": {
-		"date": {
-			"description": "Date d'émission",
-			"type": "string",
-			"format": "date"
-		},
-		"adresse": {
-			"description": "Adresse du bénéficiaire",
-			"type": "string"
-		},
-		"nom": {
-			"description": "Nom du bénéficiaire",
-			"type": "string"
-		},
-		"montant": {
-			"description": "Montant",
-			"type": "integer",
-			"minimum": 0
-		}
-	}
-}
-```
-
-Le code de la section sera alors comme suivant :
-
-```
-{{#list schema="./recu.schema.json" columns="nom, date, montant"}}
+{{:assign var="columns"
+	name="Nom du bénéficiaire"
+	date="Date d'émission"
+	address="Adresse du bénéficiaire"
+	amount="Montant"}}
+{{#list tables="recus" columns=$columns}}
 	<tr>
-		<th>{{$nom}}</th>
+		<th>{{$name}}</th>
 		<td>{{$date|date_short}}</td>
-		<td>{{$montant|raw|money_currency}}</td>
+		<td>{{$amount|raw|money_currency}}</td>
 		<td class="actions">
 			{{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
 		</td>
@@ -936,28 +792,6 @@ Le code de la section sera alors comme suivant :
 	<p class="alert block">Aucun reçu n'a été trouvé.</p>
 {{/list}}
 ```
-
-Si le paramètre `columns` avait été omis, la colonne `adresse` aurait également été incluse.
-
-Il est à noter que si l'utilisation directe du schéma est bien pratique, cela ne permet pas de récupérer des informations plus complexes dans la structure JSON, par exemple une sous-clé ou l'application d'une fonction SQL. Dans ce cas il faut obligatoirement utiliser `select`. Par exemple ici on veut pouvoir afficher l'année, et trier sur l'année par défaut :
-
-```
-{{#list select="$$.nom AS 'Nom du donateur' ; strftime('%Y', $$.date) AS 'Année'" order=2}}
-	<tr>
-		<th>{{$nom}}</th>
-		<td>{{$col2}}</td>
-		<td class="actions">
-			{{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
-		</td>
-	</tr>
-{{else}}
-	<p class="alert block">Aucun reçu n'a été trouvé.</p>
-{{/list}}
-```
-
-On peut utiliser le nom des clés du document JSON, mais sinon pour faire référence à la valeur d'une colonne spécifique dans la boucle, il faut utiliser son numéro d'ordre (qui commence à `1`, pas zéro). Ici on veut afficher l'année, donc la seconde colonne, donc `$col1`.
-
-Noter aussi l'utilisation du numéro de la colonne de l'année (`2`) pour le paramètre `order`, qui avec `select` doit indiquer le numéro de la colonne à utiliser pour l'ordre.
 
 ## files
 

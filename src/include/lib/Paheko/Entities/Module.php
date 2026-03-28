@@ -16,6 +16,7 @@ use Paheko\Web\Cache;
 use Paheko\Web\Router;
 
 use KD2\ZipWriter;
+use KD2\DB\EntityManager as EM;
 
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
@@ -32,6 +33,7 @@ class Module extends Entity
 	const ICON_FILE = 'icon.svg';
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
+	const MIGRATION_FILE = 'migration.tpl';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -52,6 +54,8 @@ class Module extends Entity
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+	const TABLE_PREFIX = 'module_table_';
+	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z]+)*$/';
 
 	const TABLE = 'modules';
 
@@ -74,6 +78,9 @@ class Module extends Entity
 	protected bool $enabled;
 	protected bool $web;
 
+	protected ?string $version;
+	protected ?string $db_version;
+
 	/**
 	 * System modules are always available, disabling them only hides the links
 	 */
@@ -81,7 +88,7 @@ class Module extends Entity
 
 	protected ?DateTime $last_updated = null;
 
-	protected bool $_table_exists;
+	protected bool $_has_data;
 
 	protected ?\stdClass $_ini;
 
@@ -282,6 +289,7 @@ class Module extends Entity
 			$restrict_level = Session::ACCESS_LEVELS[$ini->restrict_level] ?? null;
 		}
 
+		$this->set('version', $ini->version ?? null);
 		$this->set('label', $ini->name);
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
@@ -334,6 +342,41 @@ class Module extends Entity
 		}
 
 		Files::createFromString($this->path('module.ini'), $ini);
+	}
+
+	public function upgradeIfRequired(): void
+	{
+		if (!$this->version
+			|| $this->version === $this->db_version
+			|| version_compare((string) $this->version, (string) $this->db_version, '==')) {
+			return;
+		}
+
+		if (!$this->hasFile(self::MIGRATION_FILE)) {
+			return;
+		}
+
+		// Execute migration
+		$db = DB::getInstance();
+		$db->begin();
+		$r = $this->fetch(self::MIGRATION_FILE, []);
+		$db->commit();
+		$r = trim($r);
+
+		// If the template returned something display it and stop there
+		if ($r !== '') {
+			if (!str_starts_with($r, '<!DOCTYPE')
+				&& !str_starts_with($r, '<')) {
+				echo '<!DOCTYPE html><meta charset="utf-8" />';
+			}
+
+			echo $r;
+
+			exit;
+		}
+
+		$this->set('db_version', $this->version);
+		$this->save();
 	}
 
 	public function updateTemplates(): void
@@ -460,20 +503,46 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	public function table_name(): string
+	/**
+	 * @deprecated
+	 */
+	public function data_table_name(): string
 	{
 		return sprintf('module_data_%s', $this->name);
 	}
 
-	public function hasTable(): bool
+	public function table_prefix(): string
 	{
-		$this->_table_exists ??= DB::getInstance()->test('sqlite_master', 'type = \'table\' AND name = ?', $this->table_name());
-		return $this->_table_exists;
+		return self::TABLE_PREFIX . $this->name . '_';
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public function hasDataTable(): bool
+	{
+		return DB::getInstance()->test('sqlite_master',
+			'type = \'table\' AND name = ?',
+			$this->data_table_name()
+		);
+	}
+
+	public function hasData(): bool
+	{
+		$db = DB::getInstance();
+
+		$this->_has_data ??= $db->test('sqlite_master',
+			'type = \'table\' AND name = ? OR name LIKE ? ESCAPE \'\\\'',
+			$this->data_table_name(),
+			$db->escapeLike($this->table_prefix(), '\\') . '%',
+		);
+
+		return $this->_has_data;
 	}
 
 	public function getDataSize(): int
 	{
-		return (int) DB::getInstance()->getTableSize($this->table_name());
+		return (int) DB::getInstance()->getTableSize($this->data_table_name());
 	}
 
 	public function getConfigSize(): int
@@ -572,7 +641,7 @@ class Module extends Entity
 
 	public function canDeleteData(): bool
 	{
-		return !empty($this->config) || $this->hasTable();
+		return !empty($this->config) || $this->hasData();
 	}
 
 	public function listFiles(?string $path = null): array
@@ -676,8 +745,17 @@ class Module extends Entity
 	public function deleteData(): void
 	{
 		$db = DB::getInstance();
-		$table_name = $db->quoteIdentifier($this->table_name());
+		$table_name = $db->quoteIdentifier($this->data_table_name());
+		// Delete data table
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
+		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ? ESCAPE \'\\\';',
+			$db->escapeLike($this->table_prefix()) . '%'
+		);
+
+		// Delete all tables
+		foreach ($i as $table) {
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table->name)));
+		}
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {
@@ -738,6 +816,8 @@ class Module extends Entity
 
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
+		$this->upgradeIfRequired();
+
 		if (substr(Utils::basename($path), 0, 1) === '.') {
 			throw new UserException('Unknown path', 404);
 		}
@@ -1003,5 +1083,18 @@ class Module extends Entity
 
 		$this->set('enabled', false);
 		$this->save();
+	}
+
+	public function createTable(string $name, ?string $comment, array $columns): ModuleTable
+	{
+		$table = new ModuleTable;
+		$table->import(compact('name', 'comment', 'columns'));
+		$table->id_module = $this->id();
+		return $table;
+	}
+
+	public function getTable(string $name): ?ModuleTable
+	{
+		return EM::findOne(ModuleTable::class, 'SELECT * FROM @TABLE WHERE id_module = ? AND name = ?;', $this->id(), $name);
 	}
 }

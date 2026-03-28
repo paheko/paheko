@@ -54,7 +54,7 @@
 				{elseif $item.author}
 					Par <em>{$item.author}</em>
 				{/if}
-				{if $item.plugin && $item.plugin.version}— Version {$item.plugin.version}{/if}
+				{if $item.version}— Version {$item.version}{/if}
 			</p>
 
 			<p class="actions">

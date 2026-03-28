@@ -72,6 +72,7 @@ class Modifiers
 		'url_decode' => ['scalar+'],
 		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
 		'count_words' => ['scalar+'],
+		'version_compare' => ['string', 'string', 'string'],
 		'uuid' => [],
 		'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
 		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
@@ -719,6 +720,11 @@ EOS;
 	static public function count_words($str): int
 	{
 		return preg_match_all('/\S+/u', $str);
+	}
+
+	static public function version_compare($v1, $operator, $v2): int
+	{
+		return version_compare($v1, $v2, $operator);
 	}
 
 	static public function uuid()
