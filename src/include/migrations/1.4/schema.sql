@@ -73,7 +73,9 @@ CREATE TABLE IF NOT EXISTS modules
 	enabled INTEGER NOT NULL DEFAULT 0,
 	web INTEGER NOT NULL DEFAULT 0,
 	system INTEGER NOT NULL DEFAULT 0,
-	last_updated TEXT NULL CHECK (last_updated IS NULL OR datetime(last_updated) = last_updated)
+	last_updated TEXT NULL CHECK (last_updated IS NULL OR datetime(last_updated) = last_updated),
+	version TEXT NULL,
+	db_version TEXT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS modules_name ON modules (name);
@@ -88,6 +90,15 @@ CREATE TABLE IF NOT EXISTS modules_templates
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS modules_templates_name ON modules_templates (id_module, name);
+
+CREATE TABLE modules_tables (
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_module INTEGER NOT NULL REFERENCES modules (id) ON DELETE CASCADE,
+	name TEXT NOT NULL,
+	comment TEXT NULL,
+	columns TEXT NOT NULL,
+	UNIQUE (id_module, name)
+);
 
 CREATE TABLE IF NOT EXISTS api_credentials
 (

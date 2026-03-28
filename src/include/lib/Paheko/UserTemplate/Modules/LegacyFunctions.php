@@ -186,7 +186,7 @@ class LegacyFunctions
 		$table = 'module_data_' . $tpl->module->name;
 
 		// No table? No problem!
-		if (!$tpl->module->hasTable()) {
+		if (!$tpl->module->hasDataTable()) {
 			return;
 		}
 

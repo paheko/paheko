@@ -1,6 +1,18 @@
 -- Add last_updated column to modules
 ALTER TABLE modules ADD COLUMN last_updated TEXT NULL CHECK (last_updated IS NULL OR datetime(last_updated) = last_updated);
 
+ALTER TABLE modules ADD COLUMN version TEXT NULL;
+ALTER TABLE modules ADD COLUMN db_version TEXT NULL;
+
+CREATE TABLE modules_tables (
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_module INTEGER NOT NULL REFERENCES modules (id) ON DELETE CASCADE,
+	name TEXT NOT NULL,
+	comment TEXT NULL,
+	columns TEXT NOT NULL,
+	UNIQUE (id_module, name)
+);
+
 -- Create new import_rules table
 CREATE TABLE IF NOT EXISTS acc_import_rules (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -115,3 +127,4 @@ CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 
 -- Store user name for transaction creation
 ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;
+

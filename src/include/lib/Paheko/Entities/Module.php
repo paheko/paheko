@@ -251,11 +251,6 @@ class Module extends Entity
 			return null;
 		}
 
-		if (isset($ini->version)) {
-			$this->_broken_message = 'Ce module nécessite Paheko 1.4.0 ou supérieur';
-			return null;
-		}
-
 		// Don't allow user code to set itself as a system module
 		if (!$from_dist) {
 			unset($ini->system);
@@ -816,13 +811,14 @@ class Module extends Entity
 
 	public function serve(string $path, bool $has_local_file, array $params = []): void
 	{
-		$this->upgradeIfRequired();
-
 		if (substr(Utils::basename($path), 0, 1) === '.') {
 			throw new UserException('Unknown path', 404);
 		}
 
 		if (UserTemplate::isTemplate($path)) {
+			// Only upgrade for templates, not static files
+			$this->upgradeIfRequired();
+
 			// Error if path is not valid
 			// we allow any path for static files, but not for skeletons
 			if (!$this->isValidPath($path)) {
