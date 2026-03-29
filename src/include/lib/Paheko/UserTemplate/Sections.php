@@ -390,6 +390,22 @@ class Sections
 			throw new TemplateException('Module name could not be found');
 		}
 
+		if (array_key_exists('disable_user_sort', $params)) {
+			throw new TemplateException('Parameter "disable_user_sort" has been removed, use "user_sorting=false" instead.');
+		}
+
+		if (array_key_exists('disable_user_ordering', $params)) {
+			throw new TemplateException('Parameter "disable_user_ordering" has been removed, use "user_sorting=false" instead.');
+		}
+
+		if (array_key_exists('check', $params)) {
+			throw new TemplateException('Parameter "check" has been removed, use "checkable" instead.');
+		}
+
+		if (array_key_exists('export', $params)) {
+			throw new TemplateException('Parameter "export" has been removed, use "export_button" instead.');
+		}
+
 		$db = DB::getInstance();
 		$module_name = $params['module'] ?? $tpl->module->name;
 		$table = Modules::getModuleTableName($module_name, $params['table']);

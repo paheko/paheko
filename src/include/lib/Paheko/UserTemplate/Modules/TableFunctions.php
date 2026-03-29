@@ -221,6 +221,26 @@ class TableFunctions
 			return;
 		}
 
+		if (array_key_exists('assign_new_id', $params)) {
+			throw new TemplateException('Parameter "assign_new_id" has been removed, use "assign" instead');
+		}
+
+		if (array_key_exists('replace', $params)) {
+			throw new TemplateException('Parameter "replace" has been removed');
+		}
+
+		if (array_key_exists('from', $params)) {
+			throw new TemplateException('Parameter "from" has been removed');
+		}
+
+		if (array_key_exists('validate_schema', $params)) {
+			throw new TemplateException('Parameter "validate_schema" has been removed');
+		}
+
+		if (array_key_exists('validate_only', $params)) {
+			throw new TemplateException('Parameter "validate_only" has been removed');
+		}
+
 		unset($params['key'], $params['id']);
 		$db = DB::getInstance();
 
