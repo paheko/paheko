@@ -353,9 +353,17 @@ class Module extends Entity
 
 		// Execute migration
 		$db = DB::getInstance();
+
+		// We need to disable foreign keys so that everything works
+		// when we re-create a table from scratch
+		// legacy_alter_table MUST remain OFF
+		// We CANNOT change foreign_keys *INSIDE* a transaction so we need to have
+		$db->exec('PRAGMA foreign_keys = 0;');
 		$db->begin();
 		$r = $this->fetch(self::MIGRATION_FILE, []);
 		$db->commit();
+		$db->exec('PRAGMA foreign_keys = 1;');
+
 		$r = trim($r);
 
 		// If the template returned something display it and stop there

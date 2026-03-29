@@ -36,7 +36,7 @@ class ModuleTable extends Entity
 	const COLUMN_DEFINITION_REGEXP = '/^(TEXT|INT|INTEGER|DATETIME|REAL|FLOAT|NUMERIC)
 			(?:\s+(NOT\s+NULL|NULL))?
 			(?:\s+DEFAULT\s+("[^"]*"|\'[^\']*\'|\d+|CURRENT_TIMESTAMP))?
-			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|RESTRICT|CASCADE))?)?
+			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|CASCADE))?)?
 			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
 			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
 
@@ -74,37 +74,31 @@ class ModuleTable extends Entity
 
 	public function renameColumn(string $old_name, string $new_name): void
 	{
-		if (!array_key_exists($old_name, $this->columns)) {
-			throw new \InvalidArgumentException('Cannot rename this column as it doesn\'t exist: ' . $old_name);
-		}
+		$this->assert(array_key_exists($old_name, $this->columns),
+			'Cannot rename this column as it doesn\'t exist: ' . $old_name);
 
-		if (array_key_exists($new_name, $this->columns)) {
-			throw new \InvalidArgumentException('Cannot rename, this column already exists: ' . $new_name);
-		}
+		$this->assert(!array_key_exists($new_name, $this->columns),
+			'Cannot rename, this column already exists: ' . $new_name);
 
-		if (array_key_exists($old_name, self::DEFAULT_COLUMNS)) {
-			throw new \InvalidArgumentException('Cannot modify a default table column: ' . $name);
-		}
+		$this->assert(!array_key_exists($old_name, self::DEFAULT_COLUMNS),
+			'Cannot modify a default table column: ' . $name);
 
-		if (array_key_exists($new_name, self::DEFAULT_COLUMNS)) {
-			throw new \InvalidArgumentException('Column name is already used by a default table column: ' . $name);
-		}
-
+		$this->assert(!array_key_exists($new_name, self::DEFAULT_COLUMNS),
+			'Column name is already used by a default table column: ' . $name);
 
 		$this->_renamed_columns[$old_name] = $new_name;
 		$this->columns[$new_name] = $this->columns[$old_name];
 		unset($this->columns[$old_name]);
+		// Don't use set here as we won't be rewriting the table, just using ALTER TABLE ... RENAME COLUMN TO
 	}
 
 	public function dropColumn(string $name): void
 	{
-		if (!array_key_exists($name, $this->columns)) {
-			throw new \InvalidArgumentException('Cannot delete this column as it doesn\'t exist: ' . $name);
-		}
+		$this->assert(array_key_exists($name, $this->columns),
+			'Cannot delete this column as it doesn\'t exist: ' . $name);
 
-		if (array_key_exists($name, self::DEFAULT_COLUMNS)) {
-			throw new \InvalidArgumentException('Cannot delete a default table column: ' . $name);
-		}
+		$this->assert(!array_key_exists($name, self::DEFAULT_COLUMNS),
+			'Cannot delete a default table column: ' . $name);
 
 		$columns = $this->columns;
 		unset($columns[$name]);
@@ -113,16 +107,26 @@ class ModuleTable extends Entity
 
 	public function addColumn(string $name, array|string $definition): array
 	{
-		if (array_key_exists($name, $this->columns)) {
-			throw new \InvalidArgumentException('Column name already exists: ' . $name);
-		}
+		$this->assert(!array_key_exists($name, $this->columns),
+			'Column already exists: ' . $name);
 
-		if (array_key_exists($name, self::DEFAULT_COLUMNS)) {
-			throw new \InvalidArgumentException('Column name is already used by a default table column: ' . $name);
+		$this->assert(!array_key_exists($name, self::DEFAULT_COLUMNS),
+			'Column name is already used by a default table column: ' . $name);
+
+		$definition = $this->parseColumnDefinition($name, $definition);
+
+		if (!$definition->null) {
+			// Inspired by https://www.sqlite.org/lang_altertable.html#alter_table_add_column
+			// As we can't add a column with NOT NULL and no value…
+			$this->assert(null !== $definition->default,
+				sprintf('Cannot add a column "%s" that is NOT NULL without a DEFAULT value', $name));
+
+			$this->assert(!$definition->fk_table,
+				sprintf('New column "%s" must be NULL to be able to reference a foreign key', $name));
 		}
 
 		$columns = $this->columns;
-		$columns[$name] = $this->parseColumnDefinition($name, $definition);
+		$columns[$name] = $definition;
 		$this->set('columns', $columns);
 		return (array) $columns[$name];
 	}
@@ -132,13 +136,11 @@ class ModuleTable extends Entity
 		$this->columns = [];
 
 		foreach ($columns as $name => $value) {
-			if (array_key_exists($name, $this->columns)) {
-				throw new \InvalidArgumentException('Column name already exists: ' . $name);
-			}
+			$this->assert(!array_key_exists($name, $this->columns),
+				'Column already exists: ' . $name);
 
-			if (array_key_exists($name, self::DEFAULT_COLUMNS)) {
-				throw new \InvalidArgumentException('Column name is already used by a default table column: ' . $name);
-			}
+			$this->assert(!array_key_exists($name, self::DEFAULT_COLUMNS),
+				'Column name is already used by a default table column: ' . $name);
 
 			$this->columns[$name] = $this->parseColumnDefinition($name, $value);
 		}
@@ -146,16 +148,20 @@ class ModuleTable extends Entity
 
 	public function modifyColumn(string $name, array|string $definition): array
 	{
-		if (!array_key_exists($name, $this->columns)) {
-			throw new \InvalidArgumentException('Cannot modify this column as it doesn\'t exist: ' . $name);
-		}
+		$this->assert(array_key_exists($name, $this->columns),
+			'Column doesn\'t exist: ' . $name);
 
-		if (array_key_exists($name, self::DEFAULT_COLUMNS)) {
-			throw new \InvalidArgumentException('Cannot modify a default table column: ' . $name);
-		}
+		$this->assert(!array_key_exists($name, self::DEFAULT_COLUMNS),
+			'Cannot modify a default table column: ' . $name);
+
+		$new = $this->parseColumnDefinition($name, $definition);
+		$old = $this->columns[$name];
+
+		$this->assert($old->fk_table === $new->fk_table && $old->fk_column === $new->fk_column,
+			'Cannot modify a foreign key reference');
 
 		$columns = $this->columns;
-		$columns[$name] = $this->parseColumnDefinition($name, $definition);
+		$columns[$name] = $new;
 		$this->set('columns', $columns);
 		return (array) $columns[$name];
 	}
@@ -173,20 +179,39 @@ class ModuleTable extends Entity
 	public function delete(): bool
 	{
 		$db = DB::getInstance();
-		$db->begin();
 
-		$sql = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name));
-		$db->exec($sql);
+		if (!$db->inTransaction()) {
+			throw new \LogicException('This must be inside a transaction');
+		}
 
+		// Make sure that no other tables of this module have a foreign key
+		// referencing this table
+		foreach ($this->module()->listTables() as $table) {
+			if ($table->name === $this->name) {
+				continue;
+			}
+
+			foreach ($table->columns as $name => $column) {
+				$this->assert($column->fk_table !== $this->name,
+					sprintf('The "%s" table cannot be deleted: there is a foreign key referencing its columns "%s" in table "%s"', $this->name, $column->fk_column, $table->name));
+			}
+		}
+
+		// We don't need to enable foreign keys (to perform foreign key updates),
+		// as there should be no other table referencing this one with a foreign key
+		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name)));
 		$r = parent::delete();
-		$db->commit();
+
 		return $r;
 	}
 
 	public function save(bool $selfcheck = true): bool
 	{
 		$db = DB::getInstance();
-		$db->begin();
+
+		if (!$db->inTransaction()) {
+			throw new \LogicException('This must be inside a transaction');
+		}
 
 		$modified = $this->getModifiedProperties();
 		$exists = $this->exists();
@@ -194,7 +219,6 @@ class ModuleTable extends Entity
 		$r = parent::save($selfcheck);
 
 		if (!$r) {
-			$db->rollback();
 			return $r;
 		}
 
@@ -209,7 +233,7 @@ class ModuleTable extends Entity
 			$sql[] = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($old_name), $db->quoteIdentifier($table_name));
 		}
 
-		// Rename columns
+		// Rename columns (SQLite 3.25+)
 		foreach ($this->_renamed_columns as $old_name => $new_name) {
 			$sql[] = sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s;',
 				$db->quoteIdentifier($table_name),
@@ -218,15 +242,15 @@ class ModuleTable extends Entity
 			);
 		}
 
-		// Re-create schema if columns have been modified
+		// Re-create schema if columns have been modified (create table, add column, modify column)
+		// see https://www.sqlite.org/lang_altertable.html#otheralter
+		// this will delete any trigger, index or view associated to this table
+		// we don't use DROP COLUMN / ADD COLUMN as they come with multiple restrictions
 		if (!$exists
 			|| array_key_exists('comment', $modified)
 			|| array_key_exists('columns', $modified)) {
-			if ($exists) {
-				$sql[] = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($table_name), $db->quoteIdentifier($table_name . '_old'));
-			}
-
-			$sql[] = $this->getSQL();
+			$sql[] = $this->getSQL($this->name . '_tmp');
+			$tmp_name = $this->getRealName($this->name . '_tmp');
 
 			if ($exists) {
 				$columns_names = array_keys($this->columns);
@@ -234,13 +258,15 @@ class ModuleTable extends Entity
 				$columns_names = implode(', ', $columns_names);
 
 				$sql[] = sprintf('INSERT INTO %s (%s) SELECT %2$s FROM %s;',
-					$db->quoteIdentifier($table_name),
+					$db->quoteIdentifier($tmp_name),
 					$columns_names,
-					$db->quoteIdentifier($table_name . '_old')
+					$db->quoteIdentifier($table_name)
 				);
 
-				$sql[] = sprintf('DROP TABLE %s;', $db->quoteIdentifier($table_name . '_old'));
+				$sql[] = sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name));
 			}
+
+			$sql[] = sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($tmp_name), $db->quoteIdentifier($table_name));
 		}
 
 		// set authorizer to only allow working on this specific table
@@ -252,15 +278,14 @@ class ModuleTable extends Entity
 
 		$this->_renamed_columns = [];
 
-		$db->commit();
-
 		// Re-enable default authorizer
 		$db->enableSafetyAuthorizer();
 		return $r;
 	}
 
-	public function getSQL(): string
+	public function getSQL(?string $table = null): string
 	{
+		$table = $this->getRealName($table);
 		$comment = '';
 
 		if (isset($this->comment)) {
@@ -284,7 +309,6 @@ class ModuleTable extends Entity
 		$columns_str .= "\n  " . self::DEFAULT_SUFFIX;
 
 		$db = DB::getInstance();
-		$table = $this->getRealName();
 
 		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n%s(\n  %s\n);",
 			$db->quoteIdentifier($table),
@@ -300,14 +324,12 @@ class ModuleTable extends Entity
 	 */
 	protected function parseColumnDefinition(string $name, string|array $definition): stdClass
 	{
-		if (!preg_match(Module::TABLE_NAME_REGEXP, $name)) {
-			throw new \InvalidArgumentException('Invalid column name: ' . $name);
-		}
+		$this->assert(preg_match(Module::TABLE_NAME_REGEXP, $name), 'Invalid column name: ' . $name);
+		$this->assert(is_string($definition) || is_array($definition), 'Invalid column definition for: ' . $name);
 
 		if (is_string($definition)) {
-			if (!preg_match(self::COLUMN_DEFINITION_REGEXP, $definition, $match)) {
-				throw new \InvalidArgumentException(sprintf('Invalid column "%s" definition: %s', $name, $definition));
-			}
+			$this->assert(preg_match(self::COLUMN_DEFINITION_REGEXP, $definition, $match),
+				sprintf('Invalid column "%s" definition: %s', $name, $definition));
 
 			$definition = (object) [
 				'type'         => $match[1],
@@ -330,16 +352,11 @@ class ModuleTable extends Entity
 
 			$definition = (object) array_intersect_key($definition, $keys);
 		}
-		else {
-			throw new \InvalidArgumentException('Invalid column definition for: ' . $name);
-		}
 
 		$db = DB::getInstance();
 		$definition->name = $name;
 
-		if (empty($definition->type)) {
-			throw new \InvalidArgumentException('Missing type for column: ' . $name);
-		}
+		$this->assert(!empty($definition->type), 'Missing type for column: ' . $name);
 
 		$definition->type = strtoupper($definition->type);
 		$definition->fk_on_delete = isset($definition->fk_on_delete) ? strtoupper($definition->fk_on_delete) : null;
@@ -356,49 +373,43 @@ class ModuleTable extends Entity
 			$definition->constraint = sprintf('CHECK (%s IS NULL OR datetime(%1$s) = %1$s)', $db->quoteIdentifier($name));
 		}
 
-		if (!in_array($definition->type, self::COLUMN_TYPES, true)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": unknown type "%s"', $definition->type));
-		}
-		elseif (!is_bool($definition->null)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": null can only be a boolean', $name));
-		}
-		elseif (isset($definition->default)
-			&& strtoupper($definition->default) === 'CURRENT_TIMESTAMP'
-			&& $definition->type !== 'DATETIME') {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": default value "%s" is only valid for DATETIME type', $name, $definition->default));
-		}
-		elseif (isset($definition->fk_on_delete)
-			&& !in_array($definition->fk_on_delete, ['SET NULL', 'RESTRICT', 'CASCADE'], true)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $name, $definition->fk_on_delete));
-		}
-		elseif (isset($definition->fk_table)
-			&& !isset($definition->fk_column)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
-		}
-		elseif (isset($definition->fk_table)
-			&& !isset($definition->fk_column)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
-		}
-		elseif (isset($definition->fk_table)
-			&& !preg_match('/^!?[a-z]+(?:_[a-z]+)*$/', $definition->fk_table)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s" foreign key: invalid table name "%s"', $name, $definition->fk_table));
-		}
-		elseif (isset($definition->fk_column)
-			&& !preg_match(Module::TABLE_NAME_REGEXP, $definition->fk_column)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s" foreign key column name "%s"', $name, $definition->fk_column));
-		}
-		elseif (isset($definition->fk_on_delete)
-			&& strtoupper($definition->fk_on_delete) === 'RESTRICT'
-			&& substr($definition->fk_table, 0, 1) === '!') {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": foreign key constraint "%s" is only valid for internal module tables', $name, $definition->fk_on_delete));
-		}
-		elseif (isset($definition->unique)
-			&& $definition->unique !== true
-			&& !preg_match(Module::TABLE_NAME_REGEXP, $definition->unique)) {
-			throw new \InvalidArgumentException(sprintf('Invalid column "%s": invalid unique index name "%s"', $name, $definition->unique));
+		$this->assert(in_array($definition->type, self::COLUMN_TYPES, true),
+			sprintf('Invalid column "%s": unknown type "%s"', $name, $definition->type));
+
+		$this->assert(is_bool($definition->null),
+			sprintf('Invalid column "%s": null can only be a boolean', $name));
+
+		if (isset($definition->default)
+			&& strtoupper($definition->default) === 'CURRENT_TIMESTAMP') {
+			$this->assert($definition->type === 'DATETIME',
+				sprintf('Invalid column "%s": default value "%s" is only valid for DATETIME type', $name, $definition->default));
 		}
 
 		if (isset($definition->fk_table)) {
+			$this->assert(preg_match('/^!?[a-z]+(?:_[a-z]+)*$/', $definition->fk_table),
+				sprintf('Invalid column "%s" foreign key: invalid table name "%s"', $name, $definition->fk_table));
+
+			$this->assert(isset($definition->fk_column),
+				sprintf('Invalid column "%s" foreign key: table is defined, but no column is defined', $name));
+
+			$this->assert(isset($definition->fk_column),
+				sprintf('Column "%s": missing foreign key column', $name));
+
+			$this->assert(preg_match(Module::TABLE_NAME_REGEXP, $definition->fk_column),
+				sprintf('Invalid column "%s" foreign key column name "%s"', $name, $definition->fk_column));
+
+			$definition->fk_on_delete ??= 'SET NULL';
+
+			$this->assert(in_array($definition->fk_on_delete, ['SET NULL', 'CASCADE'], true),
+				sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $name, $definition->fk_on_delete));
+
+			/* Not used as RESTRICT is not allowed
+			elseif (isset($definition->fk_on_delete)
+				&& strtoupper($definition->fk_on_delete) === 'RESTRICT'
+				&& substr($definition->fk_table, 0, 1) === '!') {
+				throw new \InvalidArgumentException(sprintf('Invalid column "%s": foreign key constraint "%s" is only valid for internal module tables', $name, $definition->fk_on_delete));
+			}*/
+
 			$fk_table = $this->getRealName($definition->fk_table, true);
 
 			// Validate foreign key table and column exists
@@ -406,13 +417,20 @@ class ModuleTable extends Entity
 
 			$fk_tables[$fk_table] ??= $db->getTableSchema($fk_table);
 
-			if (!$fk_tables[$fk_table]) {
-				throw new \InvalidArgumentException(sprintf('Invalid foreign key: "%s" table does not exist', $definition->fk_table));
-			}
-			elseif (!array_key_exists($definition->fk_column, $fk_tables[$fk_table]['columns'])) {
-				throw new \InvalidArgumentException(sprintf('Invalid foreign key: "%s" column does not exist in "%s" table', $definition->fk_column, $definition->fk_table));
-			}
+			$this->assert(!empty($fk_tables[$fk_table]),
+				sprintf('Invalid foreign key: "%s" table does not exist', $definition->fk_table));
+			$this->assert(array_key_exists($definition->fk_column, $fk_tables[$fk_table]['columns']),
+				sprintf('Invalid foreign key: "%s" column does not exist in "%s" table', $definition->fk_column, $definition->fk_table));
 			// apparently sqlite doesn't care about matching foreign key column type and local column type, that's good
+		}
+		else {
+			$definition->fk_column = null;
+			$definition->fk_on_delete = null;
+		}
+
+		if (isset($definition->unique)) {
+			$this->assert($definition->unique === true || preg_match(Module::TABLE_NAME_REGEXP, $definition->unique),
+				sprintf('Invalid column "%s": invalid unique index name "%s"', $name, $definition->unique));
 		}
 
 		return $definition;

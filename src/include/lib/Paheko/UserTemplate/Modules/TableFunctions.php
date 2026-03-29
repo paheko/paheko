@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate\Modules;
 
 use Paheko\TemplateException;
+use Paheko\ValidationException;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\UserTemplate\Modules;
 use Paheko\DB;
@@ -38,21 +39,31 @@ class TableFunctions
 			throw new TemplateException('A module cannot use the "table" function if it doesn\'t have a "version" in module.ini');
 		}
 
-		if (!empty($params['create'])) {
-			$action = 'create';
+
+		$actions = ['create', 'delete', 'rename', 'export'];
+
+		$action = array_intersect_key($params, array_flip($actions));
+
+		if (count($action) > 1) {
+			throw new TemplateException('Cannot specify more than one table action');
 		}
-		elseif (!empty($params['delete'])) {
-			$action = 'delete';
-		}
-		elseif (!empty($params['rename'])) {
-			$action = 'rename';
-		}
-		else {
-			throw new TemplateException('No action parameter was supplied');
+		elseif (!count($action)) {
+			throw new TemplateException('No table action was specified');
 		}
 
+		$action = key($action);
 		$name = $params[$action];
 		unset($params[$action]);
+
+		if (!is_string($name)) {
+			throw new TemplateException('Invalid column name: not a string');
+		}
+
+		// Make sure we cannot modify tables outside of migration.tpl
+		if ($action !== 'export'
+			&& Utils::basename($tpl->_tpl_path) !== Module::MIGRATION_FILE) {
+			throw new TemplateException('This table action cannot be performed outside of ' . Module::MIGRATION_FILE);
+		}
 
 		$db = DB::getInstance();
 		$table = $module->getTable($name);
@@ -65,7 +76,12 @@ class TableFunctions
 			$comment = $params['comment'] ?? null;
 			unset($params['comment']);
 
-			$table = $module->createTable($name, $comment, $params);
+			try {
+				$table = $module->createTable($name, $comment, $params);
+			}
+			catch (ValidationException $e) {
+				throw new TemplateException($e->getMessage(), $e->getCode(), $e);
+			}
 		}
 		elseif (!$table) {
 			throw new TemplateException('This table does not exist: ' . $name);
@@ -77,7 +93,7 @@ class TableFunctions
 			}
 
 			$export = $table->asArray();
-			unset($export['id']);
+			unset($export['id'], $export['id_module']);
 			$export['sql'] = $table->getSQL();
 			$tpl->assign($params['assign'], $export);
 			return;
@@ -94,7 +110,7 @@ class TableFunctions
 				$table->save();
 			}
 		}
-		catch (\InvalidArgumentException|UserException $e) {
+		catch (\InvalidArgumentException|ValidationException $e) {
 			throw new TemplateException($e->getMessage(), $e->getCode(), $e);
 		}
 	}
@@ -112,6 +128,11 @@ class TableFunctions
 
 		if (!$module->version) {
 			throw new TemplateException('A module cannot use the "column" function if it doesn\'t have a "version" in module.ini');
+		}
+
+		// Make sure we cannot modify tables outside of migration.tpl
+		if (Utils::basename($tpl->_tpl_path) !== Module::MIGRATION_FILE) {
+			throw new TemplateException('This table action cannot be performed outside of ' . Module::MIGRATION_FILE);
 		}
 
 		$table_name = $params['table'] ?? '';
@@ -157,17 +178,22 @@ class TableFunctions
 			}
 		}
 
-		if ($action === 'create') {
-			$table->addColumn($name, $params['definition']);
+		try {
+			if ($action === 'create') {
+				$table->addColumn($name, $params['definition']);
+			}
+			elseif ($action === 'rename') {
+				$table->renameColumn($name, $params['to']);
+			}
+			elseif ($action === 'delete') {
+				$table->dropColumn($name);
+			}
+			elseif ($action === 'modify') {
+				$table->modifyColumn($name, $params['definition']);
+			}
 		}
-		elseif ($action === 'rename') {
-			$table->renameColumn($name, $params['to']);
-		}
-		elseif ($action === 'delete') {
-			$table->dropColumn($name);
-		}
-		elseif ($action === 'modify') {
-			$table->modifyColumn($name, $params['definition']);
+		catch (ValidationException $e) {
+			throw new TemplateException($e->getMessage());
 		}
 
 		// We are saving / recreating the table after each change

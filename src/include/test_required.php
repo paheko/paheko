@@ -69,6 +69,7 @@ test_required(
 	//$db->requireFeatures('cte', 'json_patch', 'fts4', 'date_functions_in_constraints', 'index_expressions', 'rename_column', 'upsert');
 	// 3.25.0 = RENAME COLUMN + UPSERT
 	// 3.34 is Debian Bullseye (2021)
+	// 3.35 = DROP COLUMN
 	// 3.40 is Debian Bookworm (2023)
 	version_compare($v['versionString'], '3.34', '>='),
 	'SQLite3 version 3.34 ou supérieur requise. Version installée : ' . $v['versionString']

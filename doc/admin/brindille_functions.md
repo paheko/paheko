@@ -614,11 +614,25 @@ Les modules peuvent disposer de tables SQL, contenant chacune plusieurs colonnes
 
 Voir la documentation sur les modules pour voir comment gérer les évolutions du schéma SQL des tables du module.
 
-Note : les fonctions `table` et `column` refuseront de s'exécuter si le module ne dispose pas de `version` dans son fichier `module.ini`.
+Notes :
+
+* les fonctions `table` et `column` refuseront de s'exécuter si le module ne dispose pas de `version` dans son fichier `module.ini`
+* les fonctions `table` et `column` refuseront de s'exécuter en dehors du squelette `migration.tpl` (sauf la fonction `{{:table export="…"}}` qui est autorisée partout)
 
 ## table
 
-Permet de récupérer, créer ou modifier une table SQL du module.
+Permet de récupérer, créer, renommer ou supprimer une table SQL du module.
+
+Seul l'export est possible en dehors du fichier `migration.tpl`. Les autres fonctions (créer, supprimer, renommer) ne sont possibles que dans le squelette `migration.tpl`.
+
+### Exporter une table
+
+| Paramètre | Optionnel / obligatoire ? | Fonction |
+| :- | :- | :- |
+| `export` | **obligatoire** | Nom de la table |
+| `assign` | **obligatoire** | Variable où doit être assigné le tableau des informations sur la table |
+
+Permet de récupérer le schéma complet de la table, y compris la liste des colonnes, dans une variable.
 
 ### Créer une table
 
@@ -654,7 +668,7 @@ TYPE[ NULL][ DEFAULT][ REFERENCES][ UNIQUE][ INDEX][ COMMENT]
 | `TYPE` | Type de la colonne : `TEXT`, `INTEGER`, `REAL`, `NUMERIC` ou `DATETIME` |
 | `NULL` | Indique si la valeur nulle est acceptée pour la colonne : `NULL` ou `NOT NULL`. Si non spécifié, la colonne accepte une valeur nulle. |
 | `DEFAULT` | Indique la valeur par défaut : `DEFAULT 'Du texte'`, `DEFAULT 1312`, `DEFAULT CURRENT_TIMESTAMP`. La valeur `CURRENT_TIMESTAMP` n'est valide que pour les colonnes de type `DATETIME`, et indique que la date et heure du moment seront enregistrés au moment de la création d'une ligne. |
-| `REFERENCES nom_table (nom_colonne)…` | Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : `REFERENCES !users (id)`. Il est possible de spécifier l'action à effectuer si la clé étrangère est supprimée : `ON DELETE SET NULL` par exemple. |
+| `REFERENCES nom_table (nom_colonne) ON DELETE (SET NULL|CASCADE)` | Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : `REFERENCES !users (id)`. Si aucune action à effectuer si la clé étrangère est supprimée n'est spécifiée, c'est `SET NULL` qui est utilisé. |
 | `UNIQUE` | Indique si la colonne doit avoir une contrainte de valeur unique : une seule ligne de la table pourra avoir cette valeur. Il est possible d'avoir une clé unique composite en lui donnant un nom : `UNIQUE ma_cle_unique` |
 | `INDEX` | Indique si la colonne doit avoir un index. Il est possible de créer un index composite en lui donnant un nom : `INDEX ma_cle_d_index` |
 | `COMMENT` | Permet de spécifier un commentaire pour la colonne : `COMMENT 'Ceci est une colonne'` |
@@ -665,14 +679,15 @@ Note : le type `DATETIME` n'existe pas réellement dans SQLite, mais si ce type 
 
 Précisions sur les clés étrangères :
 
-* elles doivent forcément faire référence à une table et une colonne qui existe déjà
+* elles doivent forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie avant)
 * l'action par défaut est `SET NULL` si la clé étrangère est une table en dehors du module
 * l'action `RESTRICT` ne peut être utilisée pour une table externe au module (sinon cela pourrait bloquer des actions normales dans Paheko)
 * pour faire référence à une table externe au module il faut ajouter le caractère `!` devant le nom de la table, sinon la table sera considérée comme interne au module
+* il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.
 
 Si la définition est un tableau il convient d'utiliser les clés suivantes :
 
-| Paramètre | Type | Exemple
+| Paramètre | Type | Exemple |
 | :- | :- | :- |
 | `type` | `string` | `text`, `integer`… |
 | `null` | `bool` | `true` ou `false` |
@@ -728,6 +743,8 @@ Il est aussi possible de créer un index unique sur plusieurs colonnes en lui do
 
 Permet d'ajouter, renommer, modifier ou supprimer une colonne à une table existante.
 
+Cette fonction peut seulement être utilisée dans le fichier `migration.tpl`.
+
 | Paramètre | Optionnel / obligatoire ? | Fonction |
 | :- | :- | :- |
 | `table` | obligatoire | Nom de la table |
@@ -744,6 +761,11 @@ Permet d'ajouter, renommer, modifier ou supprimer une colonne à une table exist
 ```
 {{:column table="matable" create="machin" type="text" null=false}}
 ```
+
+Certaines restrictions s'appliquent :
+
+* il n'est pas possible d'ajouter une colonne `NOT NULL` qui n'a pas de valeur par défaut `DEFAULT`
+* il n'est pas possible d'ajouter une colonne `NOT NULL` avec une clé étrangère (`REFERENCES…`)
 
 ### Renommer une colonne
 
@@ -773,6 +795,10 @@ Permet d'ajouter, renommer, modifier ou supprimer une colonne à une table exist
 | `modify` | obligatoire | Indique le nom de la colonne à modifier |
 
 La syntaxe est identique à celle de la fonction pour ajouter une nouvelle colonne.
+
+Certaines restrictions s'appliquent :
+
+* Il n'est pas possible de modifier la référence d'une clé étrangère (table, colonne), mais il est possible de modifier l'action (`SET NULL`, `CASCADE`)
 
 ## save
 
