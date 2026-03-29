@@ -77,16 +77,8 @@
 		<li><a href="#stockage-de-donnees">Stockage de données</a>
 		<ol>
 			<li><a href="#configuration">Configuration</a></li>
-			<li><a href="#stockage-de-documents-json">Stockage de documents JSON</a>
-			<ol>
-				<li><a href="#validation">Validation</a>
-				<ol>
-					<li><a href="#propriete-non-requise">Propriété non requise</a>
-				</ol></li>
-				<li><a href="#stockage-json-dans-sqlite-pour-information">Stockage JSON dans SQLite (pour information)</a></li>
-				<li><a href="#recuperation-et-liste-de-documents">Récupération et liste de documents</a>
-			</ol></li>
-</ol></li>
+			<li><a href="#tables-sql">Tables SQL</a>
+		</ol></li>
 		<li><a href="#export-et-import-de-modules">Export et import de modules</a></li>
 		<li><a href="#restrictions">Restrictions</a>
 		<ol>
@@ -123,11 +115,10 @@
 <li>Utilisation de la syntaxe Brindille</li>
 <li>Les modules peuvent utiliser toutes les fonctions et boucles de Brindille</li>
 <li>Les modules peuvent stocker et récupérer des données dans la base SQLite dans une table clé-valeur spécifique à chaque module</li>
-<li>Les données du module sont stockées en JSON, on peut faire des requêtes complètes avec l'extension <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">JSON de SQLite</a></li>
-<li>Les données peuvent être validées avant enregistrement en utilisant <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">JSON Schema</a></li>
+<li>Les données du module sont stockées dans des tables SQL</li>
 <li>Un module peut également accéder aux données des autres modules</li>
 <li>Un module peut aussi accéder à toutes les données de la base de données, sauf certaines données à risque (voir plus bas)</li>
-<li>Un module ne peut pas modifier les données de la base de données</li>
+<li>Un module ne peut pas modifier les données de la base de données, en dehors de ses tables</li>
 <li>Paheko crée automatiquement des index sur les requêtes SQL des modules, permettant de rendre les requêtes rapides</li>
 </ul>
 <h1 id="structure-des-repertoires">Structure des répertoires</h1>
@@ -137,6 +128,7 @@
 <li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
 <li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
 <li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (<code>&lt;svg …&gt;</code>) doit comporter les attributs suivants : <code>id="img" width="100%" height="100%"</code>.</li>
+<li><code>migration.tpl</code> : code Brindille permettant la création et la mise à jour du schéma de base de données SQL du module, si nécessaire</li>
 </ul>
 <h2 id="snippets">Snippets</h2>
 <p>Les modules peuvent également avoir des <code>snippets</code>, ce sont des squelettes qui seront inclus à des endroits précis de l'interface, permettant de rajouter des fonctionnalités, ils sont situés dans le sous-répertoire <code>snippets</code> du module :</p>
@@ -208,98 +200,34 @@ doc_url="https://paheko.cloud/extension-recu-don"</code></pre>
 <li><code>$module.url</code> l'adresse URL du module (<code>https://site-association.tld/m/recu_don/</code> par exemple)</li>
 </ul>
 <h1 id="stockage-de-donnees">Stockage de données</h1>
-<p>Un module peut stocker des données de deux manières : dans sa configuration, ou dans son stockage de documents JSON.</p>
+<p>Un module peut stocker des données de deux manières : dans sa configuration, ou dans des tables SQL.</p>
 <h2 id="configuration">Configuration</h2>
 <p>La première manière est de stocker des informations dans la configuration du module. Pour cela on utilise la fonction <code>save</code> et la clé <code>config</code> :</p>
-<pre><code>{{:save key="config" accounts_list="512A,512B" check_boxes=true}}</code></pre>
+<pre><code>{{:save key="config" accounts="512A" check_boxes=true}}</code></pre>
 <p>On pourra retrouver ces valeurs dans la variable <code>$module.config</code> :</p>
 <pre><code>{{if $module.config.check_boxes}}
-  {{$module.config.accounts_list}}
+  {{$module.config.account}}
 {{/if}}</code></pre>
-<h2 id="stockage-de-documents-json">Stockage de documents JSON</h2>
-<p>Chaque module peut stocker ses données dans une base de données clé-document qui stockera les données dans des documents au format JSON dans une table SQLite.</p>
-<p>Grâce aux <a href="https://www.sqlite.org/json1.html" rel="noreferrer noopener external" target="_blank">fonctions JSON de SQLite</a> on pourra ensuite effectuer des recherches sur ces documents.</p>
-<p>Pour enregistrer il suffit d'utiliser la fonction <code>save</code> :</p>
-<pre><code>{{:save key="facture001" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
-<p>Si la clé indiquée (dans le paramètre <code>key</code>) n'existe pas, l'enregistrement sera créé, sinon il sera mis à jour avec les valeurs données.</p>
-<h3 id="validation">Validation</h3>
-<p>On peut utiliser un <a href="https://json-schema.org/understanding-json-schema/" rel="noreferrer noopener external" target="_blank">schéma JSON</a> pour valider que le document qu'on enregistre est valide :</p>
-<pre><code>{{:save validate_schema="./document.schema.json" type="facture" date="2022-01-01" label="Vente de petits pains au chocolat" total="42"}}</code></pre>
-<p>Le fichier <code>document.schema.json</code> devra être dans le même répertoire que le squelette et devra contenir un schéma valide. Voici un exemple :</p>
-<pre><code>{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "type": "object",
-    "properties": {
-        "date": {
-            "description": "Date d'émission",
-            "type": "string",
-            "format": "date"
-        },
-        "type": {
-            "description": "Type de document",
-            "type": "string",
-            "enum": ["devis", "facture"]
-        },
-        "total": {
-            "description": "Montant total",
-            "type": "integer",
-            "minimum": 0
-        },
-        "label": {
-            "description": "Libellé",
-            "type": "string"
-        },
-        "description": {
-            "description": "Description",
-            "type": ["string", "null"]
-        }
-    },
-    "required": [ "type", "date", "total", "label"]
-}</code></pre>
-<p>Si le document fourni n'est pas conforme au schéma, il ne sera pas enregistré et une erreur sera affichée.</p>
-<h4 id="propriete-non-requise">Propriété non requise</h4>
-<p>Si vous souhaitez utiliser dans votre document une propriété non requise, il ne faut pas la fournir en paramètre de la fonction <code>save</code>.</p>
-<p>Si elle est fournie mais vide, il faut aussi autoriser le type <code>null</code> (en minuscules) au type de votre propriété.</p>
-<p>Exemple :  </p>
-<pre><code>[...]
-    "description": {
-        "description": "Description",
-        "type": ["string", "null"]
-    }
-[...]</code></pre>
-<h3 id="stockage-json-dans-sqlite-pour-information">Stockage JSON dans SQLite (pour information)</h3>
-<p>Explication du fonctionnement technique derrière la fonction <code>save</code>.</p>
-<p>En pratique chaque enregistrement sera placé dans une table SQL dont le nom commence par <code>module_data_</code>. Ici la table sera donc nommée <code>module_data_factures</code> si le nom unique du module est <code>factures</code>.</p>
-<p>Le schéma de cette table est le suivant :</p>
-<pre><code>CREATE TABLE module_data_factures (
-  id INTEGER PRIMARY KEY NOT NULL,
-  key TEXT NULL,
-  document TEXT NOT NULL
-);
-
-CREATE UNIQUE INDEX module_data_factures_key ON module_data_factures (key);</code></pre>
-<p>Comme on peut le voir, chaque ligne dans la table peut avoir une clé unique (<code>key</code>), et un ID ou juste un ID auto-incrémenté. La clé unique n'est pas obligatoire, mais peut être utile pour différencier certains documents.</p>
-<p>Par exemple le code suivant :</p>
-<pre><code>{{:save key="facture_43" nom="Facture de courses"}}</code></pre>
-<p>Est l'équivalent de la requête SQL suivante :</p>
-<pre><code>INSERT OR REPLACE INTO module_data_factures (key, document) VALUES ('facture_43', '{"nom": "Facture de courses"}');</code></pre>
-<h3 id="recuperation-et-liste-de-documents">Récupération et liste de documents</h3>
-<p>Il sera ensuite possible d'utiliser la boucle <code>load</code> pour récupérer les données :</p>
-<pre><code>{{#load id=42}}
-    Ce document est de type {{$type}} créé le {{$date}}.
-    &lt;h2&gt;{{$label}}&lt;/h2&gt;
-    À payer : {{$total}} €
-    {{else}}
-    Le document numéro 42 n'a pas été trouvé.
-{{/load}}</code></pre>
-<p>Cette boucle <code>load</code> permet aussi de faire des recherches sur les valeurs du document :</p>
-<pre><code>&lt;ul&gt;
-{{#load where="$$.type = 'facture'" order="date DESC"}}
-    &lt;li&gt;{{$label}} ({{$total}} €)&lt;/li&gt;
-{{/load}}
-&lt;/ul&gt;</code></pre>
-<p>La syntaxe <code>$$.type</code> indique d'aller extraire la clé <code>type</code> du document JSON.</p>
-<p>C'est un raccourci pour la syntaxe SQLite <code>json_extract(document, '$.type')</code>.</p>
+<h2 id="tables-sql">Tables SQL</h2>
+<p>Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.</p>
+<p>Pour cela il convient de définir une version dans le fichier <code>module.ini</code> :</p>
+<pre><code>version = "1.0.0"</code></pre>
+<p>Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.</p>
+<p>Un module sans version ne peut pas créer de tables.</p>
+<p>Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette <code>migration.tpl</code> sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.</p>
+<p>Pour cela il faut utiliser les variables suivantes :</p>
+<ul>
+<li><code>$module.db_version</code> : contient la version de la base de données (<code>NULL</code> si la base de données n'a pas été créée)</li>
+<li><code>$module.version</code> : contient la version du module, issue du fichier <code>module.ini</code></li>
+</ul>
+<p>Voici un exemple de fichier <code>migration.tpl</code> :</p>
+<pre><code>{{if !$module.db_version}}
+  {{:table create="personnes" nom="TEXT NOT NULL"}}
+{{elseif $module.db_version|version_compare:"&lt;":1.1.0"}}
+  {{:column table="personnes" create="prenom" type="TEXT" null=false}}
+{{/if}}</code></pre>
+<p>Ce squelette ne doit rien afficher. Si quelque chose est affiché, l'exécution du module sera stoppée, car on considère que le squelette a produit une erreur ou le développeur veut afficher quelque chose pour faire du debug.</p>
+<p>Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.</p><p>Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. <a href="brindille_storage_json.md">Voir l'ancienne documentation</a>.</p>
 <h1 id="export-et-import-de-modules">Export et import de modules</h1>
 <p>Il est possible d'exporter un module modifié. Cela créera un fichier ZIP contenant à la fois le code modifié et le code non modifié.</p>
 <p>De la même manière il est possible d'importer un module à partir d'un fichier ZIP d'export. Si vous créez votre fichier ZIP manuellement, attention à respecter le fait que le code du module doit se situer dans le répertoire <code>modules/nom_du_module</code> du fichier ZIP. Tout fichier ou répertoire situé en dehors de cette arborescence provoquera une erreur et l'impossibilité d'importer le module.</p>

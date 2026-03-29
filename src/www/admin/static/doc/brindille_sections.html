@@ -242,11 +242,7 @@ orange</code></pre>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>debug</code></td>
-<td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>explain</code></td>
-<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+<td style="text-align: left;">Si ce paramètre existe et vaut <code>true</code>, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>assign</code></td>
@@ -338,11 +334,7 @@ orange</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>debug</code></td>
-<td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>explain</code></td>
-<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+<td style="text-align: left;">Si ce paramètre existe et vaut <code>true</code>, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>count</code></td>
@@ -877,9 +869,10 @@ Il y a {{$result.count}} articles.</code></pre>
     …
 {{/form}}
 …
-{{:form_errors}}</code></pre><h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
+{{:form_errors}}</code></pre>
+<h2 id="load-sup-sql-sup">load <sup>(sql)</sup></h2>
 <p>Note : cette section hérite de <code>sql</code> (voir plus haut). De ce fait, le nombre de résultats est limité à 10000 par défaut, si le paramètre <code>limit</code> n'est pas renseigné.</p>
-<p>Charge un ou des documents pour le module courant.</p>
+<p>Liste des lignes d'une table SQL appartenant au module courant.</p>
 <table>
 <thead>
 <tr>
@@ -890,9 +883,14 @@ Il y a {{$result.count}} articles.</code></pre>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nom de la table</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>module</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
+<td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>key</code></td>
@@ -904,65 +902,30 @@ Il y a {{$result.count}} articles.</code></pre>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Numéro unique du document</td>
 </tr>
-<tr>
-<td style="text-align: left;"><code>each</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Traiter une clé du document comme un tableau</td>
-</tr>
 </tbody>
 </table>
-<p>Il est possible d'utiliser d'autres paramètres : <code>{{#load cle="valeur"}}</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
-<p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" rel="noreferrer noopener external" target="_blank">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
-<p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
-<p>Chaque itération renverra ces deux variables :</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Variable</th>
-<th style="text-align: left;">Valeur</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>$key</code></td>
-<td style="text-align: left;">Clé unique du document</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>$id</code></td>
-<td style="text-align: left;">Numéro unique du document</td>
-</tr>
-</tbody>
-</table>
-<p>Ainsi que chaque élément du document JSON lui-même.</p>
+<p>Il est possible d'utiliser d'autres colonnes comme paramètres : <code>{{#load table="personnes" nom="machin"}}</code>. Cela va comparer <code>"machin"</code> avec la valeur de la colonne <code>nom</code> dans la table <code>personnes</code>.</p>
+<p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser le nom de la colonne dans le paramètre <code>where</code>. Ainsi <code>where="nom LIKE 'Dulcie%'</code> va lister tous les noms qui commencent par <code>Dulcie</code>.</p>
+<p>Chaque itération renverra toutes les colonnes du tableau.</p>
+<p>Si aucun résultat n'est trouvé, aucune itération ne sera effectuée, il sera possible de détecter ce cas avec la syntaxe suivante :</p>
+<pre><code>{{#load table="personnes" nom="Dulcie"}}
+    {{$nom}}
+{{else}}
+    Aucune personne trouvée avec ce prénom.
+{{/load}}</code></pre>
 <h3 id="exemples">Exemples</h3>
-<p>Afficher le nom du document dont la clé est <code>facture_43</code> :</p>
-<pre><code>{{#load key="facture_43"}}
+<p>Afficher le nom de la ligne dont la clé est <code>facture_43</code> :</p>
+<pre><code>{{#load table="factures" key="facture_43"}}
 {{$nom}}
 {{/load}}</code></pre>
 <p>Afficher la liste des devis du module <code>invoice</code> depuis un autre module par exemple :</p>
-<pre><code>{{#load module="invoice" type="quote"}}
-&lt;h1&gt;Titre du devis : {{$subject}}&lt;/h1&gt;
+<pre><code>{{#load module="invoice" table="factures" type="devis"}}
+&lt;h1&gt;Titre du devis : {{$sujet}}&lt;/h1&gt;
 &lt;h2&gt;Montant : {{$total}}&lt;/h2&gt;
-{{/load}}</code></pre>
-<h3 id="utilisation-du-parametre-each">Utilisation du paramètre <code>each</code></h3>
-<p>Le paramètre <code>each</code> est utile pour faire une boucle sur un tableau contenu dans le document. Ce paramètre doit contenir un chemin JSON valide. Par exemple <code>membres[1].noms</code> pour boucler sur le tableau <code>noms</code>, du premier élément du tableau <code>membres</code>. Voir la documentation <a href="https://www.sqlite.org/json1.html#jeach" rel="noreferrer noopener external" target="_blank">de la fonction json_each de SQLite pour plus de détails</a>.</p>
-<p>Pour chaque itération de la section, la variable <code>{{$value}}</code> contiendra l'élément recherché dans le critère <code>each</code>.</p>
-<p>Par exemple nous pouvons avoir un élément <code>membres</code> dans notre document JSON qui contient un tableau de noms de membres :</p>
-<pre><code>{{:assign var="membres." value="Greta Thunberg}}
-{{:assign var="membres." value="Valérie Masson-Delmotte"}}
-{{:save membres=$membres}}</code></pre>
-<p>Nous pouvons utiliser <code>each</code> pour faire une liste :</p>
-<pre><code>{{#load each="membres"}}
-- {{$value}}
-{{/load}}</code></pre>
-<p>Ou pour récupérer les documents qui correspondent à un critère :</p>
-<pre><code>{{#load each="membres" where="value = 'Greta Thunberg'"}}
-Le document n°{{$id}} est celui qui parle de Greta.
 {{/load}}</code></pre>
 <h2 id="list">list</h2>
 <p>Attention : cette section n'hérite <strong>PAS de <code>sql</code></strong>.</p>
-<p>Un peu comme <code>{{#load}}</code> cette section charge les documents d'un module, mais au sein d'une liste (tableau HTML).</p>
+<p>Un peu comme <code>{{#load}}</code> cette section charge les lignes d'une table SQL d'un module, mais au sein d'une liste (tableau HTML).</p>
 <p>Cette liste gère automatiquement l'ordre selon les préférences des utilisateurs, ainsi que la pagination.</p>
 <p>Cette section est très puissante et permet de générer des listes simplement, une fois qu'on a saisi la logique de son fonctionnement.</p>
 <table>
@@ -975,14 +938,14 @@ Le document n°{{$id}} est celui qui parle de Greta.
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>schema</code></td>
-<td style="text-align: left;"><strong>requis</strong> si <code>select</code> n'est pas fourni</td>
-<td style="text-align: left;">Chemin vers un fichier de schéma JSON qui représenterait le document</td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><strong>requis</strong></td>
+<td style="text-align: left;">Nom de la table</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>select</code></td>
-<td style="text-align: left;"><strong>requis</strong> si <code>schema</code> n'est pas fourni</td>
-<td style="text-align: left;">Liste des colonnes à sélectionner, sous la forme <code>$$.colonne AS "Colonne"</code>, chaque colonne étant séparée par un point-virgule.</td>
+<td style="text-align: left;"><code>columns</code></td>
+<td style="text-align: left;"><strong>requis</strong></td>
+<td style="text-align: left;">Liste des colonnes à lister, sous forme de tableau (voir ci-dessous)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>module</code></td>
@@ -990,9 +953,9 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>columns</code></td>
+<td style="text-align: left;"><code>join</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Permet de n'afficher que certaines colonnes du schéma. Indiquer ici le nom des colonnes, séparées par des virgules.</td>
+<td style="text-align: left;">Tables à joindre à la requête, comme dans une requête SQL. Exemple : <code>INNER JOIN users ON users.id = personnes.id_user</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>order</code></td>
@@ -1000,19 +963,14 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;">Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si <code>select</code> est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>desc</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Si ce paramètre est à <code>true</code>, l'ordre de tri par défaut sera inversé.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>group</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
 <td style="text-align: left;">Expression SQL utilisée pour le groupement des résultats (<code>GROUP BY</code>).</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>count</code></td>
-<td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Expression SQL utilisée pour le décompte des résultats. Défaut : <code>COUNT(*)</code>. Principalement utile avec la clause <code>group</code>.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>desc</code></td>
-<td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Si ce paramètre est à <code>true</code>, l'ordre de tri sera inversé.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>max</code></td>
@@ -1030,77 +988,79 @@ Le document n°{{$id}} est celui qui parle de Greta.
 <td style="text-align: left;">Si ce paramètre existe, la requête SQL exécutée sera affichée avant le début de la boucle.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>explain</code></td>
+<td style="text-align: left;"><code>user_sorting</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Si ce paramètre existe, l'explication de la requête SQL exécutée sera affichée avant le début de la boucle.</td>
+<td style="text-align: left;">Booléen. Si ce paramètre est <code>false</code>, il ne sera pas possible à l'utilisateur d'ordonner les colonnes.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>disable_user_sort</code></td>
+<td style="text-align: left;"><code>export_button</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, il ne sera pas possible à l'utilisateur d'ordonner les colonnes.</td>
+<td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, un bouton d'export s'affichera au dessus de la liste.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>checkable</code></td>
+<td style="text-align: left;"><em>optionnel</em></td>
+<td style="text-align: left;">Booléen. Si ce paramètre est <code>true</code>, le tableau comportera une première colonne permettant de cocher la ligne.</td>
 </tr>
 </tbody>
 </table>
-<p>Pour déterminer quelles colonnes afficher dans le tableau, il faut utiliser soit le paramètre <code>schema</code> pour indiquer un fichier de schéma JSON qui sera utilisé pour donner le libellé des colonnes (via la <code>description</code> indiquée dans le schéma), soit le paramètre <code>select</code>, où il faut alors indiquer le nom et le libellé des colonnes sous la forme <code>$$.colonne1 AS "Libellé"; $$.colonne2 AS "Libellé 2"</code>.</p>
-<p>Comme pour <code>load</code>, il est possible d'utiliser des paramètres supplémentaires : <code>cle="valeur"</code>. Cela va comparer <code>"valeur"</code> avec la valeur de la clé <code>cle</code> dans le document JSON. C'est l'équivalent d'écrire <code>where="json_extract(document, '$.cle') = 'valeur'"</code>.</p>
-<p>Pour des conditions plus complexes qu'une simple égalité, il est possible d'utiliser la syntaxe courte <code>$$…</code> dans le paramètre <code>where</code>. Ainsi <code>where="$$.nom LIKE 'Bourse%'</code> est l'équivalent de <code>where="json_extract(document, '$.nom') LIKE 'Bourse%'"</code>.</p>
-<p>Voir <a href="https://www.sqlite.org/json1.html#jex" rel="noreferrer noopener external" target="_blank">la documentation de SQLite pour plus de détails sur la syntaxe de json_extract</a>.</p>
-<p>Note : un index SQL dynamique est créé pour chaque requête utilisant une clause <code>json_extract</code>.</p>
-<p>Chaque itération renverra toujours ces deux variables :</p>
+<p>Comme pour <code>load</code>, il est possible d'utiliser d'autres paramètres supplémentaires, correspondant à la valeur des colonnes recherchées : <code>nom="Dulcie"</code> par exemple.</p>
+<p>Chaque itération renverra toutes les colonnes de la table.</p>
+<p>La section ouvre un tableau HTML (<code>&lt;table&gt;…&lt;tbody&gt;</code>) et le ferme automatiquement, donc le contenu de la section <strong>doit</strong> être une ligne de tableau HTML (<code>&lt;tr&gt;</code>).</p>
+<p>Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans <code>columns</code> ou <code>select</code>. Une dernière colonne est réservée aux boutons d'action : <code>&lt;td class="actions"&gt;...&lt;/td&gt;</code>.</p>
+<p><strong>Attention :</strong> une seule liste peut être utilisée dans une même page, à moins d'indiquer le paramètre <code>disable_user_sort=true</code>. Appeler plusieurs fois cette fonction sans ce paramètre provoquera une erreur.</p>
+<h3 id="tableau-des-colonnes">Tableau des colonnes</h3>
+<p>Chaque clé du tableau doit correspondre au nom d'une colonne de la table.</p>
+<p>La valeur peut être soit juste le libellé sous forme de chaîne de caractère comme ceci :</p>
+<pre><code>{{:assign var="columns" name="Nom de la personne"}}</code></pre>
+<p>Sinon la valeur peut également être un tableau permettant d'avoir quelque chose de plus complexe, avec les clés suivantes :</p>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Variable</th>
-<th style="text-align: left;">Valeur</th>
+<th style="text-align: left;">Clé</th>
+<th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>$key</code></td>
-<td style="text-align: left;">Clé unique du document</td>
+<td style="text-align: left;"><code>label</code></td>
+<td style="text-align: left;">Libellé de la colonne</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>$id</code></td>
-<td style="text-align: left;">Numéro unique du document</td>
+<td style="text-align: left;"><code>select</code></td>
+<td style="text-align: left;">Clause du SELECT à utiliser pour cette colonne, si on souhaite que cela soit autre chose que le nom de la colonne</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>order</code></td>
+<td style="text-align: left;">Clause utilisée dans le <code>ORDER BY</code> si un tri est opéré sur cette colonne. Le mot-clé <code>%1$s</code> sera remplacé par la clause <code>DESC</code> ou <code>ASC</code> selon la requête de l'usager.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>export</code></td>
+<td style="text-align: left;">Booléen. Si la valeur est <code>true</code>, la colonne uniquement sera inclue dans l'export ODS/XLSX/CSV, elle ne s'affichera pas dans l'interface HTML. Si la valeur est <code>false</code>, la colonne ne sera pas inclue dans l'export, uniquement sur l'interface. Si ce paramètre est absent, la colonne apparaîtra à la fois dans l'export et dans l'interface.</td>
 </tr>
 </tbody>
 </table>
-<p>Ainsi que chaque élément du document JSON lui-même.</p>
-<p>La section ouvre un tableau HTML et le ferme automatiquement, donc le contenu de la section <strong>doit</strong> être une ligne de tableau HTML (<code>&lt;tr&gt;</code>).</p>
-<p>Dans chaque ligne du tableau il faut respecter l'ordre des colonnes indiqué dans <code>columns</code> ou <code>select</code>. Une dernière colonne est réservée aux boutons d'action : <code>&lt;td class="actions"&gt;...&lt;/td&gt;</code>.</p>
-<p><strong>Attention :</strong> une seule liste peut être utilisée dans une même page. Avoir plusieurs listes provoquera des problèmes au niveau du tri des colonnes.</p>
+<p>Exemple :</p>
+<pre><code>{{:assign var="name" label="Nom du membre" select="users.name" order="users.name COLLATE U_NOCASE %1$s" export=false}}
+{{:assign var="columns" name=$name}}
+{{#list table="personnes" join="INNER JOIN users ON users.id = personnes.id_user" columns=$columns}}
+    &lt;tr&gt;
+        &lt;th&gt;{{$nom}}&lt;/th&gt;
+        &lt;td&gt;&lt;a href="fiche.html?id={{$id}}"&gt;Fiche personne&lt;/td&gt;
+    &lt;/tr&gt;
+{{/list}}</code></pre>
 <h3 id="exemples">Exemples</h3>
-<p>Lister le nom, la date et le montant des reçus fiscaux, à partir du schéma JSON suivant :</p>
-<pre><code>{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "type": "object",
-    "properties": {
-        "date": {
-            "description": "Date d'émission",
-            "type": "string",
-            "format": "date"
-        },
-        "adresse": {
-            "description": "Adresse du bénéficiaire",
-            "type": "string"
-        },
-        "nom": {
-            "description": "Nom du bénéficiaire",
-            "type": "string"
-        },
-        "montant": {
-            "description": "Montant",
-            "type": "integer",
-            "minimum": 0
-        }
-    }
-}</code></pre>
-<p>Le code de la section sera alors comme suivant :</p>
-<pre><code>{{#list schema="./recu.schema.json" columns="nom, date, montant"}}
+<p>Lister le nom, la date et le montant des reçus fiscaux :</p>
+<pre><code>{{:assign var="columns"
+    name="Nom du bénéficiaire"
+    date="Date d'émission"
+    address="Adresse du bénéficiaire"
+    amount="Montant"}}
+{{#list tables="recus" columns=$columns}}
     &lt;tr&gt;
-        &lt;th&gt;{{$nom}}&lt;/th&gt;
+        &lt;th&gt;{{$name}}&lt;/th&gt;
         &lt;td&gt;{{$date|date_short}}&lt;/td&gt;
-        &lt;td&gt;{{$montant|raw|money_currency}}&lt;/td&gt;
+        &lt;td&gt;{{$amount|raw|money_currency}}&lt;/td&gt;
         &lt;td class="actions"&gt;
             {{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
         &lt;/td&gt;
@@ -1108,21 +1068,6 @@ Le document n°{{$id}} est celui qui parle de Greta.
 {{else}}
     &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
 {{/list}}</code></pre>
-<p>Si le paramètre <code>columns</code> avait été omis, la colonne <code>adresse</code> aurait également été incluse.</p>
-<p>Il est à noter que si l'utilisation directe du schéma est bien pratique, cela ne permet pas de récupérer des informations plus complexes dans la structure JSON, par exemple une sous-clé ou l'application d'une fonction SQL. Dans ce cas il faut obligatoirement utiliser <code>select</code>. Par exemple ici on veut pouvoir afficher l'année, et trier sur l'année par défaut :</p>
-<pre><code>{{#list select="$$.nom AS 'Nom du donateur' ; strftime('%Y', $$.date) AS 'Année'" order=2}}
-    &lt;tr&gt;
-        &lt;th&gt;{{$nom}}&lt;/th&gt;
-        &lt;td&gt;{{$col2}}&lt;/td&gt;
-        &lt;td class="actions"&gt;
-            {{:linkbutton shape="eye" label="Ouvrir" href="./voir.html?id=%d"|args:$id target="_dialog"}}
-        &lt;/td&gt;
-    &lt;/tr&gt;
-{{else}}
-    &lt;p class="alert block"&gt;Aucun reçu n'a été trouvé.&lt;/p&gt;
-{{/list}}</code></pre>
-<p>On peut utiliser le nom des clés du document JSON, mais sinon pour faire référence à la valeur d'une colonne spécifique dans la boucle, il faut utiliser son numéro d'ordre (qui commence à <code>1</code>, pas zéro). Ici on veut afficher l'année, donc la seconde colonne, donc <code>$col1</code>.</p>
-<p>Noter aussi l'utilisation du numéro de la colonne de l'année (<code>2</code>) pour le paramètre <code>order</code>, qui avec <code>select</code> doit indiquer le numéro de la colonne à utiliser pour l'ordre.</p>
 <h2 id="files">files</h2>
 <p>Liste les fichiers du module courant, éventuellement limité à un sous-répertoire designé.</p>
 <table>

@@ -105,6 +105,7 @@
 			<li><a href="#typo">typo</a></li>
 			<li><a href="#url_encode">url_encode</a></li>
 			<li><a href="#url_decode">url_decode</a></li>
+			<li><a href="#version_compare">version_compare</a></li>
 			<li><a href="#autres-filtres-de-texte">Autres filtres de texte</a>
 		</ol></li>
 		<li><a href="#filtres-sur-les-sommes-en-devises">Filtres sur les sommes en devises</a>
@@ -550,6 +551,15 @@ Ceci n'est pas un t</code></pre>
 <p>Encode une chaîne de texte pour utilisation dans une adresse URL (alias de <code>rawurlencode</code> en PHP). Équivalent de <code>|escape:'url'</code>.</p>
 <h2 id="url_decode">url_decode</h2>
 <p>Décode une chaîne de texte venant d'une URL (alias de <code>rawurldecode</code> en PHP).</p>
+<h2 id="version_compare">version_compare</h2>
+<p>Compare deux numéros de versions entre eux à l'aide d'un opérateur, alias de <a href="https://www.php.net/version_compare" rel="noreferrer noopener external" target="_blank">la même fonction en PHP</a>.</p>
+<p>| Argument | Fonction |<br />
+| :- | :- | :- |<br />
+| 1 | Opérateur : <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>==</code> ou <code>!=</code> |<br />
+| 2 | Version à comparer |</p>
+<pre><code>{{if "1.0.0"|version_compare:"&lt;":"1.1.0"}}
+    1.0.0 &lt; 1.1.0
+{{/if}}</code></pre>
 <h2 id="autres-filtres-de-texte">Autres filtres de texte</h2>
 <p>Les filtres suivants modifient la casse (majuscule/minuscules) d'un texte et ne fonctionneront correctement que si l'extension <code>mbstring</code> est installée sur le serveur. Sinon les lettres accentuées ne seront pas modifiées.</p>
 <p>Note : il est donc préférable d'utiliser la propriété CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform" rel="noreferrer noopener external" target="_blank"><code>text-transform</code></a> pour modifier la casse si l'usage n'est que pour l'affichage, et non pas pour enregistrer les données.</p>

@@ -83,16 +83,32 @@
 			</ol></li>
 			<li><a href="#signature"> signature</a>
 		</ol></li>
-		<li><a href="#fonctions-relatives-aux-modules">Fonctions relatives aux Modules</a>
+		<li><a href="#fonctions-des-tables-sql-des-modules">Fonctions des tables SQL des modules</a>
 		<ol>
+			<li><a href="#table">table</a>
+			<ol>
+				<li><a href="#exporter-une-table">Exporter une table</a></li>
+				<li><a href="#creer-une-table"> Créer une table</a></li>
+				<li><a href="#definition-d-une-colonne"> Définition d'une colonne</a></li>
+				<li><a href="#utilisation-d-index-uniques">Utilisation d'index uniques</a></li>
+				<li><a href="#renommer-une-table">Renommer une table</a></li>
+				<li><a href="#supprimer-une-table">Supprimer une table</a>
+			</ol></li>
+			<li><a href="#column">column</a>
+			<ol>
+				<li><a href="#ajouter-une-colonne-a-une-table"> Ajouter une colonne à une table</a></li>
+				<li><a href="#renommer-une-colonne"> Renommer une colonne</a></li>
+				<li><a href="#supprimer-une-colonne"> Supprimer une colonne</a></li>
+				<li><a href="#modifier-une-colonne"> Modifier une colonne</a>
+			</ol></li>
 			<li><a href="#save">save</a>
 			<ol>
-				<li><a href="#mise-a-jour">Mise à jour</a></li>
-				<li><a href="#recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</a></li>
-				<li><a href="#enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</a></li>
-				<li><a href="#validation-avec-un-schema-json">Validation avec un schéma JSON</a>
+				<li><a href="#enregistrer-la-configuration-du-module">Enregistrer la configuration du module</a>
 			</ol></li>
-			<li><a href="#delete">delete</a></li>
+			<li><a href="#delete">delete</a>
+		</ol></li>
+		<li><a href="#autres-fonctions-des-modules">Autres fonctions des modules</a>
+		<ol>
 			<li><a href="#read">read</a></li>
 			<li><a href="#admin_header">admin_header</a></li>
 			<li><a href="#admin_footer">admin_footer</a></li>
@@ -799,12 +815,6 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
   &lt;p&gt;{{:csv action="cancel_button"}}&lt;/p&gt;
 &lt;/form&gt;</code></pre>
 <p>Quand on a terminé avec le CSV, de la même manière il faut faire appel à l'action <code>clear</code>.</p>
-<p>Note : il est possible de combiner l'usage de la fonction <code>csv</code> avec le paramètre <code>from</code> de <code>save</code> pour enregistrer en une fois toutes les lignes :</p>
-<pre><code>{{if $csv.ready}}
-  {{:save type="entry" from=$csv.rows validate_schema="./entry.schema.json"}}
-  {{:csv action="clear"}}
-  {{:redirect to="./"}}
-{{/if}}</code></pre>
 <h3 id="chargement-d-un-fichier-local">Chargement d'un fichier local</h3>
 <p>Si le paramètre <code>file</code> n'est pas spécifié, un formulaire d'envoi de fichier sera affiché. S'il est renseigné avec le chemin vers un fichier stocké dans Paheko, c'est ce fichier qui sera chargé en mémoire lors de l'exécution de l'action <code>initialize</code>. Exemple :</p>
 <pre><code>{{:csv action="initialize" file="documents/test.ods" columns=$columns assign="csv"}}
@@ -817,9 +827,324 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <p>Comme le fichier est chargé en mémoire lors de la première exécution de l'action <code>initialize</code>, si le fichier est modifié après cette première exécution, les modifications ne seront pas visibles. Il faut donc exécuter <code>{{:csv action="clear"}}</code> pour pouvoir "recharger" le fichier en mémoire à partir des documents.</p>
 <h2 id="signature"> signature</h2>
 <p>Affiche la signature de l'association (en HTML), ou son logo si aucune signature n'a été choisie.</p>
-<h1 id="fonctions-relatives-aux-modules">Fonctions relatives aux Modules</h1>
+<h1 id="fonctions-des-tables-sql-des-modules">Fonctions des tables SQL des modules</h1>
+<p>Les modules peuvent disposer de tables SQL, contenant chacune plusieurs colonnes.</p>
+<p>Voir la documentation sur les modules pour voir comment gérer les évolutions du schéma SQL des tables du module.</p>
+<p>Notes :</p>
+<ul>
+<li>les fonctions <code>table</code> et <code>column</code> refuseront de s'exécuter si le module ne dispose pas de <code>version</code> dans son fichier <code>module.ini</code></li>
+<li>les fonctions <code>table</code> et <code>column</code> refuseront de s'exécuter en dehors du squelette <code>migration.tpl</code> (sauf la fonction <code>{{:table export="…"}}</code> qui est autorisée partout)</li>
+</ul>
+<h2 id="table">table</h2>
+<p>Permet de récupérer, créer, renommer ou supprimer une table SQL du module.</p>
+<p>Seul l'export est possible en dehors du fichier <code>migration.tpl</code>. Les autres fonctions (créer, supprimer, renommer) ne sont possibles que dans le squelette <code>migration.tpl</code>.</p>
+<h3 id="exporter-une-table">Exporter une table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>export</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom de la table</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>assign</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Variable où doit être assigné le tableau des informations sur la table</td>
+</tr>
+</tbody>
+</table>
+<p>Permet de récupérer le schéma complet de la table, y compris la liste des colonnes, dans une variable.</p>
+<h3 id="creer-une-table"> Créer une table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>create</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom de la table</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>comment</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Commentaire sur la table</td>
+</tr>
+</tbody>
+</table>
+<p>Toutes les tables ont automatiquement une colonne <code>id</code> qui est également la clé primaire, ainsi qu'une colonne <code>key</code> qui contient un identifiant UUID unique.</p>
+<p>Les colonnes doivent être passées sous forme de paramètres supplémentaires, avec le nom de la colonne en nom de paramètre, et sa définition en valeur. Voir plus bas pour la définition d'une colonne.</p>
+<pre><code>{{:table create="matable"
+  titre="TEXT NOT NULL"
+  id_user="INTEGER NOT NULL REFERENCES !users (id) ON DELETE CASCADE"
+  id_service="INTEGER NULL REFERENCES !services (id)"
+}}</code></pre>
+<h3 id="definition-d-une-colonne"> Définition d'une colonne</h3>
+<p>Une définition de colonne peut être un tableau (array) ou une chaîne de texte (string).</p>
+<p>Si la définition est une chaîne de texte, il convient de respecter le format suivant :</p>
+<pre><code>TYPE[ NULL][ DEFAULT][ REFERENCES][ UNIQUE][ INDEX][ COMMENT]</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>TYPE</code></td>
+<td style="text-align: left;">Type de la colonne : <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code>, <code>NUMERIC</code> ou <code>DATETIME</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>NULL</code></td>
+<td style="text-align: left;">Indique si la valeur nulle est acceptée pour la colonne : <code>NULL</code> ou <code>NOT NULL</code>. Si non spécifié, la colonne accepte une valeur nulle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>DEFAULT</code></td>
+<td style="text-align: left;">Indique la valeur par défaut : <code>DEFAULT 'Du texte'</code>, <code>DEFAULT 1312</code>, <code>DEFAULT CURRENT_TIMESTAMP</code>. La valeur <code>CURRENT_TIMESTAMP</code> n'est valide que pour les colonnes de type <code>DATETIME</code>, et indique que la date et heure du moment seront enregistrés au moment de la création d'une ligne.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>REFERENCES nom_table (nom_colonne) ON DELETE (SET NULL|CASCADE)</code></td>
+<td style="text-align: left;">Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : <code>REFERENCES !users (id)</code>. Si aucune action à effectuer si la clé étrangère est supprimée n'est spécifiée, c'est <code>SET NULL</code> qui est utilisé.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>UNIQUE</code></td>
+<td style="text-align: left;">Indique si la colonne doit avoir une contrainte de valeur unique : une seule ligne de la table pourra avoir cette valeur. Il est possible d'avoir une clé unique composite en lui donnant un nom : <code>UNIQUE ma_cle_unique</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>INDEX</code></td>
+<td style="text-align: left;">Indique si la colonne doit avoir un index. Il est possible de créer un index composite en lui donnant un nom : <code>INDEX ma_cle_d_index</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>COMMENT</code></td>
+<td style="text-align: left;">Permet de spécifier un commentaire pour la colonne : <code>COMMENT 'Ceci est une colonne'</code></td>
+</tr>
+</tbody>
+</table>
+<p>Aucun autre code SQL n'est accepté.</p>
+<p>Note : le type <code>DATETIME</code> n'existe pas réellement dans SQLite, mais si ce type est spécifié, Paheko ajoutera une contrainte pour n'accepter que des chaînes de date/heure dans cette colonne (<code>CHECK (datetime(nom_colonne) = nom_colonne)</code>).</p>
+<p>Précisions sur les clés étrangères :</p>
+<ul>
+<li>elles doivent forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie avant)</li>
+<li>l'action par défaut est <code>SET NULL</code> si la clé étrangère est une table en dehors du module</li>
+<li>l'action <code>RESTRICT</code> ne peut être utilisée pour une table externe au module (sinon cela pourrait bloquer des actions normales dans Paheko)</li>
+<li>pour faire référence à une table externe au module il faut ajouter le caractère <code>!</code> devant le nom de la table, sinon la table sera considérée comme interne au module</li>
+<li>il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.</li>
+</ul>
+<p>Si la définition est un tableau il convient d'utiliser les clés suivantes :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Exemple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>type</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>text</code>, <code>integer</code>…</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>null</code></td>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;"><code>true</code> ou <code>false</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>default</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>Du texte</code>, <code>1312</code>, <code>CURRENT_TIMESTAMP</code>…</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fk_table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>users</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fk_column</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>id</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fk_on_delete</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>SET NULL</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>unique</code></td>
+<td style="text-align: left;"><code>string</code> ou <code>bool</code></td>
+<td style="text-align: left;"><code>true</code>, <code>ma_cle</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>index</code></td>
+<td style="text-align: left;"><code>string</code> ou <code>bool</code></td>
+<td style="text-align: left;"><code>true</code>, <code>ma_cle</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>comment</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;"><code>Ceci est une colonne</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="utilisation-d-index-uniques">Utilisation d'index uniques</h3>
+<p>Il est possible de créer un index unique pour une colonne, pour indiquer qu'une seule ligne doit avoir la valeur :</p>
+<pre><code>{{:table create="personnes"
+  nom="TEXT NOT NULL UNIQUE"
+}}</code></pre>
+<p>Il est aussi possible de créer un index unique sur plusieurs colonnes en lui donnant un nom qui doit être partagé entre les différentes colonnes :</p>
+<pre><code>{{:table create="personnes"
+  nom="TEXT NOT NULL UNIQUE mon_index_composite"
+  prenom="TEXT NOT NULL UNIQUE mon_index_composite"
+}}</code></pre>
+<h3 id="renommer-une-table">Renommer une table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>rename</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nom de la table à renommer</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>to</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nouveau nom de table</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:table rename="ma_table" to="nouvelle_table"}}</code></pre>
+<h3 id="supprimer-une-table">Supprimer une table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>delete</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nom de la table à supprimer</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:table delete="matable"}}</code></pre>
+<h2 id="column">column</h2>
+<p>Permet d'ajouter, renommer, modifier ou supprimer une colonne à une table existante.</p>
+<p>Cette fonction peut seulement être utilisée dans le fichier <code>migration.tpl</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nom de la table</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ajouter-une-colonne-a-une-table"> Ajouter une colonne à une table</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Optionnel / obligatoire ?</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>create</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Nom de la colonne</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>definition</code></td>
+<td style="text-align: left;">obligatoire</td>
+<td style="text-align: left;">Définition de la colonne</td>
+</tr>
+</tbody>
+</table>
+<p>À la place de <code>definition</code> il est possible aussi de passer simplement les paramètres suivants : type, default, comment, fk_table, fk_column, fk_on_delete, index, unique.</p>
+<pre><code>{{:column table="matable" create="machin" type="text" null=false}}</code></pre>
+<p>Certaines restrictions s'appliquent :</p>
+<ul>
+<li>il n'est pas possible d'ajouter une colonne <code>NOT NULL</code> qui n'a pas de valeur par défaut <code>DEFAULT</code></li>
+<li>il n'est pas possible d'ajouter une colonne <code>NOT NULL</code> avec une clé étrangère (<code>REFERENCES…</code>)</li>
+</ul>
+<h3 id="renommer-une-colonne"> Renommer une colonne</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>rename</code></td>
+<td style="text-align: left;">Indique le nom de la colonne à renommer</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>to</code></td>
+<td style="text-align: left;">Indique le nom de la nouvelle colonne</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:column table="matable" rename="machin" to="truc"}}</code></pre>
+<h3 id="supprimer-une-colonne"> Supprimer une colonne</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Paramètre</th>
+<th style="text-align: left;">Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>delete</code></td>
+<td style="text-align: left;">Indique le nom de la colonne à supprimer</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{{:column table="matable" delete="machin"}}</code></pre>
+<h3 id="modifier-une-colonne"> Modifier une colonne</h3>
+<p>| Paramètre | Fonction |<br />
+| :- | :- | :- |<br />
+| <code>modify</code> | obligatoire | Indique le nom de la colonne à modifier |</p>
+<p>La syntaxe est identique à celle de la fonction pour ajouter une nouvelle colonne.</p>
+<p>Certaines restrictions s'appliquent :</p>
+<ul>
+<li>Il n'est pas possible de modifier la référence d'une clé étrangère (table, colonne), mais il est possible de modifier l'action (<code>SET NULL</code>, <code>CASCADE</code>)</li>
+</ul>
 <h2 id="save">save</h2>
-<p>Enregistre des données, sous la forme d'un document, dans la base de données, pour le module courant.</p>
+<p>Enregistre une ligne dans une table SQL du module.</p>
 <table>
 <thead>
 <tr>
@@ -830,82 +1155,52 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>key</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Clé unique du document</td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom de la table SQL</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>id</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Numéro unique du document</td>
+<td style="text-align: left;">Numéro unique de la ligne</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>validate_schema</code></td>
+<td style="text-align: left;"><code>key</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Fichier de schéma JSON à utiliser pour valider les données avant enregistrement</td>
+<td style="text-align: left;">Clé UUID unique de la ligne</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>validate_only</code></td>
+<td style="text-align: left;"><code>assign</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Liste des paramètres à valider (par exemple pour ne faire qu'une mise à jour partielle), séparés par des virgules.</td>
+<td style="text-align: left;">Si renseigné, les informations de la nouvelle ligne seront indiqués dans cette variable, y compris l'ID et la clé, si la ligne est nouvelle.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>assign_new_id</code></td>
+<td style="text-align: left;"><code>where</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Si renseigné, le nouveau numéro unique du document sera indiqué dans cette variable.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>from</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>replace</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">(Booléen) Si ce paramètre vaut <code>true</code>, alors le contenu du document sera écrasé, au lieu d'être fusionné.</td>
+<td style="text-align: left;">Si renseigné, sera utilisé comme clause <code>WHERE</code> pour mettre à jour plusieurs lignes en une fois.</td>
 </tr>
 <tr>
 <td style="text-align: left;">…</td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Autres paramètres : traités comme des valeurs à enregistrer dans le document</td>
+<td style="text-align: left;">Autres paramètres : traités comme des valeurs à enregistrer dans la ligne</td>
 </tr>
 </tbody>
 </table>
-<p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, un nouveau document sera créé avec un nouveau numéro (ID) unique.</p>
-<h3 id="mise-a-jour">Mise à jour</h3>
-<p>Si le document indiqué existe déjà, il sera mis à jour. Les valeurs nulles (<code>NULL</code>) seront effacées.</p>
-<pre><code>{{:save key="facture_43" nom="Atelier mobile" montant=250}}</code></pre>
-<p>Enregistrera dans la base de données le document suivant sous la clé <code>facture_43</code> :</p>
-<pre><code>{"nom": "Atelier mobile", "montant": 250}</code></pre>
-<p>Exemple de mise à jour :</p>
-<pre><code>{{:save key="facture_43" montant=300}}</code></pre>
-<p>Seul le montant sera modifié, le nom ne sera pas modifié.</p>
-<p>Par contre en utilisant le paramètre <code>replace</code>, le document sera écrasé :</p>
-<pre><code>{{:save key="facture_43" replace=true nom="Vente de vélo"}}</code></pre>
-<p>Donnera :</p>
-<pre><code>{"nom": "Vente de vélo"}</code></pre>
-<p>Le montant est donc supprimé.</p>
-<h3 id="recuperer-l-identifiant-du-document-ajoute">Récupérer l'identifiant du document ajouté</h3>
-<p>Exemple de récupération du nouvel ID :</p>
-<pre><code>{{:save titre="Coucou !" assign_new_id="id"}}
-Le document n°{{$id}} a bien été enregistré.</code></pre>
-<h3 id="enregistrer-plusieurs-documents-en-une-fois">Enregistrer plusieurs documents en une fois</h3>
-<p>Le paramètre <code>from</code> est équivalent à appeler la fonction <code>save</code> dans une boucle. Ainsi au lieu de :</p>
-<pre><code>{{:assign var="documents." title="Titre 1"}}
-{{:assign var="documents." title="Titre 2"}}
-{{#foreach from=$documents item="doc"}}
-  {{:save title=$doc.title validate_schema="./document.schema.json"}}
-{{/foreach}}</code></pre>
-<p>On peut simplement utiliser :</p>
-<pre><code>{{:assign var="documents." title="Titre 1"}}
-{{:assign var="documents." title="Titre 2"}}
-{{:save from=$documents validate_schema="./document.schema.json"}}</code></pre>
-<h3 id="validation-avec-un-schema-json">Validation avec un schéma JSON</h3>
-<pre><code>{{:save titre="Coucou" texte="Très long" validate_schema="./document.schema.json"}}</code></pre>
-<p>Pour ne valider qu'une partie du schéma, par exemple si on veut faire une mise à jour du document :</p>
-<pre><code>{{:save key="test" titre="Coucou" validate_schema="./document.schema.json" validate_only="titre"}}</code></pre>
+<p>Si ni <code>key</code> ni <code>id</code> ne sont indiqués, une nouvelle ligne sera créée avec un nouveau numéro (ID) unique.</p>
+<p>Si d'autres colonnes existent mais ne sont pas spécifiées, la valeur par défaut, ou <code>NULL</code> sera inscrit comme valeur. Si une colonne est <code>NOT NULL</code> et que sa valeur n'est pas spécifiée, une erreur se produira.</p>
+<p>Si une valeur est de type <code>array</code> (tableau), elle sera enregistrée sous forme de chaîne JSON dans la table SQL.</p>
+<p>Exemple pour créer une nouvelle ligne dans la table :</p>
+<pre><code>{{:save table="personnes" nom="Dulcie" assign="personne"}}
+Le numéro de cette personne est {{$personne.id}}</code></pre>
+<p>Exemple de mise à jour de ligne :</p>
+<pre><code>{{:save table="personnes" id=42 nom="Albert-Charlie-Antoine-Baptiste"}}</code></pre>
+<h3 id="enregistrer-la-configuration-du-module">Enregistrer la configuration du module</h3>
+<p>Il est aussi possible de stocker des clés dans la configuration du module, toujours avec la fonction save. Pour cela il suffit de spécifier <code>key="config"</code> et aucune table :</p>
+<pre><code>{{:save key="config" ma_preference="oui"}}</code></pre>
+<p>Cela sera ensuite disponible dans la variable <code>$module.config</code> :</p>
+<pre><code>Vous préférez vivre sans capitalisme : {{$module.config.ma_preference}}</code></pre>
 <h2 id="delete">delete</h2>
-<p>Supprime un document lié au module courant.</p>
+<p>Supprime une ou plusieurs lignes d'une table SQL du module.</p>
 <table>
 <thead>
 <tr>
@@ -916,25 +1211,31 @@ Le document n°{{$id}} a bien été enregistré.</code></pre>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>key</code></td>
-<td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Clé unique du document</td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><strong>obligatoire</strong></td>
+<td style="text-align: left;">Nom de la table SQL</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>id</code></td>
 <td style="text-align: left;">optionnel</td>
-<td style="text-align: left;">Numéro unique du document</td>
+<td style="text-align: left;">Numéro unique de la ligne</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>key</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Clé UUID unique de la ligne</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>where</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Critère de suppression</td>
 </tr>
 </tbody>
 </table>
-<p>Il est possible de spécifier d'autres paramètres, ou une clause <code>where</code> et des paramètres dont le nom commence par deux points.</p>
-<ul>
-<li>Supprimer le document avec la clé <code>facture_43</code> : <code>{{:delete key="facture_43"}}</code></li>
-<li>Supprimer le document avec la clé <code>ABCD</code> et dont la propriété <code>type</code> du document correspond à la valeur <code>facture</code> : <code>{{:delete key="ABCD" type="facture"}}</code></li>
-<li>Supprimer tous les documents : <code>{{:delete}}</code></li>
-<li>Supprimer tous les documents ayant le type <code>facture</code> : <code>{{:delete type="facture"}}</code></li>
-<li>Supprimer tous les documents de type <code>devis</code> ayant une date dans le passé : <code>{{:delete :type="devis" where="$$.type = :type AND $$.date &lt; datetime()"}}</code></li>
-</ul>
+<p>Si ni <code>key</code>, ni <code>id</code>, ni aucun autre critère n'est indiqué, une erreur sera renvoyée, car cela supprimerait toutes les lignes de la table.</p>
+<p>Exemple d'utilisation du paramètre <code>where</code> :</p>
+<pre><code>{{:delete table="personnes" where="code_postal = '21000'"}}</code></pre>
+<h1 id="autres-fonctions-des-modules">Autres fonctions des modules</h1>
 <h2 id="read">read</h2>
 <p>Lire un fichier stocké dans les fichiers du code du module.</p>
 <table>
