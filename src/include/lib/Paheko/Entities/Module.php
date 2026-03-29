@@ -1109,4 +1109,9 @@ class Module extends Entity
 
 		return $table;
 	}
+
+	public function listTables(): array
+	{
+		return EM::getInstance(ModuleTable::class)->all('SELECT * FROM @TABLE WHERE id_module = ? ORDER BY name;', $this->id());
+	}
 }
