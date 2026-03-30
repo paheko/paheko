@@ -1083,6 +1083,27 @@ class File extends Entity
 		return false;
 	}
 
+	public function getHighlightLanguage(): ?string
+	{
+		switch ($this->extension()) {
+			case 'css':
+				return 'css';
+			case 'js':
+				return 'javascript';
+			case 'md':
+				return 'markdown';
+			case 'xml':
+				return 'xml';
+			case 'html':
+			case 'htm':
+			case 'tpl':
+			case '':
+				return 'brindille';
+			default:
+				return null;
+		}
+	}
+
 	/**
 	 * Envoie le fichier au client HTTP
 	 */

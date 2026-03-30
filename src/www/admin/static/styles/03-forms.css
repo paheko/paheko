@@ -1100,6 +1100,104 @@ aside dt {
     margin-left: 1em;
 }
 
+form.editor nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1em;
+}
+
+form.editor h3 {
+    font-family: monospace;
+}
+
+form.editor {
+    overflow: hidden;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    background: #333;
+    color: #fff;
+}
+
+form.editor textarea {
+    box-shadow: none;
+}
+
+form.editor #editor, form.editor p textarea {
+    overflow: auto;
+    width: 100%;
+    background: #000;
+    height: 100%;
+}
+
+form.editor p textarea {
+    color: #fff;
+    font-family: monospace;
+    font-size: 16px;
+}
+
+form.editor .modified {
+    visibility: hidden;
+}
+
+form.editor.modified .modified {
+    visibility: visible;
+}
+
+form.editor nav button[type=submit] {
+    box-shadow: 0px 0px 10px black;
+    color: darkred;
+    background: #fff;
+    border-color: orange;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+form.editor nav button[type=submit][disabled] {
+    color: #666;
+    border-color: #999;
+    background-color: #ccc;
+    font-weight: normal;
+    font-size: 1em;
+}
+
+form.editor #help {
+    display: flex;
+    flex-direction: row;
+    gap: .5em;
+    background: #333;
+    padding: .5em;
+    height: 1.5em;
+    color: #fff;
+}
+
+form.editor #help a {
+    color: beige;
+}
+
+form.editor #help .function {
+    color: violet;
+}
+
+form.editor #help .section {
+    color: lightgreen;
+}
+
+form.editor #help .modifier {
+    color: skyblue;
+}
+
+form.editor #help li {
+    list-style-type: none;
+}
+
+html.dialog:has(form.editor), html.dialog:has(form.editor) main, html.dialog:has(form.editor) body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder tbody tr {
         display: flex;
