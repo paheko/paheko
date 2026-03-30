@@ -379,7 +379,7 @@ class Plugins
 			}
 
 			if ($plugin->needUpgrade()) {
-				$plugin->upgrade();
+				$plugin->upgrade(true);
 				$i++;
 			}
 
