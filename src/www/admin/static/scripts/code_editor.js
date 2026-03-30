@@ -154,7 +154,7 @@ function updateDocHint(args) {
 	help.innerHTML = '<ul>';
 
 	for (var i = 0; i < doc.length; i++) {
-		help.innerHTML += '<li><a href="' + doc_url + doc[i].link + '" onclick="g.openFrameDialog(this.href, {\'fullscreen\': true}'}); return false;" class="' + doc[i].class + '">' + doc[i].title + '</a></li>';
+		help.innerHTML += '<li><a href="' + doc_url + doc[i].link + '" onclick="g.openFrameDialog(this.href); return false;" class="' + doc[i].class + '">' + doc[i].title + '</a></li>';
 	}
 
 	help.innerHTML += '</ul>';
