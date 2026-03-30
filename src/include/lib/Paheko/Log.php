@@ -109,6 +109,7 @@ class Log
 	static public function add(int $action, ?array $params = null, ?int $id_user = null): void
 	{
 		$params ??= [];
+		$params['action'] = $action;
 		$params['user_ip'] ??= Utils::getIP();
 		$params['id_user'] ??= $id_user;
 		$params['user_name'] ??= null;
@@ -132,7 +133,7 @@ class Log
 		if (AUDIT_LOG_FILE) {
 			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s, ID_USER=%d, USER_NAME=%s) %s' . PHP_EOL,
 				date('Y-m-d H:i:s'),
-				self::ACTIONS[$type] ?? 'Action',
+				self::ACTIONS[$action] ?? 'Action',
 				$ip,
 				$params['id_user'],
 				$params['user_name'],
@@ -160,7 +161,7 @@ class Log
 			return;
 		}
 
-		if ($type !== self::LOGIN_FAIL) {
+		if ($action !== self::LOGIN_FAIL) {
 			$keep = Config::getInstance()->log_retention;
 
 			// Don't log anything
@@ -184,11 +185,11 @@ class Log
 
 		// Delete old logs according to configuration
 		$db->exec(sprintf('DELETE FROM logs
-			WHERE type != %d AND type != %d AND created < datetime(\'now\', \'-%d days\');',
+			WHERE action != %d AND action != %d AND created < datetime(\'now\', \'-%d days\');',
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, $days_delete));
 
 		// Delete failed login attempts and reminders after 30 days
-		$db->exec(sprintf('DELETE FROM logs WHERE type = %d OR type = %d AND created < datetime(\'now\', \'-%d days\');',
+		$db->exec(sprintf('DELETE FROM logs WHERE action = %d OR action = %d AND created < datetime(\'now\', \'-%d days\');',
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, 30));
 	}
 
@@ -201,7 +202,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if ($count >= self::LOCKOUT_ATTEMPTS) {
@@ -223,7 +224,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL_OTP, $ip);
 
 		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
@@ -237,7 +238,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_RECOVER, $ip);
 
 		return $count >= self::PASSWORD_LOCKOUT_ATTEMPTS;
@@ -260,14 +261,14 @@ class Log
 				'select' => sprintf('CASE WHEN u.id IS NOT NULL THEN %s ELSE user_name END', $id_field),
 				'order' => null,
 			],
-			'type_icon' => [
+			'action_icon' => [
 				'select' => null,
 				'order' => null,
 				'label' => '',
 			],
-			'type' => [
+			'action' => [
 				'label' => 'Action',
-				'select' => 'l.type',
+				'select' => 'l.action',
 			],
 			'details' => [
 				'label' => 'Détails',
@@ -285,7 +286,7 @@ class Log
 			$conditions = 'l.id_user = ' . (int)$params['id_user'];
 		}
 		elseif (isset($params['id_self'])) {
-			$conditions = sprintf('l.id_user = %d AND l.type < 10', (int)$params['id_self']);
+			$conditions = sprintf('l.id_user = %d AND l.action < 10', (int)$params['id_self']);
 		}
 		elseif (isset($params['history'])) {
 			$conditions = sprintf('l.id_linked_user = %d',(int)$params['history']);
@@ -298,7 +299,7 @@ class Log
 		$list->orderBy('created', true);
 		$list->setModifier(function (&$row) {
 			$row->details = $row->details ? json_decode($row->details) : null;
-			$row->type_label = $row->type == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->type];
+			$row->action_label = $row->action == self::MESSAGE ? ($row->details->message ?? '') : self::ACTIONS[$row->action];
 
 			if (isset($row->details->entity)) {
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::NAME';
@@ -311,7 +312,7 @@ class Log
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::PRIVATE_URL';
 
 				if (isset($row->details->id, $row->details->entity)
-					&& $row->type !== self::DELETE
+					&& $row->action !== self::DELETE
 					&& defined($const)
 					&& ($value = constant($const))) {
 					$row->entity_url = sprintf($value, $row->details->id);
