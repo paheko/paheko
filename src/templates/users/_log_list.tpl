@@ -10,7 +10,7 @@
 			{/if}
 		</td>
 		<td>
-			{$row.type_label}
+			{$row.action_label}
 		</td>
 		<td>
 			{if $row.type == Log::LOGIN_FAIL && $row.details.otp}
@@ -31,7 +31,7 @@
 				<small class="help">(ID = {$row.details.id})</small>
 			{/if}
 		</td>
-		<td>{$row.ip_address}</td>
+		<td>{$row.user_ip}</td>
 		<td class="actions">
 		</td>
 	</tr>

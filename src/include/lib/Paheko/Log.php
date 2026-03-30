@@ -202,7 +202,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if ($count >= self::LOCKOUT_ATTEMPTS) {
@@ -224,7 +224,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL_OTP, $ip);
 
 		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
@@ -238,7 +238,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_RECOVER, $ip);
 
 		return $count >= self::PASSWORD_LOCKOUT_ATTEMPTS;
@@ -274,9 +274,9 @@ class Log
 				'label' => 'Détails',
 				'select' => 'l.details',
 			],
-			'ip_address' => [
+			'user_ip' => [
 				'label' => 'Adresse IP',
-				'select' => 'l.ip_address',
+				'select' => 'l.user_ip',
 			],
 		];
 
