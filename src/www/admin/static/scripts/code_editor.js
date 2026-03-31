@@ -40,10 +40,7 @@ function createCodeEditor(lang, selector) {
 		initial_value = textarea.value;
 		save_button = textarea.form.querySelector('nav button[type="submit"]');
 
-		if (lang === 'javascript') {
-			textarea.addEventListener('input', verifyJavascriptErrors);
-		}
-		else if (lang === 'json') {
+		if (lang === 'json') {
 			textarea.addEventListener('input', verifyJSONErrors);
 		}
 
@@ -100,17 +97,6 @@ function preventClose(e) {
 	e.preventDefault();
 	e.returnValue = '';
 	return true;
-}
-
-function verifyJavascriptErrors() {
-	try {
-		eval(textarea.value);
-		help.innerText = '';
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			help.innerHTML = `<p class="error">${e.name}: ${e.message}</p>`;
-		}
-	}
 }
 
 function verifyJSONErrors() {
