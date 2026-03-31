@@ -202,7 +202,7 @@ class Module extends Entity
 			return null;
 		}
 
-		if (isset($ini->version)) {
+		if (isset($ini->min_version)) {
 			$this->_broken_message = 'Ce module nécessite Paheko 1.4.0 ou supérieur';
 			return null;
 		}
