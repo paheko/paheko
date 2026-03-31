@@ -14,13 +14,15 @@ function createCodeEditor(lang, selector) {
 			textarea.value = "\n";
 		}
 
+		var docHinter = lang === 'brindille' ? updateDocHint : null;
+
 		const editor = createEditor('#editor', {
 			language: lang,
 			value: textarea.value,
 			wordWrap: true,
 			insertSpaces: false,
 			tabSize: 4,
-			onSelectionChange: updateDocHint
+			onSelectionChange: docHinter
 		});
 
 		editor.textarea.name = textarea.name;

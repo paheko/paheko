@@ -1089,6 +1089,7 @@ class File extends Entity
 			case 'css':
 				return 'css';
 			case 'js':
+			case 'json':
 				return 'javascript';
 			case 'md':
 				return 'markdown';

@@ -1198,6 +1198,23 @@ html.dialog:has(form.editor), html.dialog:has(form.editor) main, html.dialog:has
     height: 100%;
 }
 
+form.editor #editor .prism-code-editor {
+    font-family: "Hack";
+    font-size: 16px;
+    height: 100%;
+}
+
+/* This is because span.tag is already styled */
+form.editor .prism-code-editor span {
+    padding: unset;
+    margin: unset;
+    text-shadow: unset;
+}
+
+form.editor .prism-code-editor input:focus {
+    box-shadow: unset;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder tbody tr {
         display: flex;

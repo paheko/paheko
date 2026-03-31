@@ -1,3 +1,4 @@
+/* Custom font-face */
 @font-face {
     font-family: "Hack";
     font-style: normal;
@@ -5,16 +6,7 @@
     src: url("hack.woff2") format("woff2");
 }
 
-#editor .prism-code-editor {
-    font-family: "Hack";
-    font-size: 16px;
-    height: 100%;
-}
-
-.prism-code-editor span {
-    all: unset;
-}
-
+/* Unminified CSS code from compiled code */
 .prism-code-editor {
     overflow: auto;
     display: grid;
@@ -408,7 +400,7 @@ div.guide-indents {
     transform: rotate(90deg)
 }
 
-@media (hover: hover) {
+@media(hover: hover) {
     .prism-search button:hover {
         background:var(--widget__bg-hover)
     }
@@ -612,7 +604,7 @@ button.pce-whole {
     display: none
 }
 
-@media (hover: hover) {
+@media(hover: hover) {
     .pce-ac-row:hover {
         background:#7772
     }
