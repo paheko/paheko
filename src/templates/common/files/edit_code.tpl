@@ -17,7 +17,7 @@
 </form>
 
 <script type="text/javascript">
-const lang = {$file->getHighlightLanguage()|json_encode|raw};
+const lang = {if $file}{$file->getHighlightLanguage()|json_encode|raw}{else}'html'{/if};
 createCodeEditor(lang, '#f_content');
 </script>
 
