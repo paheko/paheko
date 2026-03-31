@@ -1095,6 +1095,8 @@ class File extends Entity
 				return 'markdown';
 			case 'xml':
 				return 'xml';
+			case 'sql':
+				return 'sql';
 			case 'html':
 			case 'htm':
 			case 'tpl':
