@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Update\sprism\seditor\swith\ssyntax\shighlighting\sfor\sJS\sand\sSQL
-D 2026-03-31T00:45:48.281
+C Display\serror\sif\sJS/JSON\shas\sa\ssyntax\serror
+D 2026-03-31T01:15:18.328
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -129,7 +129,7 @@ F src/include/lib/Paheko/Entities/Accounting/Year.php 7bb24994d29509b7a5d873058d
 F src/include/lib/Paheko/Entities/Email/Email.php 9af485c436fd65b98dc03d68f0306b17f94341f1fc8f0027118696878607646a
 F src/include/lib/Paheko/Entities/Email/Mailing.php 8254c2144e2bbf36a69077a00a6cc236fee3981c455d46f07d58b8454dba0d4e
 F src/include/lib/Paheko/Entities/Extension.php 35328d801d1921ba239bc8479c9b62c893ca3914cb2cd28eef09844f533cf5e9
-F src/include/lib/Paheko/Entities/Files/File.php 7fe5269b9d493a3c0649e3564d6de071ad818b832ce5411ee16f7c885a7e38c5
+F src/include/lib/Paheko/Entities/Files/File.php e988b66a85c8cf5820ae533966d1218eb5a9ffc8aa4dc199d41f89ac8c3b0fe2
 F src/include/lib/Paheko/Entities/Files/FilePermissionsTrait.php 193ad5cfa7bf45cce4d031924f182cce55fc597561e04b392dad0ab1eb0665bf
 F src/include/lib/Paheko/Entities/Files/FileSharingTrait.php 9eb32211adac208e6344cc1eaaf4cf168fd3a63359a89ef94a2fccc147c36def
 F src/include/lib/Paheko/Entities/Files/FileThumbnailTrait.php e26f01c2b3700f4477f05b88caea967fec735783e13932f32c4ffbd186cd8bc1
@@ -724,7 +724,7 @@ F src/www/admin/static/scripts/accounts_list.js 80250a1e7dc784163feb643b13814c33
 F src/www/admin/static/scripts/advanced_search.js a92c67e7d685982522b7da09fb3995d6fbe4bcb2c313c2fdd2980b49a6a56545
 F src/www/admin/static/scripts/auto_logout.js 9e0c4517de170d9d24c29eaf8f73b21a783fe77ecb2f769eae6edf7ad3c12aaa
 F src/www/admin/static/scripts/code_editor.css f56ab02df74b8e494feccad9d611547dab875223272ccd4bb50ea1ab16557fe1
-F src/www/admin/static/scripts/code_editor.js 67b4b0eaf8eef751db9a955e6173ca9c714a169038ade2dbd22c92aa9032c85b
+F src/www/admin/static/scripts/code_editor.js 2dc105966a76f28aeec857200001fa3faa1a1713f5f77a7bbd0b304c666c3d38
 F src/www/admin/static/scripts/color_helper.js 5c89caa19b524d7f54eb9361968b043a641c2772c76e3472714f955ddc87373a
 F src/www/admin/static/scripts/config_fields.js b23758fbe8823d87df0f285a3803c4c6cf198b28270cc52fc953152dabcb9b16
 F src/www/admin/static/scripts/dragdrop-table.js 40c551bdf2face7682e79fe6c427475563cebe13d2549c4a30ee9d1dc6064d60
@@ -759,7 +759,7 @@ F src/www/admin/static/scripts/zip.js cbfa38f1ad45d171effe2be03e1d12b81084d5bf44
 F src/www/admin/static/styles/00-reset.css 7ab3eedcf95bc84c4913ea2a808dc25ff06ef6a9ee7927ce16b8042a39b3becb
 F src/www/admin/static/styles/01-layout.css c5735c7422f328c2c5c8b8f25a61664bc5bb21f1db3a5207fecede1a9cda1250
 F src/www/admin/static/styles/02-common.css e997e33d0ae4ce75a5f299dc4b751f3cf23c1fc6c0fa82aef360bde5fe6c298a
-F src/www/admin/static/styles/03-forms.css 7382b15f65687b8a386632defdb60d70f869979dd8861c149e6c260f07f5f20a
+F src/www/admin/static/styles/03-forms.css 7407bb960a75dc6f443e25fed0aca2d21d4d78545ede8bdf5a63fcad1ae1a6b9
 F src/www/admin/static/styles/04-dialogs.css 2fa5a0e16d64f635c6bb2bae8b1d8b18dd9c6749482c61aa25dacebc5f4022ee
 F src/www/admin/static/styles/05-navigation.css 929f8338fdc10d56fa554641b3424224ba86c489447d8404a7dbea35ce0ee5dd
 F src/www/admin/static/styles/06-tables-common.css 6830241beaf0f96a837611079ace365d4b1830085b1a4aeffc3659ee963d2aed
@@ -848,24 +848,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 045172cd69c9cf6dcf3057e5e5781efb4062a97d4de813657239ec768469f038
-R 52bb6b106b22ee6a68c51931a48dd6d2
+P 9f0df00de7979e0746a9432344988b437def0b1838d3316da8f829dbeb2bacbb
+R 772027875a7f1ffd0cb2551d85a9c05e
 U bohwaz
-Z 2398d02fe6aab2a15cd9220c07406feb
+Z 106423b22ed014a7701216accb3b5cf5
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnLGTwACgkQksnacbiI
-6jSmeRAAnx8pMe/ClO8nbRgINFmild2KTPAViiW/3YepfronBTYQjU6KvJV+QEou
-xBDeKqje9sRtNBxPHXMfUnf2M+zvpN6IP3DBE1p7iqmHfblycRSaO3KZVQJVsg1J
-sWFX2IcNKu7ihs5Hcp99FnpoY+6l67KTCGm1dseQ/KzZW2EUeu/p2zF5WqbTZ3py
-6CYDbqoSQ289YCwoHitIIBbtRkHN3iUvD0EU93Pm9Pj6brVYpARsS7LnKF+L5QJW
-/ttF8ugiNnrMb2S6p4NwXFeKamkPUALPBd+ntGcrIDak1isrFZ+iwyYxnmGpKD1O
-EH/dVwQ0a7FHJFKVXMNigdDg/+FVhN0GFpEVxX++eucpEcnLH9E0xSXoGcJ0EQqr
-Axfy8UeyyJbp3uLgUhNO4L9O4G1ubumylLgpcqgo+DUOj4B0SJocKlk6XIRQroLg
-Haal7k3Bs9zwxGOoC9dHF6FY0Lg7tXQpGMB1njC5uOc7Np89NCYVj0RoiRPkw21l
-Yq7q+j+l4PyHBQPk1DHnz8q8EeDYdKYVBkbXOChm6oQ+U6W2AO8+mXyZ+Uaie1Y2
-78TucHpPyGxiOxLxgD2wYZ3cV5nJJh+C2NxvM48OWkgxT6a6t4rqtt6KJf604lFV
-1kJ4/Z58syLiY9esoMET0FG9PpLzh+m7vKjEX3nTYEURJAfTomA=
-=LZUk
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnLICYACgkQksnacbiI
+6jSxkBAAjOX7JMA4G3uKPKgNrYF21Qhmd0KnIiX3+kBpbb0tqL4MZzOvAizeoZm8
+QSujBql6XWpF7EgmBN1HJyN3/9HkbW7XKgOzBKk8k+cd+UCCIaHpAp7G8ah6YT4Y
+9OJ9t85lFemb+RiTt4LX8hc7PvbEucSQkvRgjN1S/gXnMScsgjjpmQkFFjZiLjWD
++/GFlUrpHg5jViGExoELDBgB9ckhOlMv1OBW/dLjXdAOF3al4SkSRr6wGjX07bqi
+Bg9OS8QR1v8CrOweG7i9VDfkaBAMq62QV1zdcO0IZ0P3qIhbCCT04LHLLcQM2fdO
+XrQS1ZSLN0ZKR+qnjmjLyhTJqhK+mPtwuwjrUdUON1eJIn2Jq3vQ+pXcItFurnnt
+jqz3mgC280MXol/CWkTMq0zLe4FppzDdFX6NuMstDyAsMNfoVByN+xmeI7sVdbHI
+uWXdanHxahXpQ33r+A+GX9oS3fz3mS4aG6pkjzvd6xHlFqMxoskuk7XjvA+YwuN4
+gjU5VOJHCwwgigI3dG2Z/b3l0PKur0a8OmxTSy7/qjZrWcdh6ONLdIGmyURIUFfv
+efRvcb2CwwDRlvI9CIkDNn/Nreo0OJiSCB/mchp1w8fLeR9ZNRLTy2+3qJfXm/6c
+zlSnkEVdPhSQnxcf0kUX9db1Eb/ZzPP5Z0QbBGDeFv4YTs8ptS0=
+=BJoJ
 -----END PGP SIGNATURE-----

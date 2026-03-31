@@ -2,6 +2,7 @@ var textarea;
 var initial_value;
 var save_button;
 var modified = false;
+var help;
 
 function createCodeEditor(lang, selector) {
 	g.style('scripts/lib/prism/prism_editor.css');
@@ -14,7 +15,12 @@ function createCodeEditor(lang, selector) {
 			textarea.value = "\n";
 		}
 
-		var docHinter = lang === 'brindille' ? updateDocHint : null;
+		var docHinter = null;
+		help = document.querySelector('#help');
+
+		if (lang === 'brindille') {
+			docHinter = updateBrindilleDocHint;
+		}
 
 		const editor = createEditor('#editor', {
 			language: lang,
@@ -33,6 +39,13 @@ function createCodeEditor(lang, selector) {
 
 		initial_value = textarea.value;
 		save_button = textarea.form.querySelector('nav button[type="submit"]');
+
+		if (lang === 'javascript') {
+			textarea.addEventListener('input', verifyJavascriptErrors);
+		}
+		else if (lang === 'json') {
+			textarea.addEventListener('input', verifyJSONErrors);
+		}
 
 		textarea.addEventListener('input', updateSaveStatus);
 
@@ -89,7 +102,29 @@ function preventClose(e) {
 	return true;
 }
 
-function updateDocHint(args) {
+function verifyJavascriptErrors() {
+	try {
+		eval(textarea.value);
+		help.innerText = '';
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			help.innerHTML = `<p class="error">${e.name}: ${e.message}</p>`;
+		}
+	}
+}
+
+function verifyJSONErrors() {
+	try {
+		JSON.parse(textarea.value);
+		help.innerText = '';
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			help.innerHTML = `<p class="error">${e.name}: ${e.message}</p>`;
+		}
+	}
+}
+
+function updateBrindilleDocHint(args) {
 	const doc_url = g.admin_url + 'static/doc/';
 	const pos = args[0];
 
