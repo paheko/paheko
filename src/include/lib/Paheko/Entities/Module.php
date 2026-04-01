@@ -25,6 +25,7 @@ use DateTime;
 use stdClass;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, PLUGINS_BLOCKLIST};
+use function Paheko\paheko_version;
 
 class Module extends Entity
 {
@@ -246,12 +247,11 @@ class Module extends Entity
 
 		if (!isset($ini->name)) {
 			throw new ValidationException('Le fichier module.ini est invalide : la clé "name" n\'existe pas');
-			return null;
 		}
 
-		if (isset($ini->min_version)) {
-			throw new ValidationException('Ce module nécessite Paheko 1.4.0 ou supérieur');
-			return null;
+		if (isset($ini->min_version)
+			&& version_compare($ini->min_version, paheko_version(), '<')) {
+			throw new ValidationException(sprintf('Ce module nécessite Paheko %s ou supérieur', $ini->min_version));
 		}
 
 		// Don't allow user code to set itself as a system module
