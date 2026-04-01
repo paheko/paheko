@@ -90,6 +90,7 @@ CREATE INDEX IF NOT EXISTS acc_transactions_subscription ON acc_transactions_use
 CREATE UNIQUE INDEX IF NOT EXISTS acc_transactions_users_unique ON acc_transactions_users (id_user, id_transaction, COALESCE(id_subscription, 0));
 
 -- Add columns to audit table
+DROP TRIGGER IF EXISTS users_delete_logs;
 ALTER TABLE logs RENAME TO logs_old;
 
 CREATE TABLE IF NOT EXISTS logs
