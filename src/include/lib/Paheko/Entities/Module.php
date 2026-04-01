@@ -22,6 +22,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
 
 use DateTime;
+use stdClass;
 
 use const Paheko\{ROOT, WWW_URL, BASE_URL, PLUGINS_BLOCKLIST};
 
@@ -212,7 +213,7 @@ class Module extends Entity
 		return $this->_broken_message !== '';
 	}
 
-	public function getINIProperties(bool $use_local = true): ?\stdClass
+	public function getINIProperties(bool $use_local = true): stdClass
 	{
 		if (isset($this->_ini) && $use_local) {
 			return $this->_ini;
@@ -227,32 +228,29 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
-			$this->_broken_message = 'Le fichier module.ini est absent';
-			return null;
+			throw new ValidationException('Le fichier module.ini est absent');
 		}
 
 		try {
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			$this->_broken_message = sprintf('Le fichier module.ini est invalide : %s', $e->getMessage());
-			return null;
+			throw new ValidationException(sprintf('Le fichier module.ini est invalide : %s', $e->getMessage()));
 		}
 
 		if (empty($ini)) {
-			$this->_broken_message = 'Le fichier module.ini est vide';
-			return null;
+			throw new ValidationException('Le fichier module.ini est vide');
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
-			$this->_broken_message = 'Le fichier module.ini est invalide : la clé "name" n\'existe pas';
+			throw new ValidationException('Le fichier module.ini est invalide : la clé "name" n\'existe pas');
 			return null;
 		}
 
 		if (isset($ini->min_version)) {
-			$this->_broken_message = 'Ce module nécessite Paheko 1.4.0 ou supérieur';
+			throw new ValidationException('Ce module nécessite Paheko 1.4.0 ou supérieur');
 			return null;
 		}
 
