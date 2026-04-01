@@ -11,6 +11,7 @@ use Paheko\Form;
 use Paheko\Log;
 use Paheko\UserException;
 use Paheko\Utils;
+use Paheko\TemplateException;
 use Paheko\Email\Emails;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
@@ -18,8 +19,6 @@ use Paheko\UserTemplate\UserTemplate;
 use Paheko\Web\Render\Render;
 
 use Paheko\Entities\Users\DynamicField;
-
-use KD2\Brindille_Exception;
 
 use const Paheko\{WWW_URL, ADMIN_URL};
 
@@ -63,7 +62,7 @@ class Mailing extends Entity
 		try {
 			$this->getPreview();
 		}
-		catch (Brindille_Exception $e) {
+		catch (TemplateException $e) {
 			$this->assert(false, 'Erreur dans le code du message : ' . $e->getMessage());
 		}
 
@@ -473,7 +472,7 @@ class Mailing extends Entity
 		try {
 			$html = $this->getPreview();
 		}
-		catch (Brindille_Exception $e) {
+		catch (TemplateException $e) {
 			return [];
 		}
 

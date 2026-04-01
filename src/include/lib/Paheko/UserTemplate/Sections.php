@@ -2,7 +2,6 @@
 
 namespace Paheko\UserTemplate;
 
-use KD2\Brindille_Exception;
 use KD2\DB\DB_Exception;
 use Paheko\DB;
 use Paheko\DynamicList;
@@ -10,6 +9,7 @@ use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\Users\Session;
 use Paheko\Entities\Web\Page;
 use Paheko\Web\Web;
@@ -140,7 +140,7 @@ class Sections
 		// Nested #form sections are not allowed
 		foreach ($tpl->_stack as $section) {
 			if ($section[0] === $tpl::SECTION && $section[1] === 'form') {
-				throw new Brindille_Exception('Cannot use a #form section inside a #form section');
+				throw new TemplateException('Cannot use a #form section inside a #form section');
 			}
 		}
 
@@ -152,7 +152,7 @@ class Sections
 			&& ($on = $tpl->getValueFromArgument($params['on']))) {
 
 			if (!preg_match($tpl::RE_VALID_VARIABLE_NAME, $on)) {
-				throw new Brindille_Exception('Nom de variable invalide : ' . $on);
+				throw new TemplateException('Nom de variable invalide : ' . $on);
 			}
 
 			$if = sprintf('$_POST[%s]', var_export($on, true));
@@ -194,7 +194,7 @@ class Sections
 	static public function formEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
 	{
 		if ($tpl->_lastName() !== 'form') {
-			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $tpl->_lastName()));
+			throw new TemplateException(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $tpl->_lastName()));
 		}
 
 		$type = $tpl->_lastType();
@@ -227,7 +227,7 @@ class Sections
 		$params = $tpl->_parseArguments($params_str, $line);
 
 		if (!isset($params['assign']) || !is_string($params['assign'])) {
-			throw new Brindille_Exception(sprintf('"%s": missing "assign" parameter', $name));
+			throw new TemplateException(sprintf('"%s": missing "assign" parameter', $name));
 		}
 
 		$assign = $tpl->getValueFromArgument($params['assign']);
@@ -243,7 +243,7 @@ class Sections
 		$last = $tpl->_lastName();
 
 		if ($last !== 'capture') {
-			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
+			throw new TemplateException(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
 		}
 
 		$tpl->_pop();
@@ -260,23 +260,23 @@ class Sections
 		$context = array_intersect_key(['modifier' => null, 'function' => null, 'section' => null], $params);
 
 		if (count($context) > 1) {
-			throw new Brindille_Exception('"define" only allows one of "modifier", "function" or "section" parameters');
+			throw new TemplateException('"define" only allows one of "modifier", "function" or "section" parameters');
 		}
 		elseif (!count($context)) {
-			throw new Brindille_Exception('"define": missing "modifier", "function" or "section" parameter');
+			throw new TemplateException('"define": missing "modifier", "function" or "section" parameter');
 		}
 
 		$context = key($context);
 		$name = $tpl->getValueFromArgument($params[$context]);
 
 		if (!preg_match($tpl::RE_VALID_VARIABLE_NAME, $name)) {
-			throw new Brindille_Exception(sprintf('Invalid syntax for %s name \'%s\'', $context, $name));
+			throw new TemplateException(sprintf('Invalid syntax for %s name \'%s\'', $context, $name));
 		}
 
 		// Avoid weird stuff (like defining a function inside a function):
 		// only allow functions to be defined at the root level
 		if (count($tpl->_stack)) {
-			throw new Brindille_Exception(sprintf('%s cannot be defined inside a condition or section', $context));
+			throw new TemplateException(sprintf('%s cannot be defined inside a condition or section', $context));
 		}
 
 		$tpl->_push($tpl::SECTION, 'define', compact('context', 'name'));
@@ -298,7 +298,7 @@ class Sections
 
 	static public function defineElse(string $name, string $params_str, UserTemplate $tpl, int $line): void
 	{
-		throw new Brindille_Exception('\'else\' cannot be used with #define sections');
+		throw new TemplateException('\'else\' cannot be used with #define sections');
 	}
 
 	static public function defineEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
@@ -306,14 +306,14 @@ class Sections
 		$last = $tpl->_lastName();
 
 		if ($last !== 'define') {
-			throw new Brindille_Exception(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
+			throw new TemplateException(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
 		}
 
 		$tpl->_pop();
 
 		return '<?php } '
 			// Prepend function name to error
-			. 'catch (Brindille_Exception $e) { throw new Brindille_Exception(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
+			. 'catch (\Paheko\TemplateException|\KD2\Brindille_Exception $e) { throw new \Paheko\TemplateException(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
 			// Always remove current context variables even if return was used (should not be necessary anymore) FIXME
 			//. 'finally { array_pop($this->_variables); } '
 			. '}); ?>';
@@ -354,7 +354,7 @@ class Sections
 	static public function call(array $params, UserTemplate $tpl, int $line): ?\Generator
 	{
 		if (empty($params['section'])) {
-			throw new Brindille_Exception('Missing "section" parameter for "call" section');
+			throw new TemplateException('Missing "section" parameter for "call" section');
 		}
 
 		$name = $params['section'];
@@ -959,7 +959,7 @@ class Sections
 
 		if (!empty($params['search'])) {
 			if (!is_array($params['search'])) {
-				throw new Brindille_Exception('Le paramètre "search" n\'est pas un tableau');
+				throw new TemplateException('Le paramètre "search" n\'est pas un tableau');
 			}
 
 			$params['tables'] .= ' INNER JOIN users_search AS us ON us.id = u.id';
@@ -1171,11 +1171,11 @@ class Sections
 		];
 
 		if (empty($params['level']) || !array_key_exists($params['level'], $convert)) {
-			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' niveau d'accès inconnu : %s", $line, $params['level'] ?? ''));
+			throw new TemplateException(sprintf("Ligne %d: 'restrict' niveau d'accès inconnu : %s", $line, $params['level'] ?? ''));
 		}
 
 		if (empty($params['section']) || !in_array($params['section'], $session::SECTIONS)) {
-			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' section d'accès inconnu : %s", $line, $params['section'] ?? ''));
+			throw new TemplateException(sprintf("Ligne %d: 'restrict' section d'accès inconnu : %s", $line, $params['section'] ?? ''));
 		}
 
 		$ok = $session->canAccess($params['section'], $convert[$params['level']]);
@@ -1201,7 +1201,7 @@ class Sections
 			$id = self::_getPageIdFromPath($params['path'] ?? $params['uri']);
 		}
 		else {
-			throw new Brindille_Exception('"id_page", "uri" or "path" parameter is mandatory and is missing');
+			throw new TemplateException('"id_page", "uri" or "path" parameter is mandatory and is missing');
 		}
 
 		if (!$id) {
@@ -1400,7 +1400,7 @@ class Sections
 			$id = self::_getPageIdFromPath($params['parent']);
 		}
 		else {
-			throw new Brindille_Exception('La section "attachments" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
+			throw new TemplateException('La section "attachments" doit obligatoirement comporter un paramètre "id_page" ou "parent"');
 		}
 
 		if (!$id) {
@@ -1495,7 +1495,7 @@ class Sections
 	static public function module(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (empty($params['name'])) {
-			throw new Brindille_Exception('Missing parameter "name"');
+			throw new TemplateException('Missing parameter "name"');
 		}
 
 		$module = Modules::get($params['name']);
@@ -1515,7 +1515,7 @@ class Sections
 	static public function extension(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (empty($params['name'])) {
-			throw new Brindille_Exception('Missing parameter "name"');
+			throw new TemplateException('Missing parameter "name"');
 		}
 
 		$ext = Extensions::get($params['name']);
@@ -1533,14 +1533,14 @@ class Sections
 	static public function files(array $params, UserTemplate $ut, int $line): \Generator
 	{
 		if (empty($ut->module)) {
-			throw new Brindille_Exception('Module could not be found');
+			throw new TemplateException('Module could not be found');
 		}
 
 		$path = $ut->module->storage_root();
 
 		if (isset($params['path'])) {
 			if (preg_match('!/\.|\.\.|//|\\\\!', $path)) {
-				throw new Brindille_Exception(sprintf('"path" parameter is invalid: "%s"', $params['path']));
+				throw new TemplateException(sprintf('"path" parameter is invalid: "%s"', $params['path']));
 			}
 
 			$path .= '/' . $params['path'];
@@ -1595,7 +1595,7 @@ class Sections
 		}
 		else {
 			if (empty($params['tables'])) {
-				throw new Brindille_Exception(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
+				throw new TemplateException(sprintf('"sql" section: missing parameter "tables" on line %d', $line));
 			}
 
 			foreach ($defaults as $key => $default_value) {
@@ -1658,7 +1658,7 @@ class Sections
 			foreach ($params as $key => $value) {
 				if (substr($key, 0, 1) == ':') {
 					if (is_object($value) || is_array($value)) {
-						throw new Brindille_Exception(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
+						throw new TemplateException(sprintf("à la ligne %d : Section 'sql': le paramètre '%s' est un tableau.", $line, $key));
 					}
 
 					$args[substr($key, 1)] = $value;
@@ -1682,7 +1682,7 @@ class Sections
 				throw new UserException('Motif de recherche invalide', 0, $e);
 			}
 
-			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
+			throw new TemplateException(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))

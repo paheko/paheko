@@ -5,6 +5,7 @@ namespace Paheko\Entities\Services;
 use Paheko\Plugins;
 use Paheko\Entity;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\Users\DynamicFields;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\UserTemplate\CommonModifiers;
@@ -59,7 +60,7 @@ class ReminderMessage extends Entity
 			try {
 				$body = $body->fetch();
 			}
-			catch (\KD2\Brindille_Exception $e) {
+			catch (TemplateException $e) {
 				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
 			}
 		}
