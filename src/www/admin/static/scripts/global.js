@@ -132,6 +132,7 @@
 	g.dialog_title = null;
 	g.focus_before_dialog = null;
 	g.dialog_on_close = false;
+	g.dialog_options = null;
 
 	g.openDialog = function (content, options) {
 		if (null !== g.dialog) {
@@ -142,6 +143,7 @@
 
 	g.createDialog = function (content, options) {
 		options = g.getDialogOptions(options);
+		g.dialog_options = options;
 
 		g.focus_before_dialog = document.activeElement;
 
@@ -190,6 +192,7 @@
 		options.close = options.close ?? true;
 		options.caption = options.caption ?? null;
 		options.click_to_close = options.click_to_close ?? false;
+		options.escape_to_close = options.escape_to_close ?? true;
 		g.dialog_on_close = options.on_close || false;
 		return options;
 	};
@@ -219,7 +222,7 @@
 			document.title = options.caption + ' — ' + g.dialog_title;
 		}
 
-		g.setDialogKey('Escape', g.closeDialog);
+		g.setDialogKey('Escape', g.closeDialogOnEscape);
 
 		if (typeof content == 'string') {
 			var container = document.createElement('div');
@@ -283,6 +286,7 @@
 		options.height = options.height || 'auto';
 		options.callback = options.callback || null;
 		options.classname = options.classname || null;
+		options.escape_to_close = options.escape_to_close || true;
 
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
@@ -294,7 +298,7 @@
 		iframe.setAttribute('data-height', options.height);
 
 		iframe.addEventListener('load', () => {
-			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+			iframe.contentWindow.onkeyup = (e) => { if (e.key === 'Escape') g.closeDialogOnEscape(); };
 
 			if (iframe.parentNode.className) {
 				return;
@@ -381,6 +385,15 @@
 		dialog.childNodes[1].style.height = height;
 	};
 
+	g.closeDialogOnEscape = () => {
+		if (!g.dialog_options.escape_to_close) {
+			return true;
+		}
+
+		g.closeDialog();
+		return false;
+	};
+
 	g.closeDialog = function () {
 		for (var i in g.dialog_events) {
 			if (!g.dialog_events.hasOwnProperty(i)) {
@@ -413,6 +426,7 @@
 		var d = g.dialog;
 		d.style.opacity = 0;
 		g.dialog = null;
+		g.dialog_options = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
 

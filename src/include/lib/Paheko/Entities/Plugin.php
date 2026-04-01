@@ -390,22 +390,20 @@ class Plugin extends Entity
 	 * Mettre à jour le plugin
 	 * Appelle le fichier upgrade.php dans l'archive si celui-ci existe.
 	 */
-	public function upgrade(): void
+	public function upgrade(bool $no_error = false): void
 	{
 		$this->updateFromINI();
+
+		// Make sure we don't throw an error in Plugins::upgradeAllIfRequired
+		if ($no_error && $this->isBroken()) {
+			return;
+		}
 
 		if ($this->hasFile(self::UPGRADE_FILE)) {
 			$this->call(self::UPGRADE_FILE, true);
 		}
 
 		$this->save();
-	}
-
-	public function upgradeIfRequired(): void
-	{
-		if ($this->needUpgrade()) {
-			$this->upgrade();
-		}
 	}
 
 	public function oldVersion(): ?string

@@ -10,14 +10,18 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\Users\Session;
 use Paheko\Web\Web;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\Entities\Web\Page;
 
-use const Paheko\ROOT;
-use const Paheko\ADMIN_URL;
+use const Paheko\{
+	ROOT,
+	ADMIN_URL,
+	SHOW_ERRORS
+};
 
 use KD2\DB\EntityManager as EM;
 use KD2\ZipReader;
@@ -229,9 +233,26 @@ class Modules
 			try {
 				$content = $module->fetch($snippet, $variables);
 			}
-			catch (\RuntimeException $e) {
-				ErrorManager::reportExceptionSilent($e);
-				$content = sprintf('Le module "%s" a rencontré une erreur.', $module->name);
+			catch (TemplateException $e) {
+				$has_local_file = $module->hasLocalFile($snippet);
+
+				// Make sure we report errors if they come from shipped code
+				if (!$has_local_file) {
+					ErrorManager::reportExceptionSilent($e);
+				}
+
+				if (!SHOW_ERRORS && !$has_local_file) {
+					$message = sprintf('Une erreur est survenue dans le module "%s". Elle a été signalée aux développeur⋅euses.', $module->name);
+				}
+				// Display specific error for user modules
+				else {
+					$message = sprintf('Erreur dans "%s" :', $snippet);
+					$message .= " " . $e->getMessage();
+				}
+
+				$message .= "\n" . 'Cette erreur n\'empêche pas cette page de fonctionner (normalement).';
+
+				$content = sprintf('<p class="block alert">%s</p>', nl2br(htmlspecialchars($message)));
 			}
 
 			$out[$module->name] = $content;
