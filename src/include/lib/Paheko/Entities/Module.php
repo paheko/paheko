@@ -785,7 +785,7 @@ class Module extends Entity
 		}
 
 		$ut->assignArray($params);
-		$content = $ut->fetch();
+		$content = $ut->fetchAndCatchErrors();
 		$type = $ut->getContentType();
 		$code = $ut->getStatusCode();
 
