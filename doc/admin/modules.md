@@ -135,6 +135,8 @@ Ce fichier décrit le module, au format INI (`clé=valeur`), en utilisant les cl
 * `allow_user_restrict` (depuis 1.3.18) : indique si l'administrateur peut modifier les restrictions d'accès au module (via l'onglet ==Permissions== de l'extension). `true` ou `false`. Défaut si non spécifié : `true`.
 * `restrict_details` : petit texte d'explication supplémentaire (qui sera affiché dans la page des détails de l'extension) sur les droits d'accès requis pour accéder à certaines parties du module.
 * `doc_url` : adresse web HTTP menant à la documentation du module
+* `version` : indique la version du module (surtout utile pour le stockage dans les tables SQL, voir plus bas)
+* `min_version` : version minimale de Paheko requise pour installer et utiliser le module
 
 Il est possible d'ajouter un commentaire dans ce fichier, pour cela il faut que la ligne commence par un point virgule.
 
@@ -149,6 +151,8 @@ author_url="https://paheko.cloud/"
 restrict_section="accounting"
 restrict_level="read"
 doc_url="https://paheko.cloud/extension-recu-don"
+version="1.0"
+min_version="1.4.0"
 ```
 
 # Variables spéciales
@@ -193,7 +197,7 @@ version = "1.0.0"
 
 Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.
 
-Un module sans version ne peut pas créer de tables.
+Un module sans `version` indiquée dans son `module.ini` ne peut pas créer de tables.
 
 Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette `migration.tpl` sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.
 
@@ -216,8 +220,7 @@ Ce squelette ne doit rien afficher. Si quelque chose est affiché, l'exécution 
 
 Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.
 
-<!-- FIXME: supprimer quand sera supprimé le stockage JSON dans les modules -->
-Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. [Voir l'ancienne documentation](brindille_storage_json.md).
+Note : jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle pourrait être supprimée à l'avenir. [Voir l'ancienne documentation](brindille_storage_json.md).
 
 # Export et import de modules
 
