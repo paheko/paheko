@@ -163,38 +163,11 @@ class Modules
 		return $list;
 	}
 
-	/**
-	 * List locally installed modules, directly from the filesystem, without creating them in the database cache
-	 * (used in Install form)
-	 */
-	static public function listLocal(): array
-	{
-		$list = self::listRaw(false);
-		$out = [];
-
-		foreach ($list as $name) {
-			$m = new Module;
-			$m->name = $name;
-
-			if (!$m->updateFromINI(false)) {
-				continue;
-			}
-
-			$out[$name] = $m;
-		}
-
-		return $out;
-	}
-
 	static public function create(string $name): ?Module
 	{
 		$module = new Module;
 		$module->name = $name;
-
-		if (!$module->updateFromINI()) {
-			return null;
-		}
-
+		$module->updateFromINI();
 		$module->save();
 		$module->updateTemplates();
 		return $module;
@@ -523,10 +496,7 @@ class Modules
 				Files::createFromString($base  . '/' . $local_name, $content);
 			}
 
-			if (!$module->updateFromINI()) {
-				throw new ValidationException('Le fichier module.ini est invalide.');
-			}
-
+			$module->updateFromINI();
 			$module->selfCheckUser();
 
 			$module->save();
