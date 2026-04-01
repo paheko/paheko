@@ -223,14 +223,14 @@ class Functions
 	static public function save(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
-			throw new Brindille_Exception('Module name could not be found');
+			throw new TemplateException('Module name could not be found');
 		}
 
 		$db = DB::getInstance();
 
 		if (isset($params['from'])) {
 			if (!is_array($params['from'])) {
-				throw new Brindille_Exception('"from" parameter is not an array');
+				throw new TemplateException('"from" parameter is not an array');
 			}
 
 			$from = $params['from'];
@@ -239,7 +239,7 @@ class Functions
 
 			foreach ($from as $key => $row) {
 				if (!is_array($row) && !is_object($row)) {
-					throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
+					throw new TemplateException('"from" parameter item is not an array on index: ' . $key);
 				}
 
 				self::save(array_merge((array)$row, $params), $tpl, $line);
@@ -326,7 +326,7 @@ class Functions
 					$schemas[$validate] = JSONSchema::fromString($schema);
 				}
 				catch (\LogicException $e) {
-					throw new Brindille_Exception($e->getMessage(), 0, $e);
+					throw new TemplateException($e->getMessage(), 0, $e);
 				}
 			}
 
@@ -341,7 +341,7 @@ class Functions
 				}
 			}
 			catch (\RuntimeException $e) {
-				throw new Brindille_Exception(sprintf("impossible de valider le schéma:\n%s\n\n%s",
+				throw new TemplateException(sprintf("impossible de valider le schéma:\n%s\n\n%s",
 					$e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
 			}
 		}
@@ -377,7 +377,7 @@ class Functions
 	static public function delete(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
-			throw new Brindille_Exception('Module name could not be found');
+			throw new TemplateException('Module name could not be found');
 		}
 
 		$db = DB::getInstance();
@@ -416,7 +416,7 @@ class Functions
 		}
 
 		if (!count($where)) {
-			throw new Brindille_Exception('Missing parameters for delete');
+			throw new TemplateException('Missing parameters for delete');
 		}
 
 		$where = implode(' AND ', $where);
