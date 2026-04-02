@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\sdisplay\sof\sreconcilation\sstate,\sbased\son\snumber\sof\srows\sreconciled,\sand\snot\son\sreconciliation\sbalance
-D 2026-04-02T15:54:18.544
+C Update\sPrism\scode\seditor\sto\s5.1.0,\sready\sfor\sBrindille\sautocomplete
+D 2026-04-02T17:55:48.587
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -738,8 +738,8 @@ F src/www/admin/static/scripts/lib/code_editor.js c3610b5e19f764df146385f41c5130
 F src/www/admin/static/scripts/lib/datepicker2.min.js a4c81fc228bbb79c906350181d215a1ab36d44d97f632582b5314a0ba3529163
 F src/www/admin/static/scripts/lib/gibberish-aes.min.js 8c82e940cf5cf6fb68433bdc6c3a62c71583a60d
 F src/www/admin/static/scripts/lib/prism/hack.woff2 6bd11683a6c32f40c39b6da7be226395fbc967948cadbf760d3edd1b9ef7f443
-F src/www/admin/static/scripts/lib/prism/prism_editor.css 28fa42a2352f897b669651aba644d8e9069bf5e0fabcd26464bea8e0fedb5fa2
-F src/www/admin/static/scripts/lib/prism/prism_editor.js 4f355f504295796a154bcedc537bff126fff73d49530fcb7bba575bc21e130ff
+F src/www/admin/static/scripts/lib/prism/prism_editor.css f6ebe96b43f8420c9ba9d873d07223458fe381b0fdceaf7f41f557e4737b73a2
+F src/www/admin/static/scripts/lib/prism/prism_editor.js 257b1657ab8c1b2dc6174e7a070ac5ba384d26b27aabbd6a83f6e4f6dca77cd8
 F src/www/admin/static/scripts/lib/query_builder.js 1e1ade580be3a4add8dadd04e7ff7ed1f8da70855ebf5c7a53a515ee16b14cea
 F src/www/admin/static/scripts/lib/text_editor.js 753a77f49880b00419771b25a1166ff76819f3cd52ad48f2b752339caa64a5bd
 F src/www/admin/static/scripts/lib/unzipit.min.js 8729f4e48a77faee72b09d2503934f705fb5befab597262230c7c26836f52162
@@ -848,24 +848,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 922a604ee5741a3fcd7573a38d360b243f7a41b8a0c458ce296dae31505e3b0f
-R 639d2b4db7acc576f38cdcb545a96acc
+P b42c82c0aade019ed8a15d23adb63bbcd54a31907898ccc6bbee4f16ecc5acc9
+R 50613d6bd9b773a5f144079451a7d491
 U bohwaz
-Z fe9fdcffaea3359a273eb87631b38642
+Z 749c47e7f93d1d05d70576c369b22ad6
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnOkSoACgkQksnacbiI
-6jRLLg/+PsqcStkl2xxkKjJIkup44/PglcMYaWtJHzKbswWH4QhQM7t63ywTWbjt
-QQa0EzGazhwXqnrhutQesHaujoe0L3D/z5cWbo1A+rdzApjyIdDtWKqtw2PCOQ+X
-h0LfkhirdpOU0h0LW2xRUWMsRIsP1herqPD6I/ci5ZmBUnNNxje2kMKyEqyziZWQ
-ITiOdMCtLVQ3y2YTdRC9SCCTKLwIbIWuRMqJn1gvQJHYCi7TOJEnxVCZbsKO/cBM
-uP884BrvEsruH0yfCIofGK89s3MrscU0R9I+RPtydIEotAi2oEaf4GIofHvztHgQ
-785v5/ETQfHDxKawyko9k+yz7nB7xq5qI8a2O8b9RtNw4ZUIvdofFSMTH9O5rHhU
-p/vHGQqXljW2gBPXPhJOIh9LJpNtiCeIaEkVkWLelugZAWB99Amr9j0snI5LbX+S
-F/HpZSlxuFewDuwbkH0hb/VuE+nPH0ZvY5BDIqvSapWTTdellkHkFXiJwTy2T50W
-CDGRXSMFWZZEE0qk46msew9IpZUZaGooJ+am3Pzq0rdrInFnUc9Mv9znyKzZkyC5
-QIUgKVuzHE3vJMlUiBd6RakO2xvuMEO5WcGJ+BxLvVhFzvfjjHRTAvyjNL9fNFBI
-V5mxoFuQoKC0dijSQIMifzdKgzSx/y7w8sVAf6mppvXh//81SC8=
-=/LVZ
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnOraQACgkQksnacbiI
+6jR6NhAAoIZ2m3lt8wObi7SsyyPaY0uHKUfg5Fou4gCQo8maxG0A+UuMCwBWnNdp
+EnlUXNV2szO0Z8ILF6MVuVbnEDIt+OXkNt3ObX4mfLFj6rZzSSNbPmcZwoT1jAjV
+SN+yHDxMum6kCVd8MbEBd6yNhVDvtVKdW+TxwVpoirhPTyxfZBx1luh9YHxgGDi6
+abKPg13uaFAVAwGO3DgPtr+HO+gh6iu+PC4rlJ+oGLBfCz9ZpYTEQO9/J3XHTuIk
+Ecm7w2oaLgB7C1VBS63oP/bJckuqIuSRri6WHLIReqnFIYXW8p+crbD+H5qh3bFd
+/AAIITFrOnWKBB833U6AsaBb41THHW5YQo+CsW/tu38AmNU9X4NUtrvZ3PrWPfJq
+LHO2bcn15AG1KIDDuJH1+jNvA+KY1d6XMEtT+UT0iIkOKA6CMXzBUgiLOoJmJgux
+oeqSsaPVdH8hZ0ri02BkjQ+hFP7wAQ6M2TePg+WxK/+O8qaOcX7hDsRRWFTOjjPc
+yYmVyx6ASsjdnuX1mKNs42TsIk3C4LkKGnU3l1+fA0M2jVG53oYbmnTQ8WwWlTv+
+z6N+Dz0N95i6hj3Zx1yeX0b16f2TCSoJncdsvxAzSPKMYAiwD4/sH22XjpUf8oCG
+F68UmZVSX4WqMgwWCBDEHRQ0Uowzu7iX3Zo89qux2PFN6Sowsjg=
+=9920
 -----END PGP SIGNATURE-----
