@@ -111,26 +111,6 @@ if ($transaction->date < $current_year->start_date || $transaction->date > $curr
 	$transaction->date = $current_year->start_date;
 }
 
-// Quick transaction from an account journal page
-if ($id = qg('account')) {
-	$account = $accounts::get($id);
-
-	if (!$account || $account->id_chart != $current_year->id_chart) {
-		throw new UserException('Ce compte ne correspond pas à l\'exercice comptable ou n\'existe pas');
-	}
-
-	$transaction->type = Transaction::getTypeFromAccountType($account->type);
-	$index = $transaction->type == Transaction::TYPE_DEBT || $transaction->type == Transaction::TYPE_CREDIT ? 1 : 0;
-	$s = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
-
-	if ($transaction->type) {
-		$types_details[$transaction->type]->accounts[$index]->selector_value = $s;
-	}
-	else {
-		$lines = [['account_selector' => $s], []];
-	}
-}
-
 $form->runIf('save', function () use ($transaction, $session, $payoff) {
 	if ($payoff) {
 		$transaction->importFromPayoffForm($payoff);

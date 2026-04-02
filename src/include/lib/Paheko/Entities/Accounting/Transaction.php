@@ -1691,6 +1691,23 @@ class Transaction extends Entity
 
 		static $bank_types = [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING];
 
+		// acc = Account code
+		if (isset($_GET['acc'])
+			&& ($a = $accounts->getWithCode($_GET['acc']))) {
+			if (in_array($a->type, $bank_types)) {
+				$_GET['ab'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_REVENUE) {
+				$_GET['ar'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_EXPENSE) {
+				$_GET['ae'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_THIRD_PARTY) {
+				$_GET['a3'] = $a->code;
+			}
+		}
+
 		// ab = Bank/cash account
 		if (isset($_GET['ab'])
 			&& ($a = $accounts->getWithCode($_GET['ab']))
@@ -1703,7 +1720,7 @@ class Transaction extends Entity
 		// ar = Revenue account
 		if (isset($_GET['ar'])
 			&& ($a = $accounts->getWithCode($_GET['ar']))
-			&& $a->type == $a::TYPE_REVENUE) {
+			&& $a->type === $a::TYPE_REVENUE) {
 			$this->setDefaultAccount(self::TYPE_REVENUE, 'credit', $a->id);
 			$this->setDefaultAccount(self::TYPE_CREDIT, 'credit', $a->id);
 		}
@@ -1711,7 +1728,7 @@ class Transaction extends Entity
 		// ae = Expense account
 		if (isset($_GET['ae'])
 			&& ($a = $accounts->getWithCode($_GET['ae']))
-			&& $a->type == $a::TYPE_EXPENSE) {
+			&& $a->type === $a::TYPE_EXPENSE) {
 			$this->setDefaultAccount(self::TYPE_EXPENSE, 'debit', $a->id);
 			$this->setDefaultAccount(self::TYPE_DEBT, 'debit', $a->id);
 		}
@@ -1726,7 +1743,7 @@ class Transaction extends Entity
 		// a3 = Third-party account
 		if (isset($_GET['a3'])
 			&& ($a = $accounts->getWithCode($_GET['a3']))
-			&& $a->type == $a::TYPE_THIRD_PARTY) {
+			&& $a->type === $a::TYPE_THIRD_PARTY) {
 			$this->setDefaultAccount(self::TYPE_CREDIT, 'debit', $a->id);
 			$this->setDefaultAccount(self::TYPE_DEBT, 'credit', $a->id);
 		}
@@ -1750,6 +1767,12 @@ class Transaction extends Entity
 
 			// Make sure we have at least two lines
 			$lines = array_merge($lines, array_fill(0, max(0, 2 - count($lines)), []));
+		}
+		elseif (count($this->_default_selector)) {
+			$lines = [[
+				'account_selector' => current(current($this->_default_selector)),
+			]];
+			$lines[] = [];
 		}
 
 		if (isset($_GET['u'])) {

@@ -54,7 +54,7 @@
 			{if $account.type == $account::TYPE_BANK}
 				{linkbutton label="Rapprocher" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 			{/if}
-			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
+			{linkbutton href="!acc/transactions/new.php?acc=%s"|args:$account.code label="Saisie" shape="plus"}
 		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu right=true}
