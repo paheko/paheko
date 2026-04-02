@@ -547,8 +547,9 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transactions_lines (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_project ON acc_transactions_lines (id_project);
-CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_status ON acc_transactions_lines (status);
+-- Useful for list of accounts, to know if an account is reconciled or not
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (id_account, reconciled);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_links
 (

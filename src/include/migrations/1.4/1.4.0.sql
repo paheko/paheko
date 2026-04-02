@@ -150,3 +150,7 @@ INSERT INTO web_pages_versions SELECT * FROM web_pages_versions_old;
 CREATE INDEX IF NOT EXISTS web_pages_versions_id_page ON web_pages_versions (id_page);
 
 DROP TABLE web_pages_versions_old;
+
+-- Better index for reconciled status
+DROP INDEX IF EXISTS acc_transactions_lines_reconciled;
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (id_account, reconciled);
