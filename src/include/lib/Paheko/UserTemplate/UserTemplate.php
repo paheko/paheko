@@ -101,14 +101,6 @@ class UserTemplate extends \KD2\Brindille
 	protected array $headers = [];
 
 	/**
-	 * List of user-defined functions
-	 * @var array
-	 */
-	protected $user_modifiers = [];
-	protected $user_functions = [];
-	protected $user_sections = [];
-
-	/**
 	 * Return TRUE if the filename is probably Brindille template code
 	 * and should be treated as a UserTemplate
 	 */
@@ -762,9 +754,12 @@ class UserTemplate extends \KD2\Brindille
 		echo 'header { border-bottom: 5px darkred solid; margin-bottom: 1em; padding-bottom: 1em; }';
 		echo 'header h2, header h3 { font-family: monospace; font-size: 1.5em; margin: .4rem 0; }';
 		echo '#icn { color: #fff; font-size: 2em; float: right; margin: 0 1em; padding: 1em; background: #900; border-radius: 50%; }';
-		echo 'section { background: #ffc; padding: 1em; font-family: monospace; }';
-		echo 'section pre u { background: #fcc; display: inline-block; width: 100%; text-decoration: none; }';
-		echo 'section pre { margin: 1em 0; border: 1px solid #ccc; white-space: pre-wrap; }';
+		echo 'section { font-family: monospace; }';
+		echo 'section h1 { white-space: pre-wrap; }';
+		echo 'section table { margin: 1em 0; border: 1px solid #ccc; border-collapse: collapse; }';
+		echo 'section th { vertical-align: top; text-align: right; padding: .3em }';
+		echo 'section table td { white-space: pre-wrap; padding: .3em }';
+		echo 'section .current { background: #fcc; }';
 		echo 'footer { margin-top: 1em; border-top: 5px solid #ccc; padding: 1em; }';
 		echo 'footer p { margin: .5em 0; } footer a { display: inline-block; padding: .3em; border: 2px solid #ddd; color: #000; border-radius: .3em; } ';
 		echo '</style></head><body><main><header><pre id="icn"> \__/<br /> (xx)<br />//||\\\\</pre><h1>';
@@ -781,9 +776,9 @@ class UserTemplate extends \KD2\Brindille
 
 		echo '</h3></header><section><h1>';
 
-		echo nl2br(htmlspecialchars($e->getMessage()));
+		echo preg_replace('/\r\n|\n|\r/', '', nl2br(htmlspecialchars($e->getMessage())));
 
-		echo '</h1><pre>';
+		echo '</h1><table>';
 
 		if (preg_match('/Line (\d+)\s*:/i', $e->getMessage(), $match)) {
 			$line = $match[1] - 1;
@@ -799,16 +794,10 @@ class UserTemplate extends \KD2\Brindille
 			$max = min(count($file), $line + 6);
 
 			for ($i = $start; $i < $max; $i++) {
-				$code = sprintf('<b>%d</b> %s', $i + 1, htmlspecialchars($file[$i]));
-
-				if ($i == $line) {
-					$code = sprintf('<u>%s</u>', $code);
-				}
-
-				echo rtrim($code) . "\n";
+				printf('<tr class="%s"><th>%d</th><td>%s</td></tr>', $i == $line ? 'current' : '', $i + 1, htmlspecialchars($file[$i]));
 			}
 
-			echo '</pre>';
+			echo '</table>';
 		}
 
 		echo '</section><footer>';
@@ -826,14 +815,14 @@ class UserTemplate extends \KD2\Brindille
 	}
 
 	/**
-	 * Override parent Brindille class _callFunction, to throw TemplateException
+	 * Override parent Brindille class _callFunction, to catch and throw TemplateException and get line number
 	 */
 	public function _callFunction(string $name, array $params, int $line) {
 		try {
 			return call_user_func($this->_functions[$name], $params, $this, $line);
 		}
 		catch (Brindille_Exception | TemplateException $e) {
-			$message = sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), json_encode($params));
+			$message = sprintf("line %d: function '%s' has returned an error: %s\nParameters: %s", $line, $name, $e->getMessage(), self::printVariable($params));
 			throw new TemplateException($message, $e->getCode(), $e);
 		}
 	}
@@ -865,53 +854,5 @@ class UserTemplate extends \KD2\Brindille
 			'storage_root' => $module->storage_root(),
 			'table'        => $module->hasDataTable() ? $module->data_table_name() : null,
 		]));
-	}
-
-	/**
-	 * Call a user-defined function (using {{#define}} and {{:call}} {{#call}} etc.)
-	 */
-	public function callUserFunction(string $context, string $name, array $params, int $line)
-	{
-		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
-			throw new \LogicException('Invalid user function context: ' . $context);
-		}
-
-		if (!array_key_exists($name, $this->{'user_' . $context . 's'})) {
-			throw new TemplateException(sprintf('call to undefined user %s \'%s\'', $context, $name));
-		}
-
-		return $this->{'user_' . $context . 's'}[$name]($params, $line);
-	}
-
-	/**
-	 * Register a new user-defined function (this can either be a modifier, function or section)
-	 */
-	public function registerUserFunction(string $context, string $name, callable $function): void
-	{
-		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
-			throw new \LogicException('Invalid user function context: ' . $context);
-		}
-
-		if (!preg_match(self::RE_VALID_VARIABLE_NAME, $name)) {
-			throw new TemplateException(sprintf('Invalid syntax for function name \'%s\'', $name));
-		}
-
-		$this->{'user_' . $context . 's'}[$name] = $function;
-	}
-
-	/**
-	 * Copy user-defined functions between UserTemplate instances
-	 * This is so that a user-defined function defined in an included template
-	 * can be called by the parent template.
-	 */
-	public function copyUserFunctionsTo(UserTemplate $target): void
-	{
-		$contexts = ['modifier', 'function', 'section'];
-
-		foreach ($contexts as $context) {
-			foreach ($this->{'user_' . $context . 's'} as $name => $function) {
-				$target->registerUserFunction($context, $name, $function->bindTo($target));
-			}
-		}
 	}
 }

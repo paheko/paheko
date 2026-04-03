@@ -22,7 +22,6 @@ use Paheko\UserTemplate\Modules\LegacySections;
 class Sections
 {
 	const SECTIONS_LIST = [
-		'call',
 		'load',
 		'list',
 		'categories',
@@ -56,9 +55,6 @@ class Sections
 		'else:form'   => [self::class, 'formElse'],
 		'#capture'    => [self::class, 'captureStart'],
 		'/capture'    => [self::class, 'captureEnd'],
-		'#define'     => [self::class, 'defineStart'],
-		'else:define' => [self::class, 'defineElse'],
-		'/define'     => [self::class, 'defineEnd'],
 	];
 
 	const SQL_RESERVED_PARAMS = [
@@ -252,74 +248,6 @@ class Sections
 		return '<?php $this->assign(array_pop($capture_assign), ob_get_clean()); ?>';
 	}
 
-	/**
-	 * Start of user-defined function block
-	 */
-	static public function defineStart(string $name, string $params_str, UserTemplate $tpl, int $line): string
-	{
-		$params = $tpl->_parseArguments($params_str, $line);
-		$context = array_intersect_key(['modifier' => null, 'function' => null, 'section' => null], $params);
-
-		if (count($context) > 1) {
-			throw new TemplateException('"define" only allows one of "modifier", "function" or "section" parameters');
-		}
-		elseif (!count($context)) {
-			throw new TemplateException('"define": missing "modifier", "function" or "section" parameter');
-		}
-
-		$context = key($context);
-		$name = $tpl->getValueFromArgument($params[$context]);
-
-		if (!preg_match($tpl::RE_VALID_VARIABLE_NAME, $name)) {
-			throw new TemplateException(sprintf('Invalid syntax for %s name \'%s\'', $context, $name));
-		}
-
-		// Avoid weird stuff (like defining a function inside a function):
-		// only allow functions to be defined at the root level
-		if (count($tpl->_stack)) {
-			throw new TemplateException(sprintf('%s cannot be defined inside a condition or section', $context));
-		}
-
-		$tpl->_push($tpl::SECTION, 'define', compact('context', 'name'));
-
-		return sprintf('<?php '
-			. '$this->registerUserFunction(%s, %s, function (array $params, int $line) { '
-			// Store function name here, might be useful for handling errors
-			. '$context = %1$s; $name = %2$s; '
-			// Pass variables to template, either as '$params' variable for modifiers,
-			// or extract all parameters as variables for functions/sections
-			. '$this->_variables[] = %s; '
-			// Put all function body in a try
-			. 'try { ?>',
-			var_export($context, true),
-			var_export($name, true),
-			$context === 'modifier' ? 'compact(\'params\')' : '$params'
-		);
-	}
-
-	static public function defineElse(string $name, string $params_str, UserTemplate $tpl, int $line): void
-	{
-		throw new TemplateException('\'else\' cannot be used with #define sections');
-	}
-
-	static public function defineEnd(string $name, string $params_str, UserTemplate $tpl, int $line): string
-	{
-		$last = $tpl->_lastName();
-
-		if ($last !== 'define') {
-			throw new TemplateException(sprintf('"%s": block closing does not match last block "%s" opened', $name . $params_str, $last));
-		}
-
-		$tpl->_pop();
-
-		return '<?php } '
-			// Prepend function name to error
-			. 'catch (\Paheko\TemplateException|\KD2\Brindille_Exception $e) { throw new \Paheko\TemplateException(sprintf("Error in \'%s\' %s: %s", $name, $context, $e->getMessage())); } '
-			// Always remove current context variables even if return was used (should not be necessary anymore) FIXME
-			//. 'finally { array_pop($this->_variables); } '
-			. '}); ?>';
-	}
-
 	static public function _debug(string $str): void
 	{
 		echo sprintf('<pre style="padding: 5px; margin: 5px; background: yellow; white-space: pre-wrap; color: #000">%s</pre>', htmlspecialchars($str));
@@ -332,31 +260,6 @@ class Sections
 		}
 
 		return self::$_cache[$id];
-	}
-
-	static public function call(array $params, UserTemplate $tpl, int $line): ?\Generator
-	{
-		if (empty($params['section'])) {
-			throw new TemplateException('Missing "section" parameter for "call" section');
-		}
-
-		$name = $params['section'];
-		unset($params['section']);
-
-		$r = $tpl->callUserFunction('section', $name, $params, $line);
-
-		if (!is_iterable($r)) {
-			return null;
-		}
-
-		foreach ($r as $key => $value) {
-			if (is_array($value)) {
-				yield $value;
-			}
-			else {
-				yield compact('key', 'value');
-			}
-		}
 	}
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
