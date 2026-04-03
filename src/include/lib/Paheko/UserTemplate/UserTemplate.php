@@ -101,14 +101,6 @@ class UserTemplate extends \KD2\Brindille
 	protected array $headers = [];
 
 	/**
-	 * List of user-defined functions
-	 * @var array
-	 */
-	protected $user_modifiers = [];
-	protected $user_functions = [];
-	protected $user_sections = [];
-
-	/**
 	 * Return TRUE if the filename is probably Brindille template code
 	 * and should be treated as a UserTemplate
 	 */
@@ -854,53 +846,5 @@ class UserTemplate extends \KD2\Brindille
 			'storage_root' => $module->storage_root(),
 			'table'        => $module->hasTable() ? $module->table_name() : null,
 		]));
-	}
-
-	/**
-	 * Call a user-defined function (using {{#define}} and {{:call}} {{#call}} etc.)
-	 */
-	public function callUserFunction(string $context, string $name, array $params, int $line)
-	{
-		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
-			throw new \LogicException('Invalid user function context: ' . $context);
-		}
-
-		if (!array_key_exists($name, $this->{'user_' . $context . 's'})) {
-			throw new TemplateException(sprintf('call to undefined user %s \'%s\'', $context, $name));
-		}
-
-		return $this->{'user_' . $context . 's'}[$name]($params, $line);
-	}
-
-	/**
-	 * Register a new user-defined function (this can either be a modifier, function or section)
-	 */
-	public function registerUserFunction(string $context, string $name, callable $function): void
-	{
-		if ($context !== 'modifier' && $context !== 'function' && $context !== 'section') {
-			throw new \LogicException('Invalid user function context: ' . $context);
-		}
-
-		if (!preg_match(self::RE_VALID_VARIABLE_NAME, $name)) {
-			throw new TemplateException(sprintf('Invalid syntax for function name \'%s\'', $name));
-		}
-
-		$this->{'user_' . $context . 's'}[$name] = $function;
-	}
-
-	/**
-	 * Copy user-defined functions between UserTemplate instances
-	 * This is so that a user-defined function defined in an included template
-	 * can be called by the parent template.
-	 */
-	public function copyUserFunctionsTo(UserTemplate $target): void
-	{
-		$contexts = ['modifier', 'function', 'section'];
-
-		foreach ($contexts as $context) {
-			foreach ($this->{'user_' . $context . 's'} as $name => $function) {
-				$target->registerUserFunction($context, $name, $function->bindTo($target));
-			}
-		}
 	}
 }

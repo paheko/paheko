@@ -72,30 +72,10 @@ class Modifiers
 		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
 		'count_words' => ['scalar+'],
 		'uuid' => [],
-		'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
-		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s+|\s*[.\)]\s*)/';
 
-	/**
-	 * Call a user-defined function
-	 * EXPERIMENTAL! DO NOT USE YET! FIXME
-	 * @example {{$variable|call:"my_test_function":$param1|escape}}
-	 */
-	static public function call(UserTemplate $tpl, int $line, $src, string $name, ...$params)
-	{
-		// Prepend first argument to list of arguments:
-		// "string"|call:"test_function":42 => ["string", 42]
-		array_unshift($params, $src);
-
-		// Suppress any output
-		ob_start();
-		$r = $tpl->callUserFunction('modifier', $name, $params, $line);
-		ob_end_clean();
-
-		return $r;
-	}
 
 	static public function replace(string $str, $find, string $replace = ''): string
 	{
@@ -445,28 +425,6 @@ EOS;
 		catch (\Throwable $e) {
 			throw new TemplateException(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
 		}
-	}
-
-	/**
-	 * EXPERIMENTAL! DO NOT USE!
-	 */
-	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
-	{
-		if (!is_array($array)) {
-			throw new TemplateException('Supplied argument is not an array');
-		}
-
-		if (!$tpl->checkModifierExists($modifier)) {
-			throw new TemplateException('Unknown modifier: ' . $modifier);
-		}
-
-		$out = [];
-
-		foreach ($array as $key => $value) {
-			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
-		}
-
-		return $out;
 	}
 
 	static public function gettype($v): string
