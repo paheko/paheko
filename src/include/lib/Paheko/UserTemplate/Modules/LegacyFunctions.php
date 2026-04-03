@@ -48,7 +48,7 @@ class LegacyFunctions
 			return;
 		}
 
-		$table = 'module_data_' . $tpl->module->name;
+		$table = $tpl->module->documents_table_name();
 
 		if (!empty($params['key'])) {
 			if ($params['key'] == 'uuid') {
@@ -183,10 +183,10 @@ class LegacyFunctions
 		}
 
 		$db = DB::getInstance();
-		$table = 'module_data_' . $tpl->module->name;
+		$table = $tpl->module->documents_table_name();
 
 		// No table? No problem!
-		if (!$tpl->module->hasDataTable()) {
+		if (!$tpl->module->hasDocumentsTable()) {
 			return;
 		}
 

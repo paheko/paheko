@@ -509,10 +509,7 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	/**
-	 * @deprecated
-	 */
-	public function data_table_name(): string
+	public function documents_table_name(): string
 	{
 		return sprintf('module_data_%s', $this->name);
 	}
@@ -522,14 +519,11 @@ class Module extends Entity
 		return self::TABLE_PREFIX . $this->name . '_';
 	}
 
-	/**
-	 * @deprecated
-	 */
-	public function hasDataTable(): bool
+	public function hasDocumentsTable(): bool
 	{
 		return DB::getInstance()->test('sqlite_master',
 			'type = \'table\' AND name = ?',
-			$this->data_table_name()
+			$this->documents_table_name()
 		);
 	}
 
@@ -539,7 +533,7 @@ class Module extends Entity
 
 		$this->_has_data ??= $db->test('sqlite_master',
 			'type = \'table\' AND name = ? OR name LIKE ? ESCAPE \'\\\'',
-			$this->data_table_name(),
+			$this->documents_table_name(),
 			$db->escapeLike($this->table_prefix(), '\\') . '%',
 		);
 
@@ -548,7 +542,7 @@ class Module extends Entity
 
 	public function getDataSize(): int
 	{
-		return (int) DB::getInstance()->getTableSize($this->data_table_name());
+		return (int) DB::getInstance()->getTableSize($this->documents_table_name());
 	}
 
 	public function getConfigSize(): int
@@ -751,8 +745,8 @@ class Module extends Entity
 	public function deleteData(): void
 	{
 		$db = DB::getInstance();
-		$table_name = $db->quoteIdentifier($this->data_table_name());
-		// Delete data table
+		$table_name = $db->quoteIdentifier($this->documents_table_name());
+		// Delete documents table
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
 		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ? ESCAPE \'\\\';',
 			$db->escapeLike($this->table_prefix()) . '%'
@@ -1117,4 +1111,10 @@ class Module extends Entity
 	{
 		return EM::getInstance(ModuleTable::class)->all('SELECT * FROM @TABLE WHERE id_module = ? ORDER BY name;', $this->id());
 	}
+
+	public function getTablesNames(): array
+	{
+		return array_values($db->getAssoc('SELECT name, name FROM modules_tables WHERE id_module = ?;', $this->id()));
+	}
+
 }

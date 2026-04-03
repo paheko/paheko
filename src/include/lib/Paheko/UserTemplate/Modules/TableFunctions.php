@@ -39,6 +39,10 @@ class TableFunctions
 			throw new TemplateException('A module cannot use the "table" function if it doesn\'t have a "version" in module.ini');
 		}
 
+		if (($params['delete'] ?? null) === '@DOCUMENTS') {
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->documents_table_name())));
+			return;
+		}
 
 		$actions = ['create', 'delete', 'rename', 'export'];
 
@@ -320,12 +324,6 @@ class TableFunctions
 		}
 
 		$db = DB::getInstance();
-
-		// TODO: remove when support for JSON documents is removed
-		if (!empty($params['legacy_data_table'])) {
-			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->data_table_name())));
-			return;
-		}
 
 		if (!array_key_exists('table', $params)) {
 			LegacyFunctions::delete($params, $tpl, $line);

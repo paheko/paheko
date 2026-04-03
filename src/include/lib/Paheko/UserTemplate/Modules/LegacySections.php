@@ -30,8 +30,8 @@ class LegacySections
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->data_table_name();
-			$has_table = $tpl->module->hasDataTable();
+			$table = $tpl->module->documents_table_name();
+			$has_table = $tpl->module->hasDocumentsTable();
 		}
 		else {
 			throw new TemplateException('Unique module name could not be found');
@@ -273,8 +273,8 @@ class LegacySections
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->data_table_name();
-			$has_table = $tpl->module->hasDataTable();
+			$table = $tpl->module->documents_table_name();
+			$has_table = $tpl->module->hasDocumentsTable();
 		}
 		else {
 			throw new TemplateException('Unique module name could not be found');
