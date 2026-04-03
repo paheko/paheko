@@ -6,6 +6,7 @@ use Paheko\TemplateException;
 use Paheko\ValidationException;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\UserTemplate\Modules;
+use Paheko\UserTemplate\Sections;
 use Paheko\DB;
 use Paheko\Utils;
 
@@ -22,6 +23,11 @@ class TableFunctions
 		'column',
 		'save',
 		'delete',
+		'insert',
+	];
+
+	const COMPILE_FUNCTIONS_LIST = [
+		':insert' => 'compile_insert',
 	];
 
 	/**
@@ -357,6 +363,32 @@ class TableFunctions
 		try {
 			// Delete rows
 			$db->delete($table, $where, $sql_params);
+		}
+		catch (DB_Exception $e) {
+			throw new TemplateException($e->getMessage(), 0, $e);
+		}
+
+		$db->enableSafetyAuthorizer();
+	}
+
+	static public function compile_insert(string $name, string $params, UserTemplate $tpl, int $line): string
+	{
+		$params = Sections::_replaceVariablesInSQL($params, 'INSERT ');
+		return $tpl->_function('insert', $params, $line);
+	}
+
+	static public function insert(array $params, UserTemplate $tpl, int $line): void
+	{
+		var_dump($params); exit;
+		$db = DB::getInstance();
+		$sql = $params['sql'];
+		$sql = str_replace('@MODULE_', $tpl->module->table_prefix(), $sql);
+
+		// set authorizer to only allow working on modules tables
+		$db->enableTableAuthorizer($tpl->module->getTablesNames());
+
+		try {
+			$db->exec($sql);
 		}
 		catch (DB_Exception $e) {
 			throw new TemplateException($e->getMessage(), 0, $e);

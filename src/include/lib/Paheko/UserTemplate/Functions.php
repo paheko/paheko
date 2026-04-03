@@ -52,9 +52,9 @@ class Functions
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
-		':break'    => [self::class, 'compile_break'],
-		':continue' => [self::class, 'compile_continue'],
-		':redirect' => [self::class, 'compile_redirect'],
+		':break'    => 'compile_break',
+		':continue' => 'compile_continue',
+		':redirect' => 'compile_redirect',
 	];
 
 	/**

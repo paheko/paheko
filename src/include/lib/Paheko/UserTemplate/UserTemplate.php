@@ -360,10 +360,10 @@ class UserTemplate extends \KD2\Brindille
 			foreach ($class::FUNCTIONS_LIST as $name) {
 				$this->registerFunction($name, [$class, $name]);
 			}
-		}
 
-		foreach (Functions::COMPILE_FUNCTIONS_LIST as $name => $callback) {
-			$this->registerCompileBlock($name, $callback);
+			foreach ($class::COMPILE_FUNCTIONS_LIST as $name => $callback) {
+				$this->registerCompileBlock($name, [$class, $callback]);
+			}
 		}
 
 		// Local sections
