@@ -36,8 +36,8 @@ class ModuleTable extends Entity
 	const COLUMN_DEFINITION_REGEXP = '/^(TEXT|INT|INTEGER|DATETIME|REAL|FLOAT|NUMERIC)
 			(?:\s+(NOT\s+NULL|NULL))?
 			(?:\s+DEFAULT\s+("[^"]*"|\'[^\']*\'|\d+|CURRENT_TIMESTAMP))?
-			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|CASCADE))?)?
-			(\s+UNIQUE(?:\s+\((?-i)[a-z0-9_]+\))?)?
+			(?:\s+REFERENCES\s+((?-i)!?[a-z0-9_]+)\s*\(((?-i)[a-z0-9_]+)\)(?:\s+ON\s+DELETE\s+(SET\s+NULL|CASCADE|RESTRICT))?)?
+			(\s+UNIQUE(?:\s+\(((?-i)[a-z0-9_]+)\))?)?
 			(?:\s+COMMENT\s+("[^"]*"|\'[^\']*\'))?$/xi';
 
 	const COLUMN_TYPES = [
@@ -339,7 +339,7 @@ class ModuleTable extends Entity
 				'fk_column'    => !empty($match[5]) ? trim($match[5], '\'" ') : null,
 				'fk_on_delete' => !empty($match[6]) ? $match[6] : null,
 				'unique'       => !empty($match[8]) ? $match[8] : (!empty($match[7]) ? true : null),
-				'comment'      => !empty($match[11]) ? trim($match[11], '\'"') : null,
+				'comment'      => !empty($match[9]) ? trim($match[9], '\'"') : null,
 			];
 		}
 		elseif (is_array($definition)) {
