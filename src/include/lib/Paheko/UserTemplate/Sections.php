@@ -99,9 +99,9 @@ class Sections
 
 	static protected $_cache = [];
 
-	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
+	static public function _replaceVariablesInSQL(string $params, string $prefix): string
 	{
-		$sql = strtok($sql, ';');
+		$sql = strtok($params, ';');
 		$extra_params = strtok('');
 
 		$i = 0;
@@ -119,11 +119,16 @@ class Sections
 			}
 		}, $sql);
 
-		$sql = 'SELECT ' . $sql;
+		$sql = $prefix . $sql;
 		$sql = var_export($sql, true);
-
 		$params .= ' sql=' . $sql . ' ' . $extra_params;
 
+		return $params;
+	}
+
+	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
+	{
+		$params = self::_replaceVariablesInSQL($sql, 'SELECT ');
 		return $tpl->_section('sql', $params, $line);
 	}
 
