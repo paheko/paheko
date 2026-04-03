@@ -12,6 +12,7 @@ use Paheko\Form;
 use Paheko\Utils;
 use Paheko\UserException;
 
+use Paheko\Users\Session;
 use Paheko\Users\Users;
 
 use Paheko\Files\Files;
