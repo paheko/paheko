@@ -60,6 +60,7 @@ class Modifiers
 		'ksort' => ['?array'],
 		'reverse' => ['?array'],
 		'filter' => ['?array'],
+		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
 		'max' => ['array|scalar', '...' => 'scalar'],
 		'min' => ['array|scalar', '...' => 'scalar'],
 		'array_to_list' => ['?array'],
@@ -447,11 +448,6 @@ EOS;
 		}
 	}
 
-	static public function filter($v): array
-	{
-		return array_filter((array) $v);
-	}
-
 	static public function arrayval($v): array
 	{
 		return (array) $v;
@@ -593,6 +589,29 @@ EOS;
 		return rtrim($out);
 	}
 
+	static public function filter($v): array
+	{
+		return array_filter((array) $v);
+	}
+
+	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
+	{
+		if (!is_array($array)) {
+			throw new TemplateException('Supplied argument is not an array');
+		}
+
+		if (!$tpl->checkModifierExists($modifier)) {
+			throw new TemplateException('Unknown modifier: ' . $modifier);
+		}
+
+		$out = [];
+
+		foreach ($array as $key => $value) {
+			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
+		}
+
+		return $out;
+	}
 	static public function quote_sql_identifier($in, string $prefix = '')
 	{
 		if (null === $in) {
