@@ -300,6 +300,7 @@ class Page extends Entity
 	public function save(bool $selfcheck = true): bool
 	{
 		$dir = null;
+		$old_uri = null;
 
 		// Set default status
 		if (!isset($this->status)) {
@@ -329,6 +330,10 @@ class Page extends Entity
 			$dir = Files::get(File::CONTEXT_WEB . '/' . $this->getModifiedProperty('uri'));
 		}
 
+		if ($this->isModified('uri') && $this->exists()) {
+			$old_uri = $this->getModifiedProperty('uri');
+		}
+
 		// Update modified date if required
 		if (count($this->_modified) && !isset($this->_modified['modified'])) {
 			$this->set('modified', new \DateTime);
@@ -351,6 +356,11 @@ class Page extends Entity
 
 		if ($update_search) {
 			$this->syncSearch();
+		}
+
+		// Keep trace of old URIs so that a page that has been moved will get a redirect
+		if ($old_uri) {
+			DB::getInstance()->preparedQuery('REPLACE INTO web_pages_uris (id_page, uri) VALUES (?, ?);', $this->id(), $old_uri);
 		}
 
 		Cache::clear();

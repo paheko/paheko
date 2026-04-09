@@ -388,6 +388,11 @@ class Modules
 					$page = $page->asTemplateArray();
 				}
 			}
+			elseif ($page = Web::getByOldURI($uri)) {
+				http_response_code(301);
+				header('Location: ' . $page->url());
+				return;
+			}
 		}
 		// 404 if module is not enabled, except for icon
 		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {

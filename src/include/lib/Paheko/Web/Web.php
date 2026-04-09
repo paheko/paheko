@@ -247,6 +247,11 @@ class Web
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
 	}
 
+	static public function getByOldURI(string $uri): ?Page
+	{
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE id = (SELECT id_page FROM web_pages_uris WHERE uri = ?);', $uri);
+	}
+
 	static public function get(int $id): ?Page
 	{
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE id = ?;', $id);
