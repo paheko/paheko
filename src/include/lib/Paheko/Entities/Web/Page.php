@@ -74,6 +74,8 @@ class Page extends Entity
 
 	const DUPLICATE_URI_ERROR = 42;
 
+	const VALID_URI_PATTERN = '/^[\w\d_-]+$/';
+
 	protected ?File $_dir = null;
 	protected ?array $_attachments = null;
 	protected ?array $_tagged_attachments = null;
@@ -382,6 +384,17 @@ class Page extends Entity
 		return $r;
 	}
 
+	public function set(string $key, $value)
+	{
+		// Remove WWW_URL from internal markdown text links, this makes it easier to spot internal dead links later
+		if ($key === 'content') {
+			$pattern = sprintf('!\[(.*?)\]\(%s([\w\d_-]+?)\)!', preg_quote(WWW_URL, '!'));
+			$value = preg_replace($pattern, '[$1]($2)', $value);
+		}
+
+		parent::set($key, $value);
+	}
+
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
@@ -398,8 +411,9 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(mb_strlen($this->title) <= 200, 'Le titre ne peut faire plus de 200 caractères');
-		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
-		$this->assert(strlen($this->uri) <= 150, 'L\'URI ne peut faire plus de 150 caractères');
+		$this->assert(trim($this->uri) !== '', 'L\'adresse unique ne peut rester vide');
+		$this->assert(strlen($this->uri) <= 150, 'L\'adresse unique ne peut faire plus de 150 caractères');
+		$this->assert(preg_match(self::VALID_URI_PATTERN, $this->uri), 'Adresse unique invalide');
 
 		if ($this->exists()) {
 			$this->assert($this->id_parent !== $this->id(), 'Invalid parent page');
