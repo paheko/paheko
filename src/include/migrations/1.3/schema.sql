@@ -661,3 +661,10 @@ CREATE TABLE IF NOT EXISTS web_pages_versions
 	changes INTEGER NOT NULL,
 	content TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS web_suspicious_clients
+(
+	ip TEXT NOT NULL,
+	expiry TEXT NOT NULL CHECK (datetime(expiry) = expiry),
+	UNIQUE(ip)
+);

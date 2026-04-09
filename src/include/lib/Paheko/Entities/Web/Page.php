@@ -179,6 +179,14 @@ class Page extends Entity
 	}
 
 	/**
+	 * For test/specific purpose only
+	 */
+	public function setPath(string $path)
+	{
+		return $this->_path = $path;
+	}
+
+	/**
 	 * Get page status, trying to find it from parent pages if different from online
 	 */
 	public function getInheritedStatus(): ?string

@@ -818,10 +818,17 @@ class Module extends Entity
 
 		$ut->dumpHeaders();
 
-		if ($type == 'application/pdf') {
+		if ($type === 'application/pdf') {
 			Utils::streamPDF($content);
 		}
 		else {
+			// For bots
+			if ($type === 'text/html') {
+				$h_url = Router::getHoneypotURL();
+				$link = sprintf('<a href="%s" rel="nofollow noindex" aria-hidden="true" style="display: none; width: 0; height: 0; overflow: hidden;">En savoir plus sur nous</a>', $h_url);
+				$content = preg_replace('/<body.*?>/i', '$0' . $link, $content);
+			}
+
 			echo $content;
 		}
 

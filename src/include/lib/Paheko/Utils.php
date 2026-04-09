@@ -926,7 +926,17 @@ class Utils
 
 	static public function suggestPassword(): string
 	{
-		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
+		return Security::getRandomPassphrase(self::getDictionaryPath());
+	}
+
+	static public function getDictionaryPath(string $lang = 'fr'): string
+	{
+		return sprintf('%s/include/data/locales/%s/dictionary.txt', ROOT, $lang);
+	}
+
+	static public function getRandomTextFilePath(string $lang = 'fr'): string
+	{
+		return sprintf('%s/include/data/locales/%s/random.txt', ROOT, $lang);
 	}
 
 	/**
