@@ -83,7 +83,7 @@
 {include file="common/dynamic_list_head.tpl" check=$can_edit}
 
 	{foreach from=$list->iterate() item="line"}
-		<tr>
+		<tr class="{if $line.letter}disabled{/if}">
 			{if $can_edit}
 			<td class="check">
 				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id}
