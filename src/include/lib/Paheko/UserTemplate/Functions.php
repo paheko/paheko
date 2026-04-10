@@ -55,10 +55,16 @@ class Functions
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
+		':return'   => [self::class, 'compile_return'],
 		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
+
+	static public function compile_return(): string
+	{
+		return '<?php return; ?>';
+	}
 
 	/**
 	 * Compile function to break inside a loop
@@ -661,11 +667,12 @@ class Functions
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params), null, false);
 
-		if (!empty($params['capture'])) {
-			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
-				throw new TemplateException('Nom de variable invalide : ' . $params['capture']);
-			}
+		if (!empty($params['capture'])
+			&& !preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
+			throw new TemplateException('Nom de variable invalide : ' . $params['capture']);
+		}
 
+		if (!empty($params['capture'])) {
 			$ut::_assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
