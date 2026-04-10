@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Lettrage\sdes\slignes\sd'écriture
-D 2026-04-10T19:33:01.933
+C Unletter\sfrom\schecked\slines\scould\sbe\sconfusing,\sinstead\screate\sa\sform\sthat\sallows\sto\sdelete\sa\sletter
+D 2026-04-10T19:54:28.250
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -104,7 +104,7 @@ F src/include/lib/Paheko/Accounting/Graph.php 3d82a0886a4a1772ab5f809c9b830c0b10
 F src/include/lib/Paheko/Accounting/Import.php d5d7acc7bbdd5e3015fc018d013d2d958a826018dcf506428e640276f91d4bb7
 F src/include/lib/Paheko/Accounting/Projects.php 55237d8031a279f751edf8365da112186e1fa8cbb5e08d25c924ea9e2e395aa3
 F src/include/lib/Paheko/Accounting/Reports.php b1b41e150a63445be2616d2cd14ac64e09ada220413e5e5588e07e343dd2f5b9
-F src/include/lib/Paheko/Accounting/Transactions.php 95e88f08a074490274c966b3b92456fc5f51ff660414711298dad7210df76b94
+F src/include/lib/Paheko/Accounting/Transactions.php 85be285782e6c732da290c647667f0c8ca0d45332945aefc08f83ef0f05e2041
 F src/include/lib/Paheko/Accounting/Years.php 16354a653ca77263fa182a94c9c320708fef9ab9267ad6fa430e5b410cac0bdc
 F src/include/lib/Paheko/AdvancedSearch.php 84a0ca41e50c059988202de5c0ac26805a6f236d3afd41416733aef3366b06ac
 F src/include/lib/Paheko/Backup.php 377839cd57f02ee8b72028d845795b416bcceec4bb1915b2ccbdf6c194ad2a96
@@ -247,7 +247,7 @@ F src/scripts/upgrade.php b21dcf46403a5c6363dbaa42268717c073f5fd36b6774a71a519f8
 F src/sous-domaine.html 570b1ded6010aa8475f0fbd310916c2f171f02147824731a0f8fdb5c15b19492
 F src/templates/_foot.tpl f2436813e5c1ac633a39a4f57abc2956edd9bf5ad1a644f0c21637a01032fc8f
 F src/templates/_head.tpl d70b959f7ab5af9e039defd9727e8a6bb10661de905a6047788773c6193bafcd
-F src/templates/acc/_table_actions.tpl fc8bdde17591f8269682914bd8aaa85f839739959564aae33322b69efb27da4f
+F src/templates/acc/_table_actions.tpl dee6e8033bd025bf77b0de2c815da73373c2993aabe871732c44055cb8e17098
 F src/templates/acc/_year_select.tpl c5e952a79763b97a8c2245b3d42f8b1f7a3cb51c8fd2d69eb739c1d526948cab
 F src/templates/acc/accounts/_nav.tpl f7cb612b3d9ceeec87fd735f44e0bb9392efd46fba743b76f0e648ddaf8805f5
 F src/templates/acc/accounts/all.tpl c4dad13f7505b5bae27ba530bbaba00fe4437fe967d2aaf664cb1dcae7898d98
@@ -255,7 +255,7 @@ F src/templates/acc/accounts/deposit.tpl 6b5d4e1003cf550130df68ae65a0f2e860e2073
 F src/templates/acc/accounts/deposit_form.tpl 6722862a1ca0293263400f8d632d7871e31e7ffb16b04c5d7e23aa18d04c23ef
 F src/templates/acc/accounts/import.tpl 4fa519214088a1a7d8127cfb686af241ad8463fe1b289fde9a89a243719b3cb3
 F src/templates/acc/accounts/index.tpl d70033d66b3eea775dc6edbe364dd1ca7dbb5cd0cc632fd588ebc98237b91a2d
-F src/templates/acc/accounts/journal.tpl 4dcaa64b4ad7f5253bc529b86675c6fd8b762c5d4ca8483fc4882f1ad663269e
+F src/templates/acc/accounts/journal.tpl c529a0d640142b167ebe8fdf3995a82cb525a7e4832128232cf7732654051154
 F src/templates/acc/accounts/reconcile.tpl e4c4ba3a3b5b2692e3ba956b5a58b64e4ad9bc75bd2738e92470a8824bde2c82
 F src/templates/acc/accounts/reconcile_assist.tpl 00143f3015683120e330417e35cf5b1ba1c1b7f7a24dfbb4c26f11948a84a5a9
 F src/templates/acc/accounts/simple.tpl 27ef650d5990a128d1eee0799a21ee61d29badb2e50e8c5e05cf65338c809656
@@ -301,6 +301,7 @@ F src/templates/acc/transactions/creator.tpl 8d3d1b3556f579ef60d263840e701b875b1
 F src/templates/acc/transactions/delete.tpl a52ca8a4358c57f04f1d3651611ecd337cf3023385f8e3a2c0af18daa9615217
 F src/templates/acc/transactions/details.tpl 59ad067a8d03ab2265ed1a00f4dbd67d38fd9823e3a6829ea92daa2f1ab3b400
 F src/templates/acc/transactions/edit.tpl f1b0629190fffbd6ec085f4d48562dd97530306ea1b66f400ec0d23009206f07
+F src/templates/acc/transactions/letter_delete.tpl 0451518b5d9010e20d3315f5eccf8893b711b90cb4a87884cee122b6eb59f929
 F src/templates/acc/transactions/lock.tpl a4d016d4407f984fcbba55b6e6b989bd04ea0792f0ec9e5a55cfec0932dabaa6
 F src/templates/acc/transactions/new.tpl 5c27358fa01820f19734fcec1f8425a8a6520f37a452b3e4a417597a378e3ae9
 F src/templates/acc/transactions/pending.tpl 0e39b0a57a16f4b625fc28c7d97a0af30cfa598de8716b999e24bdc3e7ae25f4
@@ -549,11 +550,12 @@ F src/www/admin/acc/reports/statement.php aa8234c7341157f26c98df4a091966422e7731
 F src/www/admin/acc/reports/trial_balance.php 21ba816df3c45af15a02e04e7c12e521e9ff92f819bf4e2f029c825b8b095813
 F src/www/admin/acc/saved_searches.php 073ce71141c97ad3df1df0432bc9ce504913d2dad2d02f91595cf7c6a88f769d
 F src/www/admin/acc/search.php 1536892f1316ed05faf741906e80852f921c5b94ea6839ec78d1ca2fe89b219a
-F src/www/admin/acc/transactions/actions.php 535c3305159a31c62fe0e5e4b0e6a6545d2c85ccf31f30175c309822afd7361b
+F src/www/admin/acc/transactions/actions.php b2581da6dc5dd0ce4fbfd30bce23ccbc18829eb008b6c3f9fd9a550828410b84
 F src/www/admin/acc/transactions/creator.php e909867efed5e03a1372607c2d57d815c9ac461d3bb1aaf22526bdb6de496b6c
 F src/www/admin/acc/transactions/delete.php ed8dff600a6cf04b61e790e4ddba705e39ba8b8134e5010933537a991ef07f22
 F src/www/admin/acc/transactions/details.php 2fc635b99d93cf9ddadb1b233d575be34810b3d38e3c956bd352f37bdcdb52d3
 F src/www/admin/acc/transactions/edit.php f1ee1e0a80f4bd50ae385a2397adf66b0cf570e90097cb0cc1993e51264599c5
+F src/www/admin/acc/transactions/letter_delete.php dcf392e7f653d33de4f285ca79ff5568453c7dc5379af776ad852659f89909c6
 F src/www/admin/acc/transactions/lock.php 20bd2034e7d7f94f657853f4ebcb2352d9a96c38bdb7cf87c206c63a343f1e25
 F src/www/admin/acc/transactions/new.php 73f4279bb5c1a7977b40482b810915716341598fc38fdcb053bc942d8467ecbd
 F src/www/admin/acc/transactions/pending.php 6f7db72b7ec7aad39dfbdea2e1417f56ed90598a9418da75d62ab0f0c7d8f8f3
@@ -853,27 +855,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P a1e7604feebdb7b384e42d8b336ab279d556d3b6cb03437e38cb93c0232b764b
-R c2e12eeeeece871f5c38d69bb9fcd668
-T *branch * letter
-T *sym-letter *
-T -sym-trunk *
+P 50d173e7057a7383c15331e98c61280268821699eee8b023d0fc3f37e30e4baf
+R 96718f5889c87b3681879e0fa8be7595
 U bohwaz
-Z ebb80cf84699fd113ae9c2dc3d94807e
+Z da16f3b87181d6f9cbcb8e658d9585f3
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnZUG0ACgkQksnacbiI
-6jRNGxAArkPUD7FsDvDUaNlRwBg0uEA9INIhMOJXunAi5fyjSHtcrc5FE4DPCAkG
-jLzvOuv+LkLeNbQEnjpGbrQ6W9D1PnByvtXqE+64ksQhq3IyRXxJ+Zgx0Y2TWR1l
-c785gSekiI+4H5XTTdIe70Q25oIN/rSzm6uDLc71BX5vUq14ZbZ5q0JCKE1ETz6M
-wxPc9Ux4tFEzUdaQa0QZfMg6ym+7WK5vUxuJxd2n/eP2+198dyPXIqBab6BM3R1U
-i8eJSkYemkkSkbipuqIHqWhkJqWKdQXoUpwcp1FOyIbN7uPYR6B+frg+eGc+0heM
-RuKmvYM/jjNEcPGP6xgGfwPZERI5P1bAb2Zl4a4FABehwGojOk39i+LGrS85bF7W
-NvQx3le1ig+t7VI9L9cJVOzwBKzIQULkw4aXmxA15MI8i0Ww1FOQtoekfdr6bvda
-hMiBjK7M4QyxbEH8+A3PrHhtg7p+MwA3mnYj0Pslfz/0X4248xf8Ljo4npcQg1d2
-ylDzhBFRJddxNOm6Lj4szfiv8Umx03cLzgFiMhNNrCoN8BjjvSOTzXu07jdZUx6y
-TKgFQSooA0XK/EPQrn9D4W/tVoBwus9BcJ4qX8dAmn8FHdaO+sJ5CSiekO5vZciH
-iMAwroCYrTkHQZtT7j1wk7rlspwDoaZs6eLexI/F/wUDZ2ubK60=
-=n2u+
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnZVXQACgkQksnacbiI
+6jSGRg//cG/YbnyC1caddrIptjDYjI74g8EOMBbul8iQiL6KNVc0I4KdDzVNivSq
+Z4OdhxCon4N5N5bRnS7CKQbDqxJgWS2cqqEXIUEX/ewog1dv/RRGZkGMLjAuvzsg
+Z2a6TwYKBWbcukMehjNFbn/XjMiGP38y4+NhwSPuZ2WoRTKxPgqJYgGnejQew7Xd
+E6muzv2NwyH3C8lwYuO2BKXA+t4PR9gkfTy3B3zsLv/ZCYVrfNUMRPG/YeEq8IU1
+mPPTZvury89HPmwMO/fSCxZJ5WbaVmzf3NbpDt2FQnwo0QbpLo0AOTyRl0dUUCCm
+ocfebeG6pRmDazvyCXo7/H2vUjwNii6LN0+qVqWjOp1FveCm6au+L3iwnev4vukW
+A7TicxRmyuKXoKmrLLjgladoPkFQBys2+m9/6BJjA/XNmbHEF0gh1S3KCrxVGKKp
+pfD7Ewke9BsOdsJbmD3tyDStHD4ukFgY83D4uu3GZ1bneG6G97iqUQ+Y8c7ZPZ0x
+Azeyf1AWWWi4BPxqgpoUToRykIwamWp1MwBzL21bLBsqh909HD8fK6R7AU8WYZhb
+tN4bKtzHAj7P/h/38fe3i+3n55PRjPLp9X9+nKpr+9goPDof0GB1wnoQv/zUerHJ
+WVMgUFMrTSdrW0T0LFbPkp1KNKJD0m+urXcBCocfuekMlc7i7a4=
+=S/cd
 -----END PGP SIGNATURE-----

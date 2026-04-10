@@ -437,17 +437,13 @@ class Transactions
 	}
 
 	/**
-	 * Delete letters linked to the passed lines IDs
+	 * Delete letter
 	 */
-	static public function deleteLetters(array $ids): void
+	static public function deleteLetter(int $id_year, string $letter): void
 	{
 		$db = DB::getInstance();
-
-		$ids = array_map('intval', $ids);
-		$where_ids = $db->where('id', 'IN', $ids);
-
-		// This should trigger the delete of all letters linked to these lines (via the SQL TRIGGER)
-		$db->update('acc_transactions_lines', ['id_letter' => null], $where_ids);
+		// This should set all id_letter to NULL in acc_transactions_lines
+		$db->delete('acc_letters', 'id_year = ? AND letter = ?', $id_year, $letter);
 	}
 
 	/**

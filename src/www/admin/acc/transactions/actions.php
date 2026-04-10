@@ -30,10 +30,6 @@ $form->runIf($action === 'letter', function () use ($lines) {
 	Transactions::createLetter($lines);
 }, $csrf_key, $from);
 
-$form->runIf($action === 'unletter', function () use ($lines) {
-	Transactions::deleteLetters($lines);
-}, $csrf_key, $from);
-
 $form->throwIfErrors();
 
 // Delete transactions

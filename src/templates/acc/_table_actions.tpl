@@ -6,7 +6,6 @@
 						<option value="change_project">Ajouter/enlever d'un projet</option>
 						{if !empty($enable_letter)}
 							<option value="letter">Lettrer</option>
-							<option value="unletter">Supprimer le lettrage</option>
 						{/if}
 						<option value="delete">Supprimer les écritures</option>
 					</select>

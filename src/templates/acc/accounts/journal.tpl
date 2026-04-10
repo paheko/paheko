@@ -43,9 +43,10 @@
 		{/if}
 	{/if}
 
-
-	<nav class="tabs">
-		<aside>
+	<p class="actions">
+		{if $can_edit && $account->canLetter()}
+			{linkbutton shape="delete" href="!acc/transactions/letter_delete.php" label="Supprimer le lettrage" target="_dialog"}
+		{/if}
 		{if !$filter.start && !$filter.end}
 			{linkbutton shape="calendar" href="?start=1" label="Filtrer par date" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
 		{/if}
@@ -59,8 +60,7 @@
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu right=true}
 		{/if}
-		</aside>
-	</nav>
+	</p>
 {/if}
 
 <form method="get" action="{$self_url}"{if !$filter.start && !$filter.end} class="hidden"{/if} id="filterForm">
