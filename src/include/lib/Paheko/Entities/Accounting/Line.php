@@ -22,6 +22,7 @@ class Line extends Entity
 	protected ?string $label = null;
 	protected bool $reconciled = false;
 	protected ?int $id_project = null;
+	protected ?int $id_letter = null;
 	protected int $status = 0;
 
 	// Moved from transaction

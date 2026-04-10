@@ -104,6 +104,9 @@
 			<th scope="row">{$line.label}{if $simple && $line.line_label} — <em>{$line.line_label}</em>{/if}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
+			{if $list->hasColumn('letter')}
+				<td>{$line.letter}</td>
+			{/if}
 			<td class="num">{if $line.id_project}{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$year.id label=$line.project_code|truncate:10}{/if}</td>
 			{if isset($line.locked)}
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
@@ -147,9 +150,9 @@
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="{if $simple}6{else}8{/if}">
+			<td class="actions" colspan="10">
 				{if $can_edit}
-					{include file="acc/_table_actions.tpl"}
+					{include file="acc/_table_actions.tpl" enable_letter=$account->canLetter()}
 				{/if}
 			</td>
 		</tr>

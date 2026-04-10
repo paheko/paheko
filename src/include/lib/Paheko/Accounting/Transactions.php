@@ -125,7 +125,8 @@ class Transactions
 			$columns['id_project'],
 			$columns['line_reference'],
 			$columns['locked'],
-			$columns['files']
+			$columns['files'],
+			$columns['letter']
 		);
 
 		$columns['change']['select'] = 'SUM(l.credit)';
@@ -202,7 +203,8 @@ class Transactions
 			$columns['line_label'],
 			$columns['sum'],
 			$columns['debit'],
-			$columns['credit']
+			$columns['credit'],
+			$columns['letter']
 		);
 
 		$db = DB::getInstance();
@@ -432,5 +434,107 @@ class Transactions
 		$new->type = 99;
 
 		return $out;
+	}
+
+	/**
+	 * Delete letters linked to the passed lines IDs
+	 */
+	static public function deleteLetters(array $ids): void
+	{
+		$db = DB::getInstance();
+
+		$ids = array_map('intval', $ids);
+		$where_ids = $db->where('id', 'IN', $ids);
+
+		// This should trigger the delete of all letters linked to these lines (via the SQL TRIGGER)
+		$db->update('acc_transactions_lines', ['id_letter' => null], $where_ids);
+	}
+
+	/**
+	 * Create a new letter linking all the lines IDs passed as parameter
+	 *
+	 * A letter can only be created if:
+	 * - all lines have the same account
+	 * - all lines transactions are in the same year
+	 * - all lines don't already have a letter
+	 * - the letter ('A', 'AA'…) doesn't already exist for this year
+	 */
+	static public function createLetter(array $ids): int
+	{
+		$db = DB::getInstance();
+
+		$ids = array_map('intval', $ids);
+		$where_ids = $db->where('id', 'IN', $ids);
+		$sql = sprintf('SELECT l.id, l.debit, l.credit, l.id_account, t.id_year, l.id_letter
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE l.%s;',
+			$where_ids
+		);
+
+		$lines = $db->get($sql);
+
+		if (count($lines) !== count($ids)) {
+			throw new UserException('Une ligne sélectionnée n\'existe plus');
+		}
+
+		$id_account = current($lines)->id_account;
+		$id_year = current($lines)->id_year;
+
+		if (!$db->test('acc_years', 'id = ? AND status = ?', $id_year, Year::OPEN)) {
+			throw new \LogicException('This transaction line year is not open');
+		}
+
+		// Find new letter (each letter is unique for each year)
+		$max_letter = $db->firstColumn('SELECT letter FROM acc_letters WHERE id_year = ?
+			ORDER BY LENGTH(letter) DESC, letter DESC LIMIT 1;', $id_year);
+
+		if (!$max_letter) {
+			$i = 0;
+		}
+		else {
+			$i = Utils::alpha2num($max_letter);
+			$i++;
+		}
+
+		$letter = Utils::num2alpha($i);
+
+		if ($db->test('acc_letters', 'id_year = ? AND letter = ?', $id_year, $letter)) {
+			throw new \LogicException(sprintf('This letter is already attributed: %s (id_year = %d)', $letter, $id_year));
+		}
+
+		$total = 0;
+		$db->begin();
+
+		// Create letter
+		$db->insert('acc_letters', compact('id_year', 'letter'));
+		$id_letter = $db->lastInsertId();
+
+		foreach ($lines as $line) {
+			// a letter CAN ONLY be attributed to lines of the same account and year
+			if ($line->id_account !== $id_account) {
+				throw new \LogicException('Cannot letter lines linked to different accounts');
+			}
+
+			if ($line->id_year !== $id_year) {
+				throw new \LogicException('Cannot letter lines linked to different accounts');
+			}
+
+			if ($line->id_letter) {
+				throw new UserException('Impossible de lettrer une écriture qui est déjà lettrée');
+			}
+
+			$db->update('acc_transactions_lines', compact('id_letter'), 'id = ' . (int) $line->id);
+			$total += $line->credit;
+			$total -= $line->debit;
+		}
+
+		if ($total) {
+			$db->rollback();
+			throw new UserException('Les lignes sélectionnées ne sont pas équilibrées.');
+		}
+
+		$db->commit();
+		return $id_letter;
 	}
 }

@@ -274,7 +274,7 @@ class Template extends Smartyer
 			return '';
 		}
 
-		$errors = $form->getErrorMessages();
+		$errors = $form->getErrors();
 
 		foreach ($errors as &$error) {
 			if ($error instanceof UserException) {
