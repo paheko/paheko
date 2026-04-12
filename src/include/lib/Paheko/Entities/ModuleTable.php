@@ -48,6 +48,20 @@ class ModuleTable extends Entity
 		'NUMERIC',
 	];
 
+	const EXTERNAL_FK_ALLOWED_TABLES = [
+		'users',
+		'users_categories',
+		'services',
+		'services_fees',
+		'services_subscriptions',
+		'acc_charts',
+		'acc_accounts',
+		'acc_projects',
+		'acc_years',
+		'acc_transactions',
+		'acc_transactions_lines',
+		'web_pages',
+	];
 
 	public function selfCheck(): void
 	{
@@ -432,6 +446,19 @@ class ModuleTable extends Entity
 				sprintf('Invalid foreign key: "%s" table does not exist', $definition->fk_table));
 			$this->assert(array_key_exists($definition->fk_column, $fk_tables[$fk_table]['columns']),
 				sprintf('Invalid foreign key: "%s" column does not exist in "%s" table', $definition->fk_column, $definition->fk_table));
+
+			// Restrict external references, just to avoid risks of modules breaking
+			// if a table or column is dropped
+			if (substr($definition->fk_table, 0, 1) === '!') {
+				// Restrict which tables can be referenced
+				$this->assert(in_array($fk_table, self::EXTERNAL_FK_ALLOWED_TABLES, true),
+					sprintf('Invalid foreign key: "%s" table is not allowed', $definition->fk_table));
+
+				// Only allow references to "id" column for external tables
+				$this->assert($definition->fk_column === 'id',
+					sprintf('Invalid foreign key: "%s" column can only reference column "id" for external table "%s"', $definition->fk_column, $definition->fk_table));
+			}
+
 			// apparently sqlite doesn't care about matching foreign key column type and local column type, that's good
 		}
 		else {

@@ -489,7 +489,7 @@ CREATE TABLE IF NOT EXISTS acc_years_provisional
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_years_provisional_id_year ON acc_years_provisional (id_year, id_account);
 
-CREATE TABLE acc_letters (
+CREATE TABLE IF NOT EXISTS acc_letters (
 	id INTEGER PRIMARY KEY NOT NULL,
 	id_year INTEGER NOT NULL REFERENCES acc_years(id) ON DELETE CASCADE,
 	letter TEXT NOT NULL,

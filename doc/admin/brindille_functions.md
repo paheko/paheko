@@ -714,7 +714,9 @@ Il existe deux actions possibles :
 
 Note : l'action `RESTRICT` n'est pas disponible à cause des interactions potentielles entre modules et autres tables, qui pourraient empêcher la suppression d'un module ou d'une table.
 
-On peut utiliser le caractère `!` pour faire référence à une table externe au module :
+#### Clés étrangères sur des tables de Paheko
+
+On peut utiliser le caractère `!` pour faire référence à une table de Paheko (externe au module) :
 
 ```
 {{:table create="answers"
@@ -722,9 +724,28 @@ On peut utiliser le caractère `!` pour faire référence à une table externe a
 }}
 ```
 
-Attention les clés étrangères ont plusieurs restrictions :
+Dans ce cas la colonne sera obligatoirement `id` : aucune autre colonne ne pourra être référencée.
 
-* une clé étrangère doit forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie précédemment)
+Seules les tables suivantes peuvent être référencées par un module :
+
+* `users`
+* `users_categories`
+* `services`
+* `services_fees`
+* `services_subscriptions`
+* `acc_charts`
+* `acc_accounts`
+* `acc_projects`
+* `acc_years`
+* `acc_transactions`
+* `acc_transactions_lines`
+* `web_pages`
+
+##### Restrictions sur les clés étrangères
+
+Les clés étrangères sont puissantes mais attention elles ont plusieurs restrictions :
+
+* une clé étrangère doit forcément faire référence à une table et une colonne qui existent déjà (ou à la même table et une autre colonne de la table qui est définie précédemment)
 * une colonne avec une clé étrangère doit obligatoirement être `NULL` (il n'est pas possible qu'elle soit `NOT NULL`)
 * si aucune action n'est spécifiée, c'est `SET NULL` qui est utilisé
 * l'action `RESTRICT` n'est pas autorisée
