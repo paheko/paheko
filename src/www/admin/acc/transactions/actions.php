@@ -9,7 +9,8 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
-$check = f('check');
+$check = $_POST['check'] ?? null;
+$from = $_POST['from'] ?? null;
 
 if (!$check || !is_array($check)) {
 	throw new UserException('Aucune écriture n\'a été sélectionnée.');
@@ -24,6 +25,12 @@ if ($action === 'payoff') {
 }
 
 $csrf_key = 'acc_actions';
+
+$form->runIf($action === 'letter', function () use ($lines) {
+	Transactions::createLetter($lines);
+}, $csrf_key, $from);
+
+$form->throwIfErrors();
 
 // Delete transactions
 $form->runIf('delete', function () use ($transactions) {
@@ -40,7 +47,7 @@ $form->runIf('delete', function () use ($transactions) {
 
 		$transaction->delete();
 	}
-}, $csrf_key, f('from') ?: ADMIN_URL);
+}, $csrf_key, $from ?: ADMIN_URL);
 
 // Add/remove lines to analytical project
 $form->runIf('change_project', function () use ($transactions, $lines) {
@@ -54,9 +61,8 @@ $form->runIf('change_project', function () use ($transactions, $lines) {
 	}
 
 	Transactions::setProject($id, $transactions, $lines);
-}, $csrf_key, f('from') ?: ADMIN_URL);
+}, $csrf_key, $from ?: ADMIN_URL);
 
-$from = f('from');
 $count = count($check);
 $extra = compact('check', 'from', 'action');
 $tpl->assign(compact('csrf_key', 'check', 'count', 'extra'));
