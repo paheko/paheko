@@ -7,6 +7,7 @@ use KD2\DB\Date;
 
 use Paheko\Config;
 use Paheko\DB;
+use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Form;
 use Paheko\Utils;
@@ -227,6 +228,63 @@ class Transaction extends Entity
 		}
 	}
 
+	public function getLinesList(): DynamicList
+	{
+		$columns = [
+			'id' => ['select' => 'l.id'],
+			'id_account' => ['select' => 'l.id_account'],
+			'row' => [
+				'select' => 'ROW_NUMBER() OVER (ORDER BY l.id)',
+				'label' => 'Ligne',
+			],
+			'account_code' => [
+				'select' => 'a.code',
+				'label' => 'N° compte',
+			],
+			'account_label' => [
+				'select' => 'a.label',
+				'label' => 'Compte',
+			],
+			'debit' => [
+				'select' => 'l.debit',
+				'label' => 'Débit',
+			],
+			'credit' => [
+				'select' => 'l.credit',
+				'label' => 'Crédit',
+			],
+			'label' => [
+				'select' => 'l.label',
+				'label' => 'Libellé',
+			],
+			'reference' => [
+				'select' => 'l.reference',
+				'label' => 'Réf.',
+			],
+			'project' => [
+				'select' => 'COALESCE(p.code, p.label)',
+				'label' => 'Projet',
+			],
+			'id_project' => ['select' => 'l.id_project'],
+			'letter' => [
+				'select' => 'll.letter',
+				'label' => 'Lettrage',
+			],
+			'id_letter' => ['select' => 'l.id_letter'],
+			'is_deposited' => ['select' => 'l.status & ' . Line::STATUS_DEPOSITED],
+		];
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_projects p ON p.id = l.id_project
+			LEFT JOIN acc_letters ll ON ll.id = l.id_letter';
+
+		$list = new DynamicList($columns, $tables, 'l.id_transaction = ' . (int)$this->id());
+		$list->orderBy('row', false);
+		$list->togglePreferenceHashElement('conditions', false);
+		return $list;
+	}
+
 	public function getLinesWithAccounts(bool $as_array = false, bool $amount_as_int = true): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
@@ -275,8 +333,6 @@ class Transaction extends Entity
 				$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
 			}
 
-			$l['project_name'] = $line->id_project ? ($projects[$line->id_project] ?? null) : null;
-			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
 			if (!$as_array) {

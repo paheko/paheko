@@ -28,8 +28,11 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)) {
 
 $expert = !empty($session->user()->preferences->accounting_expert);
 
+$list = $transaction->getLinesList();
+$list->loadFromQueryString();
+
 $variables = compact('csrf_key', 'transaction') + [
-	'transaction_lines'    => $transaction->getLinesWithAccounts(),
+	'lines_list'           => $list,
 	'transaction_year'     => $transaction->year(),
 	'simple'               => isset($_GET['advanced']) ? !$_GET['advanced'] : !$expert,
 	'details'              => $transaction->getDetails(),

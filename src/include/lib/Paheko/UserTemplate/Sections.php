@@ -178,7 +178,7 @@ class Sections
 			. sprintf('$params = %s; ', $params)
 			. '$form_errors = []; '
 			. 'if (!\KD2\Form::check(\'form_\' . $hash, $rules, $form_errors)) { '
-			. '$this->assign(\'form_errors\', \KD2\Form::getErrorMessages($form_errors, \'fr\')); '
+			. '$this->assign(\'form_errors\', \KD2\Form::getErrors($form_errors, \'fr\')); '
 			. '} ?>';
 		*/
 	}

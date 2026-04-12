@@ -265,6 +265,10 @@ class Account extends Entity
 			'label' => 'Réf. ligne',
 			'select' => 'l.reference',
 		],
+		'letter' => [
+			'label' => 'Lettrage',
+			'select' => 'll.letter',
+		],
 		'id_project' => [
 			'select' => 'l.id_project',
 		],
@@ -560,6 +564,13 @@ class Account extends Entity
 			LEFT JOIN acc_projects p ON p.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
+		if ($this->type === self::TYPE_THIRD_PARTY) {
+			$tables .= ' LEFT JOIN acc_letters ll ON ll.id = l.id_letter';
+		}
+		else {
+			unset($columns['letter']);
+		}
+
 		$reverse = $this->isReversed($simple) ? -1 : 1;
 
 		if ($start) {
@@ -629,6 +640,11 @@ class Account extends Entity
 	public function isReversed(bool $simple): bool
 	{
 		return Accounts::isReversed($simple, $this->type);
+	}
+
+	public function canLetter(): bool
+	{
+		return $this->type === self::TYPE_THIRD_PARTY;
 	}
 
 	public function getPosition(int $id_year): int

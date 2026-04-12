@@ -24,7 +24,6 @@ class UserTemplateDefinedFunctions
 	{
 		// Modifiers
 		//'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
-		//'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
 
 		// Compile sections
 		//'#define'     => [self::class, 'defineStart'],
@@ -274,24 +273,5 @@ class UserTemplateDefinedFunctions
 		ob_end_clean();
 
 		return $r;
-	}
-
-	static public function modifier_map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
-	{
-		if (!is_array($array)) {
-			throw new TemplateException('Supplied argument is not an array');
-		}
-
-		if (!$tpl->checkModifierExists($modifier)) {
-			throw new TemplateException('Unknown modifier: ' . $modifier);
-		}
-
-		$out = [];
-
-		foreach ($array as $key => $value) {
-			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
-		}
-
-		return $out;
 	}
 }

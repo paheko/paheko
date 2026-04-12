@@ -51,7 +51,11 @@ if ($type && $type_name) {
 
 	// Remove NULLs
 	$columns = array_filter($columns);
+
 	$columns_table = $columns = array_flip($columns);
+
+	// Letter cannot be imported yet (FIXME: implement this some day)
+	unset($columns['letter'], $columns_table['letter']);
 
 	if ($type === Export::FEC) {
 		// Fill with labels
