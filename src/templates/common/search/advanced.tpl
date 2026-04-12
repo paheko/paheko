@@ -46,7 +46,7 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 				{button name="edit" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus" formaction=$save_action_url}
 			{/if}
 			{if $can_sql_unprotected}
-				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
+				{linkbutton href="!config/advanced/sql/" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
 			{/if}
 		</p>
 	{/if}
