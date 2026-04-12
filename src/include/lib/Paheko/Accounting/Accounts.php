@@ -384,19 +384,21 @@ class Accounts
 	 */
 	static public function isReversed(bool $simple, int $type): bool
 	{
-		if ($simple && in_array($type, [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_EXPENSE, Account::TYPE_THIRD_PARTY])) {
+		if ($simple
+			&& in_array($type, [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING, Account::TYPE_EXPENSE, Account::TYPE_THIRD_PARTY])) {
 			return false;
 		}
 
 		return true;
 	}
 
-	static public function getReconciledBalance(int $account_id, int $year_id): int
+	static public function isReconciled(int $account_id, int $year_id): bool
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+		return !DB::getInstance()->firstColumn('SELECT 1
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.reconciled = 1;', $year_id, $account_id);
+			WHERE t.id_year = ? AND l.id_account = ? AND l.reconciled = 0 LIMIT 1;',
+			$year_id, $account_id);
 	}
 
 /* FIXME: implement closing of accounts

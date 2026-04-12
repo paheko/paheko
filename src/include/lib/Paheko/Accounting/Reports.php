@@ -565,7 +565,7 @@ class Reports
 			$t = in_array($row->type, $types, true) ? $row->type : 0;
 
 			if ($row->type === Account::TYPE_BANK && isset($criterias['year'])) {
-				$row->reconciled_balance = Accounts::getReconciledBalance($row->id, (int) $criterias['year']) * -1;
+				$row->is_reconciled = Accounts::isReconciled($row->id, (int) $criterias['year']);
 			}
 
 			$out[$t]->accounts[] = $row;

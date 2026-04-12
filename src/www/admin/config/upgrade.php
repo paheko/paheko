@@ -29,11 +29,26 @@ $tpl->assign('downloaded', false);
 $tpl->assign('can_verify', Security::canUseEncryption());
 
 $form->runIf('download', function () use ($i, $tpl) {
-	$i->download(f('download'));
+	$version = $_POST['download'];
+
+	// FIXME: remove in 1.4+
+	if (version_compare($version, '1.4', '>=')) {
+		if (PHP_VERSION_ID < 80200) {
+			throw new UserException('Paheko 1.4+ nécessite PHP 8.2+, hors vous avez PHP ' . PHP_VERSION);
+		}
+
+		$v = \SQLite3::version()['versionString'];
+
+		if (version_compare($v, '3.34', '<')) {
+			throw new UserException('Paheko 1.4+ nécessite SQLite 3.34+, hors vous avez SQLite3 ' . $v);
+		}
+	}
+
+	$i->download($version);
 	$tpl->assign('downloaded', true);
-	$tpl->assign('verified', $i->verify(f('download')));
-	$tpl->assign('diff', $i->diff(f('download')));
-	$tpl->assign('version', f('download'));
+	$tpl->assign('verified', $i->verify($version));
+	$tpl->assign('diff', $i->diff($version));
+	$tpl->assign('version', $version);
 }, $csrf_key);
 
 $form->runIf('upgrade', function () use ($i) {

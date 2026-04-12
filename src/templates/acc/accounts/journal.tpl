@@ -43,9 +43,10 @@
 		{/if}
 	{/if}
 
-
-	<nav class="tabs">
-		<aside>
+	<p class="actions">
+		{if $can_edit && $account->canLetter()}
+			{linkbutton shape="delete" href="!acc/transactions/letter_delete.php" label="Supprimer le lettrage" target="_dialog"}
+		{/if}
 		{if !$filter.start && !$filter.end}
 			{linkbutton shape="calendar" href="?start=1" label="Filtrer par date" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
 		{/if}
@@ -54,13 +55,12 @@
 			{if $account.type == $account::TYPE_BANK}
 				{linkbutton label="Rapprocher" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 			{/if}
-			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisie" shape="plus"}
+			{linkbutton href="!acc/transactions/new.php?acc=%s"|args:$account.code label="Saisie" shape="plus"}
 		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu right=true}
 		{/if}
-		</aside>
-	</nav>
+	</p>
 {/if}
 
 <form method="get" action="{$self_url}"{if !$filter.start && !$filter.end} class="hidden"{/if} id="filterForm">
@@ -83,7 +83,7 @@
 {include file="common/dynamic_list_head.tpl" check=$can_edit}
 
 	{foreach from=$list->iterate() item="line"}
-		<tr>
+		<tr class="{if $line.letter}disabled{/if}">
 			{if $can_edit}
 			<td class="check">
 				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id}
@@ -104,6 +104,9 @@
 			<th scope="row">{$line.label}{if $simple && $line.line_label} — <em>{$line.line_label}</em>{/if}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
+			{if $list->hasColumn('letter')}
+				<td>{$line.letter}</td>
+			{/if}
 			<td class="num">{if $line.id_project}{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$year.id label=$line.project_code|truncate:10}{/if}</td>
 			{if isset($line.locked)}
 			<td>{if $line.locked}{icon title="Écriture verrouillée" shape="lock"}{/if}</td>
@@ -137,19 +140,19 @@
 				<td><b>Total</b></td>
 				<td class="money">{$sum.debit|raw|money:false}</td>
 				<td class="money">{$sum.credit|raw|money:false}</td>
-				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
+				<td class="money"><strong>{$sum.balance_real|raw|money:false}</strong></td>
 				{else}
 				<td></td>
-				<td colspan="2"><b>Total</b></td>
+				<td><b>Total</b></td>
 				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{/if}
 			{else}
 				<td colspan="4"></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="6">
+			<td class="actions" colspan="10">
 				{if $can_edit}
-					{include file="acc/_table_actions.tpl"}
+					{include file="acc/_table_actions.tpl" enable_letter=$account->canLetter()}
 				{/if}
 			</td>
 		</tr>

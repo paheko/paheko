@@ -890,7 +890,7 @@ class File extends Entity
 			return 'image';
 		}
 		elseif ($this->isDir()) {
-			return 'directory';
+			return 'folder';
 		}
 
 		return Files::getIconShape($this->name);
@@ -1081,6 +1081,31 @@ class File extends Entity
 		$tpl->assign(compact('csrf_key', 'content', 'path', 'format'));
 		$tpl->display(sprintf('common/files/edit_%s.tpl', $editor));
 		return false;
+	}
+
+	public function getHighlightLanguage(): ?string
+	{
+		switch ($this->extension()) {
+			case 'css':
+				return 'css';
+			case 'js':
+				return 'javascript';
+			case 'json':
+				return 'json';
+			case 'md':
+				return 'markdown';
+			case 'xml':
+				return 'xml';
+			case 'sql':
+				return 'sql';
+			case 'html':
+			case 'htm':
+			case 'tpl':
+			case '':
+				return 'brindille';
+			default:
+				return null;
+		}
 	}
 
 	/**

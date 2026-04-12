@@ -202,7 +202,14 @@ class CSV_Custom
 			$this->rows = [];
 
 			foreach ($sheets as $i => $name) {
-				$this->rows[$i] = iterator_to_array($s->iterate($i));
+				$rows = iterator_to_array($s->iterate($i));
+
+				// Ignore empty sheets
+				if (!count($rows)) {
+					continue;
+				}
+
+				$this->rows[$i] = $rows;
 			}
 
 			if (!$this->sheet_selection) {
@@ -232,7 +239,12 @@ class CSV_Custom
 			throw new UserException(sprintf('Ce fichier est trop gros (taille maximale : %s)', Utils::format_bytes($this->max_file_size)));
 		}
 
-		$ext = substr($file_name, strrpos($file_name, '.')+1);
+		if (null !== $file_name) {
+			$ext = substr($file_name, strrpos($file_name, '.')+1);
+		}
+		else {
+			$ext = null;
+		}
 
 		$this->rows = null;
 		$this->sheets = null;

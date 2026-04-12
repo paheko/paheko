@@ -926,7 +926,17 @@ class Utils
 
 	static public function suggestPassword(): string
 	{
-		return Security::getRandomPassphrase(ROOT . '/include/data/locales/fr/dictionary.txt');
+		return Security::getRandomPassphrase(self::getDictionaryPath());
+	}
+
+	static public function getDictionaryPath(string $lang = 'fr'): string
+	{
+		return sprintf('%s/include/data/locales/%s/dictionary.txt', ROOT, $lang);
+	}
+
+	static public function getRandomTextFilePath(string $lang = 'fr'): string
+	{
+		return sprintf('%s/include/data/locales/%s/random.txt', ROOT, $lang);
 	}
 
 	/**
@@ -1954,16 +1964,34 @@ class Utils
 	}
 
 	/**
-	 * Integer to A-Z, AA-ZZ, AAA-ZZZ, etc.
+	 * Integer to letters: A-Z, AA-ZZ, AAA-ZZZ, etc.
 	 * @see https://www.php.net/manual/fr/function.base-convert.php#94874
 	 */
-	static public function num2alpha(int $n): string {
+	static public function num2alpha(int $n): string
+	{
 		$r = '';
+
 		for ($i = 1; $n >= 0 && $i < 10; $i++) {
 			$r = chr(0x41 + intval($n % pow(26, $i) / pow(26, $i - 1))) . $r;
 			$n -= pow(26, $i);
 		}
+
 		return $r;
+	}
+
+	/**
+	 * Letters to integer
+	 */
+	static public function alpha2num(string $a): int
+	{
+		$r = 0;
+		$l = strlen($a);
+
+		for ($i = 0; $i < $l; $i++) {
+			$r += pow(26, $i) * (ord($a[$l - $i - 1]) - 0x40);
+		}
+
+		return $r - 1;
 	}
 
 	static public function random_string(int $length): string

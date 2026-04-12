@@ -10,14 +10,18 @@ use Paheko\DB;
 use Paheko\Utils;
 use Paheko\ValidationException;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\Users\Session;
 use Paheko\Web\Web;
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\User;
 use Paheko\Entities\Web\Page;
 
-use const Paheko\ROOT;
-use const Paheko\ADMIN_URL;
+use const Paheko\{
+	ROOT,
+	ADMIN_URL,
+	SHOW_ERRORS
+};
 
 use KD2\DB\EntityManager as EM;
 use KD2\ZipReader;
@@ -45,6 +49,15 @@ class Modules
 		}
 
 		return @file_get_contents(Module::DIST_ROOT . '/' . $path) ?: null;
+	}
+
+	static public function distExists(string $name): bool
+	{
+		if (!preg_match(Module::VALID_NAME_REGEXP, $name)) {
+			return false;
+		}
+
+		return is_dir(Module::DIST_ROOT . '/' . $name);
 	}
 
 	/**
@@ -140,38 +153,11 @@ class Modules
 		return $list;
 	}
 
-	/**
-	 * List locally installed modules, directly from the filesystem, without creating them in the database cache
-	 * (used in Install form)
-	 */
-	static public function listLocal(): array
-	{
-		$list = self::listRaw(false);
-		$out = [];
-
-		foreach ($list as $name) {
-			$m = new Module;
-			$m->name = $name;
-
-			if (!$m->updateFromINI(false)) {
-				continue;
-			}
-
-			$out[$name] = $m;
-		}
-
-		return $out;
-	}
-
 	static public function create(string $name): ?Module
 	{
 		$module = new Module;
 		$module->name = $name;
-
-		if (!$module->updateFromINI()) {
-			return null;
-		}
-
+		$module->updateFromINI();
 		$module->save();
 		$module->updateTemplates();
 		return $module;
@@ -220,9 +206,26 @@ class Modules
 			try {
 				$content = $module->fetch($snippet, $variables);
 			}
-			catch (\RuntimeException $e) {
-				ErrorManager::reportExceptionSilent($e);
-				$content = sprintf('Le module "%s" a rencontré une erreur.', $module->name);
+			catch (TemplateException $e) {
+				$has_local_file = $module->hasLocalFile($snippet);
+
+				// Make sure we report errors if they come from shipped code
+				if (!$has_local_file) {
+					ErrorManager::reportExceptionSilent($e);
+				}
+
+				if (!SHOW_ERRORS && !$has_local_file) {
+					$message = sprintf('Une erreur est survenue dans le module "%s". Elle a été signalée aux développeur⋅euses.', $module->name);
+				}
+				// Display specific error for user modules
+				else {
+					$message = sprintf('Erreur dans "%s" :', $snippet);
+					$message .= " " . $e->getMessage();
+				}
+
+				$message .= "\n" . 'Cette erreur n\'empêche pas cette page de fonctionner (normalement).';
+
+				$content = sprintf('<p class="block alert">%s</p>', nl2br(htmlspecialchars($message)));
 			}
 
 			$out[$module->name] = $content;
@@ -382,6 +385,11 @@ class Modules
 					$page = $page->asTemplateArray();
 				}
 			}
+			elseif ($page = Web::getByOldURI($uri)) {
+				http_response_code(301);
+				header('Location: ' . $page->url());
+				return;
+			}
 		}
 		// 404 if module is not enabled, except for icon
 		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {
@@ -490,9 +498,8 @@ class Modules
 				Files::createFromString($base  . '/' . $local_name, $content);
 			}
 
-			if (!$module->updateFromINI()) {
-				throw new ValidationException('Le fichier module.ini est invalide.');
-			}
+			$module->updateFromINI();
+			$module->selfCheckUser();
 
 			$module->save();
 			$module->updateTemplates();

@@ -5,6 +5,7 @@ namespace Paheko\UserTemplate;
 use Paheko\DB;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\ValidationException;
 
 use Paheko\Users\DynamicFields;
@@ -14,7 +15,6 @@ use KD2\Smartyer;
 use KD2\SMTP;
 
 use KD2\Brindille;
-use KD2\Brindille_Exception;
 
 class Modifiers
 {
@@ -60,8 +60,9 @@ class Modifiers
 		'ksort' => ['?array'],
 		'reverse' => ['?array'],
 		'filter' => ['?array'],
-		'max',
-		'min',
+		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
+		'max' => ['array|scalar', '...' => 'scalar'],
+		'min' => ['array|scalar', '...' => 'scalar'],
 		'array_to_list' => ['?array'],
 		'quote_sql_identifier' => ['scalar+', 'scalar+'],
 		'quote_sql' => ['scalar+'],
@@ -72,30 +73,10 @@ class Modifiers
 		'urlencode' => ['callback' => [self::class, 'url_encode'], 'types' => ['scalar+']],
 		'count_words' => ['scalar+'],
 		'uuid' => [],
-		'call' => ['pass_object' => true, 'types' => [null, 'string', '...' => null]],
-		'map' => ['pass_object' => true, 'types' => ['array', 'string', '...' => null]],
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^(\d{1,3})(?:\s+|\s*[.\)]\s*)/';
 
-	/**
-	 * Call a user-defined function
-	 * EXPERIMENTAL! DO NOT USE YET! FIXME
-	 * @example {{$variable|call:"my_test_function":$param1|escape}}
-	 */
-	static public function call(UserTemplate $tpl, int $line, $src, string $name, ...$params)
-	{
-		// Prepend first argument to list of arguments:
-		// "string"|call:"test_function":42 => ["string", 42]
-		array_unshift($params, $src);
-
-		// Suppress any output
-		ob_start();
-		$r = $tpl->callUserFunction('modifier', $name, $params, $line);
-		ob_end_clean();
-
-		return $r;
-	}
 
 	static public function replace(string $str, $find, string $replace = ''): string
 	{
@@ -379,7 +360,7 @@ EOS;
 		];
 
 		if (is_array($expression) || is_object($expression) || trim((string)$expression) === '') {
-			throw new Brindille_Exception('Invalid empty or array value passed to math modifier');
+			throw new TemplateException('Invalid empty or array value passed to math modifier');
 		}
 
 		// Treat comma as dot in strings
@@ -395,7 +376,7 @@ EOS;
 			$tokens = Brindille::tokenize($expression, $tokens_list);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception('Invalid value: ' . $e->getMessage());
+			throw new TemplateException('Invalid value: ' . $e->getMessage());
 		}
 
 		$stack = [];
@@ -414,12 +395,12 @@ EOS;
 				$last = array_pop($stack);
 
 				if (!$last) {
-					throw new Brindille_Exception('Invalid closing parenthesis, on position ' . $token->offset);
+					throw new TemplateException('Invalid closing parenthesis, on position ' . $token->offset);
 				}
 			}
 			elseif ($token->type == 'separator') {
 				if (empty(end($stack)['function'])) {
-					throw new Brindille_Exception('Invalid comma outside of a function, on position ' . $token->offset);
+					throw new TemplateException('Invalid comma outside of a function, on position ' . $token->offset);
 				}
 			}
 			elseif ($token->type === 'number') {
@@ -428,7 +409,7 @@ EOS;
 			}
 			elseif ($token->type === 'sign') {
 				if ($tokens[$i-1]->type === 'sign') {
-					throw new Brindille_Exception('Invalid sign following a sign, on position ' . $token->offset);
+					throw new TemplateException('Invalid sign following a sign, on position ' . $token->offset);
 				}
 			}
 
@@ -436,37 +417,15 @@ EOS;
 		}
 
 		if (count($stack)) {
-			throw new Brindille_Exception('Unmatched open parenthesis, on position ' . $token->offset);
+			throw new TemplateException('Unmatched open parenthesis, on position ' . $token->offset);
 		}
 
 		try {
 			return @eval('return ' . $expression . ';') ?: 0;
 		}
 		catch (\Throwable $e) {
-			throw new Brindille_Exception(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
+			throw new TemplateException(sprintf('Syntax error: "%s" (in "%s")', $e->getMessage(), $expression), 0, $e);
 		}
-	}
-
-	/**
-	 * EXPERIMENTAL! DO NOT USE!
-	 */
-	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
-	{
-		if (!is_array($array)) {
-			throw new Brindille_Exception('Supplied argument is not an array');
-		}
-
-		if (!$tpl->checkModifierExists($modifier)) {
-			throw new Brindille_Exception('Unknown modifier: ' . $modifier);
-		}
-
-		$out = [];
-
-		foreach ($array as $key => $value) {
-			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
-		}
-
-		return $out;
 	}
 
 	static public function gettype($v): string
@@ -487,11 +446,6 @@ EOS;
 			default:
 				return $type;
 		}
-	}
-
-	static public function filter($v): array
-	{
-		return array_filter((array) $v);
 	}
 
 	static public function arrayval($v): array
@@ -585,11 +539,25 @@ EOS;
 
 	static public function max(...$values)
 	{
+		if (count($values) === 1 && !is_array($values[0])) {
+			throw new TemplateException('invalid parameter type: must be an array');
+		}
+		elseif (count($values) > 1 && is_array($values[0])) {
+			throw new TemplateException('invalid first parameter type: must be a scalar value');
+		}
+
 		return max(...$values);
 	}
 
 	static public function min(...$values)
 	{
+		if (count($values) === 1 && !is_array($values[0])) {
+			throw new TemplateException('invalid parameter type: must be an array');
+		}
+		elseif (count($values) > 1 && is_array($values[0])) {
+			throw new TemplateException('invalid first parameter type: must be a scalar value');
+		}
+
 		return min(...$values);
 	}
 
@@ -621,6 +589,29 @@ EOS;
 		return rtrim($out);
 	}
 
+	static public function filter($v): array
+	{
+		return array_filter((array) $v);
+	}
+
+	static public function map(UserTemplate $tpl, int $line, $array, string $modifier, ...$params): array
+	{
+		if (!is_array($array)) {
+			throw new TemplateException('Supplied argument is not an array');
+		}
+
+		if (!$tpl->checkModifierExists($modifier)) {
+			throw new TemplateException('Unknown modifier: ' . $modifier);
+		}
+
+		$out = [];
+
+		foreach ($array as $key => $value) {
+			$out[$key] = $tpl->callModifier($modifier, $line, $value, ...$params);
+		}
+
+		return $out;
+	}
 	static public function quote_sql_identifier($in, string $prefix = '')
 	{
 		if (null === $in) {

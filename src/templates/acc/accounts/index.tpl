@@ -54,11 +54,11 @@ use Paheko\Entities\Accounting\Account;
 						{elseif $account.type == Account::TYPE_CASH && $account.balance > 0 && $account.position == Account::LIABILITY}
 							{tag preset="anomaly"}
 						{/if}
-						{if $account.type === Account::TYPE_BANK && $account.reconciled_balance}
-							{if $account.reconciled_balance != $account.balance}
-								{tag small=true preset="reconciliation_required"}
-							{else}
+						{if $account.type === Account::TYPE_BANK}
+							{if $account.is_reconciled}
 								{tag small=true preset="reconciled"}
+							{else}
+								{tag small=true preset="reconciliation_required"}
 							{/if}
 						{/if}
 					</td>

@@ -61,8 +61,8 @@ if (!empty($_POST['mark']) || !empty($_POST['create'])) {
 	}
 
 	$form->runIf('confirm_mark', function () use ($account, $checked) {
-		if (empty($_POST['yes'])) {
-			throw new UserException('Merci de bien vouloir cocher la case pour confirmer l\'action');
+		if (empty($_POST['confirm_word']) || trim($_POST['confirm_word']) !== 'CONFIRMER') {
+			throw new UserException('Vous n\'avez pas confirmé l\'action');
 		}
 
 		$account->markLinesAsDeposited($checked);

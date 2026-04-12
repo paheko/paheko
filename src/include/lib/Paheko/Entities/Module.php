@@ -9,6 +9,7 @@ use Paheko\UserException;
 use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Files\Files;
+use Paheko\UserTemplate\Modules;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Users\Session;
 use Paheko\Web\Cache;
@@ -21,7 +22,9 @@ use Paheko\Entities\Users\Category;
 
 use DateTime;
 
-use const Paheko\{ROOT, WWW_URL, BASE_URL};
+use stdClass;
+
+use const Paheko\{ROOT, WWW_URL, BASE_URL, PLUGINS_BLOCKLIST};
 
 class Module extends Entity
 {
@@ -154,6 +157,13 @@ class Module extends Entity
 		}
 	}
 
+	public function selfCheckUser(): void
+	{
+		$this->assert(!Modules::distExists($this->name), 'Un module existe déjà avec ce nom unique');
+		$this->assert(!Plugins::exists($this->name), 'Un plugin existe déjà avec ce nom unique');
+		$this->assert(!in_array($this->name, PLUGINS_BLOCKLIST ?? [], true), 'Ce nom unique de module ne peut être utilisé, merci d\'en choisir un autre');
+	}
+
 	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
@@ -197,7 +207,7 @@ class Module extends Entity
 		return $this->_broken_message !== '';
 	}
 
-	public function getINIProperties(bool $use_local = true): ?\stdClass
+	public function getINIProperties(bool $use_local = true): stdClass
 	{
 		if (isset($this->_ini) && $use_local) {
 			return $this->_ini;
@@ -212,27 +222,29 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
-			$this->_broken_message = 'Le fichier module.ini est absent';
-			return null;
+			throw new ValidationException('Le fichier module.ini est absent');
 		}
 
 		try {
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			$this->_broken_message = sprintf('Le fichier module.ini est invalide : %s', $e->getMessage());
-			return null;
+			throw new ValidationException(sprintf('Le fichier module.ini est invalide : %s', $e->getMessage()));
 		}
 
 		if (empty($ini)) {
-			$this->_broken_message = 'Le fichier module.ini est vide';
-			return null;
+			throw new ValidationException('Le fichier module.ini est vide');
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
-			$this->_broken_message = 'Le fichier module.ini est invalide : la clé "name" n\'existe pas';
+			throw new ValidationException('Le fichier module.ini est invalide : la clé "name" n\'existe pas');
+			return null;
+		}
+
+		if (isset($ini->min_version)) {
+			throw new ValidationException('Ce module nécessite Paheko 1.4.0 ou supérieur');
 			return null;
 		}
 
@@ -816,7 +828,7 @@ class Module extends Entity
 		}
 
 		$ut->assignArray($params);
-		$content = $ut->fetch();
+		$content = $ut->fetchAndCatchErrors();
 		$type = $ut->getContentType();
 		$code = $ut->getStatusCode();
 
@@ -850,10 +862,17 @@ class Module extends Entity
 
 		$ut->dumpHeaders();
 
-		if ($type == 'application/pdf') {
+		if ($type === 'application/pdf') {
 			Utils::streamPDF($content);
 		}
 		else {
+			// For bots
+			if ($type === 'text/html') {
+				$h_url = Router::getHoneypotURL();
+				$link = sprintf('<a href="%s" rel="nofollow noindex" aria-hidden="true" style="display: none; width: 0; height: 0; overflow: hidden;">En savoir plus sur nous</a>', $h_url);
+				$content = preg_replace('/<body.*?>/i', '$0' . $link, $content);
+			}
+
 			echo $content;
 		}
 

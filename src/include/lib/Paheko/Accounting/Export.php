@@ -42,6 +42,7 @@ class Export
 		'Référence ligne'   => 'line_reference',
 		'Libellé ligne'     => 'line_label',
 		'Rapprochement'     => 'reconciled',
+		'Lettrage'          => 'letter',
 		'Projet analytique' => 'project',
 		'Membres associés'  => 'linked_users',
 	];
@@ -78,8 +79,8 @@ class Export
 			'EcritureLib'   => 'label',
 			'Debit'         => 'debit',
 			'Credit'        => 'credit',
-			'EcritureLet'   => null,
-			'DateLet'       => null,
+			'EcritureLet'   => 'letter',
+			'DateLet'       => 'letter_date',
 			'ValidDate'     => null,
 			'MontantDevise' => null,
 			'Idevise'       => null,
@@ -180,7 +181,14 @@ class Export
 		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		if (self::SIMPLE == $type) {
-			$sql =  'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
+			$sql =  'SELECT
+				t.id,
+				t.type,
+				t.status,
+				t.label,
+				t.date,
+				t.notes,
+				t.reference,
 				IFNULL(l1.reference, l2.reference) AS p_reference,
 				a1.code AS debit_account,
 				a2.code AS credit_account,
@@ -221,22 +229,36 @@ class Export
 				t.label, -- EcritureLib
 				l.debit, -- Debit
 				l.credit, -- Credit
-				NULL AS EcritureLet,
-				NULL AS DateLet,
+				ll.letter AS EcritureLet,
+				CASE WHEN ll.created THEN strftime(\'%Y%m%d\', ll.created) ELSE NULL END AS DateLet,
 				strftime(\'%Y%m%d\', t.date) AS ValidDate,
 				NULL AS MontantDevise,
 				NULL AS Idevise
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 				INNER JOIN acc_accounts a ON a.id = l.id_account
+				LEFT JOIN acc_letters ll ON ll.id = l.id_letter
 				WHERE t.id_year = ?
 				GROUP BY t.id, l.id
 				ORDER BY t.date, t.id, l.id;';
 		}
 		elseif (self::FULL == $type || self::GROUPED == $type) {
-			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-				a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
-				l.reference AS line_reference, l.label AS line_label, l.reconciled,
+			$sql = 'SELECT
+				t.id,
+				t.type,
+				t.status,
+				t.label,
+				t.date,
+				t.notes,
+				t.reference,
+				a.code AS account,
+				a.label AS account_label,
+				l.debit,
+				l.credit,
+				l.reference AS line_reference,
+				l.label AS line_label,
+				l.reconciled,
+				ll.letter,
 				IFNULL(p.code, p.label) AS project,
 				GROUP_CONCAT(%s) AS linked_users
 				FROM acc_transactions t
@@ -245,6 +267,7 @@ class Export
 				LEFT JOIN acc_projects p ON p.id = l.id_project
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
 				LEFT JOIN users u ON u.id = tu.id_user
+				LEFT JOIN acc_letters ll ON ll.id = l.id_letter
 				WHERE t.id_year = ?
 				GROUP BY t.id, l.id
 				ORDER BY t.date, t.id, l.id;';

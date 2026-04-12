@@ -2,7 +2,6 @@
 
 namespace Paheko\UserTemplate;
 
-use KD2\Brindille_Exception;
 use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 use KD2\HTTP;
@@ -19,6 +18,7 @@ use Paheko\Extensions;
 use Paheko\Template;
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\TemplateException;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\Email\Emails;
 use Paheko\Files\Files;
@@ -52,17 +52,19 @@ class Functions
 		'delete_file',
 		'api',
 		'csv',
-		'call',
 	];
 
 	const COMPILE_FUNCTIONS_LIST = [
+		':return'   => [self::class, 'compile_return'],
 		':break'    => [self::class, 'compile_break'],
 		':continue' => [self::class, 'compile_continue'],
-		':return'   => [self::class, 'compile_return'],
-		':exit'     => [self::class, 'compile_exit'],
-		':yield'    => [self::class, 'compile_yield'],
 		':redirect' => [self::class, 'compile_redirect'],
 	];
+
+	static public function compile_return(): string
+	{
+		return '<?php return; ?>';
+	}
 
 	/**
 	 * Compile function to break inside a loop
@@ -78,7 +80,7 @@ class Functions
 		}
 
 		if (!$in_loop) {
-			throw new Brindille_Exception(sprintf('Error on line %d: break can only be used inside a section', $line));
+			throw new TemplateException(sprintf('Error on line %d: break can only be used inside a section', $line));
 		}
 
 		return '<?php break; ?>';
@@ -99,60 +101,10 @@ class Functions
 		$i = ctype_digit(trim($params)) ? (int)$params : 1;
 
 		if ($in_loop < $i) {
-			throw new Brindille_Exception('"continue" function can only be used inside a section');
+			throw new TemplateException('"continue" function can only be used inside a section');
 		}
 
 		return sprintf('<?php continue(%d); ?>', $i);
-	}
-
-	static public function compile_return(string $name, string $params_str, UserTemplate $tpl, int $line): string
-	{
-		$parent = $tpl->_getStack($tpl::SECTION, 'define');
-
-		// Allow {{:return value="test"}} inside a user-defined modifier only
-		if ($parent && ($parent[2]['context'] ?? null) === 'modifier') {
-			$params = $tpl->_parseArguments($params_str, $line);
-
-			if (!isset($params['value'])) {
-				$params = 'null';
-			}
-			else {
-				$params = $params['value'];
-			}
-
-			return sprintf('<?php return %s; ?>', $params);
-		}
-		// But not outside
-		elseif (!empty($params_str)) {
-			throw new Brindille_Exception('"return" function cannot have parameters in this context');
-		}
-
-		return '<?php return; ?>';
-	}
-
-	static public function compile_exit(string $name, string $params_str, UserTemplate $tpl, int $line): string
-	{
-		$parent = $tpl->_getStack($tpl::SECTION, 'define');
-
-		if (!$parent) {
-			throw new Brindille_Exception('"exit" function cannot be called in this context');
-		}
-
-		return '<?php return; ?>';
-	}
-
-	static public function compile_yield(string $name, string $params_str, UserTemplate $tpl, int $line): string
-	{
-		$parent = $tpl->_getStack($tpl::SECTION, 'define');
-
-		// Only allow {{:yield}} inside a user-defined function
-		if (!$parent || ($parent[2]['context'] ?? null) !== 'section') {
-			throw new Brindille_Exception('"yield" can only be used inside a "define" section');
-		}
-
-		$params = $tpl->_parseArguments($params_str, $line);
-
-		return sprintf('<?php yield %s; ?>', $tpl->_exportArguments($params));
 	}
 
 	static public function compile_redirect(string $name, string $params, UserTemplate $tpl, int $line): string
@@ -223,14 +175,14 @@ class Functions
 	static public function save(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
-			throw new Brindille_Exception('Module name could not be found');
+			throw new TemplateException('Module name could not be found');
 		}
 
 		$db = DB::getInstance();
 
 		if (isset($params['from'])) {
 			if (!is_array($params['from'])) {
-				throw new Brindille_Exception('"from" parameter is not an array');
+				throw new TemplateException('"from" parameter is not an array');
 			}
 
 			$from = $params['from'];
@@ -239,7 +191,7 @@ class Functions
 
 			foreach ($from as $key => $row) {
 				if (!is_array($row) && !is_object($row)) {
-					throw new Brindille_Exception('"from" parameter item is not an array on index: ' . $key);
+					throw new TemplateException('"from" parameter item is not an array on index: ' . $key);
 				}
 
 				self::save(array_merge((array)$row, $params), $tpl, $line);
@@ -251,15 +203,15 @@ class Functions
 
 		$table = 'module_data_' . $tpl->module->name;
 
-		if (!empty($params['key'])) {
-			if ($params['key'] == 'uuid') {
+		if (isset($params['key'])) {
+			if ($params['key'] === 'uuid') {
 				$params['key'] = Utils::uuid();
 			}
 
 			$field = 'key';
 			$where_value = $params['key'];
 		}
-		elseif (!empty($params['id'])) {
+		elseif (isset($params['id'])) {
 			$field = 'id';
 			$where_value = $params['id'];
 		}
@@ -269,7 +221,6 @@ class Functions
 		}
 
 		$key = $params['key'] ?? null;
-		$id = $params['id'] ?? null;
 		$assign_new_id = $params['assign_new_id'] ?? null;
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
@@ -326,7 +277,7 @@ class Functions
 					$schemas[$validate] = JSONSchema::fromString($schema);
 				}
 				catch (\LogicException $e) {
-					throw new Brindille_Exception($e->getMessage(), 0, $e);
+					throw new TemplateException($e->getMessage(), 0, $e);
 				}
 			}
 
@@ -341,7 +292,7 @@ class Functions
 				}
 			}
 			catch (\RuntimeException $e) {
-				throw new Brindille_Exception(sprintf("impossible de valider le schéma:\n%s\n\n%s",
+				throw new TemplateException(sprintf("impossible de valider le schéma:\n%s\n\n%s",
 					$e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
 			}
 		}
@@ -362,6 +313,8 @@ class Functions
 				$db->delete($table, $field . ' = ?', $where_value);
 			}
 
+			$id = null;
+			$key = Utils::uuid();
 			$db->insert($table, compact('id', 'document', 'key'));
 			$db->commit();
 
@@ -377,7 +330,7 @@ class Functions
 	static public function delete(array $params, UserTemplate $tpl, int $line): void
 	{
 		if (!$tpl->module) {
-			throw new Brindille_Exception('Module name could not be found');
+			throw new TemplateException('Module name could not be found');
 		}
 
 		$db = DB::getInstance();
@@ -416,7 +369,7 @@ class Functions
 		}
 
 		if (!count($where)) {
-			throw new Brindille_Exception('Missing parameters for delete');
+			throw new TemplateException('Missing parameters for delete');
 		}
 
 		$where = implode(' AND ', $where);
@@ -450,7 +403,7 @@ class Functions
 			$number = $params['verify_number'] ?? '';
 		}
 		else {
-			throw new Brindille_Exception(sprintf('Line %d: no valid arguments supplied for "captcha" function', $line));
+			throw new TemplateException(sprintf('Line %d: no valid arguments supplied for "captcha" function', $line));
 		}
 
 		$error = 'Réponse invalide à la vérification anti-robot';
@@ -470,15 +423,15 @@ class Functions
 	static public function mail(array $params, UserTemplate $ut, int $line)
 	{
 		if (empty($params['to'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "to" manquant pour la fonction "mail"', $line));
+			throw new TemplateException(sprintf('Ligne %d: argument "to" manquant pour la fonction "mail"', $line));
 		}
 
 		if (empty($params['subject'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "subject" manquant pour la fonction "mail"', $line));
+			throw new TemplateException(sprintf('Ligne %d: argument "subject" manquant pour la fonction "mail"', $line));
 		}
 
 		if (empty($params['body'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
+			throw new TemplateException(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
 		}
 
 		if (!empty($params['block_urls']) && preg_match('!https?://!', $params['subject'] . $params['body'])) {
@@ -531,7 +484,7 @@ class Functions
 		$params['to'] = array_filter($params['to']);
 
 		if (!count($params['to'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: aucune adresse destinataire n\'a été précisée pour la fonction "mail"', $line));
+			throw new TemplateException(sprintf('Ligne %d: aucune adresse destinataire n\'a été précisée pour la fonction "mail"', $line));
 		}
 
 		foreach ($params['to'] as &$to) {
@@ -555,11 +508,11 @@ class Functions
 			$external_count = intval(count($params['to']) - $internal_count);
 
 			if (($external_count + $external) > 1) {
-				throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
+				throw new TemplateException(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
 			}
 
 			if (($internal_count + $internal) > 10) {
-				throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
+				throw new TemplateException(sprintf('Ligne %d: l\'envoi d\'email à une adresse interne est limité à 10 envois par page', $line));
 			}
 
 			if ($external_count
@@ -580,7 +533,7 @@ class Functions
 					}
 
 					if (!$allowed) {
-						throw new Brindille_Exception(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
+						throw new TemplateException(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe interdit l\'utilisation d\'une adresse web autre que le site de l\'association : %s', $line, $m));
 					}
 				}
 			}
@@ -609,7 +562,7 @@ class Functions
 		$message = $params['message'] ?? 'Erreur du module';
 
 		if (!empty($params['admin'])) {
-			throw new Brindille_Exception($message);
+			throw new TemplateException($message);
 		}
 
 		throw new UserException($message, intval($params['code'] ?? 0));
@@ -618,7 +571,7 @@ class Functions
 	static protected function getFilePath(?string $path, string $arg_name, UserTemplate $ut, int $line)
 	{
 		if (empty($path)) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $line, $arg_name));
+			throw new TemplateException(sprintf('Ligne %d: argument "%s" manquant', $line, $arg_name));
 		}
 
 		if (substr($path, 0, 2) == './') {
@@ -643,7 +596,7 @@ class Functions
 		$out = implode('/', $out);
 
 		if (preg_match('!\.\.|://|/\.|^\.!', $out)) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
+			throw new TemplateException(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
 		}
 
 		return $out;
@@ -662,7 +615,7 @@ class Functions
 			$content = file_get_contents(ROOT . '/modules/' . $path);
 		}
 		else {
-			throw new Brindille_Exception(sprintf('Ligne %d : le fichier appelé "%s" n\'existe pas', $line, $path));
+			throw new TemplateException(sprintf('Ligne %d : le fichier appelé "%s" n\'existe pas', $line, $path));
 		}
 
 		return $content;
@@ -700,7 +653,7 @@ class Functions
 		$from = $ut->get('included_from') ?? [];
 
 		if (in_array($path, $from)) {
-			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $path));
+			throw new TemplateException(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $path));
 		}
 
 		try {
@@ -708,18 +661,19 @@ class Functions
 			$include->setParent($ut);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $path));
+			throw new TemplateException(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $path));
 		}
 
 		$params['included_from'] = array_merge($from, [$path]);
 
 		$include->assignArray(array_merge($ut->getAllVariables(), $params), null, false);
 
-		if (!empty($params['capture'])) {
-			if (!preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
-				throw new Brindille_Exception('Nom de variable invalide : ' . $params['capture']);
-			}
+		if (!empty($params['capture'])
+			&& !preg_match($ut::RE_VALID_VARIABLE_NAME, $params['capture'])) {
+			throw new TemplateException('Nom de variable invalide : ' . $params['capture']);
+		}
 
+		if (!empty($params['capture'])) {
 			$ut::_assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
@@ -736,9 +690,6 @@ class Functions
 			}
 		}
 
-		// Copy/overwrite user-defined functions to parent template
-		$include->copyUserFunctionsTo($ut);
-
 		// Transmit nocache to parent template
 		if ($include->get('nocache')) {
 			$ut::_assign(['nocache' => true], $ut, $line);
@@ -752,7 +703,7 @@ class Functions
 		}
 
 		if (isset($params['redirect'])) {
-			throw new Brindille_Exception('Le paramètre "redirect" a été supprimé');
+			throw new TemplateException('Le paramètre "redirect" a été supprimé');
 		}
 
 		if (isset($params['code'])) {
@@ -840,7 +791,7 @@ class Functions
 	static public function admin_files(array $params, UserTemplate $ut, int $line): string
 	{
 		if (empty($ut->module)) {
-			throw new Brindille_Exception('Module could not be found');
+			throw new TemplateException('Module could not be found');
 		}
 		$tpl = Template::getInstance();
 
@@ -848,36 +799,42 @@ class Functions
 			'edit' => $params['edit'] ?? false,
 		];
 
-		$tpl_params['upload'] ??= $params['edit'];
+		$tpl_params['upload'] ??= $tpl_params['edit'];
 
-		if (isset($params['path']) && preg_match('!/\.|\.\.!', $params['path'])) {
-			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+		$path = '';
+
+		if (isset($params['path'])) {
+			if (!preg_match('!^([a-z0-9_-]+/?){1,5}$!i', $params['path'])) {
+				throw new TemplateException(sprintf('"path" parameter is invalid (only [a-z0-9_/-] is allowed): "%s"', $params['path']));
+			}
+
+			$path = trim($params['path'], '/');
 		}
-
-		$path = isset($params['path']) && preg_match('/^[a-z0-9_-]+$/i', $params['path']) ? '/' . $params['path'] : '';
 
 		if (!$ut->module->restrict_section
 			&& 0 !== strpos($path, 'public')) {
-			throw new Brindille_Exception('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
+			throw new TemplateException('Cannot use "admin_files" function if restrict_section is not specified in "module.ini" and files are private. See documentation for details.');
 		}
 
+		$path = rtrim($ut->module->storage_root() . '/' . $path, '/');
+
 		$tpl->assign($tpl_params);
-		$tpl->assign('path', $ut->module->storage_root() . $path);
+		$tpl->assign('path', $path);
 		return '<div class="attachments noprint"><h3 class="ruler">Fichiers joints</h3>' . $tpl->fetch('common/files/_context_list.tpl') . '</div>';
 	}
 
 	static public function delete_file(array $params, UserTemplate $ut, int $line): void
 	{
 		if (empty($ut->module)) {
-			throw new Brindille_Exception('Module could not be found');
+			throw new TemplateException('Module could not be found');
 		}
 
 		if (empty($params['path'])) {
-			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is missing or empty', $line));
+			throw new TemplateException(sprintf('Line %d: "path" parameter is missing or empty', $line));
 		}
 
 		if (preg_match('!/\.|\.\.!', $params['path'])) {
-			throw new Brindille_Exception(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
+			throw new TemplateException(sprintf('Line %d: "path" parameter is invalid: "%s"', $line, $params['path']));
 		}
 
 		Files::delete($ut->module->storage_root() . '/' . $params['path']);
@@ -886,11 +843,11 @@ class Functions
 	static public function api(array $params, UserTemplate $ut, int $line): void
 	{
 		if (empty($params['path'])) {
-			throw new Brindille_Exception('"path" parameter is missing');
+			throw new TemplateException('"path" parameter is missing');
 		}
 
 		if (empty($params['method'])) {
-			throw new Brindille_Exception('"method" parameter is missing');
+			throw new TemplateException('"method" parameter is missing');
 		}
 
 		$path = trim($params['path'], '/');
@@ -905,11 +862,11 @@ class Functions
 
 		if (isset($params['url'])) {
 			if (empty($params['user'])) {
-				throw new Brindille_Exception('"user" parameter is missing');
+				throw new TemplateException('"user" parameter is missing');
 			}
 
 			if (empty($params['password'])) {
-				throw new Brindille_Exception('"password" parameter is missing');
+				throw new TemplateException('"password" parameter is missing');
 			}
 
 			$url = str_replace('://', '://' . $params['user'] . '@' . $params['password'], $params['url']);
@@ -945,7 +902,7 @@ class Functions
 
 			if ($fail && $r->fail) {
 				$body = json_decode($r->body);
-				throw new Brindille_Exception(sprintf('External API request failed: %d - %s', $r->status, $body->error ?? $r->error));
+				throw new TemplateException(sprintf('External API request failed: %d - %s', $r->status, $body->error ?? $r->error));
 			}
 
 			$code = $r->status;
@@ -970,7 +927,7 @@ class Functions
 			}
 			catch (APIException $e) {
 				if ($fail) {
-					throw new Brindille_Exception(sprintf('Internal API request failed: %d - %s', $e->getCode(), $e->getMessage()));
+					throw new TemplateException(sprintf('Internal API request failed: %d - %s', $e->getCode(), $e->getMessage()));
 				}
 			}
 		}
@@ -987,7 +944,7 @@ class Functions
 	static public function csv(array $params, UserTemplate $ut, int $line): string
 	{
 		if (!$ut->module) {
-			throw new Brindille_Exception('Module name could not be found');
+			throw new TemplateException('Module name could not be found');
 		}
 
 		static $sheets = [];
@@ -995,7 +952,7 @@ class Functions
 		$action = $params['action'] ?? null;
 
 		if (empty($sheets) && $action !== 'initialize') {
-			throw new Brindille_Exception('"action" parameter is missing or is not "initialize"');
+			throw new TemplateException('"action" parameter is missing or is not "initialize"');
 		}
 
 		if (empty($params['name'])) {
@@ -1016,11 +973,11 @@ class Functions
 			$session = Session::getInstance();
 
 			if (!$session->isLogged()) {
-				throw new Brindille_Exception('This function may only be called by a logged-in user');
+				throw new TemplateException('This function may only be called by a logged-in user');
 			}
 
 			if (empty($params['columns']) || !is_array($params['columns'])) {
-				throw new Brindille_Exception('"columns" parameter is missing or is empty');
+				throw new TemplateException('"columns" parameter is missing or is empty');
 			}
 
 			$csv = $sheets[$name] = new CSV_Custom($session, $name);
@@ -1048,7 +1005,7 @@ class Functions
 					}
 
 					if (!is_array($row)) {
-						throw new Brindille_Exception(sprintf('CSV modifier "%s" function returned "%s", but "array" expected', $mod_name, gettype($row)));
+						throw new TemplateException(sprintf('CSV modifier "%s" function returned "%s", but "array" expected', $mod_name, gettype($row)));
 					}
 
 					return (object)$row;
@@ -1077,7 +1034,7 @@ class Functions
 		}
 
 		if (empty($sheets[$name])) {
-			throw new Brindille_Exception(sprintf('"name" parameter is referencing an unknown instance: "%s"', $name));
+			throw new TemplateException(sprintf('"name" parameter is referencing an unknown instance: "%s"', $name));
 		}
 
 		$csv =& $sheets[$name];
@@ -1144,7 +1101,7 @@ class Functions
 			]);
 		}
 		elseif ($action && $action !== 'initialize') {
-			throw new Brindille_Exception('Unknown action: ' . $action);
+			throw new TemplateException('Unknown action: ' . $action);
 		}
 
 		$assign = $params['assign'] ?? null;
@@ -1154,16 +1111,5 @@ class Functions
 		}
 
 		return '';
-	}
-
-	static public function call(array $params, UserTemplate $tpl, int $line): void
-	{
-		if (empty($params['function'])) {
-			throw new Brindille_Exception('Missing "function" parameter for "call" function');
-		}
-
-		$name = $params['function'];
-		unset($params['function']);
-		$tpl->callUserFunction('function', $name, $params, $line);
 	}
 }

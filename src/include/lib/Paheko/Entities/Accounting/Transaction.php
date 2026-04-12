@@ -7,6 +7,7 @@ use KD2\DB\Date;
 
 use Paheko\Config;
 use Paheko\DB;
+use Paheko\DynamicList;
 use Paheko\Entity;
 use Paheko\Form;
 use Paheko\Utils;
@@ -225,6 +226,63 @@ class Transaction extends Entity
 		}
 	}
 
+	public function getLinesList(): DynamicList
+	{
+		$columns = [
+			'id' => ['select' => 'l.id'],
+			'id_account' => ['select' => 'l.id_account'],
+			'row' => [
+				'select' => 'ROW_NUMBER() OVER (ORDER BY l.id)',
+				'label' => 'Ligne',
+			],
+			'account_code' => [
+				'select' => 'a.code',
+				'label' => 'N° compte',
+			],
+			'account_label' => [
+				'select' => 'a.label',
+				'label' => 'Compte',
+			],
+			'debit' => [
+				'select' => 'l.debit',
+				'label' => 'Débit',
+			],
+			'credit' => [
+				'select' => 'l.credit',
+				'label' => 'Crédit',
+			],
+			'label' => [
+				'select' => 'l.label',
+				'label' => 'Libellé',
+			],
+			'reference' => [
+				'select' => 'l.reference',
+				'label' => 'Réf.',
+			],
+			'project' => [
+				'select' => 'COALESCE(p.code, p.label)',
+				'label' => 'Projet',
+			],
+			'id_project' => ['select' => 'l.id_project'],
+			'letter' => [
+				'select' => 'll.letter',
+				'label' => 'Lettrage',
+			],
+			'id_letter' => ['select' => 'l.id_letter'],
+			'is_deposited' => ['select' => 'l.status & ' . Line::STATUS_DEPOSITED],
+		];
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_projects p ON p.id = l.id_project
+			LEFT JOIN acc_letters ll ON ll.id = l.id_letter';
+
+		$list = new DynamicList($columns, $tables, 'l.id_transaction = ' . (int)$this->id());
+		$list->orderBy('row', false);
+		$list->togglePreferenceHashElement('conditions', false);
+		return $list;
+	}
+
 	public function getLinesWithAccounts(bool $as_array = false, bool $amount_as_int = true): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
@@ -273,8 +331,6 @@ class Transaction extends Entity
 				$l['account_selector'] = [$line->id_account => sprintf('%s — %s', $l['account_code'], $l['account_label'])];
 			}
 
-			$l['project_name'] = $line->id_project ? ($projects[$line->id_project] ?? null) : null;
-			$l['is_deposited'] = $line->isDeposited();
 			$l['line'] =& $line;
 
 			if (!$as_array) {
@@ -1691,6 +1747,23 @@ class Transaction extends Entity
 
 		static $bank_types = [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING];
 
+		// acc = Account code
+		if (isset($_GET['acc'])
+			&& ($a = $accounts->getWithCode($_GET['acc']))) {
+			if (in_array($a->type, $bank_types)) {
+				$_GET['ab'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_REVENUE) {
+				$_GET['ar'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_EXPENSE) {
+				$_GET['ae'] = $a->code;
+			}
+			elseif ($a->type === $a::TYPE_THIRD_PARTY) {
+				$_GET['a3'] = $a->code;
+			}
+		}
+
 		// ab = Bank/cash account
 		if (isset($_GET['ab'])
 			&& ($a = $accounts->getWithCode($_GET['ab']))
@@ -1703,7 +1776,7 @@ class Transaction extends Entity
 		// ar = Revenue account
 		if (isset($_GET['ar'])
 			&& ($a = $accounts->getWithCode($_GET['ar']))
-			&& $a->type == $a::TYPE_REVENUE) {
+			&& $a->type === $a::TYPE_REVENUE) {
 			$this->setDefaultAccount(self::TYPE_REVENUE, 'credit', $a->id);
 			$this->setDefaultAccount(self::TYPE_CREDIT, 'credit', $a->id);
 		}
@@ -1711,7 +1784,7 @@ class Transaction extends Entity
 		// ae = Expense account
 		if (isset($_GET['ae'])
 			&& ($a = $accounts->getWithCode($_GET['ae']))
-			&& $a->type == $a::TYPE_EXPENSE) {
+			&& $a->type === $a::TYPE_EXPENSE) {
 			$this->setDefaultAccount(self::TYPE_EXPENSE, 'debit', $a->id);
 			$this->setDefaultAccount(self::TYPE_DEBT, 'debit', $a->id);
 		}
@@ -1726,7 +1799,7 @@ class Transaction extends Entity
 		// a3 = Third-party account
 		if (isset($_GET['a3'])
 			&& ($a = $accounts->getWithCode($_GET['a3']))
-			&& $a->type == $a::TYPE_THIRD_PARTY) {
+			&& $a->type === $a::TYPE_THIRD_PARTY) {
 			$this->setDefaultAccount(self::TYPE_CREDIT, 'debit', $a->id);
 			$this->setDefaultAccount(self::TYPE_DEBT, 'credit', $a->id);
 		}
@@ -1750,6 +1823,12 @@ class Transaction extends Entity
 
 			// Make sure we have at least two lines
 			$lines = array_merge($lines, array_fill(0, max(0, 2 - count($lines)), []));
+		}
+		elseif (count($this->_default_selector)) {
+			$lines = [[
+				'account_selector' => current(current($this->_default_selector)),
+			]];
+			$lines[] = [];
 		}
 
 		if (isset($_GET['u'])) {
