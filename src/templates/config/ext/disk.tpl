@@ -32,7 +32,7 @@
 			<td class="size"><nobr>{$data_size|size_in_bytes}</nobr></td>
 			<td class="actions">
 				{if $data_size}
-					{linkbutton href="!config/advanced/sql.php?table=module_data_%s"|args:$ext.name shape="table" label="Voir les données brutes"}<br />
+					{linkbutton href="!config/advanced/sql/?filter=%s"|args:$module->getTableNamePrefix() shape="table" label="Voir les données brutes"}<br />
 				{/if}
 				{if $data_size && $module->canDeleteData()}
 					{linkbutton shape="delete" label="Supprimer les données" href="delete.php?name=%s&mode=data"|args:$ext.name target="_dialog"}
