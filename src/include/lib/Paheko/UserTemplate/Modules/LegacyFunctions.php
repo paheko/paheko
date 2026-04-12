@@ -48,7 +48,7 @@ class LegacyFunctions
 			return;
 		}
 
-		$table = $tpl->module->documents_table_name();
+		$table = $tpl->module->getDocumentsTableName();
 
 		if (isset($params['key'])) {
 			if ($params['key'] === 'uuid') {
@@ -184,7 +184,7 @@ class LegacyFunctions
 		}
 
 		$db = DB::getInstance();
-		$table = $tpl->module->documents_table_name();
+		$table = $tpl->module->getDocumentsTableName();
 
 		// No table? No problem!
 		if (!$tpl->module->hasDocumentsTable()) {
@@ -200,7 +200,7 @@ class LegacyFunctions
 				$args[substr($key, 1)] = $value;
 			}
 			elseif ($key == 'where') {
-				$where[] = Sections::_moduleReplaceJSONExtract($value, $table);
+				$where[] = LegacySections::_moduleReplaceJSONExtract($value, $table);
 			}
 			else {
 				if ($key == 'id') {

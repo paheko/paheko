@@ -52,6 +52,7 @@ class ModuleTable extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert(preg_match(Module::TABLE_NAME_REGEXP, $this->name), 'The table name is invalid: ' . $this->name);
+		$this->assert($this->name !== Module::DOCUMENTS_TABLE_NAME, 'This table name is reserved and cannot be used: ' . $this->name);
 
 		if (isset($this->comment)) {
 			$this->assert(strlen($this->comment) <= 70, 'The table comment cannot be longer than 70 characters');
@@ -386,6 +387,9 @@ class ModuleTable extends Entity
 		}
 
 		if (isset($definition->fk_table)) {
+			$this->assert($definition->null,
+				sprintf('Column "%s" must be NULL to reference a foreign key', $name));
+
 			$this->assert(preg_match('/^!?[a-z]+(?:_[a-z]+)*$/', $definition->fk_table),
 				sprintf('Invalid column "%s" foreign key: invalid table name "%s"', $name, $definition->fk_table));
 
@@ -400,15 +404,22 @@ class ModuleTable extends Entity
 
 			$definition->fk_on_delete ??= 'SET NULL';
 
+			/**
+			 * A short explanation on why RESTRICT is not allowed:
+			 * - if a module referenced a regular table column with RESTRICT
+			 *   then it could block the deletion of an entity in the main UI
+			 * - if a module A had a column with a FOREIGN KEY on module B
+			 *   column with RESTRICT, module B could not be deleted!
+			 * - if table A had a FOREIGN KEY on table B (of the same module),
+			 *   deleting tables when deleting the module would throw an error
+			 *   if the tables are not deleted in the right order (or if there
+			 *   is a circular reference!)
+			 *
+			 * This is why RESTRICT can never be allowed in modules, even between
+			 * their own tables!
+			 */
 			$this->assert(in_array($definition->fk_on_delete, ['SET NULL', 'CASCADE'], true),
 				sprintf('Invalid column "%s": unknown foreign key constraint "%s"', $name, $definition->fk_on_delete));
-
-			/* Not used as RESTRICT is not allowed
-			elseif (isset($definition->fk_on_delete)
-				&& strtoupper($definition->fk_on_delete) === 'RESTRICT'
-				&& substr($definition->fk_table, 0, 1) === '!') {
-				throw new \InvalidArgumentException(sprintf('Invalid column "%s": foreign key constraint "%s" is only valid for internal module tables', $name, $definition->fk_on_delete));
-			}*/
 
 			$fk_table = $this->getRealName($definition->fk_table, true);
 

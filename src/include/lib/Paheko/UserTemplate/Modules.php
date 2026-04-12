@@ -531,14 +531,10 @@ class Modules
 		}
 	}
 
-	static public function getModuleTableName(string $module, ?string $table): string
+	static public function getModuleTableName(string $module, string $table): string
 	{
 		if (!preg_match(Module::VALID_NAME_REGEXP, $module)) {
 			throw new \InvalidArgumentException('Invalid module name : ' . $module);
-		}
-
-		if (null === $table) {
-			return sprintf('module_data_%s', $module);
 		}
 
 		if (!preg_match(Module::TABLE_NAME_REGEXP, $table) || strlen($table) > 70) {

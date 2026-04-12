@@ -653,7 +653,7 @@ Les colonnes doivent être passées sous forme de paramètres supplémentaires, 
 }}
 ```
 
-### Définition d'une colonne
+#### Définition d'une colonne
 
 Une définition de colonne peut être un tableau (array) ou une chaîne de texte (string).
 
@@ -668,7 +668,7 @@ TYPE[ NULL][ DEFAULT][ REFERENCES][ UNIQUE][ INDEX][ COMMENT]
 | `TYPE` | Type de la colonne : `TEXT`, `INTEGER`, `REAL`, `NUMERIC` ou `DATETIME` |
 | `NULL` | Indique si la valeur nulle est acceptée pour la colonne : `NULL` ou `NOT NULL`. Si non spécifié, la colonne accepte une valeur nulle. |
 | `DEFAULT` | Indique la valeur par défaut : `DEFAULT 'Du texte'`, `DEFAULT 1312`, `DEFAULT CURRENT_TIMESTAMP`. La valeur `CURRENT_TIMESTAMP` n'est valide que pour les colonnes de type `DATETIME`, et indique que la date et heure du moment seront enregistrés au moment de la création d'une ligne. |
-| `REFERENCES nom_table (nom_colonne) ON DELETE (SET NULL|CASCADE)` | Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : `REFERENCES !users (id)`. Si aucune action à effectuer si la clé étrangère est supprimée n'est spécifiée, c'est `SET NULL` qui est utilisé. |
+| `REFERENCES nom_table (nom_colonne) ON DELETE (SET NULL|CASCADE)` | Indique une clé étrangère (foreign key) qui référence une autre colonne. |
 | `UNIQUE` | Indique si la colonne doit avoir une contrainte de valeur unique : une seule ligne de la table pourra avoir cette valeur. Il est possible d'avoir une clé unique composite en lui donnant un nom : `UNIQUE ma_cle_unique` |
 | `INDEX` | Indique si la colonne doit avoir un index. Il est possible de créer un index composite en lui donnant un nom : `INDEX ma_cle_d_index` |
 | `COMMENT` | Permet de spécifier un commentaire pour la colonne : `COMMENT 'Ceci est une colonne'` |
@@ -677,13 +677,7 @@ Aucun autre code SQL n'est accepté.
 
 Note : le type `DATETIME` n'existe pas réellement dans SQLite, mais si ce type est spécifié, Paheko ajoutera une contrainte pour n'accepter que des chaînes de date/heure dans cette colonne (`CHECK (datetime(nom_colonne) = nom_colonne)`).
 
-Précisions sur les clés étrangères :
-
-* elles doivent forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie avant)
-* l'action par défaut est `SET NULL` si la clé étrangère est une table en dehors du module
-* l'action `RESTRICT` ne peut être utilisée pour une table externe au module (sinon cela pourrait bloquer des actions normales dans Paheko)
-* pour faire référence à une table externe au module il faut ajouter le caractère `!` devant le nom de la table, sinon la table sera considérée comme interne au module
-* il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.
+#### Définition sous forme de tableau
 
 Si la définition est un tableau il convient d'utiliser les clés suivantes :
 
@@ -699,7 +693,44 @@ Si la définition est un tableau il convient d'utiliser les clés suivantes :
 | `index` | `string` ou `bool` | `true`, `ma_cle` |
 | `comment` | `string` | `Ceci est une colonne` |
 
-### Utilisation d'index uniques
+#### Clés étrangères (foreign keys)
+
+Les clés étrangères permettent de faire référence à une autre table et ainsi d'assurer une certaine cohérence dans les données.
+
+Il faut utiliser le nom de la table et de la colonne :
+
+```
+{{:table create="answers"
+  id_question="NULL INTEGER REFERENCES questions (id) ON DELETE CASCADE"
+}}
+```
+
+Ainsi la colonne `id_question` devra contenir la valeur d'un ID existant de la table `questions`. Il ne sera pas possible d'insérer dans la table un ID qui n'existe pas. Quand la question sera supprimée, toute réponse associée sera aussi supprimée.
+
+Il existe deux actions possibles :
+
+* `ON DELETE CASCADE` : la ligne sera supprimée si la ligne référencée clé étrangère est supprimée (action de cascade)
+* `ON DELETE SET NULL` : la valeur sera remplacée par `NULL` si la ligne référencée par la clé étrangère est supprimée
+
+Note : l'action `RESTRICT` n'est pas disponible à cause des interactions potentielles entre modules et autres tables, qui pourraient empêcher la suppression d'un module ou d'une table.
+
+On peut utiliser le caractère `!` pour faire référence à une table externe au module :
+
+```
+{{:table create="answers"
+  id_user="NULL INTEGER REFERENCES !users (id) ON DELETE CASCADE"
+}}
+```
+
+Attention les clés étrangères ont plusieurs restrictions :
+
+* une clé étrangère doit forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie précédemment)
+* une colonne avec une clé étrangère doit obligatoirement être `NULL` (il n'est pas possible qu'elle soit `NOT NULL`)
+* si aucune action n'est spécifiée, c'est `SET NULL` qui est utilisé
+* l'action `RESTRICT` n'est pas autorisée
+* il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.
+
+#### Utilisation d'index uniques
 
 Il est possible de créer un index unique pour une colonne, pour indiquer qu'une seule ligne doit avoir la valeur :
 

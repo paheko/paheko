@@ -846,13 +846,16 @@ class UserTemplate extends \KD2\Brindille
 			return;
 		}
 
+		$tables = $module->listTables();
+
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
 			'config'       => json_decode(json_encode($module->config), true),
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => $module->hasDocumentsTable() ? $module->documents_table_name() : null,
+			'table'        => in_array($module::DOCUMENTS_TABLE_NAME, $tables) ? $module::DOCUMENTS_TABLE_NAME : null,
+			'tables'       => array_values($tables),
 		]));
 	}
 }

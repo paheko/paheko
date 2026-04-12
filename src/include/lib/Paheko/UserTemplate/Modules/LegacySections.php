@@ -16,6 +16,8 @@ use Paheko\TemplateException;
  */
 class LegacySections
 {
+	static protected $modules_tables = [];
+
 	/**
 	 * @deprecated
 	 */
@@ -25,17 +27,19 @@ class LegacySections
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
-			$table = 'module_data_' . $name;
-			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+			$table = Modules::getModuleTableName($name, 'documents');
+			self::$modules_tables[$table] ??= $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->documents_table_name();
-			$has_table = $tpl->module->hasDocumentsTable();
+			$table = $tpl->module->getDocumentsTableName();
+			self::$modules_tables[$table] ??= $tpl->module->hasDocumentsTable();
 		}
 		else {
 			throw new TemplateException('Unique module name could not be found');
 		}
+
+		$has_table = self::$modules_tables[$table];
 
 		if (!$has_table) {
 			return;
@@ -179,12 +183,19 @@ class LegacySections
 		ksort($search_params);
 		$hash = sha1(implode('', array_keys($search_params)));
 
-		$db = DB::getInstance();
+		static $indexes = [];
 
+		// Don't try to create index more than once
+		if (in_array($table . $hash, $indexes)) {
+			return;
+		}
+
+		$db = DB::getInstance();
 		$sql = sprintf('CREATE INDEX IF NOT EXISTS %s_auto_%s ON %1$s (%s);', $table, $hash, implode(', ', $search_params));
 
 		try {
 			$db->exec($sql);
+			$indexes[] = $table . $hash;
 		}
 		catch (DB_Exception $e) {
 			throw new TemplateException(sprintf("Impossible de créer l'index, erreur SQL :\n%s\n\nRequête exécutée :\n%s", $db->lastErrorMsg(), $sql));
@@ -268,17 +279,19 @@ class LegacySections
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
-			$table = 'module_data_' . $name;
-			$has_table = $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
+			$table = Modules::getModuleTableName($name, 'documents');
+			self::$modules_tables[$table] ??= $db->test('sqlite_master', 'type = \'table\' AND name = ?', $table);
 		}
 		elseif (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->documents_table_name();
-			$has_table = $tpl->module->hasDocumentsTable();
+			$table = $tpl->module->getDocumentsTableName();
+			self::$modules_tables[$table] ??= $tpl->module->hasDocumentsTable();
 		}
 		else {
 			throw new TemplateException('Unique module name could not be found');
 		}
+
+		$has_table = self::$modules_tables[$table];
 
 		if (!$has_table) {
 			return;

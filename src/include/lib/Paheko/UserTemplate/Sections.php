@@ -1256,7 +1256,7 @@ class Sections
 
 		if (isset($tpl->module->name)) {
 			$name = $tpl->module->name;
-			$table = $tpl->module->documents_table_name();
+			$table = $tpl->module->getDocumentsTableName();
 			$sql = LegacySections::_moduleReplaceJSONExtract($sql, $table); // FIXME: remove in Paheko 1.5+ (?)
 		}
 

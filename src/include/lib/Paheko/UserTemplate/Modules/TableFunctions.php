@@ -46,7 +46,7 @@ class TableFunctions
 		}
 
 		if (($params['delete'] ?? null) === '@DOCUMENTS') {
-			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->documents_table_name())));
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->getDocumentsTableName())));
 			return;
 		}
 
@@ -384,8 +384,8 @@ class TableFunctions
 		$sql = $params['sql'];
 		$sql = str_replace('@MODULE_', $tpl->module->table_prefix(), $sql);
 
-		// set authorizer to only allow working on modules tables
-		$db->enableTableAuthorizer($tpl->module->getTablesNames());
+		// set authorizer to only allow working on modules tables (except documents table)
+		$db->enableTableAuthorizer(array_keys($tpl->module->getTablesNames(false)));
 
 		try {
 			$db->exec($sql);

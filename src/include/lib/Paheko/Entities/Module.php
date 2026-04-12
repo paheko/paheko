@@ -56,7 +56,8 @@ class Module extends Entity
 	];
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
-	const TABLE_PREFIX = 'module_table_';
+	const TABLE_PREFIX = 'module_';
+	const DOCUMENTS_TABLE_NAME = 'documents';
 	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z]+)*$/';
 
 	const TABLE = 'modules';
@@ -509,22 +510,27 @@ class Module extends Entity
 		return DB::getInstance()->test('modules_templates', 'id_module = ? AND name = ?', $this->id(), self::CONFIG_FILE);
 	}
 
-	public function documents_table_name(): string
-	{
-		return sprintf('module_data_%s', $this->name);
-	}
-
-	public function table_prefix(): string
+	public function getTableNamePrefix(): string
 	{
 		return self::TABLE_PREFIX . $this->name . '_';
+	}
+
+	public function getRealTableName(string $name): string
+	{
+		return Modules::getModuleTableName($this->name, $name);
 	}
 
 	public function hasDocumentsTable(): bool
 	{
 		return DB::getInstance()->test('sqlite_master',
 			'type = \'table\' AND name = ?',
-			$this->documents_table_name()
+			$this->getDocumentsTableName()
 		);
+	}
+
+	public function getDocumentsTableName(): string
+	{
+		return $this->getTableNamePrefix() . self::DOCUMENTS_TABLE_NAME;
 	}
 
 	public function hasData(): bool
@@ -532,9 +538,8 @@ class Module extends Entity
 		$db = DB::getInstance();
 
 		$this->_has_data ??= $db->test('sqlite_master',
-			'type = \'table\' AND name = ? OR name LIKE ? ESCAPE \'\\\'',
-			$this->documents_table_name(),
-			$db->escapeLike($this->table_prefix(), '\\') . '%',
+			'type = \'table\' AND name LIKE ?',
+			$this->getTableNamePrefix() . '%',
 		);
 
 		return $this->_has_data;
@@ -542,7 +547,14 @@ class Module extends Entity
 
 	public function getDataSize(): int
 	{
-		return (int) DB::getInstance()->getTableSize($this->documents_table_name());
+		$total = 0;
+		$db = DB::getInstance();
+
+		foreach ($this->getTablesNames() as $real_name => $name) {
+			$total += (int) $db->getTableSize($real_name);
+		}
+
+		return $total;
 	}
 
 	public function getConfigSize(): int
@@ -745,17 +757,33 @@ class Module extends Entity
 	public function deleteData(): void
 	{
 		$db = DB::getInstance();
-		$table_name = $db->quoteIdentifier($this->documents_table_name());
-		// Delete documents table
-		$db->exec(sprintf('DROP TABLE IF EXISTS %s; UPDATE modules SET config = NULL WHERE name = %s;', $table_name, $db->quote($this->name)));
-		$i = $db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ? ESCAPE \'\\\';',
-			$db->escapeLike($this->table_prefix()) . '%'
-		);
+
+		$tables = array_keys($this->getTablesNames());
+
+		$db->begin();
+
+		// Truncate tables before delete, this will trigger all foreign key actions (CASCADE/SET NULL)
+		foreach ($tables as $name) {
+			$db->exec(sprintf('DELETE FROM %s;', $db->quoteIdentifier($name)));
+		}
+
+		$db->commit();
+
+		// Disable foreign keys for deleting tables
+		$db->beginSchemaUpdate();
+
+		// Delete config, reset db_version
+		$db->preparedQuery('UPDATE modules SET config = NULL, db_version = NULL WHERE id = ?;', $this->id());
+
+		// Delete tables config
+		$db->preparedQuery('DELETE FROM modules_tables WHERE id_module = ?;', $this->id());
 
 		// Delete all tables
-		foreach ($i as $table) {
-			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table->name)));
+		foreach ($tables as $name) {
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($name)));
 		}
+
+		$db->commitSchemaUpdate();
 
 		// Delete all files
 		if ($dir = Files::get($this->storage_root())) {
@@ -1119,9 +1147,26 @@ class Module extends Entity
 		return EM::getInstance(ModuleTable::class)->all('SELECT * FROM @TABLE WHERE id_module = ? ORDER BY name;', $this->id());
 	}
 
-	public function getTablesNames(): array
+	/**
+	 * Return list of all module tables names, including the documents table
+	 */
+	public function getTablesNames(bool $with_documents = true): array
 	{
-		return array_values($db->getAssoc('SELECT name, name FROM modules_tables WHERE id_module = ?;', $this->id()));
+		$db = DB::getInstance();
+		$list = [];
+		$prefix = $this->getTableNamePrefix();
+		$documents_table_name = $this->getDocumentsTableName();
+		$sql = 'SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE ?;';
+
+		foreach ($db->iterate($sql, $prefix . '%') as $row) {
+			if (!$with_documents && $row->name === $documents_table_name) {
+				continue;
+			}
+
+			$list[$row->name] = substr($row->name, strlen($prefix));
+		}
+
+		return $list;
 	}
 
 }
