@@ -9,6 +9,24 @@ $db::toggleAuthorizer($db, false);
 $db->beginSchemaUpdate();
 $db->import(__DIR__ . '/1.4.0.sql');
 
+// Don't use iterate or SQLite will be throwing "database table is locked"
+// as a DROP INDEX/DROP TABLE cannot be executed when a SELECT is running
+$list = $db->getAssoc('SELECT name, name FROM sqlite_master WHERE type = \'index\' AND name LIKE \'module_data_%\';');
+
+// Drop old indexes
+foreach ($list as $name) {
+	$db->exec(sprintf('DROP INDEX IF EXISTS %s;', $db->quoteIdentifier($name)));
+}
+
+// Rename module documents tables
+foreach ($db->iterate('SELECT name FROM sqlite_master WHERE type = \'table\' AND name LIKE \'module_data_%\';') as $row) {
+	$new_name = str_replace('module_data_', 'module_', $row->name) . '_documents';
+	$db->exec(sprintf('ALTER TABLE %s RENAME TO %s;', $db->quoteIdentifier($row->name), $db->quoteIdentifier($new_name)));
+	// Don't forget the UNIQUE index
+	$db->exec(sprintf('CREATE UNIQUE INDEX %s ON %s (key);', $db->quoteIdentifier($new_name . '_key'), $db->quoteIdentifier($new_name)));
+}
+
+
 // Make sure 74* are correct
 Charts::updateInstalled('fr_pca_2025');
 
