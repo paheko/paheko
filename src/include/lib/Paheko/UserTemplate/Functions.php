@@ -203,15 +203,15 @@ class Functions
 
 		$table = 'module_data_' . $tpl->module->name;
 
-		if (!empty($params['key'])) {
-			if ($params['key'] == 'uuid') {
+		if (isset($params['key'])) {
+			if ($params['key'] === 'uuid') {
 				$params['key'] = Utils::uuid();
 			}
 
 			$field = 'key';
 			$where_value = $params['key'];
 		}
-		elseif (!empty($params['id'])) {
+		elseif (isset($params['id'])) {
 			$field = 'id';
 			$where_value = $params['id'];
 		}
@@ -314,6 +314,7 @@ class Functions
 			}
 
 			$id = null;
+			$key = Utils::uuid();
 			$db->insert($table, compact('id', 'document', 'key'));
 			$db->commit();
 
