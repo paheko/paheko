@@ -17,8 +17,6 @@ if (!$all_columns) {
 	throw new UserException('This table does not exist');
 }
 
-$is_module = str_starts_with($table, 'module_data_');
-
 $columns = [];
 
 foreach ($all_columns as $c) {
@@ -37,7 +35,7 @@ if (!empty($_GET['only']) && is_array($_GET['only'])) {
 	$list->setParameter(0, current($_GET['only']));
 }
 
-$tpl->assign(compact('table', 'list', 'is_module', 'foreign_keys'));
+$tpl->assign(compact('table', 'list', 'foreign_keys'));
 
 $tpl->register_modifier('format_json', function (string $str) {
 	return json_encode(json_decode($str, true), JSON_PRETTY_PRINT);
