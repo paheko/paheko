@@ -221,7 +221,6 @@ class Functions
 		}
 
 		$key = $params['key'] ?? null;
-		$id = $params['id'] ?? null;
 		$assign_new_id = $params['assign_new_id'] ?? null;
 		$validate = $params['validate_schema'] ?? null;
 		$validate_only = $params['validate_only'] ?? null;
@@ -314,6 +313,7 @@ class Functions
 				$db->delete($table, $field . ' = ?', $where_value);
 			}
 
+			$id = null;
 			$db->insert($table, compact('id', 'document', 'key'));
 			$db->commit();
 
