@@ -44,9 +44,7 @@ DELETE FROM plugins WHERE name = 'git_documents';
 ALTER TABLE services_reminders ADD COLUMN not_before_date TEXT NULL CHECK (date(not_before_date) IS NULL OR date(not_before_date) = not_before_date);
 
 
-ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
-
-CREATE TABLE IF NOT EXISTS services_reminders_sent
+CREATE TABLE IF NOT EXISTS services_reminders_sent_tmp
 -- Records of sent reminders, to keep track
 (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -59,8 +57,10 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
 	due_date TEXT NOT NULL CHECK (date(due_date) IS NOT NULL AND date(due_date) = due_date)
 );
 
-INSERT INTO services_reminders_sent SELECT * FROM services_reminders_sent_old;
-DROP TABLE services_reminders_sent_old;
+INSERT INTO services_reminders_sent_tmp SELECT * FROM services_reminders_sent;
+
+DROP TABLE services_reminders_sent;
+ALTER TABLE services_reminders_sent_tmp RENAME TO services_reminders_sent;
 
 CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, due_date);
 
@@ -71,10 +71,8 @@ CREATE INDEX IF NOT EXISTS srs_user ON services_reminders_sent (id_user);
 DROP INDEX IF EXISTS acc_transactions_users_service;
 ALTER TABLE services_users RENAME TO services_subscriptions;
 
-ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;
-
 -- Rename foreign key in acc_transactions_users
-CREATE TABLE IF NOT EXISTS acc_transactions_users
+CREATE TABLE IF NOT EXISTS acc_transactions_users_tmp
 -- Linking transactions and users
 (
 	id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
@@ -84,8 +82,10 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 	PRIMARY KEY (id_transaction, id_user, id_subscription)
 );
 
-INSERT INTO acc_transactions_users SELECT id_transaction, id_user, id_service_user FROM acc_transactions_users_old;
-DROP TABLE acc_transactions_users_old;
+INSERT INTO acc_transactions_users_tmp SELECT id_transaction, id_user, id_service_user FROM acc_transactions_users;
+DROP TABLE acc_transactions_users;
+
+ALTER TABLE acc_transactions_users_tmp RENAME TO acc_transactions_users;
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_transaction ON acc_transactions_users (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_user ON acc_transactions_users (id_user);
@@ -94,9 +94,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS acc_transactions_users_unique ON acc_transacti
 
 -- Add columns to audit table
 DROP TRIGGER IF EXISTS users_delete_logs;
-ALTER TABLE logs RENAME TO logs_old;
 
-CREATE TABLE IF NOT EXISTS logs
+CREATE TABLE IF NOT EXISTS logs_tmp
 -- Logged events
 (
 	id INTEGER NOT NULL PRIMARY KEY,
@@ -112,7 +111,7 @@ CREATE TABLE IF NOT EXISTS logs
 	details TEXT NULL -- Optional details (JSON object)
 );
 
-INSERT INTO logs SELECT
+INSERT INTO logs_tmp SELECT
 	id,
 	id_user,
 	NULL,
@@ -123,9 +122,12 @@ INSERT INTO logs SELECT
 	CASE WHEN json_extract(details, '$.entity') IS NOT NULL THEN json_extract(details, '$.id') ELSE NULL END,
 	NULL, -- NULL, as the user might not exist anymore, or it might be another user
 	CASE WHEN json_extract(details, '$.entity') IS NOT NULL THEN NULL ELSE details END
-FROM logs_old;
+FROM logs;
 
-CREATE INDEX IF NOT EXISTS logs_ip ON logs (ip_address, action, created);
+DROP TABLE logs;
+ALTER TABLE logs_tmp RENAME TO logs;
+
+CREATE INDEX IF NOT EXISTS logs_ip ON logs (user_ip, action, created);
 CREATE INDEX IF NOT EXISTS logs_user ON logs (id_user, action, created);
 CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 
@@ -135,9 +137,7 @@ ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;
 -- Fix web_pages_versions table (invalid foreign key)
 DELETE FROM web_pages_versions WHERE id_page NOT IN (SELECT id FROM web_pages);
 
-ALTER TABLE web_pages_versions RENAME TO web_pages_versions_old;
-
-CREATE TABLE IF NOT EXISTS web_pages_versions
+CREATE TABLE IF NOT EXISTS web_pages_versions_tmp
 (
 	id INTEGER NOT NULL PRIMARY KEY,
 	id_page INTEGER NOT NULL REFERENCES web_pages (id) ON DELETE CASCADE,
@@ -148,11 +148,12 @@ CREATE TABLE IF NOT EXISTS web_pages_versions
 	content TEXT NOT NULL
 );
 
-INSERT INTO web_pages_versions SELECT * FROM web_pages_versions_old;
+INSERT INTO web_pages_versions_tmp SELECT * FROM web_pages_versions;
+
+DROP TABLE web_pages_versions;
+ALTER TABLE web_pages_versions_tmp RENAME TO web_pages_versions;
 
 CREATE INDEX IF NOT EXISTS web_pages_versions_id_page ON web_pages_versions (id_page);
-
-DROP TABLE web_pages_versions_old;
 
 -- Better index for reconciled status
 DROP INDEX IF EXISTS acc_transactions_lines_reconciled;

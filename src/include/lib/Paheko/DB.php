@@ -570,11 +570,16 @@ class DB extends SQLite3
 		$this->db->exec(sprintf('PRAGMA user_version = %d;', $version));
 	}
 
-	public function beginSchemaUpdate()
+	public function beginSchemaUpdate(bool $legacy = true)
 	{
 		// Only start if not already taking place
 		if ($this->_schema_update++ == 0) {
 			$this->toggleForeignKeys(false);
+
+			if ($legacy) {
+				$this->db->exec('PRAGMA legacy_alter_table = ON;');
+			}
+
 			$this->begin();
 		}
 	}
@@ -584,6 +589,7 @@ class DB extends SQLite3
 		// Only commit if last call
 		if (--$this->_schema_update == 0) {
 			$this->commit();
+			$this->db->exec('PRAGMA legacy_alter_table = OFF;');
 			$this->toggleForeignKeys(true);
 		}
 	}
@@ -601,7 +607,6 @@ class DB extends SQLite3
 		$this->connect();
 
 		if (!$enable) {
-			$this->db->exec('PRAGMA legacy_alter_table = ON;');
 			$this->db->exec('PRAGMA foreign_keys = OFF;');
 
 			if ($this->firstColumn('PRAGMA foreign_keys;')) {
@@ -609,7 +614,6 @@ class DB extends SQLite3
 			}
 		}
 		else {
-			$this->db->exec('PRAGMA legacy_alter_table = OFF;');
 			$this->db->exec('PRAGMA foreign_keys = ON;');
 		}
 	}

@@ -6,7 +6,7 @@ use Paheko\Entities\Files\File;
 use Paheko\Files\Files;
 
 $db::toggleAuthorizer($db, false);
-$db->beginSchemaUpdate();
+$db->beginSchemaUpdate(false);
 $db->import(__DIR__ . '/1.4.0.sql');
 
 // Don't use iterate or SQLite will be throwing "database table is locked"
