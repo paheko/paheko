@@ -30,6 +30,11 @@ class DynamicList implements \Countable
 	protected array $columns;
 
 	/**
+	 * Set to TRUE if * should be prefixed to the SELECT clause
+	 */
+	protected bool $select_all = false;
+
+	/**
 	 * List of tables (including joins)
 	 */
 	protected string $tables;
@@ -230,6 +235,11 @@ class DynamicList implements \Countable
 	public function addConditions(string $conditions)
 	{
 		$this->conditions .= ' ' . ltrim($conditions);
+	}
+
+	public function setSelectAll(bool $all)
+	{
+		$this->select_all = $all;
 	}
 
 	public function setColumns(array $columns)
@@ -545,6 +555,10 @@ class DynamicList implements \Countable
 		}
 		else {
 			$columns = [];
+
+			if ($this->select_all) {
+				$columns[] = '*';
+			}
 
 			foreach ($this->columns as $alias => $properties) {
 				// Skip columns that require a certain order (eg. calculating a running sum)

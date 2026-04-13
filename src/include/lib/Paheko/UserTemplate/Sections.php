@@ -360,6 +360,9 @@ class Sections
 		$size = (int) ($params['max'] ?? 50);
 		$list->setPageSize($size === 0 ? null : $size);
 
+		// Make sure we do a SELECT *, and columns are added to the list
+		$list->setSelectAll(true);
+
 		if (isset($params['order'])) {
 			$list->orderBy($params['order'], $params['desc'] ?? false);
 		}
