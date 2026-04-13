@@ -550,7 +550,7 @@ class Module extends Entity
 		$total = 0;
 		$db = DB::getInstance();
 
-		foreach ($this->getTablesNames() as $real_name => $name) {
+		foreach ($this->getTablesNames() as $real_name) {
 			$total += (int) $db->getTableSize($real_name);
 		}
 
@@ -758,7 +758,7 @@ class Module extends Entity
 	{
 		$db = DB::getInstance();
 
-		$tables = array_keys($this->getTablesNames());
+		$tables = array_values($this->getTablesNames());
 
 		$db->begin();
 
@@ -1163,7 +1163,8 @@ class Module extends Entity
 				continue;
 			}
 
-			$list[$row->name] = substr($row->name, strlen($prefix));
+			$short_name = substr($row->name, strlen($prefix));
+			$list[$short_name] = $row->name;
 		}
 
 		return $list;

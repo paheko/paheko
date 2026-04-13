@@ -846,7 +846,8 @@ class UserTemplate extends \KD2\Brindille
 			return;
 		}
 
-		$tables = $module->listTables();
+		$tables = $module->getTablesNames();
+		$documents_table = array_key_exists($module::DOCUMENTS_TABLE_NAME, $tables) ? $module::DOCUMENTS_TABLE_NAME : null;
 
 		$this->module = $module;
 		$this->assign('module', array_merge($module->asArray(false), [
@@ -854,8 +855,8 @@ class UserTemplate extends \KD2\Brindille
 			'url'          => $module->url(),
 			'public_url'   => $module->public_url(),
 			'storage_root' => $module->storage_root(),
-			'table'        => in_array($module::DOCUMENTS_TABLE_NAME, $tables) ? $module::DOCUMENTS_TABLE_NAME : null,
-			'tables'       => array_values($tables),
+			'table'        => $documents_table,
+			'tables'       => $tables,
 		]));
 	}
 }
