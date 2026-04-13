@@ -321,9 +321,9 @@ class DB extends SQLite3
 	/**
 	 * Set authorizer to only allow modifying a custom table name
 	 */
-	public function enableTableAuthorizer(string $allowed_table_name): void
+	public function enableTableAuthorizer(array $allowed_tables): void
 	{
-		$this->setAuthorizer(function (int $action, ...$args) use ($allowed_table_name) {
+		$this->setAuthorizer(function (int $action, ...$args) use ($allowed_tables) {
 			// Use safety authorizer first
 			$r = self::safetyAuthorizer($action, ...$args);
 
@@ -351,7 +351,7 @@ class DB extends SQLite3
 				return \SQLite3::DENY;
 			}
 
-			if ($table === $allowed_table_name) {
+			if (in_array($table, $allowed_tables)) {
 				return \SQLite3::OK;
 			}
 			else {

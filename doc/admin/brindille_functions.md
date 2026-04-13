@@ -862,6 +862,7 @@ Enregistre une ligne dans une table SQL du module.
 | `id` | optionnel | Numéro unique de la ligne |
 | `key` | optionnel | Clé UUID unique de la ligne |
 | `assign` | optionnel | Si renseigné, les informations de la nouvelle ligne seront indiqués dans cette variable, y compris l'ID et la clé, si la ligne est nouvelle. |
+| `from` | optionnel | Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer. |
 | `where` | optionnel | Si renseigné, sera utilisé comme clause `WHERE` pour mettre à jour plusieurs lignes en une fois. |
 | … | optionnel | Autres paramètres : traités comme des valeurs à enregistrer dans la ligne |
 
@@ -882,6 +883,26 @@ Exemple de mise à jour de ligne :
 
 ```
 {{:save table="personnes" id=42 nom="Albert-Charlie-Antoine-Baptiste"}}
+```
+
+### Enregistrer plusieurs lignes en une fois
+
+Le paramètre `from` est équivalent à appeler la fonction `save` dans une boucle. Ainsi au lieu de :
+
+```
+{{:assign var="rows." title="Titre 1"}}
+{{:assign var="rows." title="Titre 2"}}
+{{#foreach from=$rows item="row"}}
+  {{:save table="trucs" title=$row.title type="page"}}
+{{/foreach}}
+```
+
+On peut simplement utiliser :
+
+```
+{{:assign var="rows." title="Titre 1"}}
+{{:assign var="rows." title="Titre 2"}}
+{{:save table="trucs" from=$rows type="page"}}
 ```
 
 ### Enregistrer la configuration du module
