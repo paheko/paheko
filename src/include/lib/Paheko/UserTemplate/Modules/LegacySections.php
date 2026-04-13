@@ -48,25 +48,8 @@ class LegacySections
 		unset($params['module']);
 		$params['tables'] = sprintf('%s AS a', $table);
 
-		// Cannot use json_each with authorizer before SQLite 3.41.0
-		// @see https://sqlite.org/forum/forumpost/d28110be11
-		if (isset($params['each']) && !$db->hasFeatures('json_each_readonly')) {
-			$t = 'module_tmp_each' . md5($params['each']);
-
-			// We create a temporary table, to get around authorizer issues in SQLite
-			$db->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
-			$db->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
-				$t, $table, $db->quote('$.' . trim($params['each']))
-			));
-
-			$params['tables'] = $t . ' AS a';
-			$params['select'] = 'value';
-			unset($params['each']);
-		}
-		elseif (isset($params['each'])) {
-			$params['select'] = 'value';
-			$params['tables'] = sprintf('%s AS a, json_each(a.document, %s)', $table, $db->quote('$.' . trim($params['each'])));
-			unset($params['each']);
+		if (isset($params['each'])) {
+			throw new TemplateException('Parameter "each" has been removed');
 		}
 
 		if (!isset($params['where'])) {
