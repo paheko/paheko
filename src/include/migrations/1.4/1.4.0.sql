@@ -1,3 +1,6 @@
+-- Seems that this table might exist in some cases, shouldn't be the case
+DROP TABLE IF EXISTS config_users_fields_old;
+
 -- Add last_updated column to modules
 ALTER TABLE modules ADD COLUMN last_updated TEXT NULL CHECK (last_updated IS NULL OR datetime(last_updated) = last_updated);
 
