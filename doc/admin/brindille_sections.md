@@ -715,7 +715,7 @@ Cette section est très puissante et permet de générer des listes simplement, 
 | :- | :- | :- |
 | `table` | **requis** | Nom de la table |
 | `columns` | **requis** | Liste des colonnes à lister, sous forme de tableau (voir ci-dessous) |
-| `module` | *optionnel* | Nom unique du module lié (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
+| `module` | *optionnel* | Nom unique du module à utiliser (par exemple : `recu_don`). Si non spécifié, alors le nom du module courant sera utilisé. |
 | `join` | *optionnel* | Tables à joindre à la requête, comme dans une requête SQL. Exemple : `INNER JOIN users ON users.id = personnes.id_user` |
 | `order` | *optionnel* | Colonne utilisée par défaut pour le tri (si l'utilisateur n'a pas choisi le tri sur une autre colonne). Si `select` est utilisé, il faut alors indiquer ici le numéro de la colonne, et non pas son nom. |
 | `desc` | *optionnel* | Si ce paramètre est à `true`, l'ordre de tri par défaut sera inversé. |
@@ -779,7 +779,7 @@ Lister le nom, la date et le montant des reçus fiscaux :
 	date="Date d'émission"
 	address="Adresse du bénéficiaire"
 	amount="Montant"}}
-{{#list tables="recus" columns=$columns}}
+{{#list table="recus" columns=$columns}}
 	<tr>
 		<th>{{$name}}</th>
 		<td>{{$date|date_short}}</td>
