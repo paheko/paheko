@@ -812,14 +812,19 @@ class DynamicFields
 			$db->beginSchemaUpdate();
 		}
 
+		// See https://www.sqlite.org/lang_altertable.html for correct order
+		// 1. create new table
 		$this->createTable(User::TABLE . '_tmp');
 
 		// No need to copy if the table does not exist (that's the case during first setup)
 		if ($db->firstColumn('SELECT 1 FROM sqlite_master WHERE type = \'table\' AND name = ?;', User::TABLE)) {
+			// 2. Copy data
 			$this->copy(User::TABLE, User::TABLE . '_tmp', $fields);
 		}
 
+		// 3. Drop old table
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', User::TABLE));
+		// 4. Rename new into old
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', User::TABLE));
 
 		$this->createIndexes(User::TABLE);
