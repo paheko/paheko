@@ -285,7 +285,7 @@ class ModuleTable extends Entity
 		}
 
 		// set authorizer to only allow working on this specific table
-		$db->enableTableAuthorizer($table_name);
+		$db->enableTablesAuthorizer([$table_name]);
 
 		foreach ($sql as $line) {
 			$db->exec($line);

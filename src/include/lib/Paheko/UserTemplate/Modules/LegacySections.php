@@ -331,6 +331,9 @@ class LegacySections
 
 		$list = new DynamicList($columns, $table);
 
+		// Make sure we cannot get unauthorized data out
+		$list->setAllowedTables(DB::RESTRICTED_TABLES);
+
 		static $reserved_keywords = ['max', 'order', 'desc', 'debug', 'explain', 'schema', 'columns', 'select', 'where', 'module', 'disable_user_ordering', 'disable_user_sort', 'check', 'export', 'group', 'count'];
 
 		foreach ($params as $key => $value) {

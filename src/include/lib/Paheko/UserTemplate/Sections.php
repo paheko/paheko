@@ -71,32 +71,6 @@ class Sections
 		'count',
 	];
 
-	/**
-	 * List of tables and columns that are restricted in SQL queries
-	 *
-	 * ~column means the column will always be returned as NULL
-	 * -column or !table means trying to access this column or table will return an error
-	 * see KD2/DB/SQLite3 code for details
-	 *
-	 * Note: column restrictions are only possible with PHP >= 8.0
-	 */
-	const SQL_TABLES = [
-		// Allow access to all tables
-		'*' => null,
-		// Restrict access to private fields in users
-		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
-		// Restrict access to some private tables
-		'!emails' => null,
-		'!emails_queue' => null,
-		'!compromised_passwords_cache' => null,
-		'!compromised_passwords_cache_ranges' => null,
-		'!api_credentials' => null,
-		'!plugins_signals' => null,
-		'!config' => null,
-		'!users_sessions' => null,
-		'!logs' => null,
-	];
-
 	static protected $_cache = [];
 
 	static public function _replaceVariablesInSQL(string $params, string $prefix): string
@@ -337,8 +311,8 @@ class Sections
 
 		$list = new DynamicList($columns, $table);
 
-		// Make sure we cannot get unauthorized data
-		$list->setAllowedTables(self::SQL_TABLES);
+		// Make sure we cannot get unauthorized data out
+		$list->setAllowedTables(DB::RESTRICTED_TABLES);
 
 		static $reserved_keywords = ['table', 'max', 'order', 'desc', 'debug', 'explain', 'columns', 'where', 'module', 'user_sorting', 'checkable', 'group', 'export_button'];
 
@@ -862,8 +836,6 @@ class Sections
 			unset($params['private']);
 		}
 
-		$allowed_tables = self::SQL_TABLES;
-
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
 				return;
@@ -878,17 +850,6 @@ class Sections
 
 			$params['order'] = 'points DESC';
 			$params['limit'] = '30';
-
-			// There is a bug in SQLite3 < 3.41.0
-			// where virtual tables (eg. FTS4) will trigger UPDATEs in the authorizer,
-			// making the request fail.
-			// So we will disable the authorizer here.
-			// From a security POV, this is a compromise, but in PHP < 8 there was no authorizer
-			// at all.
-			// @see https://sqlite.org/forum/forumpost/e11b51ca555f82147a1cbb58dc640b441e5f126cf6d7400753f62e82ca11ba88
-			if (\SQLite3::version()['versionNumber'] < 3041000) {
-				$allowed_tables = null;
-			}
 		}
 
 		if (isset($params['path'])) {
@@ -956,7 +917,7 @@ class Sections
 
 		unset($params['duplicates']);
 
-		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
+		foreach (self::sql($params, $tpl, $line) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
 				unset($data['points'], $data['snippet']);
@@ -1190,7 +1151,7 @@ class Sections
 		}
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator
+	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
@@ -1269,7 +1230,7 @@ class Sections
 			// Lock database against changes
 			$db->setReadOnly(true);
 
-			$statement = $db->prepareRestricted($allowed_tables, $sql);
+			$statement = $db->prepareRestricted(DB::RESTRICTED_TABLES, $sql);
 
 			$args = [];
 

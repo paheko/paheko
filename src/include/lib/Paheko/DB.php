@@ -31,6 +31,30 @@ class DB extends SQLite3
 
 	protected bool $_install_check = true;
 
+	/**
+	 * List of tables and columns that are restricted in SQL queries
+	 *
+	 * ~column means the column will always be returned as NULL
+	 * -column or !table means trying to access this column or table will return an error
+	 * see KD2/DB/SQLite3::restrictedAuthorizer code for details
+	 */
+	const RESTRICTED_TABLES = [
+		// Allow access to all tables
+		'*' => null,
+		// Restrict access to private fields in users
+		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
+		// Restrict access to some private tables
+		'!emails' => null,
+		'!emails_queue' => null,
+		'!compromised_passwords_cache' => null,
+		'!compromised_passwords_cache_ranges' => null,
+		'!api_credentials' => null,
+		'!plugins_signals' => null,
+		'!config' => null,
+		'!users_sessions' => null,
+		'!logs' => null,
+	];
+
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
@@ -319,45 +343,52 @@ class DB extends SQLite3
 	}
 
 	/**
+	 * Authorizer that allows changes to a limited set of tables
+	 */
+	static public function restrictedTablesAuthorizer(array $allowed_tables, int $action, ...$args)
+	{
+		// Use safety authorizer first
+		$r = self::safetyAuthorizer($action, ...$args);
+
+		if (!$r !== \SQLite3::OK) {
+			return $r;
+		}
+
+		// Second argument is table name
+		if ($action === \SQLite3::CREATE_INDEX
+			|| $action === \SQLite3::DROP_INDEX
+			|| $action === \SQLite3::ALTER_TABLE) {
+			$table = $args[1];
+		}
+		elseif ($action === \SQLite3::CREATE_TABLE
+			|| $action === \SQLite3::DELETE
+			|| $action === \SQLite3::INSERT
+			|| $action === \SQLite3::UPDATE) {
+			$table = $args[0];
+		}
+		elseif ($action === \SQLite3::SELECT
+			|| $action === \SQLite3::READ) {
+			// Make sure we still can't read from restricted tables
+			return self::restrictedAuthorizer(self::RESTRICTED_SQL_TABLES, $action, ...$args);
+		}
+		else {
+			return \SQLite3::DENY;
+		}
+
+		if (in_array($table, $allowed_tables)) {
+			return \SQLite3::OK;
+		}
+		else {
+			return \SQLite3::DENY;
+		}
+	}
+
+	/**
 	 * Set authorizer to only allow modifying a custom table name
 	 */
-	public function enableTableAuthorizer(array $allowed_tables): void
+	public function enableTablesAuthorizer(array $allowed_tables): void
 	{
-		$this->setAuthorizer(function (int $action, ...$args) use ($allowed_tables) {
-			// Use safety authorizer first
-			$r = self::safetyAuthorizer($action, ...$args);
-
-			if (!$r !== \SQLite3::OK) {
-				return $r;
-			}
-
-			// Second argument is table name
-			if ($action === \SQLite3::CREATE_INDEX
-				|| $action === \SQLite3::DROP_INDEX
-				|| $action === \SQLite3::ALTER_TABLE) {
-				$table = $args[1];
-			}
-			elseif ($action === \SQLite3::CREATE_TABLE
-				|| $action === \SQLite3::DELETE
-				|| $action === \SQLite3::INSERT
-				|| $action === \SQLite3::UPDATE) {
-				$table = $args[0];
-			}
-			elseif ($action === \SQLite3::SELECT
-				|| $action === \SQLite3::READ) {
-				return \SQLite3::OK;
-			}
-			else {
-				return \SQLite3::DENY;
-			}
-
-			if (in_array($table, $allowed_tables)) {
-				return \SQLite3::OK;
-			}
-			else {
-				return \SQLite3::DENY;
-			}
-		});
+		$this->setAuthorizer(fn (int $action, ...$args) => self::restrictedTablesAuthorizer($allowed_tables, $action, ...$args));
 	}
 
 	static public function registerCustomFunctions($db)

@@ -68,6 +68,9 @@ class TableFunctions
 		if (!is_string($name)) {
 			throw new TemplateException('Invalid column name: not a string');
 		}
+		elseif ($name === $module::DOCUMENTS_TABLE_NAME) {
+			throw new TemplateException('The documents table cannot be modified');
+		}
 
 		// Make sure we cannot modify tables outside of migration.tpl
 		if ($action !== 'export'
@@ -146,6 +149,13 @@ class TableFunctions
 		}
 
 		$table_name = $params['table'] ?? '';
+
+		// this would be catched by getTable (as documents is not a regular table),
+		// but it's better to have a clear error message
+		if ($table === $module::DOCUMENTS_TABLE_NAME) {
+			throw new TemplateException('The documents table cannot be modified');
+		}
+
 		$table = $module->getTable($table_name);
 
 		if (!$table) {
@@ -231,6 +241,10 @@ class TableFunctions
 			return;
 		}
 
+		if ($params['table'] === $module::DOCUMENTS_TABLE_NAME) {
+			throw new TemplateException('The documents table cannot be modified');
+		}
+
 		if (array_key_exists('from', $params)) {
 			if (empty($params['from'])) {
 				return;
@@ -289,6 +303,11 @@ class TableFunctions
 		}
 
 		$table = Modules::getModuleTableName($module->name, $params['table']);
+
+		if ($table === $module->getDocumentsTableName()) {
+			throw new TemplateException('The documents table cannot be modified');
+		}
+
 		$sql_params = [];
 		$where = null;
 
@@ -317,7 +336,7 @@ class TableFunctions
 		unset($value);
 
 		// set authorizer to only allow working on this specific table
-		$db->enableTableAuthorizer($table);
+		$db->enableTablesAuthorizer([$table]);
 
 		try {
 			if ($where) {
@@ -360,6 +379,10 @@ class TableFunctions
 
 		$table = Modules::getModuleTableName($tpl->module->name, $params['table']);
 
+		if ($table === $module->getDocumentsTableName()) {
+			throw new TemplateException('The documents table cannot be modified');
+		}
+
 		$sql_params = [];
 		$where = null;
 
@@ -380,7 +403,7 @@ class TableFunctions
 		}
 
 		// set authorizer to only allow working on this specific table
-		$db->enableTableAuthorizer($table);
+		$db->enableTablesAuthorizer([$table]);
 
 		try {
 			// Delete rows
@@ -401,13 +424,12 @@ class TableFunctions
 
 	static public function insert(array $params, UserTemplate $tpl, int $line): void
 	{
-		var_dump($params); exit;
 		$db = DB::getInstance();
 		$sql = $params['sql'];
 		$sql = str_replace('@MODULE_', $tpl->module->table_prefix(), $sql);
 
 		// set authorizer to only allow working on modules tables (except documents table)
-		$db->enableTableAuthorizer(array_keys($tpl->module->getTablesNames(false)));
+		$db->enableTablesAuthorizer(array_values($tpl->module->getTablesNames(false)));
 
 		try {
 			$db->exec($sql);
