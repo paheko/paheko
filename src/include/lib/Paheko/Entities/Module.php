@@ -97,6 +97,7 @@ class Module extends Entity
 
 	public function selfCheck(): void
 	{
+		$this->assert(!$this->_broken_message, $this->_broken_message);
 		$this->assertIsValid();
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
@@ -136,16 +137,20 @@ class Module extends Entity
 		parent::importForm($source);
 	}
 
+	public function setBrokenMessage(string $message): void
+	{
+		$this->_broken_message = $message;
+	}
+
 	public function getBrokenMessage(): ?string
 	{
-		$this->checkIfBroken();
 		return $this->_broken_message;
 	}
 
-	public function checkIfBroken(): void
+	public function isBroken(): bool
 	{
 		if ($this->_broken_message !== null) {
-			return;
+			return true;
 		}
 
 		try {
@@ -153,19 +158,13 @@ class Module extends Entity
 		}
 		catch (ValidationException $e) {
 			$this->_broken_message = $e->getMessage();
-			return;
+			return true;
 		}
 
-		$this->_broken_message = '';
+		return false;
 	}
 
-	public function isBroken(): bool
-	{
-		$this->checkIfBroken();
-		return $this->_broken_message !== '';
-	}
-
-	public function getINIProperties(bool $use_local = true): stdClass
+	public function getINIProperties(bool $use_local = true): ?stdClass
 	{
 		if (isset($this->_ini) && $use_local) {
 			return $this->_ini;
@@ -180,29 +179,32 @@ class Module extends Entity
 			$from_dist = true;
 		}
 		else {
-			throw new ValidationException('Le fichier module.ini est absent');
+			$this->setBrokenMessage('Le fichier module.ini est absent');
+			return null;
 		}
 
 		try {
 			$ini = Utils::parse_ini_string($ini, false);
 		}
 		catch (\RuntimeException $e) {
-			throw new ValidationException(sprintf('Le fichier module.ini est invalide : %s', $e->getMessage()));
+			$this->setBrokenMessage(sprintf('Le fichier module.ini est invalide : %s', $e->getMessage()));
+			return null;
 		}
 
 		if (empty($ini)) {
-			throw new ValidationException('Le fichier module.ini est vide');
+			$this->setBrokenMessage('Le fichier module.ini est vide');
+			return null;
 		}
 
 		$ini = (object) $ini;
 
 		if (!isset($ini->name)) {
-			throw new ValidationException('Le fichier module.ini est invalide : la clé "name" n\'existe pas');
+			$this->setBrokenMessage('Le fichier module.ini est invalide : la clé "name" n\'existe pas');
 			return null;
 		}
 
 		if (isset($ini->min_version)) {
-			throw new ValidationException('Ce module nécessite Paheko 1.4.0 ou supérieur');
+			$this->setBrokenMessage('Ce module nécessite Paheko 1.4.0 ou supérieur');
 			return null;
 		}
 
@@ -227,7 +229,7 @@ class Module extends Entity
 	{
 		$ini = $this->getINIProperties($use_local);
 
-		if (!$ini) {
+		if (null === $ini) {
 			return false;
 		}
 
