@@ -314,7 +314,7 @@ class Functions
 			}
 
 			$id = null;
-			$key = Utils::uuid();
+			$key ??= Utils::uuid();
 			$db->insert($table, compact('id', 'document', 'key'));
 			$db->commit();
 
