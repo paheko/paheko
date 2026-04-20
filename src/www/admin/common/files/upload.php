@@ -9,6 +9,10 @@ require __DIR__ . '/../../_inc.php';
 
 $path = $_GET['p'] ?? null;
 
+if (!is_string($path)) {
+	throw new UserException('Invalid path', 400);
+}
+
 File::validatePath($path);
 
 if (!File::canCreate($path)) {
