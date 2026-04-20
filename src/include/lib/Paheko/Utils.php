@@ -1804,7 +1804,7 @@ class Utils
 	static protected function getPrinceCommand(): string
 	{
 		$org_name = Config::getInstance()->org_name;
-		return sprintf('prince --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
+		return sprintf('prince --no-local-files --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
 	}
 
 	static public function getPDFCommand(): ?string
