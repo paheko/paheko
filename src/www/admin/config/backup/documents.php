@@ -20,7 +20,25 @@ $form->runIf('restore', function () {
 		// Decompress (inflate) raw data
 		if (empty($_FILES['file1']['error']) && !empty($_FILES['file1']['tmp_name']) && f('compressed')) {
 			$f = $_FILES['file1']['tmp_name'];
-			file_put_contents($f, gzinflate(file_get_contents($f), 1024*1024*1024));
+			$in = fopen($f, 'rb');
+			$out = fopen($f . '.inflated', 'w');
+			stream_filter_append($in, 'zlib.inflate', STREAM_FILTER_READ);
+			$size = filesize($f);
+			$total = 0;
+
+			while (!feof($in)) {
+				$data = fread($in, 8192);
+				fwrite($out, $data);
+				$total += strlen($data);
+
+				// Suspicious file size
+				if ($size && $total > $size*50) {
+					@unlink($f . '.inflated');
+					throw new UserException('Fichier invalide à la décompression : ' . $_FILES['file1']['name']);
+				}
+			}
+
+			rename($f . '.inflated', $f);
 		}
 
 		Files::upload(Utils::dirname($target), 'file1', Session::getInstance());
