@@ -13,6 +13,7 @@ use Paheko\DB;
 use Paheko\Entity;
 use Paheko\Files\Conversion;
 use Paheko\Form;
+use Paheko\Log;
 use Paheko\Plugins;
 use Paheko\Static_Cache;
 use Paheko\Template;
@@ -482,6 +483,10 @@ class File extends Entity
 
 		$this->deleteCache();
 		$this->deleteVersions();
+
+		if (!$this->isDir()) {
+			Log::add(Log::DELETE, ['entity' => self::class, 'path' => $this->path]);
+		}
 
 		$r = parent::delete();
 

@@ -252,6 +252,9 @@ class Log
 					&& ($value = constant($const))) {
 					$row->entity_name = $value;
 				}
+				elseif ($row->details->entity === 'Files\\File') {
+					$row->entity_name = 'fichier ' . ($row->details->path ?? '(?)');
+				}
 
 				$const = 'Paheko\Entities\\' . $row->details->entity . '::PRIVATE_URL';
 
