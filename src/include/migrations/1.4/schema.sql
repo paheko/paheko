@@ -707,6 +707,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 	status INTEGER NOT NULL,
 	inherited_status INTEGER NOT NULL,
 	format TEXT NOT NULL,
+	list_order INTEGER NOT NULL,
 	published TEXT NOT NULL CHECK (datetime(published) IS NOT NULL AND datetime(published) = published),
 	modified TEXT NOT NULL CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
 	title TEXT NOT NULL,

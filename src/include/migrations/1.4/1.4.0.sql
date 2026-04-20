@@ -134,6 +134,46 @@ CREATE INDEX IF NOT EXISTS logs_created ON logs (created);
 -- Store user name for transaction creation
 ALTER TABLE acc_transactions ADD COLUMN creator_name TEXT NULL;
 
+-- Add column list_order to web_pages table
+CREATE TABLE IF NOT EXISTS web_pages_tmp
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	id_parent INTEGER NULL REFERENCES web_pages_tmp(id) ON DELETE CASCADE,
+	uri TEXT NOT NULL, -- Page identifier
+	type INTEGER NOT NULL, -- 1 = Category, 2 = Page
+	status INTEGER NOT NULL,
+	inherited_status INTEGER NOT NULL,
+	format TEXT NOT NULL,
+	list_order INTEGER NOT NULL,
+	published TEXT NOT NULL CHECK (datetime(published) IS NOT NULL AND datetime(published) = published),
+	modified TEXT NOT NULL CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
+	title TEXT NOT NULL,
+	content TEXT NOT NULL
+);
+
+INSERT INTO web_pages_tmp SELECT
+	id,
+	id_parent,
+	uri,
+	type,
+	status,
+	inherited_status,
+	format,
+	'date',
+	published,
+	modified,
+	title,
+	content
+	FROM web_pages;
+
+DROP TABLE web_pages;
+ALTER TABLE web_pages_tmp RENAME TO web_pages;
+
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
+CREATE INDEX IF NOT EXISTS web_pages_id_parent ON web_pages (id_parent);
+CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
+CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
+
 -- Fix web_pages_versions table (invalid foreign key)
 DELETE FROM web_pages_versions WHERE id_page NOT IN (SELECT id FROM web_pages);
 

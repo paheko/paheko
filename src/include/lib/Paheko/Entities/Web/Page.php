@@ -36,6 +36,7 @@ class Page extends Entity
 	protected int $status;
 	protected int $inherited_status;
 	protected string $format;
+	protected string $list_order = self::LIST_BY_TITLE;
 	protected \DateTime $published;
 	protected \DateTime $modified;
 	protected string $content;
@@ -65,6 +66,14 @@ class Page extends Entity
 	const TYPES = [
 		self::TYPE_CATEGORY => 'Category',
 		self::TYPE_PAGE => 'Page',
+	];
+
+	const LIST_BY_DATE = 'date';
+	const LIST_BY_TITLE = 'title';
+
+	const LIST_ORDERS = [
+		self::LIST_BY_TITLE => 'Par titre',
+		self::LIST_BY_DATE => 'Par date inverse',
 	];
 
 	const TEMPLATES = [
