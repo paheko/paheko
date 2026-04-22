@@ -592,7 +592,11 @@ class CSV_Custom
 	{
 		$sheet ??= $this->sheet;
 
-		return null !== $this->rows ? count($this->rows[$sheet]) : null;
+		if (!isset($sheet, $this->rows[$sheet])) {
+			return null;
+		}
+
+		return count($this->rows[$sheet]);
 	}
 
 	public function skip(int $count): void
