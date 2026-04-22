@@ -764,9 +764,9 @@ class CSV_Custom
 		$header = array_slice($this->rows[$this->sheet], 0, $this->skip);
 		$rows = array_slice($this->rows[$this->sheet], $this->skip);
 
-		usort($rows, fn($a, $b) => strcmp($a[$col] ?? '', $b[$col] ?? ''));
+		usort($rows, fn($a, $b) => strnatcasecmp($a[$col] ?? '', $b[$col] ?? ''));
 
-		$rows = $header + $rows;
+		$rows = array_merge($header, $rows);
 
 		// Renumber array
 		$this->rows[$this->sheet] = array_combine(range(1, count($rows)), array_values($rows));
