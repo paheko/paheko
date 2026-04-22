@@ -576,12 +576,8 @@ class CommonFunctions
 			throw new TemplateException('Missing parameter "href"');
 		}
 
-		if (!isset($params['label'])) {
-			throw new TemplateException('Missing parameter "label"');
-		}
-
 		$href = $params['href'];
-		$label = $params['label'];
+		$label = $params['label'] ?? null;
 		$prefix = $params['prefix'] ?? '';
 
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
