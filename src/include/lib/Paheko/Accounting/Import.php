@@ -167,6 +167,13 @@ class Import
 
 		$year->assertCanBeModified();
 
+		// Make sure we order FEC files by ID, allowing to handle files where lines of the same transaction
+		// are not contiguous
+		if ($type === Export::FEC
+			&& is_numeric($csv->getLine(2)->id ?? null)) {
+			$csv->orderBy('id');
+		}
+
 		$db = DB::getInstance();
 		$db->begin();
 		Log::add(Log::MESSAGE, ['message' => 'Import d\'écritures comptables'], $user_id);
