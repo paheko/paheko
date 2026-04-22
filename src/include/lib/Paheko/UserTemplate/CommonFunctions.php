@@ -572,6 +572,14 @@ class CommonFunctions
 
 	static public function link(array $params): string
 	{
+		if (!isset($params['href'])) {
+			throw new TemplateException('Missing parameter "href"');
+		}
+
+		if (!isset($params['label'])) {
+			throw new TemplateException('Missing parameter "label"');
+		}
+
 		$href = $params['href'];
 		$label = $params['label'];
 		$prefix = $params['prefix'] ?? '';
