@@ -395,6 +395,9 @@ class File extends Entity
 		// ->rename() will ->save()
 		$this->rename(self::CONTEXT_TRASH . '/' . $hash . '/' . $this->path);
 
+		// Just to make sure ;)
+		$this->save();
+
 		Plugins::fire('file.trash', false, ['file' => $this]);
 
 		$db->commit();
