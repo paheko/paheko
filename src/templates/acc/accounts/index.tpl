@@ -55,9 +55,9 @@ use Paheko\Entities\Accounting\Account;
 							{tag preset="anomaly"}
 						{/if}
 						{if $account.type === Account::TYPE_BANK}
-							{if $account.is_reconciled}
+							{if $account.is_reconciled === true}
 								{tag small=true preset="reconciled"}
-							{else}
+							{elseif $account.is_reconciled === false}
 								{tag small=true preset="reconciliation_required"}
 							{/if}
 						{/if}

@@ -392,13 +392,30 @@ class Accounts
 		return true;
 	}
 
-	static public function isReconciled(int $account_id, int $year_id): bool
+	/**
+	 * Return TRUE if account has all lines reconciled,
+	 * NULL if account has never been reconciled,
+	 * or FALSE of there is at least one reconciled line and at least one non-reconciled line
+	 */
+	static public function isReconciled(int $account_id, int $year_id): ?bool
 	{
-		return !DB::getInstance()->firstColumn('SELECT 1
+		$r = DB::getInstance()->first('SELECT SUM(l.reconciled) AS "count",
+			SUM(CASE WHEN l.reconciled = 0 THEN 1 ELSE 0 END) AS "missing"
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE t.id_year = ? AND l.id_account = ? AND l.reconciled = 0 LIMIT 1;',
+			WHERE t.id_year = ? AND l.id_account = ?;',
 			$year_id, $account_id);
+
+		if ($r->count === 0) {
+			return null;
+		}
+
+		if ($r->missing) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 /* FIXME: implement closing of accounts
