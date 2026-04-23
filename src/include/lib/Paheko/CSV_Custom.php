@@ -274,14 +274,17 @@ class CSV_Custom
 		}
 
 		$rows = [];
+		$prev = null;
 
 		foreach (CSV::iterate($path) as $line => $row) {
 			if ($line > 1
-				&& count($rows[$line - 1]) !== count($row)) {
+				&& null !== $prev
+				&& count($prev) !== count($row)) {
 				throw new UserException(sprintf('Ligne %d : le nombre de colonne diffère de la ligne précédente, cela peut indiquer un fichier corrompu ou comportant plusieurs feuilles différentes', $line));
 			}
 
 			$rows[$line] = $row;
+			$prev = $row;
 		}
 
 		if (!count($rows)) {
@@ -761,15 +764,16 @@ class CSV_Custom
 			throw new \InvalidArgumentException('Unknown column: ' . $column);
 		}
 
-		$header = array_slice($this->rows[$this->sheet], 0, $this->skip);
-		$rows = array_slice($this->rows[$this->sheet], $this->skip);
+		$header = array_slice($this->rows[$this->sheet], 0, $this->skip, true);
+		$rows = array_slice($this->rows[$this->sheet], $this->skip, null, true);
 
-		usort($rows, fn($a, $b) => strnatcasecmp($a[$col] ?? '', $b[$col] ?? ''));
+		uasort($rows, fn($a, $b) => strnatcasecmp($a[$col] ?? '', $b[$col] ?? ''));
 
-		$rows = array_merge($header, $rows);
+		// Don't use array_merge here as we want to preserve keys
+		$rows = $header + $rows;
 
 		// Renumber array
-		$this->rows[$this->sheet] = array_combine(range(1, count($rows)), array_values($rows));
+		$this->rows[$this->sheet] = $rows;
 	}
 
 	public function listSheets(): array
