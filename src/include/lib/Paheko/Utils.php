@@ -2,11 +2,12 @@
 
 namespace Paheko;
 
-use KD2\Security;
+use KD2\ErrorManager;
 use KD2\Form;
 use KD2\HTTP;
-use KD2\Translate;
+use KD2\Security;
 use KD2\SMTP;
+use KD2\Translate;
 use KD2\DB\Date;
 use KD2\DB\DB_Exception;
 
@@ -535,6 +536,11 @@ class Utils
 
 	static public function isLocalURL(string $url): bool
 	{
+		if (substr($url, 0, 1) === '/'
+			&& substr($url, 1, 1) !== '/') {
+			return true;
+		}
+
 		$config = Config::getInstance();
 
 		$my_hosts = [
@@ -1833,6 +1839,31 @@ class Utils
 	}
 
 	/**
+	 * Filter HTML code for use with PDF transformation software
+	 */
+	static public function filterHTMLForPDF(string $str): string
+	{
+		// Make sure no external request is allowed
+		// (Just in case the PDF program doesn't have an allow-list for remote hosts)
+		$str = preg_replace_callback('/<[^>]+(?:src)\s*=\s*(".*?"|\'.*?\'|[^\s]+)[^>]*>/', function (array $match): string {
+			$url = trim(trim($match[1], '"\''));
+
+			if (false !== strpos($url, 'file:')
+				|| !self::isLocalURL($url)) {
+				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
+				return '<!-- Disabled external request -->';
+			}
+
+			return $match[0];
+		}, $str);
+
+		$str = self::appendCookieToURLs($str);
+		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+
+		return $str;
+	}
+
+	/**
 	 * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
 	 * @param  string $str HTML string
 	 * @return void
@@ -1843,12 +1874,11 @@ class Utils
 			throw new \LogicException('PDF generation is disabled');
 		}
 
-		$str = self::appendCookieToURLs($str);
-		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+		$str = self::filterHTMLForPDF($str);
 
 		// If there is no program found, try to see if there's a plugin
 		if (PDF_COMMAND === 'auto'
-			&& Plugins::hasSignal('pdf.create')) {
+			&& Plugins::hasSignal('pdf.stream')) {
 			$in = ['string' => $str];
 
 			$signal = Plugins::fire('pdf.stream', true, $in);
@@ -1865,7 +1895,7 @@ class Utils
 		// Only Prince can handle using STDIN and STDOUT and stream PDF
 		// If the program is not Prince, store PDF in temporary file
 		if ($cmd !== 'prince') {
-			$file = self::filePDF($str);
+			$file = self::filePDF($str, false);
 			readfile($file);
 			unlink($file);
 			return;
@@ -1885,9 +1915,10 @@ class Utils
 	/**
 	 * Creates a PDF file from a HTML string
 	 * @param  string $str HTML string
+	 * @param  bool $filter_html TRUE to filter the HTML input
 	 * @return string File path of the PDF file (temporary), you must delete or move it
 	 */
-	static public function filePDF(string $str): ?string
+	static public function filePDF(string $str, bool $filter_html = true): ?string
 	{
 		if (!PDF_COMMAND) {
 			throw new \LogicException('PDF generation is disabled');
@@ -1896,8 +1927,9 @@ class Utils
 		$source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
 		$target = str_replace('.html', '.pdf', $source);
 
-		$str = self::appendCookieToURLs($str);
-		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
+		if ($filter_html) {
+			$str = self::filterHTMLForPDF($str);
+		}
 
 		Utils::safe_mkdir(CACHE_ROOT, null, true);
 		file_put_contents($source, $str);
