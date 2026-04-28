@@ -160,6 +160,7 @@ Toutes les pages d'un module disposent de la variable `$module` qui contient l'e
 * `$module.description` la description
 * `$module.config` la configuration du module
 * `$module.url` l'adresse URL du module (`https://site-association.tld/m/recu_don/` par exemple)
+* `$module.table` le nom de la table SQL où sont stockés les documents JSON du module (`NULL` si la table n'existe pas encore)
 
 # Stockage de données
 
