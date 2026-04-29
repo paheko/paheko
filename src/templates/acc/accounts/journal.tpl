@@ -78,7 +78,7 @@
 	</fieldset>
 </form>
 
-<form method="post" action="{$admin_url}acc/transactions/actions.php">
+<form method="post" action="{$admin_url}acc/transactions/actions.php?from={$self_url|rawurlencode}">
 
 {include file="common/dynamic_list_head.tpl" check=$can_edit}
 
