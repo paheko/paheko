@@ -46,6 +46,7 @@
 							$account::TYPE_CASH,
 							$account::TYPE_BANK,
 							$account::TYPE_OUTSTANDING,
+							$account::TYPE_THIRD_PARTY,
 							$sum < 0 ? $account::TYPE_EXPENSE : $account::TYPE_REVENUE,
 						];
 						$types = rawurlencode(implode('|', $types));
