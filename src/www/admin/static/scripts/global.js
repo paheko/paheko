@@ -732,13 +732,21 @@
 			let f = form.dataset.focus;
 			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
 			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"]):not([readonly]):not([type=button])' : f);
+			var element;
 
 			if (n !== null && i[n]) {
-				i[n].focus();
+				element = i[n];
 			}
 			else if (n === null && i[0]) {
-				i[0].focus();
+				element = i[0];
 			}
+
+			// Don't focus inputs on touch screens as this opens the keyboard
+			if (!element || (element.tagName.toLowerCase() === 'input' && ('ontouchstart' in window))) {
+				return;
+			}
+
+			element.focus();
 		}
 	});
 
