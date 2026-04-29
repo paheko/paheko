@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Make\ssure\swe\scan't\sload\sexternal\sresources\sfrom\sthe\sHTML\sincluded\sin\sa\sPDF\sfile
-D 2026-04-28T12:21:47.443
+C Fix\sPrism\seditor\sthat\sused\sto\scrash\swhen\sautocompleting\ssome\sstuff
+D 2026-04-29T09:32:51.147
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -745,7 +745,7 @@ F src/www/admin/static/scripts/lib/datepicker2.min.js a4c81fc228bbb79c906350181d
 F src/www/admin/static/scripts/lib/gibberish-aes.min.js 8c82e940cf5cf6fb68433bdc6c3a62c71583a60d
 F src/www/admin/static/scripts/lib/prism/hack.woff2 6bd11683a6c32f40c39b6da7be226395fbc967948cadbf760d3edd1b9ef7f443
 F src/www/admin/static/scripts/lib/prism/prism_editor.css f6ebe96b43f8420c9ba9d873d07223458fe381b0fdceaf7f41f557e4737b73a2
-F src/www/admin/static/scripts/lib/prism/prism_editor.js df849aef098df144c6e09d9d0ae0a8d1a149035fe1701ce159498b1d92e061b9
+F src/www/admin/static/scripts/lib/prism/prism_editor.js f3f59db7dcdbb1047f7a3465a8b7daa548a3ca07626580797bce8b456a0b24d5
 F src/www/admin/static/scripts/lib/query_builder.js 1e1ade580be3a4add8dadd04e7ff7ed1f8da70855ebf5c7a53a515ee16b14cea
 F src/www/admin/static/scripts/lib/text_editor.js 753a77f49880b00419771b25a1166ff76819f3cd52ad48f2b752339caa64a5bd
 F src/www/admin/static/scripts/lib/unzipit.min.js 8729f4e48a77faee72b09d2503934f705fb5befab597262230c7c26836f52162
@@ -855,24 +855,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P c39fbc6e53ca1c20e9061810fd2904d34941c994da91cb192c7bdee9d8fa827b
-R cda12e26a1163f25438fcb9c2631eef4
+P 667cf3c542a71e04935c48d33c5e54b8b4e9a0e232c313c45b2f3ba1d2f4e4db
+R 2606fd39f5944b1573f0b57d326b2dbf
 U bohwaz
-Z 66a28ff67b462f830b963ce6f945e231
+Z e5b0329c447831c3336fccf878dd4325
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnwplsACgkQksnacbiI
-6jSNmQ//XeeFoeCKVWxZZIcFyonemgjiQBOo0YD+2nsXmUZ2xi46mlrGaHwGM2BH
-BZxsEyBuGDXW/+3GvmLkxuz0VTXwcA3Z7RcTe9B41zGzPx5skfPRr6c5mVE3DtxZ
-2DeZa8EhMGCW70MsnAB4ysjIH54g98i08+vmv0mafKPidd1ilIdM8vS+l1o9Csmc
-sl1xcaWSd4UUtATDaliXpMB71P5xZErfbI34ikoQkbsgYRhJMebtxEmZ/baVi9qC
-mgLrNaSG0UPFY8Yv9Z7yY5IHfGbO1Ok/R4XaQFamRc6jsNq2OVUMdBnJWH2CrWcn
-Pod7Eph2yxK7E9igFLaCBi3vQ4AVQjnEaMEJo6t8HzzT9iH1BAUeJDAVlXjXnLGa
-YmrO4IwMpztXZDagBQi3tZMXHTPfAXH1wnhVUeY2MLm5xTR4Z8HpFfuc8xy3om57
-x8eN1Fx4HdSIIPJgPNze2LI/fUi2j7/LgLD55AVQM+V0Mh6tLRCH3fssbLAwpq9O
-kfWBykwxhBGwf+Wjwq19/aiqXF7glTwefNxETCQa5PHJSA39ufogMLJS8oR6FGfQ
-de1ium8WZAPmFKwH5d/Z/tE13l+NGmC+HjQtCK1jQsyaYePuuIItpBLmYc91io1d
-zahyiuLLVnF2zzsRUD4Q5H+EXweXddA+x4EMWj85OTgO0kHxRr4=
-=zk/c
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnx0EMACgkQksnacbiI
+6jQ6tRAAlu/xeOul7X5xpvBJT3nAs9B1Lnp+Z9Z9DzInPb3PiKA4BaHJknpyOJAQ
+vGc9yXzSd7sO+FlzGbsNfPixX04kasup9C2iFVGLdby6F0KuxVMMCTFQHrO+eIED
+o6t9XQM3TCsp9VQoQigvuUTWvmiXhROTu7PoHsNhax0X1/lkL8Q4BzuJtsCaCGkj
+AJJISZsfvNu9x5qvxt4G1HlCRYAafV5BUaz46f0FyChOHVv/PStzjRy5bHT+QjnH
+dVWTY3IEDomcjAJDR1Zji7YDeqzwftu5WwTFNg88mbaFwGRyaKy2do0f1yv50R8m
+sQY2kxovWii3UBFS5+XwleKPyTkMPkb9TgmCg6ZAirBxcJHpwRKEwF++9Ypv5sAv
+T3/kt6bZq1HcQ97JuT6mGSZYj50BJ0XzZqAJqBt6PGGhrQxps6pwIqm5io2QpHRM
+CT0rnCTrbg+pOepQjvZYIZRtjxJ2gCH+GziJERSe6tkb3Km0tBmIedq97VivSx8W
+VIfnRPvZBz+nutvrx/R0Q3JAHp2JJX1EXmqeTh3RcvJgpHmJoZTlWE0wn9r9haIW
+f9SylNu85IGEYGRpfYMyfEDKhYrRPMO8Y3K706RPkjPLVVCHIeJdC2dF4DhGjZKB
+t8X5Vi2V5c6r+XX5WcBkEYqUSy5/ZuklNb/JLIk11a9HYnXf0W0=
+=YCZe
 -----END PGP SIGNATURE-----
