@@ -284,6 +284,10 @@ class Upgrade
 				$i->addIgnoredPath(substr(DATA_ROOT, strlen(ROOT) + 1));
 			}
 
+			if (0 === strpos(BACKUPS_ROOT, ROOT)) {
+				$i->addIgnoredPath(substr(BACKUPS_ROOT, strlen(ROOT) + 1));
+			}
+
 			if (0 === strpos(SHARED_CACHE_ROOT, ROOT)) {
 				$i->addIgnoredPath(substr(SHARED_CACHE_ROOT, strlen(ROOT) + 1));
 			}
@@ -293,6 +297,10 @@ class Upgrade
 				&& is_string(FILE_STORAGE_CONFIG)
 				&& 0 === strpos(FILE_STORAGE_CONFIG, ROOT)) {
 				$i->addIgnoredPath(substr(FILE_STORAGE_CONFIG, strlen(ROOT) + 1));
+			}
+
+			if (0 === strpos(PLUGINS_ROOT, ROOT)) {
+				$i->addManagedPath(substr(PLUGINS_ROOT, strlen(ROOT) + 1));
 			}
 
 			$i->addIgnoredPath('config.local.php');
