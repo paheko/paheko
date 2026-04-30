@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Make\ssure\splugins\sare\smanaged\sby\supdates
-D 2026-04-30T08:12:04.286
+C Add\sfilter\sicon\sto\sicon\sfont
+D 2026-04-30T09:01:58.315
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -197,7 +197,7 @@ F src/include/lib/Paheko/Users/Import.php b37be145a548d2bbb46e95a8a1c4de79952082
 F src/include/lib/Paheko/Users/LocalAddressFinder.php aa015abb65784ab06c489986d3f4dbd8d6f9aafd23d994bc0351c0831d85f844
 F src/include/lib/Paheko/Users/Session.php c8b1f3f278041578b1fc4a0979d218fc2ed557503c9229d2191ed77f8234eadc
 F src/include/lib/Paheko/Users/Users.php 13c7871e7716c6d64f21eb06c89b1521f97c62a490eeb12da8d62e64fc1ff4fd
-F src/include/lib/Paheko/Utils.php 206ae90313eafd2a6081177e2e233a7a79266621f014ea7b6005d9898758daad
+F src/include/lib/Paheko/Utils.php 5afd81d4b7dc1b1ebbef13ebbfdd19bbdd0ef008029704db14fe9fd948ed5558
 F src/include/lib/Paheko/Web/Cache.php 92d31aa40f483cadeda2f133a9be389d42d24de24094c356cfb0eabee872361d
 F src/include/lib/Paheko/Web/Render/AbstractRender.php 6b19b8522c5918c4027680a079663ad908ef69df2311797a85b9b9fbdcaf1b0d
 F src/include/lib/Paheko/Web/Render/Encrypted.php 44318504bea74d76824d63e6651e1eae9478e65a53694625a4144ef63ca3e946
@@ -710,13 +710,13 @@ F src/www/admin/static/doc/skriv.html 0a14a5bc78e89fc85f3e4ca2bd3b6675060eaedd39
 F src/www/admin/static/doc/sql.html 8ea2de3ed3600012141cb01db66b77f65625dc2c7905eb4468af37c30ba9351c
 F src/www/admin/static/doc/web.html b3442b127ad9f7630c6e3f6c41c3e63b0efcc2c35581117b8f164977f9a7fe38
 F src/www/admin/static/favicon.png 18c14f40c3ed6d4d73ceb5319c55b05cff7b0677b52ad79ba28d69ef63036aee
-F src/www/admin/static/font/config.json 2f1870a8d676bd0025b7c1ac4696c00cc9212d3b379598afa9358eec368e3171
-F src/www/admin/static/font/paheko.css 3744358d7a38c0ef6d1e0263ccd237233f384803bcba5a43766e4f33f24d997c
-F src/www/admin/static/font/paheko.eot c3b1c7e8d8df29011fe7e4446a228b45aa6f3de945d014fbba6c153662e94232
-F src/www/admin/static/font/paheko.svg a9cbec6253679ced394ad6de1111db462b0e4c92c1a044d78f5b34baa62e7a38
-F src/www/admin/static/font/paheko.ttf 9b011484923fca4bf4fb342ab9863972b08ecaa2dddaba878470b9cf83bb4c77
-F src/www/admin/static/font/paheko.woff 67f1763e6843014758d6a97020dd1c780ade87be2e4b101c628280fca353af5e
-F src/www/admin/static/font/paheko.woff2 6008a37e37c23774f012045731ce47644938b89134c43749d7c739b2caa96653
+F src/www/admin/static/font/config.json b8d2d6decff689a5892240d4177ccbb374cb66e1a4661a2b3664344aff018031
+F src/www/admin/static/font/paheko.css d89d22726438ab0d7636e16fef431b38f4492b84cea7274f83b65eecc6892be4
+F src/www/admin/static/font/paheko.eot 070a2db6241840d86d015aefdc5462f82316748e0a3cba53be3c28bb590e3299
+F src/www/admin/static/font/paheko.svg 56060a4aa6f2e81dea874b805983188ae11a8c911cf2e7625402ed305ce2f4b8
+F src/www/admin/static/font/paheko.ttf 4c681d190426e2a7d31d69eeac501f3a1a930c1e6ced644e23b6cdc7494d5767
+F src/www/admin/static/font/paheko.woff 3d6929705936e48e6d9884c8d9e0b0cf6c2d624e4cfa07a4d85c3f4b20854954
+F src/www/admin/static/font/paheko.woff2 34f0c4aca2aae01a180b9d9a9981bf056765003e43b36d86ae2b4b0f4c721822
 F src/www/admin/static/handheld.css e498672fa47974d1b574261dc9e1ebc392c3728e578c478c007adcc6ec1df71b
 F src/www/admin/static/icon.png 1387768a8bcff7465be6bb1b4afa8d6d9c22126655288c1edfbb614d86e575f5
 F src/www/admin/static/pics/img_center.png c93c143b47b8d5a7e2caf3acce64251c4716b9a5
@@ -855,24 +855,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 9b9a37d714451284a2a870e5238a33b2dcbd1c8078d1c53e5b5198c4b506ecf1
-R 5aed2b36357f45028fd79c321a74a799
+P 638a21d919ec9225efe38ef00552fbd166e1174f00ea4613517ca76b8e3e005d
+R 636afc6eb43de0f71e134eff7d21660a
 U bohwaz
-Z 302237140f9b7affd34843e3d66f14e9
+Z 2ccb6d8460359ad5530e093404289db0
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnzDtQACgkQksnacbiI
-6jQKVw//a9wQ6bYcW0sAsSip4crT/raO3Awmp9ZmLh0FEfvqqUbLc+LU79CCEaWo
-LnW0DoiaFl2x6z7nx5FdWFXkW9HC4xzYzmz4S5A/0aRkg0WN4pCcGOEqOfst2EcU
-gGwglTvSqo8qQ/NEE0i3ntO51pgXNAQw9SG6k90QNaW03CSD+xEDOUNHoYpwdung
-lkOVQOyN5dBsDxrI+wTJ+eYo1noKr8GQIB2WTjJREgcBjQA3cCdwv77RrfIuGCDK
-XTn90ZJbdcZaiT82/mUIdB3POFF722F5XYkIs3gx+3CnLtid0FNLWA36YgOMKAFs
-GFh0oBpEkJsxPAXeYVR6h5TsDfuxOG4qIKr3wLLAZPERdWKB30K6vL/sTNjgjTQK
-MH5zIG8OXdZBur2lqW3Z2oxLUWutIYCfa7m1SuISC7DMDmnTbq5HzDF5v+BW7ilT
-60vgRzDMiuDDgFEkjaBTC3M40FNtWYXlM3abAkpyu7axXRorKjqmJTHsFAG6WGlm
-bMlyHbPCrFuEmwkhh7cENfnkpHR4J5U36vdn0YoOA3uSl/CSNJTnh3BUg2nTegg1
-Hpcckwz1AF96sDIyxXroqItZiW4PJHXyOFINGHmDjdjt2dF2liVy41z10Biu75Kh
-4JYUsqemLLnTXb+cq+DRYd6nR76k5XHqrfp2ZToAIHdwRNtDGIE=
-=g7K/
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnzGoYACgkQksnacbiI
+6jSsrw/6A1y0Nb51+dVsJA6ToYmkDaMRwgTU7v+UsL7haTVB+78CHr2mLKzD/7TV
+eMBAteQpazw/7B+EF/5d7JoHVrjzAx4/lFhe1CSCJRAjHZDtTegdOyejPyAsZ9SE
+5YwCNeVWJYfALiRQlbmzaNAoGZeY0FVGAYChbpEQpamQInSMM3GS616H08G9Zmk1
+3W+PfKSPDogDGihQd8uEP3WoC6zyQC3f593M/Cq5wqJvqq9zhPK5+0ju4MHk7AvV
+zdWm8OQdvOVTHI4mxSUT0kOuMXtKQRdsv/tVl/ltuNjhEws5Jz5ySl0/DWrvPsXZ
+XP2qKE50CBH1MHnPwgjrpnmsPsN/OW84guYYZupFdl/GSFyRDJ1HFaGEAk8Hr+py
+amOKuJqLqQ3HrdXwacajyIi1BdUR00gF0uB13Nc/oHL8jv6VSkWzLxFoGmHf/Ztm
+b5i828qithEfWaV7ahWN3UUYGu7x3PlZXKIaOWFdBMSgdzRDJvnjKFwnEQGk+93e
+v9JV2HvJ6QO5Klf5OpOtbrSO3V0hKOdvP8rfgFGT3ZHPtcDpbA61u6lPjz9ITVUj
+cM4VdkZTMfpaFS7Nv6ygghxeFRXcBCLkxbUvkMVXz2yftG/LBhO/ByHZQRmfnFWh
+PKhhKbiiGXM3PwM8WjgvQqqTi8SrQ3cd9rcG/C0DYppwnm8tV0c=
+=0ZPZ
 -----END PGP SIGNATURE-----

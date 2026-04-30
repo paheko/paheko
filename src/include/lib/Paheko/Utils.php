@@ -90,6 +90,7 @@ class Utils
 		'reply'           => '↢',
 		'reply-all'       => '⬹',
 		'forward'         => '↣',
+		'filter'          => '⧩',
 	];
 
 	const FRENCH_DATE_NAMES = [
