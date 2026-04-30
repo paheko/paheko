@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
+{include file="_head.tpl" title=$title current="acc/accounts" body_id="rapport"}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}
@@ -43,12 +43,9 @@
 		{/if}
 	{/if}
 
-	<p class="actions">
+	<nav class="actions">
 		{if $can_edit && $account->canLetter()}
-			{linkbutton shape="delete" href="!acc/transactions/letter_delete.php" label="Supprimer le lettrage" target="_dialog"}
-		{/if}
-		{if !$filter.start && !$filter.end}
-			{linkbutton shape="calendar" href="?start=1" label="Filtrer par date" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+			{linkbutton shape="delete" href="!acc/transactions/letter_delete.php" label="Supprimer un lettrage" target="_dialog"}
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id:$account.code label="Rechercher"}
 		{if $year.id == CURRENT_YEAR_ID}
@@ -57,26 +54,29 @@
 			{/if}
 			{linkbutton href="!acc/transactions/new.php?acc=%s"|args:$account.code label="Saisie" shape="plus"}
 		{/if}
+		{linkmenu shape="filter" label="Filtrer…"}
+			<form method="get" action="" class="actions">
+			<fieldset>
+				<dl>
+					{input type="date" name="start" source=$filter default=$year.start_date label="Depuis le"}
+					{input type="date" name="end" source=$filter default=$year.end_date label="Jusqu'au"}
+					{if $account->canLetter()}
+					{input type="select" name="letter" label="Lettrage" options=$letter_filter_options default="" required=true source=$filter}
+					{/if}
+				</dl>
+				<input type="hidden" name="id" value="{$account.id}" />
+				<input type="hidden" name="year" value="{$year.id}" />
+			</fieldset>
+			<p class="submit">
+				{button shape="right" label="Filtrer" type="submit"}
+			</p>
+		</form>
+		{/linkmenu}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{exportmenu right=true}
 		{/if}
-	</p>
+	</nav>
 {/if}
-
-<form method="get" action="{$self_url}"{if !$filter.start && !$filter.end} class="hidden"{/if} id="filterForm">
-	<fieldset>
-		<legend>Filtrer par date</legend>
-		<p>
-			Du
-			{input type="date" name="start" source=$filter default=$year.start_date}
-			au
-			{input type="date" name="end" source=$filter default=$year.end_date}
-			<input type="hidden" name="id" value="{$account.id}" />
-			<input type="hidden" name="year" value="{$year.id}" />
-			<input type="submit" value="Filtrer" />
-		</p>
-	</fieldset>
-</form>
 
 <form method="post" action="{$admin_url}acc/transactions/actions.php?from={$self_url|rawurlencode}">
 

@@ -125,7 +125,7 @@ nav.tabs aside form {
     text-align: left;
 }
 
-.menu-btn:hover b, .menu-btn:active b, .menu-btn.active b {
+.menu-btn:hover > b, .menu-btn:active > b, .menu-btn.active > b {
     background-color: rgba(var(--gSecondColor), .7);
 }
 
@@ -133,7 +133,7 @@ nav.tabs aside form {
     display: block;
 }
 
-.menu-btn button, .menu-btn .icn-btn {
+.menu-btn > button, .menu-btn > .icn-btn {
     white-space: nowrap;
 }
 
@@ -150,9 +150,31 @@ nav.tabs aside form {
     color: var(--gBorderColor);
 }
 
-main .menu-btn button {
+main .menu-btn > button {
     text-align: left;
 }
+
+.menu-btn fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.menu-btn dd {
+    padding: 0;
+    margin-bottom: .4em;
+    min-width: 11em;
+}
+
+.menu-btn dt {
+    font-size: .9em;
+}
+
+.menu-btn p.submit {
+    margin: .4em 0;
+    text-align: right;
+}
+
 nav.home ul {
     display: flex;
     flex-wrap: wrap;

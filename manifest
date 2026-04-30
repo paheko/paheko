@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Add\sfilter\sicon\sto\sicon\sfont
-D 2026-04-30T09:01:58.315
+C Add\sfiltering\sfor\slettered\stransactions\sin\sjournal
+D 2026-04-30T09:04:33.541
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -118,7 +118,7 @@ F src/include/lib/Paheko/Email/Emails.php a8f14eca1b08ece2396ae81fca1408aa7b7563
 F src/include/lib/Paheko/Email/Mailings.php 3097c9710effa379a2c5a0f53c64c52dfaecb224c1df3b76d19fc5c3013a4458
 F src/include/lib/Paheko/Email/Templates.php 27ef4c8eab50ad2557a75073e355e7d3f49f1156b01f0add8ad8274524426f33
 F src/include/lib/Paheko/Entities/API_Credentials.php af3482891c625853a9f38fe2a17f7deb9f6b51fc0eb2539c3c2f9391e04e8e68
-F src/include/lib/Paheko/Entities/Accounting/Account.php 3a797c7d1f20612cce8a545699413dec833e505951f17760f63e1c23d59c8291
+F src/include/lib/Paheko/Entities/Accounting/Account.php d46c87ae31efdd657e2163ba4fe5a570935e02f772b81cf4e59737f00dcf23eb
 F src/include/lib/Paheko/Entities/Accounting/Chart.php 2fb100f7aec42853b14cb3f8288296e21ae98b078716dc580f2f1b2a69d451b6
 F src/include/lib/Paheko/Entities/Accounting/Line.php 9b05d963b802007f07d94f1151448a90aba8426d7c80fccede4ae2117cecd3af
 F src/include/lib/Paheko/Entities/Accounting/Project.php f221f56feec52d958a4df736b080dce528af7ac466ec799967365619b5fefed5
@@ -255,7 +255,7 @@ F src/templates/acc/accounts/deposit.tpl 6b5d4e1003cf550130df68ae65a0f2e860e2073
 F src/templates/acc/accounts/deposit_form.tpl 6722862a1ca0293263400f8d632d7871e31e7ffb16b04c5d7e23aa18d04c23ef
 F src/templates/acc/accounts/import.tpl 5aab80168a2820bef0b162a1d2b2be67e4b4d3f0b8c3ac251bf627468b2d6f56
 F src/templates/acc/accounts/index.tpl c340a794f773ecee5bd823674cadbc123bb330513a776d864b22c777a566086d
-F src/templates/acc/accounts/journal.tpl b572ef361d3ef0b890353249398206270b396364e0f7be8e810240ad9b8510d0
+F src/templates/acc/accounts/journal.tpl 805ff9dc9e33fac606549837821d0f716662e84154e300ebeebd9f7b4e9728fc
 F src/templates/acc/accounts/reconcile.tpl e4c4ba3a3b5b2692e3ba956b5a58b64e4ad9bc75bd2738e92470a8824bde2c82
 F src/templates/acc/accounts/reconcile_assist.tpl 00143f3015683120e330417e35cf5b1ba1c1b7f7a24dfbb4c26f11948a84a5a9
 F src/templates/acc/accounts/simple.tpl 27ef650d5990a128d1eee0799a21ee61d29badb2e50e8c5e05cf65338c809656
@@ -517,7 +517,7 @@ F src/www/admin/acc/accounts/all.php 259df489f0ce8dc2d43535b29a3d41e56d13deff3da
 F src/www/admin/acc/accounts/deposit.php 5829d055adb2c5c0685220f0444f0b6487a3597308bc221c3cd9bf27d25b113c
 F src/www/admin/acc/accounts/import.php c3e8bae5539d8c7f3a381f2f1804b118af61f1ca84bae98eb0735ad2abd979db
 F src/www/admin/acc/accounts/index.php 8e62e8fe2f71623c366d26527a6933d03687b1bed2045d957fde57edf712e31c
-F src/www/admin/acc/accounts/journal.php ac36f8446408d8619e803bb17e385ca10b48b398faf762b908536a8364f0011c
+F src/www/admin/acc/accounts/journal.php ab692855ea452c21f7134d78b1b4042fea3b34840c1ac1adc0df1366bf5bb349
 F src/www/admin/acc/accounts/reconcile.php 7f63a4621f57e5a2836c4d850385c8c7a68e3bbade7951430ef4dc18141f0208
 F src/www/admin/acc/accounts/reconcile_assist.php c43d413538453eadd47a12497f7e5d0e95fc0603326984c816e399be6eda720f
 F src/www/admin/acc/accounts/simple.php 292a55a8e927d8f34e8ec7f6d05ee8d6bcacbab040c8ba39c7b40e05614736b4
@@ -723,7 +723,7 @@ F src/www/admin/static/pics/img_center.png c93c143b47b8d5a7e2caf3acce64251c4716b
 F src/www/admin/static/pics/img_flow.png d247e7abf93a2c37d2ba402be08ec432bb0d7bc1
 F src/www/admin/static/pics/img_left.png e43aa44c9fe1b5508a2af6c1ec124654999b6c6b
 F src/www/admin/static/pics/img_right.png e2021d96729d6f28fcc946b5ed6742f6732a967e
-F src/www/admin/static/print.css ef2bf892087f4647f09601ea45461aa9e0995441ae334e034edf8e09d20d1542
+F src/www/admin/static/print.css 0f3784e14494b37e3b80ba049345fbdd75d9e33e76be7ababd6d668ee9545eac
 F src/www/admin/static/scripts/accounting.js 97afa7d8c5eb4f77e4a093c5e3cfe3c98a11c166d97f82047501e22649fc2540
 F src/www/admin/static/scripts/accounting_setup.js f3f556d0335951f674918463b69d65870fa32645c1392136ce694c108dd1fa13
 F src/www/admin/static/scripts/accounts_list.js 80250a1e7dc784163feb643b13814c33faf3a52ac615828582473b18e3e8a57a
@@ -765,9 +765,9 @@ F src/www/admin/static/scripts/zip.js cbfa38f1ad45d171effe2be03e1d12b81084d5bf44
 F src/www/admin/static/styles/00-reset.css 7ab3eedcf95bc84c4913ea2a808dc25ff06ef6a9ee7927ce16b8042a39b3becb
 F src/www/admin/static/styles/01-layout.css c5735c7422f328c2c5c8b8f25a61664bc5bb21f1db3a5207fecede1a9cda1250
 F src/www/admin/static/styles/02-common.css e997e33d0ae4ce75a5f299dc4b751f3cf23c1fc6c0fa82aef360bde5fe6c298a
-F src/www/admin/static/styles/03-forms.css 7407bb960a75dc6f443e25fed0aca2d21d4d78545ede8bdf5a63fcad1ae1a6b9
+F src/www/admin/static/styles/03-forms.css 9c4dd8c10767a8aa857454752d42835b8588ee3bbef78a974e2df2f1c1e8ec60
 F src/www/admin/static/styles/04-dialogs.css 2fa5a0e16d64f635c6bb2bae8b1d8b18dd9c6749482c61aa25dacebc5f4022ee
-F src/www/admin/static/styles/05-navigation.css 929f8338fdc10d56fa554641b3424224ba86c489447d8404a7dbea35ce0ee5dd
+F src/www/admin/static/styles/05-navigation.css 4c5c922164bcc7864a9e467bbb33fb772474480e2309d2d9d38c987b629d5c86
 F src/www/admin/static/styles/06-tables-common.css 6830241beaf0f96a837611079ace365d4b1830085b1a4aeffc3659ee963d2aed
 F src/www/admin/static/styles/07-tables.css a4b7c5dfc22894a197c9b6b04520a1abc203962e8944c6e4b8d494cf09fd0683
 F src/www/admin/static/styles/10-accounting.css 0550915adcfb728a65e53775d7d67d73a9dbaec82e64dcfe5cbe4780797c33fb
@@ -855,24 +855,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 638a21d919ec9225efe38ef00552fbd166e1174f00ea4613517ca76b8e3e005d
-R 636afc6eb43de0f71e134eff7d21660a
+P 9712cd984bcc6b0b34bba62f02c0d0d6aa49a316ef38d74e2f3ea6f45fde9d45
+R 3bee5968639c1a386dc08b1428925b29
 U bohwaz
-Z 2ccb6d8460359ad5530e093404289db0
+Z 2c834727d1ec512a315a05ed217db41e
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnzGoYACgkQksnacbiI
-6jSsrw/6A1y0Nb51+dVsJA6ToYmkDaMRwgTU7v+UsL7haTVB+78CHr2mLKzD/7TV
-eMBAteQpazw/7B+EF/5d7JoHVrjzAx4/lFhe1CSCJRAjHZDtTegdOyejPyAsZ9SE
-5YwCNeVWJYfALiRQlbmzaNAoGZeY0FVGAYChbpEQpamQInSMM3GS616H08G9Zmk1
-3W+PfKSPDogDGihQd8uEP3WoC6zyQC3f593M/Cq5wqJvqq9zhPK5+0ju4MHk7AvV
-zdWm8OQdvOVTHI4mxSUT0kOuMXtKQRdsv/tVl/ltuNjhEws5Jz5ySl0/DWrvPsXZ
-XP2qKE50CBH1MHnPwgjrpnmsPsN/OW84guYYZupFdl/GSFyRDJ1HFaGEAk8Hr+py
-amOKuJqLqQ3HrdXwacajyIi1BdUR00gF0uB13Nc/oHL8jv6VSkWzLxFoGmHf/Ztm
-b5i828qithEfWaV7ahWN3UUYGu7x3PlZXKIaOWFdBMSgdzRDJvnjKFwnEQGk+93e
-v9JV2HvJ6QO5Klf5OpOtbrSO3V0hKOdvP8rfgFGT3ZHPtcDpbA61u6lPjz9ITVUj
-cM4VdkZTMfpaFS7Nv6ygghxeFRXcBCLkxbUvkMVXz2yftG/LBhO/ByHZQRmfnFWh
-PKhhKbiiGXM3PwM8WjgvQqqTi8SrQ3cd9rcG/C0DYppwnm8tV0c=
-=0ZPZ
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmnzGyEACgkQksnacbiI
+6jQ35w//eZp8f6JBF5WGFk2c3iq9DXlz9mw+N7+UiGmsk7H06lYWMdNQn+6GpksX
+eLNV+81luNZwgAPFyfRBVGTxxeaLJ6+pvyLXpRJGi8NpJjJtchBaJoqe1gRh5y+O
+zra/rdt9hG1q8qwTvt3NmCo+heNAMF+Wa/mrQuR+lDiGNwmTOo25l1YtzVkkQTr5
+wm2lxPTPelarWFHY8C2nKTK//gw6/w7dlB4DCcvYQ6y2LYqIjCZDY0Su5roJYDJK
+skuI8gLvpXhMhTSKpzH4a3tJ6C+Uq7KdWw5+OtOcU8RsGM3gzsfpUHW/Sg1531hG
+1U+5OW0914/7G2as5tj5ALeqFecUAw2HkeK5S1pI8TD3nC0gRv9XxXma3l3XVdFr
+r7fmRtJ5lCnIn16Ih/R8L5aL5uLVAXGJ6IOsoxFgNGHy5mAx3mdIQC+apEMJN7ex
+8rPLaRNNJsIXwQr99fm3Ai+VwPalbudmP1LwRHd2vZk3iXPBqXLRBG9r7VHv4ML7
+A+AmReEMOoL02JjjYxwNAVx6DHLLAiH84R/zj+tEzT+rQ7u2/UH9lb7uE/fa0EEl
+up/er/iwYQNdTT4C5wT4VhWO8i0mcdw9k0jle6QjkH35kKjW4bBXW4U+qUlMOSrg
+oBSlKXMI1Js/4DBPVLfxkGZasUx0DJgiSuKcIbECExskeg09n3c=
+=RTXe
 -----END PGP SIGNATURE-----
