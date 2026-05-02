@@ -87,6 +87,7 @@ Exécute une requête SQL en lecture
 | `FORMAT` | `string` | Format de retour : `json`, `csv`, `ods` ou `xlsx` |
 | `sql` | `string` | Requête SQL à exécuter. |
 | `header` | `bool` | Indiquer `header=false` pour ne pas avoir une première ligne d'en-tête dans les formats CSV, ODS ou XLSX. |
+| autres | `string` | Paramètres nommés pour la requête SQL |
 
 Si aucun format n'est passé (exemple : `…/api/sql`, sans point ni extension), `json` sera utilisé.
 
@@ -122,6 +123,14 @@ Exemple de réponse :
 
 **Attention :** Les requêtes en écriture (`INSERT, DELETE, UPDATE, CREATE TABLE`, etc.) ne sont pas acceptées, il n'est pas possible de modifier la base de données directement via Paheko, afin d'éviter les soucis de données corrompues.
 
+Il est possible d'utiliser des paramètres nommés dans les requêtes SQL, il suffit de les rajouter en paramètres. Exemple :
+
+```request
+curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -G --data-urlencode sql='SELECT nom FROM users WHERE ville = :ville;' \
+  --data-urlencode ville='Dijon'
+```
+
 ### POST sql.{FORMAT}
 
 Idem que la méthode en `GET`, mais le la requête peut être passée dans le corps de la requête HTTP :
@@ -129,6 +138,12 @@ Idem que la méthode en `GET`, mais le la requête peut être passée dans le co
 ```request
 curl -u test:abcd https://paheko.monasso.tld/api/sql \
   -d 'SELECT nom, code_postal FROM users LIMIT 2;'
+```
+
+```request
+curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -F sql='SELECT nom, code_postal FROM users WHERE code_postal = :cp LIMIT 2;'
+  -F cp=21000
 ```
 
 ## Téléchargements
