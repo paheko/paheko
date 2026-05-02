@@ -889,14 +889,12 @@ class User extends Entity
 
 	public function canLogin(): bool
 	{
-		$category = $this->category();
-		return $category->perm_connect >= Session::ACCESS_READ;
+		return $this->getPermissions()[Session::SECTION_CONNECT] >= Session::ACCESS_READ;
 	}
 
 	public function isSuperAdmin(): bool
 	{
-		$category = $this->category();
-		return $category->perm_config === Session::ACCESS_ADMIN;
+		return $this->getPermissions()[Session::SECTION_CONFIG] === Session::ACCESS_ADMIN;
 	}
 
 	/**
@@ -911,13 +909,13 @@ class User extends Entity
 			return true;
 		}
 
-		$category = $this->category();
+		$permissions = $this->getPermissions();
 
-		if ($category->perm_config === Session::ACCESS_ADMIN) {
+		if ($permissions[Session::SECTION_CONFIG] === Session::ACCESS_ADMIN) {
 			return false;
 		}
 
-		if (($category->perm_users === Session::ACCESS_ADMIN)
+		if (($permissions[Session::SECTION_USERS] === Session::ACCESS_ADMIN)
 			&& (!$session || !$session->canAccess(Session::SECTION_USERS, Session::ACCESS_ADMIN))) {
 			return false;
 		}
@@ -1047,7 +1045,12 @@ class User extends Entity
 			$this->_permissions ??= $this->category()->getPermissions();
 		}
 
-		return $this->_permissions ?? [];
+		// Set all permissions to NONE
+		if (!isset($this->_permissions)) {
+			$this->setPermissions([]);
+		}
+
+		return $this->_permissions;
 	}
 
 	public function setPermissions(array $permissions): void
