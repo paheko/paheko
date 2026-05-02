@@ -374,7 +374,7 @@ class DynamicField extends Entity
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
 			try {
-				$db->protectSelect(['users' => []], sprintf('SELECT (%s) FROM users;', $this->sql));
+				$db->prepareRestricted(['users' => []], sprintf('SELECT (%s) FROM users;', $this->sql));
 			}
 			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);

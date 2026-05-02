@@ -112,7 +112,7 @@ class Users
 		$db = DB::getInstance();
 
 		$s = Search::get($id_search);
-		// Make sure the query is protected and safe, by doing a protectSelect
+		// Make sure the query is protected and safe, by doing a prepareRestricted
 		$s->query(['limit' => 1]);
 
 		$header = $s->getHeader();

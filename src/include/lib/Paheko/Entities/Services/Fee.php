@@ -120,7 +120,7 @@ class Fee extends Entity
 		try {
 			$db = DB::getInstance();
 			$sql = $this->getFormulaSQL();
-			$db->protectSelect(['users' => null, 'services_subscriptions' => null, 'services' => null, 'services_fees' => null], $sql);
+			$db->prepareRestricted(['users' => null, 'services_subscriptions' => null, 'services' => null, 'services_fees' => null], $sql);
 			return null;
 		}
 		catch (DB_Exception $e) {
