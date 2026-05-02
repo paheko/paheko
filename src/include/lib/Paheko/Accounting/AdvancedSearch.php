@@ -162,6 +162,12 @@ class AdvancedSearch extends A_S
 				'select' => 'l.reconciled',
 				'where'  => 'l.reconciled %s',
 			],
+			'letter' => [
+				'type'   => 'text',
+				'label'  => 'Lettrage',
+				'null'   => true,
+				'select' => 'll.letter',
+			],
 		];
 	}
 
@@ -298,6 +304,7 @@ class AdvancedSearch extends A_S
 			'acc_charts',
 			'acc_transactions_users',
 			'acc_transactions_links',
+			'acc_letters',
 		]);
 	}
 
@@ -307,7 +314,8 @@ class AdvancedSearch extends A_S
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
 			INNER JOIN acc_years AS y ON t.id_year = y.id
-			LEFT JOIN acc_projects AS p ON l.id_project = p.id';
+			LEFT JOIN acc_projects AS p ON l.id_project = p.id
+			LEFT JOIN acc_letters AS ll ON l.id_letter = ll.id';
 
 		$list = $this->makeList($query, $tables, 'id', true, ['id', 'id_line', 'account_code', 'debit', 'credit']);
 		$list->setExportCallback(function (&$row) {
