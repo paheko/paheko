@@ -13,7 +13,7 @@ $form->runIf('save', function () use ($fields) {
 	$fields->save();
 }, $csrf_key, '!config/fields/?msg=SAVED_ORDER');
 
-$tpl->assign('fields', $fields->all());
+$tpl->assign('fields', $fields->allExceptPassword());
 $tpl->assign(compact('csrf_key'));
 
 $tpl->display('config/fields/index.tpl');

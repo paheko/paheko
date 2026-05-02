@@ -37,7 +37,7 @@ use KD2\DB\Date;
 use KD2\ZipWriter;
 use KD2\Graphics\QRCode;
 
-use const Paheko\{WWW_URL, LOCAL_LOGIN};
+use const Paheko\{WWW_URL, LOCAL_LOGIN, ENABLE_PERMISSIONS};
 
 /**
  * WARNING: do not use $user->property = 'value' to set a property value on this class
@@ -750,24 +750,26 @@ class User extends Entity
 		throw new UserException("Le champ identifiant ne peut être laissé vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
 	}
 
-	public function canChangePassword(?Session $session): bool
+	/**
+	 * Can the user change their own password?
+	 * This used to be dependent upon DynamicField::$user_access_level
+	 * in order to restrict the user from setting its own password.
+	 * This lead to security issues (password re-use between accounts),
+	 * the user should always be able (and have) to set their own password.
+	 * @deprecated
+	 */
+	public function canChangePassword(): bool
 	{
-		if ($session && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-			return true;
+		if (!ENABLE_PERMISSIONS) {
+			return false;
 		}
 
-		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
-		return $password_field->user_access_level === Session::ACCESS_WRITE;
+		return true;
 	}
 
 	public function canRecoverPassword(): bool
 	{
-		// Admins can recover their password all the time
-		if ($this->isSuperAdmin()) {
-			return true;
-		}
-
-		return $this->canChangePassword(null);
+		return $this->canChangePassword();
 	}
 
 	public function checkDuplicate(): ?int
@@ -905,10 +907,13 @@ class User extends Entity
 	 */
 	public function canBeModifiedBy(?Session $session = null): bool
 	{
+		if ($session && $session->user()->isSuperAdmin()) {
+			return true;
+		}
+
 		$category = $this->category();
 
-		if (($category->perm_config === Session::ACCESS_ADMIN)
-			&& (!$session || !$session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN))) {
+		if ($category->perm_config === Session::ACCESS_ADMIN) {
 			return false;
 		}
 
@@ -929,11 +934,11 @@ class User extends Entity
 
 	/**
 	 * Return true if a manager can change a users password
+	 * Only superadmins can change passwords
 	 */
 	public function canChangePasswordBy(Session $session): bool
 	{
-		$password_field = current(DynamicFields::getInstance()->fieldsBySystemUse('password'));
-		return $session->canAccess($session::SECTION_USERS, $password_field->management_access_level);
+		return $session->user()->isSuperAdmin();
 	}
 
 	public function validatePasswordCanBeChangedBy(Session $session): void
@@ -950,25 +955,24 @@ class User extends Entity
 			return false;
 		}
 
-		// Cannot login if not a superadmin
-		if (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
+		if (!ENABLE_PERMISSIONS) {
 			return false;
 		}
 
-		$logged_user = $session->getUser();
+		$logged_user = $session->user();
+
+		// Cannot login if not a superadmin
+		if (!$logged_user->isSuperAdmin()) {
+			return false;
+		}
 
 		// Cannot self-login
 		if ($logged_user->id === $this->id) {
 			return false;
 		}
 
-		// Cannot login as same category, if not super-admin
-		if ($this->id_category === $logged_user->id_category && !$logged_user->isSuperAdmin()) {
-			return false;
-		}
-
-		// Cannot login as a super-admin, if not super-admin
-		if ($this->isSuperAdmin() && !$logged_user->isSuperAdmin()) {
+		// Cannot login as same category
+		if ($this->id_category === $logged_user->id_category) {
 			return false;
 		}
 

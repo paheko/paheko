@@ -21,8 +21,7 @@ $sessions_count = $session->countActiveSessions();
 
 $id_field = current(DynamicFields::getInstance()->fieldsBySystemUse('login'));
 $id = $user->{$id_field->name};
-$can_change_password = $user->canChangePassword($session);
 
-$tpl->assign(compact('id', 'id_field', 'user', 'sessions_count', 'can_change_password', 'can_use_pgp', 'pgp_fingerprint'));
+$tpl->assign(compact('id', 'id_field', 'user', 'sessions_count', 'can_use_pgp', 'pgp_fingerprint'));
 
 $tpl->display('me/security.tpl');
