@@ -37,9 +37,6 @@ $form->runIf('save', function () use ($user) {
 	if (f('password_delete')) {
 		$user->deletePassword();
 	}
-	elseif (f('password')) {
-		$user->setNewPassword(null, false);
-	}
 
 	if (f('otp_delete')) {
 		$user->setOTPSecret(null);
