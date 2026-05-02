@@ -15,10 +15,7 @@ $verified = false;
 
 $from_otp = $_GET['otp'] ?? null;
 
-if ($from_otp === md5($user->password . $user->otp_secret)
-	&& !$user->otp_recovery_codes) {
-	$user->generateOTPRecoveryCodes();
-	$user->save(false);
+if ($from_otp === md5($user->password . $user->otp_secret)) {
 	$verified = true;
 	$generate = false;
 }
