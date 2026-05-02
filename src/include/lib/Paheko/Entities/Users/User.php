@@ -592,6 +592,19 @@ class User extends Entity
 		return $out;
 	}
 
+	public function isOTPRequired(): bool
+	{
+		if (!$this->id_category) {
+			return false;
+		}
+
+		if (!$this->otp_secret && $this->category()->force_otp) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public function deletePassword(): void
 	{
 		$this->set('password', null);

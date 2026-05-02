@@ -5,6 +5,8 @@ namespace Paheko;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 
+const OTP_PROCESS = true;
+
 require_once __DIR__ . '/_inc.php';
 
 $user = Session::getLoggedUser();
@@ -12,16 +14,22 @@ $user = Session::getLoggedUser();
 $csrf_key = 'edit_otp_' . md5($user->password);
 
 $form->runIf('disable', function () use ($user) {
+	$user->verifyPassword(f('password_check'));
 	$user->setOTPSecret(null);
 	$user->save(false); // Don't self-check other fields
 	Session::getInstance()->clearSessionVerifier();
 }, $csrf_key, '!me/security.php?ok');
 
 $form->runIf('enable', function () use ($user) {
-	$user->verifyPassword(f('password_check'));
+	if (!$user->isOTPRequired()) {
+		$user->verifyPassword(f('password_check'));
+	}
+
 	$user->setOTPSecret(f('otp_secret'), f('otp_code'));
 	$user->save(false); // Don't self-check other fields
 	Session::getInstance()->clearSessionVerifier();
+
+	Utils::redirect('!me/security_otp_recovery.php?otp=' . md5($user->password . $user->otp_secret));
 }, $csrf_key, '!me/security.php?ok');
 
 $otp = null;

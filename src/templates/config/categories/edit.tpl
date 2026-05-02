@@ -47,21 +47,22 @@
 	</fieldset>
 	{/if}
 
-	{*TODO: advanced category security options
 	<fieldset>
-		<legend>Sécurité</legend>
+		<legend>Connexion</legend>
 		<dl>
+		{*TODO: advanced category security options
 			{input type="checkbox" name="allow_passwordless_login" value=1 source=$cat label="Permettre la connexion sans mot de passe"}
 			<dd class="help">Si cette case est cochée, les membres pourront se connecter sans utiliser de mot de passe, simplement via un lien à usage unique qui leur sera envoyé par e-mail.</dd>
-			{input type="checkbox" name="force_otp" value=1 source=$cat label="Obliger à utiliser la double authentification"}
-			<dd class="help">Si cette case est cochée, les membres de cette catégorie seront obligés de configurer un second facteur de sécurité (code unique généré sur téléphone avec TOTP) lors de leur première connexion pour pouvoir se connecter. Conseillé pour les administrateurs.</dd>
-			{if $has_encryption}
+		*}
+			{input type="checkbox" name="force_otp" value=1 source=$cat label="Obliger les membres à utiliser la double authentification (2FA) pour se connecter"}
+			<dd class="help">Si cette case est cochée, les membres de cette catégorie seront obligés de configurer un second facteur de sécurité (code unique généré sur téléphone avec TOTP) pour pouvoir se connecter.<br />
+			<strong>Il est fortement conseillé d'activer ce réglage pour les administrateurs et les personnes ayant accès à la liste des membres</strong>, pour être en conformité avec le RGPD et limiter les risques de vol des données des membres.</dd>
+			{*if $has_encryption}
 				{input type="checkbox" name="force_pgp" value=1 source=$cat label="Obliger à chiffrer les e-mails avec PGP"}
 				<dd class="help">Si coché, un membre ne pourra se connecter que s'il indique une clé PGP publique valide, permettant de chiffrer tous les e-mails qui lui sont envoyés. Cette fonctionnalité permet d'empêcher la connexion d'un attaquant si la boîte mail du membre est piratée. Cela permet également de s'assurer de la confidentialité des e-mails envoyés aux membres.</dd>
-			{/if}
+			{/if*}
 		</dl>
 	</fieldset>
-	*}
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}

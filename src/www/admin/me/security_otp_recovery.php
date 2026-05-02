@@ -13,6 +13,16 @@ $csrf_key = 'edit_recovery_' . md5($user->password);
 $generate = qg('generate') !== null;
 $verified = false;
 
+$from_otp = $_GET['otp'] ?? null;
+
+if ($from_otp === md5($user->password . $user->otp_secret)
+	&& !$user->otp_recovery_codes) {
+	$user->generateOTPRecoveryCodes();
+	$user->save(false);
+	$verified = true;
+	$generate = false;
+}
+
 $form->runIf('generate', function () use ($user, &$verified, &$generate) {
 	$user->verifyPassword(f('password_check'));
 	$user->generateOTPRecoveryCodes();

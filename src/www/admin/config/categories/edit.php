@@ -30,14 +30,6 @@ $form->runIf('save', function () use ($cat, $session) {
 	if ($cat->id() === $user->id_category) {
 		$cat->set('perm_connect', Session::ACCESS_READ);
 		$cat->set('perm_config', Session::ACCESS_ADMIN);
-
-		if ($cat->force_otp && !$user->otp_secret) {
-			throw new UserException('Vous ne pouvez pas forcer le second facteur car vous n\'avez pas configuré de second facteur pour votre compte.');
-		}
-
-		if ($cat->force_otp && !$user->otp_recovery_codes) {
-			throw new UserException('Vous ne pouvez pas forcer le second facteur car vous n\'avez pas généré de codes de récupération.');
-		}
 	}
 
 	$cat->save();

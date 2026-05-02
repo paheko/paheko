@@ -14,7 +14,7 @@
 	<dd>{input type=$id_field.type readonly="readonly" copy=true default=$id name=""}</dd>
 	<dt>Mot de passe</dt>
 	<dd>{linkbutton href="security_password.php" label="Modifier le mot de passe" shape="edit"}</dd>
-	<dt>Double authentification (second facteur TOTP)</dt>
+	<dt>Double authentification (2FA)</dt>
 	<dd>
 		{if $user.otp_secret}
 			{tag color="darkgreen" label="Activée"}
