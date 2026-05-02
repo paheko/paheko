@@ -185,8 +185,9 @@ class Search extends Entity
 			// Lock database against changes
 			$db->setReadOnly(true);
 
-			$st = $db->protectSelect($allowed_tables, $sql);
-			$result = $db->execute($st);
+			$params = $options['params'] ?? [];
+			$st = $db->prepareRestricted($allowed_tables, $sql);
+			$result = $db->execute($st, $params);
 
 			$db->setReadOnly(false);
 

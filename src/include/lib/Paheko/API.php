@@ -286,12 +286,15 @@ class API
 		}
 
 		try {
+			$return_header = !isset($this->params['header']) || $this->params['header'] !== 'false';
+			unset($this->params['sql'], $this->params['header']);
+
 			$s = Search::fromSQL($body);
+			$s->query(['params' => $this->params]);
 			$result = $s->iterateResults();
 			$header = $s->getHeader();
 
 			if ($format !== 'json') {
-				$return_header = !isset($this->params['header']) || $this->params['header'] !== 'false';
 				$s->export($format, 'sql', $return_header);
 				return null;
 			}
@@ -518,7 +521,7 @@ class API
 			$this->closeFilePointer();
 		}
 
-		return $this->input;
+		return $this->input ?? '';
 	}
 
 	public function setInput(?string $input): void
