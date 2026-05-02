@@ -22,8 +22,7 @@
 	</form>
 {elseif $verified}
 	<p class="block alert">
-		Conservez ces codes dans un endroit sûr. Ces codes sont le dernier moyen de vous connecter si vous perdez votre second facteur.<br />
-		Il est conseillé de les enregistrer dans un gestionnaire de mots de passe, comme KeepassXC par exemple.
+		Conservez ces codes dans un endroit sûr. Ces codes sont le dernier moyen de vous connecter si vous perdez votre téléphone. Il est conseillé de les noter dans un carnet par exemple.
 	</p>
 	{if $user.otp_recovery_codes}
 		<p class="otp-recovery">{input type="textarea" copy=true default=$codes name="" readonly=true class="otp" rows=$user.otp_recovery_codes|count cols=6}</p>
