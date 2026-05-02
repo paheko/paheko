@@ -962,16 +962,15 @@ class User extends Entity
 			return false;
 		}
 
-		// Cannot login as same category
-		if ($this->id_category === $logged_user->id_category) {
+		// Cannot login as same category, if not super-admin
+		if ($this->id_category === $logged_user->id_category && !$logged_user->isSuperAdmin()) {
 			return false;
 		}
 
-		// Cannot login as a super-admin
-		if ($this->isSuperAdmin()) {
+		// Cannot login as a super-admin, if not super-admin
+		if ($this->isSuperAdmin() && !$logged_user->isSuperAdmin()) {
 			return false;
 		}
-
 
 		return true;
 	}
