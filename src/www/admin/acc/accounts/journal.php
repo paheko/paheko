@@ -54,8 +54,9 @@ if (null === $simple) {
 $filter = new \stdClass;
 $filter->start = Utils::parseDateTime(qg('start'));
 $filter->end = Utils::parseDateTime(qg('end'));
+$filter->letter = $_GET['letter'] ?? '';
 
-$list = $account->listJournal($year_id, $simple, $filter->start, $filter->end);
+$list = $account->listJournal($year_id, $simple, $filter);
 $list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
 $list->loadFromQueryString();
 
@@ -65,6 +66,18 @@ if (!$filter->start && !$filter->end) {
 	$sum = $account->getBalance($year_id);
 }
 
-$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit', 'filter'));
+$letter_filter_options = [
+	'' => 'Toutes',
+	'only' => 'Lettrées uniquement',
+	'none' => 'Non lettrées',
+];
+
+$title = sprintf('Journal : %s - %s', $account->code, $account->label);
+
+if ($account->canLetter() && $filter->letter) {
+	$title .= sprintf(' (%s)', $filter->letter === 'only' ? 'lettrées seulement' : 'sans les écritures lettrées');
+}
+
+$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit', 'filter', 'letter_filter_options', 'title'));
 
 $tpl->display('acc/accounts/journal.tpl');

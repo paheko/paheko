@@ -44,6 +44,12 @@ class CSV
 			// Make sure the data is UTF-8 encoded
 			$row = array_map(fn ($a) => Utils::utf8_encode(trim((string)$a)), $row);
 
+			// Ignore empty rows
+			if (count($row) === 1
+				&& current($row) === '') {
+				continue;
+			}
+
 			yield $line => $row;
 
 		}

@@ -936,6 +936,8 @@ class Transaction extends Entity
 		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
 
 		$chart_id = $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $this->id_year);
+		$volunteer_accounts = 0;
+		$non_volunteer_accounts = 0;
 
 		foreach ($lines as $k => $line) {
 			$k = $k+1;
@@ -945,9 +947,18 @@ class Transaction extends Entity
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
 			$this->assert($db->test(Account::TABLE, 'id = ? AND id_chart = ?', $line->id_account, $chart_id), sprintf('Ligne %d: le compte spécifié n\'est pas lié au bon plan comptable', $k));
 
+			if ($db->test(Account::TABLE, 'id = ? AND (type = ? OR type = ?)', $line->id_account, Account::TYPE_VOLUNTEERING_EXPENSE, Account::TYPE_VOLUNTEERING_REVENUE)) {
+				$volunteer_accounts++;
+			}
+			else {
+				$non_volunteer_accounts++;
+			}
+
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
+
+		$this->assert(!($volunteer_accounts && $non_volunteer_accounts), 'Il n\'est pas possible d\'avoir dans la même écriture des comptes de bénévolat (classe 8) et des comptes d\'autres classes');
 
 		// check that transaction type is respected, or fall back to advanced
 		if ($this->type != self::TYPE_ADVANCED) {

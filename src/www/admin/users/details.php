@@ -60,9 +60,9 @@ $form->runIf('login_as', function () use ($user, $session, $can_login) {
 		throw new UserException('Accès interdit');
 	}
 
+	Log::addEventWithDetails(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
 	$session->logout();
 	$session->forceLogin($user->id);
-	Log::addEventWithDetails(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
 }, $csrf_key, '!?login_as=1');
 
 $services = Subscriptions::listDistinctForUser($user->id);

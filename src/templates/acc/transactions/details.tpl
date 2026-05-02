@@ -182,7 +182,7 @@
 						<td>{$line.reference}</td>
 						<td>
 							{if $line.id_project}
-								{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$transaction.id_year label=$line.project_name}
+								{link href="!acc/reports/statement.php?project=%d&year=%d"|args:$line.id_project:$transaction.id_year label=$line.project}
 							{/if}
 						</td>
 						<td>{$line.letter}</td>

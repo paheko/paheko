@@ -10,6 +10,7 @@ class UserException extends \RuntimeException
 {
 	protected $details = null;
 	protected ?string $html_message = null;
+	protected ?string $return_url = null;
 
 	public function setMessage(string $message) {
 		$this->message = $message;
@@ -21,6 +22,14 @@ class UserException extends \RuntimeException
 
 	public function setHTMLMessage(string $html): void {
 		$this->html_message = $html;
+	}
+
+	public function setReturnURL(?string $url): void {
+		$this->return_url = $url;
+	}
+
+	public function getReturnURL(): ?string {
+		return $this->return_url;
 	}
 
 	public function setDetails($details) {

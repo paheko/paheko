@@ -1,5 +1,5 @@
 .PHONY := php installer clean publish
-PHP_ARCHIVE := https://windows.php.net/downloads/releases/php-8.4.16-nts-Win32-vs17-x64.zip
+PHP_ARCHIVE := https://downloads.php.net/~windows/releases/archives/php-8.5.5-nts-Win32-vs17-x64.zip
 
 all: installer
 

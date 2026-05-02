@@ -46,11 +46,16 @@ class Email extends Entity
 	static public function getHash(string $email): string
 	{
 		$email = strtolower(trim($email));
+		$pos = strrpos($email, '@');
 
-		$host = substr($email, strrpos($email, '@')+1);
+		if (!$pos) {
+			throw new \InvalidArgumentException('Not a valid email address: ' . $email);
+		}
+
+		$host = substr($email, $pos+1);
 		$host = idn_to_ascii($host);
 
-		$email = substr($email, 0, strrpos($email, '@')+1) . $host;
+		$email = substr($email, 0, $pos+1) . $host;
 
 		return sha1($email);
 	}

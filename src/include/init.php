@@ -477,7 +477,7 @@ function user_error(UserException $e)
 
 		$tpl->assign('error', $e->getMessage());
 		$tpl->assign('html_error', $e->getHTMLMessage());
-		$tpl->assign('admin_url', ADMIN_URL);
+		$tpl->assign('return_url', $e->getReturnURL() ?? ADMIN_URL);
 		$tpl->display();
 	}
 	catch (\Throwable $e) {

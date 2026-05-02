@@ -17,6 +17,7 @@ use KD2\DB\Date;
 use KD2\DB\EntityManager as EM;
 
 use DateTime;
+use stdClass;
 
 class Account extends Entity
 {
@@ -541,7 +542,7 @@ class Account extends Entity
 		return self::LOCAL_TYPES[$country][$this->type];
 	}
 
-	public function listJournal(int $year_id, bool $simple = false, ?DateTime $start = null, ?DateTime $end = null)
+	public function listJournal(int $year_id, bool $simple = false, ?stdClass $filter = null)
 	{
 		$db = DB::getInstance();
 		$columns = self::LIST_COLUMNS;
@@ -564,7 +565,7 @@ class Account extends Entity
 			LEFT JOIN acc_projects p ON p.id = l.id_project';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
-		if ($this->type === self::TYPE_THIRD_PARTY) {
+		if ($this->canLetter()) {
 			$tables .= ' LEFT JOIN acc_letters ll ON ll.id = l.id_letter';
 		}
 		else {
@@ -572,13 +573,28 @@ class Account extends Entity
 		}
 
 		$reverse = $this->isReversed($simple) ? -1 : 1;
+		$start = $end = null;
 
-		if ($start) {
-			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
+		if (!empty($filter->start)
+			&& $filter->start instanceof DateTime) {
+			$conditions .= sprintf(' AND t.date >= %s', $db->quote($filter->start->format('Y-m-d')));
+			$start = $filter->start;
 		}
 
-		if ($end) {
-			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
+		if (!empty($filter->end)
+			&& $filter->end instanceof DateTime) {
+			$conditions .= sprintf(' AND t.date <= %s', $db->quote($filter->end->format('Y-m-d')));
+			$end = $filter->end;
+		}
+
+		if (!empty($filter->letter)
+			&& $this->canLetter()) {
+			if ($filter->letter === 'only') {
+				$conditions .= ' AND ll.id IS NOT NULL';
+			}
+			elseif ($filter->letter === 'none') {
+				$conditions .= ' AND ll.id IS NULL';
+			}
 		}
 
 		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);

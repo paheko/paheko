@@ -111,13 +111,15 @@ class Form
 		return $out;
 	}
 
-	public function throwIfErrors(): void
+	public function throwIfErrors(?string $return_url = null): void
 	{
 		if (!$this->hasErrors()) {
 			return;
 		}
 
-		throw new UserException(implode("\n", $this->getErrorMessages()));
+		$e = new UserException(implode("\n", $this->getErrorMessages()));
+		$e->setReturnURL($return_url);
+		throw $e;
 	}
 
 	public function __invoke($key)

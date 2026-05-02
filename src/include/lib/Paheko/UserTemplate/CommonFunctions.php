@@ -573,8 +573,12 @@ class CommonFunctions
 
 	static public function link(array $params): string
 	{
+		if (!isset($params['href'])) {
+			throw new TemplateException('Missing parameter "href"');
+		}
+
 		$href = $params['href'];
-		$label = $params['label'];
+		$label = $params['label'] ?? null;
 		$prefix = $params['prefix'] ?? '';
 
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL

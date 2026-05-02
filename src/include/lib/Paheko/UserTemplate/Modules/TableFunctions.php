@@ -339,8 +339,11 @@ class TableFunctions
 		$db->enableTablesAuthorizer([$table]);
 
 		try {
-			if ($where) {
-				$db->update($table, $params, $where, $sql_params);
+			$id = $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s;', $table, $where), $sql_params);
+
+			if ($id) {
+				unset($params['key']); // make sure we can't change the UUID
+				$db->update($table, $params, 'id = ' . (int) $id, $sql_params);
 			}
 			else {
 				$params['key'] = Utils::uuid();
