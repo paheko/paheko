@@ -18,6 +18,9 @@
 # see https://github.com/jvoisin/snuffleupagus/pull/484
 # https://github.com/jvoisin/snuffleupagus/issues/486
 # https://github.com/jvoisin/snuffleupagus/issues/485
+#
+# Inspiration:
+# https://git.tedomum.net/tedomum/mailu/-/blob/tedomum/webmails/snuffleupagus.rules
 
 # Disable execution of writable PHP files (disabled by default, but recommended)
 # Make sure all PHP files are read-only for FPM to enable this setting.
@@ -92,7 +95,7 @@ sp.disable_function.function("eval").drop();
 sp.unserialize_hmac.enable();
 
 ## Only allow wrappers we use https://www.php.net/manual/en/wrappers.php
-sp.wrappers_whitelist.list("file,php,phar");
+sp.wrappers_whitelist.list("file,php,phar,http,https");
 sp.wrappers_whitelist.php_list("stdout,stdin,stderr,input,memory,temp,output");
 
 ## Harden the `chmod` function (0777 (oct = 511, 0666 = 438)
@@ -143,11 +146,6 @@ sp.ini.key("sqlite3.extension_dir").ro();
 
 ## prevent remote access via include
 sp.ini.key("allow_url_include").set("0").ro();
-
-## prevent remote access via fopen, if curl is available, it shouldn't be needed
-@condition extension_loaded("curl");
-	sp.ini.key("allow_url_fopen").set("0").ro();
-@end_condition;
 
 ## prevent code execution from auto-included files
 sp.ini.key("auto_append_file").ro();

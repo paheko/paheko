@@ -1671,6 +1671,51 @@ class Utils
 			2 => ['pipe', 'w'], // stderr
 		];
 
+		// Use Bubblewrap to jail running apps
+		// https://jvns.ca/blog/2022/06/28/some-notes-on-bubblewrap/
+		// In some distant future, using nsjail might be better (more options: timeout, network),
+		// but it's not in Debian yet, see https://bugs.debian.org/964199
+		if (EXECUTION_JAIL === 'bubblewrap') {
+			$args = [
+				'--clearenv',
+				'--new-session',
+				'--die-with-parent',
+				'--unshare-all',
+				'--hostname local',
+				// Bind directories
+				'--ro-bind /bin /bin',
+				'--ro-bind /usr /usr',
+				'--ro-bind /lib /lib',
+				'--ro-bind /lib64 /lib64',
+				'--ro-bind /etc/alternatives /etc/alternatives', // Required for java
+				'--proc /proc',
+				'--dev /dev',
+				// required for chromium
+				'--tmpfs /tmp',
+				// Only allow to write to cache, commands should be
+				sprintf('--bind %s %1$s', escapeshellarg(CACHE_ROOT)),
+				sprintf('--ro-bind %s %1$s', escapeshellarg(SHARED_CACHE_ROOT)),
+				sprintf('--chdir %s', escapeshellarg(CACHE_ROOT)),
+			];
+
+			// Allow access to locally stored files, but read-only
+			if (FILE_STORAGE_BACKEND === 'FileSystem') {
+				$args[] = sprintf('--ro-bind %s %1$s', escapeshellarg(FILE_STORAGE_CONFIG));
+			}
+
+			// Only allow network access when required (PDF processors)
+			// TODO: restrict network access to some vhosts, see https://jvns.ca/blog/2022/06/28/some-notes-on-bubblewrap/
+			if (preg_match('/^(prince|chromium|weasyprint)\s+/', $cmd)) {
+				$args[] = '--share-net';
+			}
+
+			if (strpos($cmd, 'chromium ') === 0) {
+				$args[] = '--ro-bind /etc/chromium.d /etc/chromium.d';
+			}
+
+			$cmd = sprintf('bwrap %s %s', implode(' ', $args), $cmd);
+		}
+
 		$process = proc_open($cmd, $descriptorspec, $pipes);
 
 		if (!is_resource($process)) {
@@ -1963,7 +2008,7 @@ class Utils
 			$cmd = self::getPrinceCommand() . ' -o %2$s %1$s';
 		}
 		elseif ($cmd === 'chromium') {
-			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
+			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
 		}
 		elseif ($cmd === 'wkhtmltopdf') {
 			$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';

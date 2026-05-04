@@ -371,7 +371,7 @@ class Conversion
 			throw new \LogicException(sprintf('Command "%s" failed as it wasn\'t found. Disable this command or install it. %s', $cmd, $output));
 		}
 
-		// Don't trust code as it can return != 0 even if generation was OK
+		// Don't trust return code as it can return != 0 even if generation was OK
 		if (!file_exists($destination) || filesize($destination) < 10) {
 			Utils::safe_unlink($destination);
 			$e = new \RuntimeException($cmd . ' execution failed with code: ' . $code . "\n" . $output);

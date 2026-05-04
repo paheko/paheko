@@ -225,6 +225,7 @@ static $default_config = [
 	'FILE_VERSIONING_MAX_SIZE' => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
+	'EXECUTION_JAIL'        => null, // FIXME: set to 'bubblewrap' for 1.4.0
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
 	'SQL_DEBUG'             => null,
