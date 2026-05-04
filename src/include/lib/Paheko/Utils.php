@@ -1688,10 +1688,9 @@ class Utils
 				'--ro-bind /lib /lib',
 				'--ro-bind /lib64 /lib64',
 				'--ro-bind /etc/alternatives /etc/alternatives', // Required for java
+				'--bind /tmp /tmp', // Required for chromium + for reading uploaded files
 				'--proc /proc',
 				'--dev /dev',
-				// required for chromium
-				'--tmpfs /tmp',
 				// Only allow to write to cache, commands should be
 				sprintf('--bind %s %1$s', escapeshellarg(CACHE_ROOT)),
 				sprintf('--ro-bind %s %1$s', escapeshellarg(SHARED_CACHE_ROOT)),
