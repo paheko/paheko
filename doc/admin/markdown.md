@@ -687,7 +687,7 @@ Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivant
 * `href` : adresse du lien de l'image
 * `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
 
-Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
+Si le paramètre `href` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
 
 ```
 <<image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/">>

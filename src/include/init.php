@@ -8,7 +8,7 @@ use KD2\Form;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 use Paheko\Web\Cache as WebCache;
-
+phpinfo(); exit;
 $start_timer = microtime(true);
 
 // Disable output buffering, if enabled
