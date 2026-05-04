@@ -454,7 +454,7 @@ D'autres exemples de raccourcis :
 * `!!` : deux colonnes de largeur égale
 * `!!!` : trois colonnes de largeur égale
 * `!##` : deux colonnes, la première occupant un tiers de la largeur, la seconde occupant les deux tiers
-* `!##!` : 4 colonnes, la première occupant un quart de la largeur, la seconde occupant la moitié, la dernière occupant le quart
+* `!##!` : 3 colonnes, la première occupant un quart de la largeur, la seconde occupant la moitié (deux quarts), la dernière occupant le quart
 
 Alternativement, pour plus de contrôle, ce bloc accepte les paramètres suivants :
 
