@@ -23,9 +23,19 @@ $fields = DF::getInstance()->all();
 		continue;
 	}
 
+	// Skip password
+	if ($field->isPassword()) {
+		continue;
+	}
+
 	$value = $user->$key ?? null;
 	?>
-	<dt>{$field.label}</dt>
+	<dt>
+		{$field.label}
+		{if $field->isLogin() && $user->canLogin()}
+		<em>(identifiant de connexion)</em>
+		{/if}
+	</dt>
 
 	{* Skip according to management access rules *}
 	{if $context === 'manage' && !$session->canAccess(Session::SECTION_USERS, $field.management_access_level)}
