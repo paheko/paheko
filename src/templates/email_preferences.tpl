@@ -20,6 +20,13 @@
 		<p class="block confirm">
 			Votre adresse e-mail a bien été vérifiée, merci !
 		</p>
+	{elseif !$email->exists()}
+		{* When the address doesn't exist, we default with every accept_* property to false *}
+		<p class="alert block">
+			Merci de bien vouloir valider le formulaire pour confirmer
+			que vous ne souhaitez plus recevoir
+			de messages de notre part.
+		</p>
 	{elseif $optout_context}
 		<p class="alert block">
 			Merci de bien vouloir valider le formulaire pour confirmer

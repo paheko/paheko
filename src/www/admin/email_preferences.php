@@ -14,12 +14,10 @@ if (empty($_GET['h'])) {
 $hash = $_GET['h'];
 $optout_context = isset($_GET['c']) ? intval($_GET['c']) : null;
 
-$email = Emails::getEmailFromQueryStringValue($hash);
+// We want to create an email object if the hash doesn't exist,
+// as this may concern an address that is not part of users (eg. {{:mail}} function in Brindille)
+$email = Emails::getEmailFromQueryStringValue($hash, true);
 $csrf_key = 'email_preferences';
-
-if (!$email) {
-	throw new UserException('Adresse e-mail introuvable.');
-}
 
 // Verify e-mail address, and then display preferences to allow the user to change them
 if (isset($_GET['y']) && $_GET['y'] !== 'ok') {

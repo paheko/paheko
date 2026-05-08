@@ -88,6 +88,11 @@ class Email extends Entity
 			return false;
 		}
 
+		// No email_hash: this address does not exist in the emails table, assume they allow everything
+		if (null === $r->email_hash) {
+			return true;
+		}
+
 		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
