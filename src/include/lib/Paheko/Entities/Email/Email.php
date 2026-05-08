@@ -89,6 +89,7 @@ class Email extends Entity
 		}
 
 		// No email_hash: this address does not exist in the emails table, assume they allow everything
+		// (this is for external addresses, eg. with mail function in Brindille)
 		if (null === $r->email_hash) {
 			return true;
 		}
