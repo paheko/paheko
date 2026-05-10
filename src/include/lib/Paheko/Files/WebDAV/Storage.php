@@ -261,6 +261,13 @@ class Storage extends AbstractStorage
 			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID, NextCloud::PROP_OC_FILEID]);
 		}
 
+		// Make sure resourcetype is always included, even if not requested,
+		// this ensures directory URLs are correct
+		// see https://github.com/kd2org/karadav/pull/91
+		if (!in_array('DAV::resourcetype', $properties)) {
+			$properties[] = 'DAV::resourcetype';
+		}
+
 		$out = [];
 
 		foreach ($properties as $name) {

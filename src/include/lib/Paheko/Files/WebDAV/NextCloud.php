@@ -125,7 +125,7 @@ class NextCloud extends WebDAV_NextCloud
 			$data = fread($pointer, 8192);
 			$used += strlen($used);
 
-			if ($used > $quota['free']) {
+			if ($used > $quota['total']) {
 				$this->deleteChunks($login, $name);
 				throw new WebDAV_Exception('Your quota does not allow for the upload of this file', 403);
 			}
