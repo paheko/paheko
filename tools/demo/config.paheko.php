@@ -147,7 +147,7 @@ $message = <<<EOF
 <strong>Bac à sable temporaire</strong>
 — L'envoi d'e-mail est désactivé
 — <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
-— <a onclick="if (confirm('Supprimer ce bac à sable ?')) { this.href += this.dataset.hash; return true; } else { return false; }" href="?delete_demo=" data-hash="{$delete_hash}" style="border: 1px solid #999; margin: 0; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</a>
+— <a onclick="if (confirm('Supprimer ce bac à sable ?')) { this.href += this.dataset.hash; return true; } else { return false; }" href="?delete_demo=" data-hash="{$delete_hash}" style="border: 1px solid #999; margin: 0; color: #666; border-radius: 3px; text-decoration: none; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</a>
 EOF;
 
 define('Paheko\ALERT_MESSAGE', $message);
