@@ -137,7 +137,7 @@ elseif (!empty($_COOKIE['__login'])
 $days = DEMO_DELETE_DAYS;
 $delete_hash = sha1(SECRET_KEY . DATA_ROOT);
 
-if (!empty($_POST['delete_demo']) && $_POST['delete_demo'] === $delete_hash) {
+if (!empty($_GET['delete_demo']) && $_GET['delete_demo'] === $delete_hash) {
 	demo_delete(DATA_ROOT);
 	header('Location: /');
 	exit;
@@ -147,7 +147,7 @@ $message = <<<EOF
 <strong>Bac à sable temporaire</strong>
 — L'envoi d'e-mail est désactivé
 — <strong style="color: darkred">Toutes les données seront effacées au bout de {$days} jours&nbsp;!</strong>
-— <form method="post" style="display: inline; float: right" onsubmit="return confirm('Supprimer le compte de test ?');"><button type="submit" name="delete_demo" value="{$delete_hash}" style="border: 1px solid #999; margin: 0; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</button></form>
+— <a onclick="if (confirm('Supprimer ce bac à sable ?')) { this.href += this.dataset.hash; return true; } else { return false; }" href="?delete_demo=" data-hash="{$delete_hash}" style="border: 1px solid #999; margin: 0; padding: 1px 4px; background: none; font: inherit; font-size: .8em">Supprimer</a>
 EOF;
 
 define('Paheko\ALERT_MESSAGE', $message);
