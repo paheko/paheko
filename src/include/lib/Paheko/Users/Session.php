@@ -683,7 +683,7 @@ class Session extends \KD2\UserSession
 	protected function reportLoggedUser(): void
 	{
 		if (!isset($this->user)) {
-			throw new \LogicException('No logged user');
+			return;
 		}
 
 		// Make sure we set the user ID for the error report
