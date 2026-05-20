@@ -793,6 +793,7 @@ class Functions
 		if (empty($ut->module)) {
 			throw new TemplateException('Module could not be found');
 		}
+
 		$tpl = Template::getInstance();
 
 		$tpl_params = [

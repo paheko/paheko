@@ -297,6 +297,11 @@ class Session extends \KD2\UserSession
 				$this->user->$name = $login['user']['_name'];
 			}
 
+			$login['permissions'] ??= [];
+
+			// Always allow to connect as we are already logged-in!
+			$login['permissions']['connect'] ??= self::ACCESS_READ;
+
 			$this->user->setPermissions($login['permissions']);
 
 			if (!empty($login['save']) && $allow_new_session) {
