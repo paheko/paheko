@@ -438,7 +438,7 @@ class Files
 					continue;
 				}
 
-				$zip->add($f->path, null, $path, $pointer);
+				$zip->add($f->path, null, $path, $pointer, $f->modified);
 
 				if ($pointer) {
 					fclose($pointer);
