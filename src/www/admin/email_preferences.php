@@ -53,7 +53,12 @@ $form->runIf('save', function () use ($email, $hash, &$address_required) {
 }, $csrf_key);
 
 if ($optout_context && !isset($_GET['saved'])) {
-	$email->setOptout($optout_context);
+	try {
+		$email->setOptout($optout_context);
+	}
+	catch (\InvalidArgumentException $e) {
+		throw new UserException('Invalid optout request', 400);
+	}
 }
 
 $form_url = '?h=' . $hash;

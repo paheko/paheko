@@ -373,7 +373,7 @@ class Email extends Entity
 			$this->set('accepts_mailings', false);
 		}
 		else {
-			throw new \LogicException('Invalid optout context: ' . $context);
+			throw new \InvalidArgumentException('Invalid optout context: ' . $context);
 		}
 	}
 
