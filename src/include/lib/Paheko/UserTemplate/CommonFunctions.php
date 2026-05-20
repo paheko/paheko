@@ -463,7 +463,7 @@ class CommonFunctions
 			}
 		}
 		else {
-			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
+			$value = isset($attributes['value']) || !is_scalar($current_value) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
