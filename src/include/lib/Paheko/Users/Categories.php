@@ -41,16 +41,20 @@ class Categories
 	 */
 	static public function listAssocSafe(Session $session, bool $allow_config = true): array
 	{
-		$perms = $session->user()->getPermissions();
 		$conditions = '';
 
-		foreach ($perms as $section => $level) {
-			// Don't match login permission if logged-in user doesn't exist
-			if ($section === 'connect' && \Paheko\LOCAL_LOGIN && !$session->user()->exists()) {
-				continue;
-			}
+		// Admins can put people everywhere, because they can also change categories
+		if (!$session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN)) {
+			$perms = $session->user()->getPermissions();
 
-			$conditions .= sprintf(' AND perm_%s <= %d', $section, $level);
+			foreach ($perms as $section => $level) {
+				// Don't match login permission if logged-in user doesn't exist
+				if ($section === 'connect' && \Paheko\LOCAL_LOGIN && !$session->user()->exists()) {
+					continue;
+				}
+
+				$conditions .= sprintf(' AND perm_%s <= %d', $section, $level);
+			}
 		}
 
 		if (!$allow_config) {
