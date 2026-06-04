@@ -28,16 +28,20 @@
 		</tr>
 
 	{foreach from=$group.accounts item="account"}
-		<tr class="account">
+		<tr class="account{if $account.archived} disabled{/if}">
 			<td class="num">{$account.code}</td>
 			<th scope="row">{$account.label}</th>
 			<td class="desc">{$account.description}</td>
 			<td>
-				<?php
-				$shape = $account->bookmark ? 'check' : 'uncheck';
-				$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
-				?>
-				{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
+				{if $account.archived}
+					Archivé
+				{else}
+					<?php
+					$shape = $account->bookmark ? 'check' : 'uncheck';
+					$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
+					?>
+					{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
+				{/if}
 			</td>
 			<td class="actions">
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}
