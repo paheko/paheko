@@ -21,7 +21,7 @@
 	{include file="common/dynamic_list_head.tpl"}
 
 		{foreach from=$list->iterate() item="account"}
-			<tr class="account account-level-{$account.level}">
+			<tr class="account account-level-{$account.level}{if $account.archived} disabled{/if}">
 				<td class="num">{$account.code}</td>
 				<th scope="row"{if !$account.description} colspan=2{/if}>{$account.label}</th>
 				{if $account.description}
@@ -36,11 +36,15 @@
 					{if $account.user}<em>Ajouté</em>{/if}
 				</td>
 				<td>
-					<?php
-					$shape = $account->bookmark ? 'check' : 'uncheck';
-					$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
-					?>
-					{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
+					{if $account.archived}
+						Archivé
+					{else}
+						<?php
+						$shape = $account->bookmark ? 'check' : 'uncheck';
+						$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
+						?>
+						{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
+					{/if}
 				</td>
 				<td class="actions">
 					{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}

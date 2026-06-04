@@ -136,6 +136,7 @@ class Accounts
 			'bookmark' => [
 				'label' => 'Favori',
 			],
+			'archived' => [],
 		];
 
 		$tables = 'acc_accounts';
