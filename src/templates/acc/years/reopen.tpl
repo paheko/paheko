@@ -9,7 +9,7 @@
 		<p class="alert block">
 			L'exercice sera réouvert, mais une écriture sera ajoutée au journal général indiquant que celui-ci a été réouvert après clôture. Cette écriture ne peut pas être supprimée.
 		</p>
-		<p class="help">Cette opération est sensée être exceptionnelle, et inhabituelle.</p>
+		<p class="help">Cette opération est censée être exceptionnelle et inhabituelle.</p>
 		<dl>
 			{input type="checkbox" name="confirm" label="Je confirme la réouverture de cet exercice" value=1}
 		</dl>
