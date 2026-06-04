@@ -103,6 +103,7 @@ $types_names = implode(', ', $types_names);
 
 $criterias = compact('types', 'codes');
 $criterias = array_filter($criterias);
+$criterias['archived'] = false;
 $grouped_accounts = $all_accounts = null;
 
 if ($filter === 'bookmarks') {
