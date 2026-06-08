@@ -795,12 +795,16 @@ class UserTemplate extends \KD2\Brindille
 		echo '</section><footer>';
 
 		if ($this->file) {
-			printf('<p>Vérifiez que vous avez bien la dernière version du module.</p>
-				<p>Si c\'est le cas, contactez l\'auteur⋅e du module : <a href="%s">%s</a></p>
-				<p><strong>Ceci n\'est pas une erreur dans Paheko, merci de ne pas contacter le support Paheko :-)</strong></p>',
-				htmlspecialchars($this->module->author_url ?? ''),
-				htmlspecialchars($this->module->author ?? 'inconnu')
-			);
+			echo '<p><strong style="padding: 5px; background: yellow;">Ceci n\'est pas une erreur dans Paheko, merci de ne pas contacter le support Paheko :-)</strong></p>';
+			 echo '<p><em>Si vous avez modifié ce module, vérifiez votre code ;-)</em></p>';
+
+			if (!$this->module->hasDist()) {
+				printf('<p>Vérifiez que vous avez bien la dernière version du module.</p>
+					<p>Si c\'est le cas, contactez l\'auteur⋅e du module : <a href="%s">%s</a></p>',
+					htmlspecialchars($this->module->author_url ?? ''),
+					htmlspecialchars($this->module->author ?? 'inconnu')
+				);
+			}
 		}
 
 		echo '</footer></body></html>';
