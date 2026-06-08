@@ -534,13 +534,14 @@ class CSV_Custom
 				$names = [];
 
 				foreach ($column as $c) {
+					$found = true;
+
 					foreach ((array) $c as $key) {
-						if (in_array($key, $table, true)) {
-							$found = true;
+						if (!in_array($key, $table, true)) {
+							$found = false;
+							$names[] = $this->columns[$key];
 							break;
 						}
-
-						$names[] = $this->columns[$key];
 					}
 				}
 
