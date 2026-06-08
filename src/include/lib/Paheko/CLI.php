@@ -528,6 +528,22 @@ class CLI
 		$verbose = array_key_exists('verbose', $o);
 		$report = Security::getReport($o['version'] ?? null);
 
+		echo 'Execution jail: ';
+
+		if (!$report->jail_recommended) {
+			echo $this->color('green', 'not required');
+		}
+		elseif ($report->execution_jail) {
+			echo $this->color('green', 'yes');
+			printf(' (%s)', EXECUTION_JAIL);
+		}
+		else {
+			echo $this->color('red', 'DISABLED');
+			echo ' (execution of external programs is not protected)';
+		}
+
+		echo "\n";
+
 		echo 'Restricted open_basedir: ';
 
 		if ($report->open_basedir) {
@@ -536,7 +552,7 @@ class CLI
 		}
 		else {
 			echo $this->color('red', 'DISABLED');
-			echo ' (enabling this helps againts potential issues)';
+			echo ' (enabling this helps against path traversal)';
 		}
 
 		echo "\n";
