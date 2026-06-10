@@ -472,12 +472,12 @@ function user_error(UserException $e)
 	}
 
 	try {
-		// Flush any previous output, such as module HTML code etc.
-		@ob_end_clean();
-
-		if ($e->getCode() >= 400) {
+		if ($e->getCode() >= 400 && !headers_sent()) {
 			http_response_code($e->getCode());
 		}
+
+		// Flush any previous output, such as module HTML code etc.
+		@ob_end_clean();
 
 		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
 		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');
