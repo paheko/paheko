@@ -3,8 +3,9 @@
 namespace Paheko;
 
 use KD2\ErrorManager;
-use KD2\Security;
 use KD2\Form;
+use KD2\HTTP;
+use KD2\Security;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 use Paheko\Web\Cache as WebCache;
@@ -472,8 +473,9 @@ function user_error(UserException $e)
 	}
 
 	try {
-		if ($e->getCode() >= 400 && !headers_sent()) {
-			http_response_code($e->getCode());
+		if ($e->getCode() >= 400
+			&& !headers_sent()) {
+			header(sprintf('HTTP/1.1 %d %s', $e->getCode(), HTTP::CODES[$e->getCode()] ?? 'Unknown'), true, $e->getCode());
 		}
 
 		// Flush any previous output, such as module HTML code etc.
