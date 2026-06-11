@@ -44,10 +44,10 @@ trait FileWOPITrait
 		$url = null;
 
 		if ($ext && $action) {
-			$url = $data['extensions'][$ext][$action];
+			$url = $data['extensions'][$ext][$action] ?? null;
 		}
 		elseif ($action) {
-			$url = $data['mimetypes'][$this->mime][$action];
+			$url = $data['mimetypes'][$this->mime][$action] ?? null;
 		}
 		elseif ($ext && isset($data['extensions'][$ext])) {
 			$url = current($data['extensions'][$ext]);
