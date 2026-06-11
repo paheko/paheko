@@ -228,8 +228,12 @@ class Utils
 			}
 		}
 		elseif ($b === '-') {
+			// YYYY-MM-DDTHH:MM:SS
+			if ($l === 19 && false !== strpos($value, 'T')) {
+				$format = '!Y-m-d\TH:i:s';
+			}
 			// YYYY-MM-DD HH:MM:SS
-			if ($l === 19) {
+			elseif ($l === 19) {
 				$format = '!Y-m-d H:i:s';
 			}
 			// YYYY-MM-DDTHH:MM
