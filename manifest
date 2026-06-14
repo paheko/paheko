@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\srenaming\sof\sfiles\sand\sfolders\sin\swebdav
-D 2026-06-11T21:19:32.737
+C Hide\sdebit/credit/sum\scolumns\sin\sprojects\slist\sif\sonly\sproducts/expenses\sare\stracked
+D 2026-06-14T19:38:55.104
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -274,7 +274,7 @@ F src/templates/acc/charts/delete.tpl 770eef87a72f0fd8f37ff638b21d743c5811e77af9
 F src/templates/acc/charts/edit.tpl e64fe554715809f95f8d370503c610c8d550b8cf751b9894376f44514897e8fc
 F src/templates/acc/charts/index.tpl 029720cab94617e7d3057f62901f6623955536768914618f27bd50921e98cab5
 F src/templates/acc/index.tpl 7642bfc19f70c3d5dc8806d8f96d5cdcde7d88b03a4f9ed2a59beb790078551b
-F src/templates/acc/projects/_list.tpl 5c7ae2232e951a57d8d04181f6058f0ad6e210adea4debe44fc4d9004e27f80e
+F src/templates/acc/projects/_list.tpl f0732b7467a5d1aa755f5adccce582dfe3924a5643795a2e78226c1cec7bc14a
 F src/templates/acc/projects/_nav.tpl 7446f38c3416c7e9f50c665fdfc36dbdec330e41228bfbdc210b2948c4650292
 F src/templates/acc/projects/config.tpl f3017d725bd1b3c8017c50d77c99e61aa88bbe33c5777fbcd0fc50298e0fcedf
 F src/templates/acc/projects/delete.tpl 50483883de6621504d4a3b6e2bdae3f54024e03ef3ae6db3b0636c4126ab6324
@@ -855,24 +855,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php b3a3a122376a784b3d86dac9b14c1e0c7c1b3e2f4ae833e7c5c38561927d1f8d
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 2c43cf84c14b6c4c694c0df3a35005702faae0c908992932a8f0aa1aee24c73c
-R 67a39e2e3733389dd912448f18a322e2
+P c79916f06668d1e51415c44ad05bfa7d500a8e4b1162374d2551928eb2d92135
+R eaad017c61d64f1b7db145ef452da4db
 U bohwaz
-Z d8a6c2cc44774f0ddb7fdc74e43b29ba
+Z 34c7671413e25e0cc852e3267866c1d0
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmorJmQACgkQksnacbiI
-6jSNNg//c/kGQbgfwMRx1PAJq9bC01TbJRHiw0fUWSsAQrSHpsrpwYTyjQhkIWnP
-DWdIcnXoavoKPaq3t4mFAWa071Ay5HauGe1fr60Fvh9CKzH8bWouJoAGSeILTa1V
-36W8gOEJTU6hnhttZk6/DwKLq5Ov2UVeoPILLbOyaL2xN863abgG9vIUBSxfNcVw
-OmGrA6G/lHP3s/+lkA90KIY+6m6LZuyYdtDdqxh5g28Et1gijcsHeaBFrbqcpk9h
-C35CCLL1w9Hv3zXGGnq7MpfMNLaXQ0HjRQCxPpsulz8vFfkyzEnpN8vgiFUensNC
-hC/b9fBfSvZs91lqiGPGYB7J2z9tLyTJCH7qXcifrJXZIm+n3MFU/4nf0r0kKOhb
-4e++OZiwpB4Psx5/MiHKRhTsYBuW54PSOdqFnjiQIVwm6l/bh8TFWWjnYxRTt/dC
-biMj9Gk0QsauE4gInaHRGfI3JEk3ZKDtDKHMhbL2wIWr0XY0PN8ng1OdA47oCzO7
-tGoFRjtDD+v4DfnNCWIyrwZ1PKSyjM6PWgMjfUlIVdZakmNLsd8+nJ/zOzIKbyxN
-3QLqpclojvh32YiHf6JuHuSwXVBGtKEFenHf7FVLzLEgBIY+ZAQEPIIS7G/SKyM/
-+7ECupltlt+QDV2PdXt72B/ZK6FT51fZyr3tACvA4ZakgPt/kgk=
-=wIyu
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmovA08ACgkQksnacbiI
+6jRuQg/+O5m4LZjuMOcvYTNf/w5Pjtf6/FgFXNoaC77zk8wGYJfO5hnIB3WFhwFP
+w1kPYadzz8B521wDpz8Fyxl3Fn9pCh3Ghno4QdpM8eAbf7MWfZPY0YXJZL0L9MA3
+XVDRTFMFe8crC+6xTo/PKKWj/nax4b1/gzR00pCd2pRm2RtoiBm4KyZQp7NSFXgr
+nHcxE7KHED7yBbYgO5Ps13m95brsqRp2LygbuAbLBuNNuBMOojdACpWFmGG95eJj
+FNGxMh5uFXpU6ENEJ8g5InSdjSjrwHQMZMu6j8h8NUatu6RY0FmwgQRqSbiP6I1Z
+dp4TfiafmroNSIdvBCdcYrgTLvPS27Hxx17Wt0BIgwsy5llvAFIZ2JTxibMOXnjM
+Tno9vFGF8Mqj9YzK4sg47vrbgwQYXmFRha50nuZKxNm4xJP1gvKQjkCP00voEjSu
+NYoqSR+plog98b5dRY9b6CMOn6SIkZ8w41iq+FTq874Me8C20vVyyN7xW62WvAUa
+g/DoyptIT5WtBz696AY1lqnPb4LKuJIiLS3ShRsWQdEHgR0CcfWiA4B+t2T7Z0wb
+fmu3gfbb9b4hbbah3pSc/bkMH/im2EQeANxuASi1gbS1CqhLmgb7R+y459YrFNWH
+tJp8FOnvkPwGaPuX6gLwljehsPtKMJ6CptxY6mCqT28jBjjvpLM=
+=DV8b
 -----END PGP SIGNATURE-----

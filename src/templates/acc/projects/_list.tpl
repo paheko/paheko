@@ -7,19 +7,21 @@
 				<td class="money">Charges</td>
 				<td class="money">Produits</td>
 				<td class="money">Résultat</td>
+				{if $config.analytical_set_all}
 				<td class="money">Débits</td>
 				<td class="money">Crédits</td>
 				<td class="money">Solde</td>
+				{/if}
 			</tr>
 		</thead>
 		{foreach from=$list item="parent"}
 			<tbody{if $parent.archived} class="archived"{/if}>
 				<tr class="title">
-					<td colspan="4">
+					<td colspan="{if $config.analytical_set_all}4{else}2{/if}">
 						<h2 class="ruler-left">{$parent.label}{if $parent.archived} <em>(archivé)</em>{/if}</h2>
 						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
 					</td>
-					<td colspan="4" class="actions">
+					<td colspan="{if $config.analytical_set_all}4{else}3{/if}" class="actions">
 					{if !$table_export && !$by_year && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 						{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$parent.id target="_dialog"}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$parent.id target="_dialog"}
@@ -51,9 +53,11 @@
 					<td class="money">{$item.sum_expense|raw|money}</td>
 					<td class="money">{$item.sum_revenue|raw|money}</td>
 					<td class="money">{$result|raw|money:true:true}</td>
+					{if $config.analytical_set_all}
 					<td class="money">{$item.debit|raw|money:false}</td>
 					<td class="money">{$item.credit|raw|money:false}</td>
 					<td class="money">{$item.sum|raw|money:false}</td>
+					{/if}
 				</tr>
 			{/foreach}
 			</tbody>
