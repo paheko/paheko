@@ -501,7 +501,7 @@ CREATE TABLE IF NOT EXISTS acc_letters (
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Transactions (écritures comptables)
 (
-	id INTEGER PRIMARY KEY NOT NULL,
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 
 	type INTEGER NOT NULL DEFAULT 0, -- Transaction type, zero is advanced
 	status INTEGER NOT NULL DEFAULT 0, -- Status (bitmask)
