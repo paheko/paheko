@@ -421,7 +421,25 @@ class CommonFunctions
 			$multiple = !empty($attributes['multiple']);
 			$can_delete = $multiple || !empty($attributes['can_delete']);
 			$values = '';
-			$delete_btn = self::button(['shape' => 'delete']);
+
+			if (!empty($attributes['readonly'])) {
+				$button = '';
+				$delete_btn = '';
+			}
+			else {
+				$delete_btn = self::button(['shape' => 'delete']);
+				$button = self::button([
+					'shape'           => $multiple ? 'plus' : 'menu',
+					'label'           => $multiple ? 'Ajouter' : 'Sélectionner',
+					'required'        => $attributes['required'] ?? null,
+					'value'           => Utils::getLocalURL($attributes['target']),
+					'data-caption'    => $params['label'] ?? '',
+					'data-multiple'   => $multiple ? '1' : '0',
+					'data-can-delete' => (int) $can_delete,
+					'data-name'       => $name,
+					'data-max'        => $attributes['max'] ?? 0,
+				]);
+			}
 
 			if (null !== $current_value && (is_array($current_value) || is_object($current_value))) {
 				foreach ($current_value as $v => $l) {
@@ -432,18 +450,6 @@ class CommonFunctions
 					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', htmlspecialchars((string)$name), htmlspecialchars((string)$v), htmlspecialchars((string)$l), $can_delete ? $delete_btn : '');
 				}
 			}
-
-			$button = self::button([
-				'shape'           => $multiple ? 'plus' : 'menu',
-				'label'           => $multiple ? 'Ajouter' : 'Sélectionner',
-				'required'        => $attributes['required'] ?? null,
-				'value'           => Utils::getLocalURL($attributes['target']),
-				'data-caption'    => $params['label'] ?? '',
-				'data-multiple'   => $multiple ? '1' : '0',
-				'data-can-delete' => (int) $can_delete,
-				'data-name'       => $name,
-				'data-max'        => $attributes['max'] ?? 0,
-			]);
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', htmlspecialchars($attributes['id']), $button, $values);
 		}
@@ -464,7 +470,7 @@ class CommonFunctions
 			}
 		}
 		else {
-			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
+			$value = isset($attributes['value']) || !is_scalar($current_value) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 

@@ -347,7 +347,7 @@ class Emails
 	/**
 	 * Return an Email entity from the optout code
 	 */
-	static public function getEmailFromQueryStringValue(string $code): ?Email
+	static public function getEmailFromQueryStringValue(string $code, bool $create_if_not_found = false): ?Email
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 
@@ -356,7 +356,15 @@ class Emails
 		}
 
 		$hash = bin2hex($hash);
-		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
+		$email = EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
+
+		if (!$email && $create_if_not_found) {
+			$email = new Email;
+			$email->set('added', new \DateTime);
+			$email->set('hash', $hash);
+		}
+
+		return $email;
 	}
 
 	/**
@@ -572,7 +580,8 @@ class Emails
 
 		$condition = null === $context ? '' : sprintf(' AND context = %d', $context);
 
-		return DB::getInstance()->get(sprintf('SELECT q.*, e.accepts_messages, e.accepts_mailings, e.accepts_reminders, e.verified, e.hash AS email_hash,
+		return DB::getInstance()->get(sprintf('SELECT q.*,
+				e.accepts_messages, e.accepts_mailings, e.accepts_reminders, e.verified, e.hash AS email_hash,
 				e.invalid, e.fail_count, strftime(\'%%s\', e.last_sent) AS last_sent
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash

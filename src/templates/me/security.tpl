@@ -13,12 +13,8 @@
 	<dd class="help">{$id_field.label}</dd>
 	<dd>{input type=$id_field.type readonly="readonly" copy=true default=$id name=""}</dd>
 	<dt>Mot de passe</dt>
-	{if $can_change_password}
-		<dd>{linkbutton href="security_password.php" label="Modifier le mot de passe" shape="edit"}</dd>
-	{else}
-		<dd class="alert">Vous n'avez pas le droit de modifier votre mot de passe. Vous devez contacter un administrateur pour qu'il change votre mot de passe.</dd>
-	{/if}
-	<dt>Double authentification (second facteur TOTP)</dt>
+	<dd>{linkbutton href="security_password.php" label="Modifier le mot de passe" shape="edit"}</dd>
+	<dt>Double authentification (2FA)</dt>
 	<dd>
 		{if $user.otp_secret}
 			{tag color="darkgreen" label="Activée"}

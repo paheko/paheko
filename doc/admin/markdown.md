@@ -454,7 +454,7 @@ D'autres exemples de raccourcis :
 * `!!` : deux colonnes de largeur égale
 * `!!!` : trois colonnes de largeur égale
 * `!##` : deux colonnes, la première occupant un tiers de la largeur, la seconde occupant les deux tiers
-* `!##!` : 4 colonnes, la première occupant un quart de la largeur, la seconde occupant la moitié, la dernière occupant le quart
+* `!##!` : 3 colonnes, la première occupant un quart de la largeur, la seconde occupant la moitié (deux quarts), la dernière occupant le quart
 
 Alternativement, pour plus de contrôle, ce bloc accepte les paramètres suivants :
 
@@ -687,7 +687,7 @@ Il est aussi possible d'utiliser la syntaxe avec les paramètres nommés suivant
 * `href` : adresse du lien de l'image
 * `alt` : description textuelle de l'image (utile si on ne veut pas de légende en dessous de l'image)
 
-Si le paramètre `link` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
+Si le paramètre `href` est fourni, un clic sur l'image ouvrira ce lien, au lieu d'ouvrir l'image en grand.
 
 ```
 <<image src="Nom_fichier.jpg" align="center" alt="Ceci est une photo d'une fougère très jolie" href="https://paheko.cloud/">>

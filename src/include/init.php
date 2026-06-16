@@ -3,8 +3,9 @@
 namespace Paheko;
 
 use KD2\ErrorManager;
-use KD2\Security;
 use KD2\Form;
+use KD2\HTTP;
+use KD2\Security;
 use KD2\Translate;
 use KD2\DB\EntityManager;
 use Paheko\Web\Cache as WebCache;
@@ -224,6 +225,7 @@ static $default_config = [
 	'FILE_VERSIONING_MAX_SIZE' => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
+	'EXECUTION_JAIL'        => null, // FIXME: set to 'bubblewrap' for 1.4.0
 	'PDF_COMMAND'           => 'auto',
 	'PDF_USAGE_LOG'         => null,
 	'SQL_DEBUG'             => null,
@@ -464,12 +466,13 @@ function user_error(UserException $e)
 	}
 
 	try {
+		if ($e->getCode() >= 400
+			&& !headers_sent()) {
+			header(sprintf('HTTP/1.1 %d %s', $e->getCode(), HTTP::CODES[$e->getCode()] ?? 'Unknown'), true, $e->getCode());
+		}
+
 		// Flush any previous output, such as module HTML code etc.
 		@ob_end_clean();
-
-		if ($e->getCode() >= 400) {
-			http_response_code($e->getCode());
-		}
 
 		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
 		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');

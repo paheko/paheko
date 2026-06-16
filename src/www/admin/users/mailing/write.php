@@ -31,12 +31,19 @@ $form->runIf('save', function () use ($mailing) {
 	Utils::redirect($url);
 }, $csrf_key);
 
+// Preview of mailing content
 if (!$form->hasErrors()) {
-	$form->runIf('content', function() use ($mailing) {
-		$mailing->set('body', trim(f('content') ?? ''));
-		echo $mailing->getHTMLPreview(null, true);
-		exit;
-	});
+	if (!empty($_POST['content']) && isset($_GET['preview'])) {
+		try {
+			$mailing->set('body', trim(f('content') ?? ''));
+			echo $mailing->getHTMLPreview(null, true);
+			exit;
+		}
+		catch (TemplateException $e) {
+			echo '<h2 style="color: red;">' . htmlspecialchars($e->getMessage()) . '</h2>';
+			exit;
+		}
+	}
 }
 
 $tpl->assign(compact('mailing', 'csrf_key'));

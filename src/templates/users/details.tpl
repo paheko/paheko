@@ -85,7 +85,7 @@
 			{linkbutton shape="menu" label="Journal d'audit" href="!users/log.php?id=%d"|args:$user.id}
 		</dd>
 		{/if}
-		<dt>Sécurité</dt>
+		<dt>Connexion</dt>
 		<dd>
 			{if empty($user.password)}
 				{tag color="darkgrey" label="Pas de mot de passe"}
@@ -104,9 +104,9 @@
 			{if $logged_user.id == $user.id}
 				{linkbutton shape="settings" label="Modifier mon mot de passe" href="!me/security.php"}
 			{elseif $user.password}
-				{linkbutton shape="settings" label="Modifier le mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+				{linkbutton shape="settings" label="Options de connexion" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 			{else}
-				{linkbutton shape="settings" label="Définir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
+				{linkbutton shape="help" label="Choisir un mot de passe" href="edit_security.php?id=%d"|args:$user.id target="_dialog"}
 			{/if}
 			</dd>
 		{/if}

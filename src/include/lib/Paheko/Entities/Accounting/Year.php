@@ -117,7 +117,8 @@ class Year extends Entity
 		$closing_id = $this->accounts()->getClosingAccountId();
 
 		if (!$closing_id) {
-			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
+			$number = $this->accounts()->getCodeForLocalType(Account::TYPE_CLOSING);
+			throw new UserException(sprintf('Aucun compte n\'est indiqué comme compte de clôture (code %s) dans le plan comptable', $number));
 		}
 
 		$this->set('status', self::OPEN);

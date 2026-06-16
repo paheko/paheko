@@ -470,7 +470,7 @@ class Functions
 			$ut::_assign([$params['capture'] => $include->fetch()], $ut, $line);
 		}
 		else {
-			$include->display();
+			echo $include->fetchAndCatchErrors();
 		}
 
 		if (isset($params['keep'])) {
@@ -586,6 +586,7 @@ class Functions
 		if (empty($ut->module)) {
 			throw new TemplateException('Module could not be found');
 		}
+
 		$tpl = Template::getInstance();
 
 		$tpl_params = [

@@ -261,6 +261,13 @@ class Storage extends AbstractStorage
 			$properties = array_merge(WebDAV::BASIC_PROPERTIES, ['DAV::getetag', NextCloud::PROP_OC_ID, NextCloud::PROP_OC_FILEID]);
 		}
 
+		// Make sure resourcetype is always included, even if not requested,
+		// this ensures directory URLs are correct
+		// see https://github.com/kd2org/karadav/pull/91
+		if (!in_array('DAV::resourcetype', $properties)) {
+			$properties[] = 'DAV::resourcetype';
+		}
+
 		$out = [];
 
 		foreach ($properties as $name) {
@@ -373,11 +380,16 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('File not found', 404);
 		}
 
-		if (!$source->canMoveTo($destination, $this->session)) {
-			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
+		if ($move) {
+			if (!$source->canMoveTo($destination, $this->session)) {
+				throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
+			}
 		}
+		else {
+			if (!$source->canCopyTo($destination, $this->session)) {
+				throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de copier ce fichier à cet endroit', 403);
+			}
 
-		if (!$move) {
 			if ($source->size > Files::getRemainingQuota()) {
 				throw new WebDAV_Exception('Your quota is exhausted', 403);
 			}

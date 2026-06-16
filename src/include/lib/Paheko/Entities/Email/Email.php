@@ -88,6 +88,12 @@ class Email extends Entity
 			return false;
 		}
 
+		// No email_hash: this address does not exist in the emails table, assume they allow everything
+		// (this is for external addresses, eg. with mail function in Brindille)
+		if (null === $r->email_hash) {
+			return true;
+		}
+
 		// Use (bool) casting as we can get (int) 0/1 here (straight from the DB)
 		switch ($r->context) {
 			case Emails::CONTEXT_BULK:
@@ -367,7 +373,7 @@ class Email extends Entity
 			$this->set('accepts_mailings', false);
 		}
 		else {
-			throw new \LogicException('Invalid optout context: ' . $context);
+			throw new \InvalidArgumentException('Invalid optout context: ' . $context);
 		}
 	}
 

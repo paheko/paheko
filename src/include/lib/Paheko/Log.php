@@ -38,6 +38,7 @@ class Log
 	const LOGIN_FAIL_OTP = 7;
 	const OTP_CHANGED = 8;
 	const OTP_RECOVERY_USED = 9;
+	const LOGIN_REMEMBER_ME = 101;
 
 	const CREATE = 10;
 	const DELETE = 11;
@@ -56,6 +57,7 @@ class Log
 		self::LOGIN_FAIL_OTP => 'Code TOTP invalide',
 		self::OTP_CHANGED => 'Modification de la double authentification TOTP',
 		self::OTP_RECOVERY_USED => 'Utilisation d\'un code de secours',
+		self::LOGIN_REMEMBER_ME => 'Nouvelle session (fonction "Rester connecté⋅e")',
 
 		self::CREATE => 'Création',
 		self::DELETE => 'Suppression',

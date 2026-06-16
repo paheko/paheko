@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Connexion — double facteur" current="login"}
+{include file="_head.tpl" title="Connexion — double facteur" current="login" show_logout=true}
 
 {form_errors}
 

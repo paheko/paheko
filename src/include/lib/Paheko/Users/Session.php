@@ -35,11 +35,12 @@ use const Paheko\{
 	OIDC_CLIENT_CALLBACK
 };
 
-use KD2\Security;
-use KD2\Security_OTP;
+use KD2\ErrorManager;
 use KD2\Graphics\QRCode;
 use KD2\HTTP;
 use KD2\OpenIDConnect;
+use KD2\Security;
+use KD2\Security_OTP;
 
 class Session extends \KD2\UserSession
 {
@@ -193,8 +194,9 @@ class Session extends \KD2\UserSession
 			$user_id = $this->getUser()->id;
 			Plugins::fire('user.login.auto', false, compact('user_id'));
 
-			// Update login date as well
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+			// Log
+			$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
+			Log::add(Log::LOGIN_REMEMBER_ME, compact('user_agent'));
 		}
 
 		return $r;
@@ -270,6 +272,8 @@ class Session extends \KD2\UserSession
 			$logged = $this->forceLogin(LOCAL_LOGIN, $allow_new_session);
 		}
 
+		$this->reportLoggedUser();
+
 		return $logged;
 	}
 
@@ -296,6 +300,11 @@ class Session extends \KD2\UserSession
 				$name = DynamicFields::getFirstNameField();
 				$this->user->$name = $login['user']['_name'];
 			}
+
+			$login['permissions'] ??= [];
+
+			// Always allow to connect as we are already logged-in!
+			$login['permissions']['connect'] ??= self::ACCESS_READ;
 
 			$this->user->setPermissions($login['permissions']);
 
@@ -667,7 +676,28 @@ class Session extends \KD2\UserSession
 		$this->start(true);
 		$this->user = $user;
 		$_SESSION['userSession'] = $this->user;
+
+		$this->reportLoggedUser();
+
 		$this->close();
+	}
+
+	protected function reportLoggedUser(): void
+	{
+		if (!isset($this->user)) {
+			return;
+		}
+
+		// Make sure we set the user ID for the error report
+		if ($this->user->exists()) {
+			ErrorManager::setContextProperty('logged_user_id', $this->user->id);
+			ErrorManager::setContextProperty('logged_user_name', null);
+		}
+		else {
+			ErrorManager::setContextProperty('logged_user_id', null);
+			ErrorManager::setContextProperty('logged_user_name', $this->user->name());
+		}
+
 	}
 
 	static public function getUserId(): ?int

@@ -41,6 +41,17 @@ if (!defined('Paheko\LOGIN_PROCESS'))
 		}
 	}
 
+	$user = $session->user();
+
+	if (!$user) {
+		throw new \LogicException('No user object in session!');
+	}
+
+	if ($user->isOTPRequired()
+		&& !defined('Paheko\OTP_PROCESS')) {
+		Utils::redirect(ADMIN_URL . 'me/security_otp.php');
+	}
+
 	$tpl->assign('current', '');
 
 	$tpl->assign('plugins_menu', Extensions::listMenu($session));

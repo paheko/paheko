@@ -899,12 +899,10 @@ class Account extends Entity
 
 	public function importLimitedForm(?array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
-		$data = array_intersect_key($source, array_flip(['type', 'description']));
-		parent::import($data);
+		$data = array_intersect_key($source, array_flip(['type', 'description', 'bookmark', 'bookmark_present']));
+		$this->importForm($data);
 	}
 
 	public function canDelete(): bool
@@ -1033,14 +1031,15 @@ class Account extends Entity
 
 	public function importForm(?array $source = null)
 	{
-		if (null === $source) {
-			$source = $_POST;
-		}
+		$source ??= $_POST;
 
 		if (isset($source['code_value'], $source['code_base'])) {
 			$source['code'] = trim($source['code_base']) . trim($source['code_value']);
 		}
 
+		if (isset($source['bookmark_present'])) {
+			$source['bookmark'] = !empty($source['bookmark']);
+		}
 		parent::importForm($source);
 	}
 
