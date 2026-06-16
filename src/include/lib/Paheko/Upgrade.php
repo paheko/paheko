@@ -71,39 +71,39 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.3', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.3.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.5', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.5.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.7', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.7.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.8', '<')) {
 				require ROOT . '/include/migrations/1.3/1.3.8.php';
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.8.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.9', '<')) {
 				require ROOT . '/include/migrations/1.3/1.3.9.php';
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.9.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.10', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.10.sql');
 				$db->commitSchemaUpdate();
 			}
@@ -113,19 +113,19 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.12', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.12.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.13', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.13.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.14', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.14.sql');
 
 				if ($db->hasTable('module_data_recus_fiscaux')) {
@@ -136,7 +136,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.16', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.16.sql');
 				$db->commitSchemaUpdate();
 			}
@@ -154,13 +154,13 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.20', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.20.sql');
 				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.3.21', '<')) {
-				$db->beginSchemaUpdate();
+				$db->beginLegacySchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.21.sql');
 				$db->commitSchemaUpdate();
 			}

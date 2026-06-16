@@ -8,7 +8,7 @@ use Paheko\Entities\Email\Email;
 
 $db = DB::getInstance();
 
-$db->beginSchemaUpdate();
+$db->beginLegacySchemaUpdate();
 $db->import(__DIR__ . '/1.3.17.sql');
 $db->commitSchemaUpdate();
 

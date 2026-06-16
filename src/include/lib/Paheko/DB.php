@@ -570,28 +570,45 @@ class DB extends SQLite3
 		$this->db->exec(sprintf('PRAGMA user_version = %d;', $version));
 	}
 
-	public function beginSchemaUpdate(bool $legacy = true)
+	/**
+	 * @deprecated
+	 */
+	public function beginLegacySchemaUpdate(): void
+	{
+		if ($this->_schema_update++) {
+			return;
+		}
+
+		// This is because it will be increased in beginSchemaUpdate
+		$this->_schema_update--;
+
+		// Migrations before 1.4.0 didn't use the correct table create / rename order for changing schema
+		// See section 8 of https://www.sqlite.org/lang_altertable.html
+		$this->db->exec('PRAGMA legacy_alter_table = ON;');
+		$this->beginSchemaUpdate();
+	}
+
+	public function beginSchemaUpdate()
 	{
 		// Only start if not already taking place
-		if ($this->_schema_update++ == 0) {
-			$this->toggleForeignKeys(false);
-
-			if ($legacy) {
-				$this->db->exec('PRAGMA legacy_alter_table = ON;');
-			}
-
-			$this->begin();
+		if ($this->_schema_update++) {
+			return;
 		}
+
+		$this->toggleForeignKeys(false);
+		$this->begin();
 	}
 
 	public function commitSchemaUpdate()
 	{
 		// Only commit if last call
-		if (--$this->_schema_update == 0) {
-			$this->commit();
-			$this->db->exec('PRAGMA legacy_alter_table = OFF;');
-			$this->toggleForeignKeys(true);
+		if (--$this->_schema_update != 0) {
+			return;
 		}
+
+		$this->commit();
+		$this->db->exec('PRAGMA legacy_alter_table = OFF;');
+		$this->toggleForeignKeys(true);
 	}
 
 	public function lastErrorMsg()
