@@ -104,7 +104,7 @@ class Conversion
 			return true;
 		}
 
-		if ((in_array('collabora', $tools, true) || in_array('unoconv', $tools, true) || in_array('unoconvert', $tools, true))
+		if ((in_array('collabora', $tools, true) || in_array('unoconvert', $tools, true))
 			&& ($to === 'csv' || $to === 'pdf' || $to === 'png' || $to === 'txt')
 			&& in_array($extension, self::LIBREOFFICE_FORMATS, true)) {
 			return true;
@@ -338,10 +338,7 @@ class Conversion
 			return self::onlyoffice($source, $destination, $format, $extension);
 		}
 
-		if (in_array('unoconv', $tools, true)) {
-			$cmd = 'unoconv %s -i FilterOptions=44,34,76 -o %3$s %2$s 2>&1';
-		}
-		elseif (in_array('unoconvert', $tools, true)) {
+		if (in_array('unoconvert', $tools, true)) {
 			// --filter-options PixelWidth=500 --filter-options PixelHeight=500
 			// see https://github.com/unoconv/unoserver/issues/85
 			// see https://github.com/unoconv/unoserver/issues/86

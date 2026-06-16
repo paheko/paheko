@@ -1154,14 +1154,13 @@ namespace Paheko;
  *   dont l'URL est indiquée dans WOPI_DISCOVERY_URL, et la clé indiquée dans en paramètre
  *   (voir ci-dessous)
  * - ssconvert (apt install gnumeric --no-install-recommends) (plus léger, recommandé)
- * - unoconv (apt install unoconv) (utilise LibreOffice)
  * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
  * - mupdf : les miniatures PDF/SVG/XPS/EPUB sont générées avec mutool
  *   (apt install mupdf-tools)
  * - ffmpeg : les miniatures de vidéos seront générées avec ffmpeg
  *
  * Si un outil permettant la conversion de documents bureautique est
- * spécifié (collabora, unoconvert, unocov, onlyoffice), alors il sera
+ * spécifié (collabora, unoconvert, onlyoffice), alors il sera
  * possible d'importer des fichiers XLS (vieil Excel) en plus du CSV, ODS et XLSX
  * (par exemple pour les imports de membres ou d'écritures comptables).
  *
