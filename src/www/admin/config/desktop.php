@@ -66,10 +66,9 @@ $pdf_commands = [
 	'prince'      => 'PrinceXML (recommandé)',
 	'chromium'    => 'Chromium (recommandé)',
 	'weasyprint'  => 'Weasyprint',
-	'wkhtmltopdf' => 'wkhtmltopdf',
 ];
 
-foreach (['prince', 'chromium', 'chrome', 'weasyprint', 'wkhtmltopdf'] as $cmd) {
+foreach (['prince', 'chromium', 'chrome', 'weasyprint'] as $cmd) {
 	if (!has_command($cmd)) {
 		unset($pdf_commands[$cmd]);
 	}

@@ -1093,13 +1093,13 @@ namespace Paheko;
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
  *
  * Si laissé sur 'auto', Paheko essaiera de détecter une solution entre
- * PrinceXML, Chromium, wkhtmltopdf ou weasyprint (dans cet ordre).
+ * PrinceXML, Chromium ou weasyprint (dans cet ordre).
  * Si aucune solution n'est disponible, une erreur sera affichée.
  *
  * Il est possible d'indiquer NULL pour désactiver l'export en PDF.
  *
  * Il est possible d'indiquer uniquement le nom du programme :
- * 'chromium', 'prince', 'weasyprint', ou 'wkhtmltopdf'.
+ * 'chromium', 'prince', ou 'weasyprint'
  * Dans ce cas, Paheko utilisera les paramètres par défaut de ce programme.
  *
  * Alternativement, il est possible d'indiquer la commande complète avec
@@ -1110,10 +1110,6 @@ namespace Paheko;
  *
  * Si vous utilisez une extension pour générer les PDF (comme DomPDF), alors
  * laisser cette constante sur 'auto'.
- *
- * Exemples :
- * 'weasyprint'
- * 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s'
  *
  * Si vous utilisez Prince, un message mentionnant l'utilisation de Prince
  * sera joint aux e-mails utilisant des fichiers PDF, conformément à la licence :

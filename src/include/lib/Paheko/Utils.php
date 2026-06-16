@@ -1858,7 +1858,7 @@ class Utils
 
 		if ($cmd === 'auto') {
 			// Try to find a local executable
-			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+			$list = ['prince', 'chromium', 'weasyprint'];
 			$cmd = null;
 
 			foreach ($list as $program) {
@@ -2002,9 +2002,6 @@ class Utils
 		}
 		elseif ($cmd === 'chromium') {
 			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
-		}
-		elseif ($cmd === 'wkhtmltopdf') {
-			$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
 		}
 		elseif ($cmd === 'weasyprint') {
 			$timeout = 60;
