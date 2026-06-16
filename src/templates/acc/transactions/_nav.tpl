@@ -16,7 +16,7 @@
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
 			&& $current_year
 			&& $current_year->isOpen()}
-			{tabitem href="!acc/years/import.php?year=%d"|args:$current_year.id label="Import" name="import" selected=$current}
+			{tabitem href="!acc/years/import.php" label="Import" name="import" selected=$current}
 		{/if}
 	</ul>
 </nav>

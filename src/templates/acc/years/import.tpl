@@ -3,10 +3,16 @@ use Paheko\Accounting\Export;
 ?>
 {include file="_head.tpl" title="Importer des écritures" current="acc/years"}
 
-<nav class="acc-year">
-	<h4>Exercice sélectionné&nbsp;:</h4>
-	<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
-</nav>
+{if $_GET.year}
+	<nav class="acc-year">
+		<h4>Exercice sélectionné&nbsp;:</h4>
+		<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
+	</nav>
+{else}
+	{include file="acc/_year_select.tpl"}
+	{include file="acc/transactions/_nav.tpl" current="import"}
+{/if}
+
 
 {form_errors}
 
