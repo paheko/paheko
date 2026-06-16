@@ -156,7 +156,11 @@ if (ALERT_MESSAGE && !$dialog) {
 		{if $config.org_web || !$config.site_disabled}
 		<li><h3><a href="{$site_url}">{icon shape="left"}<b>Retour au site</b></a></h3></li>
 		{/if}
-		<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
+		{if !empty($show_logout)}
+			<li><h3><a href="{$admin_uri}logout.php">{icon shape="logout"}<b>Déconnexion</b></a></h3></li>
+		{else}
+			<li{if $current == 'login'} class="current"{/if}><h3><a href="{$admin_url}">{icon shape="login"}<b>Connexion</b></a></h3></li>
+		{/if}
 	{/if}
 	</ul>
 </nav>
