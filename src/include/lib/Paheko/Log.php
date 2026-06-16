@@ -105,10 +105,10 @@ class Log
 
 	static public function addEventWithMessage(int $action, string $message, ?int $id_user = null): void
 	{
-		self::add($action, compact('message'), $id_user);
+		self::addEventWithDetails($action, compact('message'), $id_user);
 	}
 
-	static public function add(int $action, ?array $params = null, ?int $id_user = null): void
+	static protected function add(int $action, ?array $params = null, ?int $id_user = null): void
 	{
 		$params ??= [];
 		$params['action'] = $action;
