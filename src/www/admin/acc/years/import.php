@@ -77,7 +77,7 @@ if ($type && $type_name) {
 
 	if (!f('import') && $csv->ready()) {
 		try {
-			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal') + ['dry_run' => true, 'return_report' => true]);
+			$report = Import::import($type, $year, $csv, $session, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal') + ['dry_run' => true, 'return_report' => true]);
 		}
 		catch (UserException $e) {
 			$csv->clear();
@@ -85,9 +85,9 @@ if ($type && $type_name) {
 		}
 	}
 
-	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts, $fec_number_per_journal) {
+	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids, $auto_create_accounts, $fec_number_per_journal, $session) {
 		try {
-			Import::import($type, $year, $csv, $user->id, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal'));
+			Import::import($type, $year, $csv, $session, compact('ignore_ids', 'auto_create_accounts', 'fec_number_per_journal'));
 		}
 		finally {
 			$csv->clear();
