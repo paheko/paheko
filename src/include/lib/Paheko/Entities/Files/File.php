@@ -488,7 +488,7 @@ class File extends Entity
 		$this->deleteVersions();
 
 		if (!$this->isDir()) {
-			Log::add(Log::DELETE, ['entity' => self::class, 'path' => $this->path]);
+			Log::addEventWithDetails(Log::DELETE, ['entity' => self::class, 'path' => $this->path]);
 		}
 
 		$r = parent::delete();

@@ -196,7 +196,7 @@ class Session extends \KD2\UserSession
 
 			// Log
 			$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
-			Log::add(Log::LOGIN_REMEMBER_ME, compact('user_agent'));
+			Log::addEventWithDetails(Log::LOGIN_REMEMBER_ME, compact('user_agent'), $user_id);
 		}
 
 		return $r;

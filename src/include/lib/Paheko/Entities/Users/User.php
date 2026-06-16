@@ -324,7 +324,7 @@ class User extends Entity
 
 		if ($login_modified && $this->password) {
 			EmailTemplates::loginChanged($this);
-			Log::add(Log::LOGIN_CHANGE, null, $this->id());
+			Log::addEventWithDetails(Log::LOGIN_CHANGE, null, $this->id());
 		}
 
 		if ($password_modified && $this->password && $this->id == Session::getUserId()) {
@@ -332,7 +332,7 @@ class User extends Entity
 		}
 
 		if ($password_modified) {
-			Log::add(Log::LOGIN_PASSWORD_CHANGE, null, $this->id());
+			Log::addEventWithDetails(Log::LOGIN_PASSWORD_CHANGE, null, $this->id());
 			Plugins::fire('user.change.password.after', false, ['user' => $this]);
 		}
 
