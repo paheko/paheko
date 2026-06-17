@@ -252,7 +252,7 @@ Modifie les métadonnées de la page. Si la page n'existe pas, elle sera créée
 | `title` | `string` | Titre de la page. |
 | `type` | `int` | Type de page. `1` pour les catégories, `2` pour les pages simples. |
 | `status` | `string` | Statut de la page. `2` si la page est en ligne, `0` si la page est en brouillon, et `1` si la page est réservée aux membres connectés. |
-| `format` | `string` | Format de la page : `markdown`, `encrypted` ou `skriv` |
+| `format` | `string` | Format de la page : `markdown` ou `encrypted` |
 | `published` | `string` | Date et heure de publication au format `YYYY-MM-DD HH:mm:ss`. |
 | `modified` | `string` | Date et heure de modification au format `YYYY-MM-DD HH:mm:ss`. |
 | `content` | `string` | Contenu. |

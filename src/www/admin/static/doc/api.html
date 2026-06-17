@@ -216,6 +216,11 @@
 <td style="text-align: left;"><code>bool</code></td>
 <td style="text-align: left;">Indiquer <code>header=false</code> pour ne pas avoir une premi&egrave;re ligne d'en-t&ecirc;te dans les formats CSV, ODS ou XLSX.</td>
 </tr>
+<tr>
+<td style="text-align: left;">autres</td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Param&egrave;tres nomm&eacute;s pour la requ&ecirc;te SQL</td>
+</tr>
 </tbody>
 </table><p>Si aucun format n'est pass&eacute; (exemple : <code>&hellip;/api/sql</code>, sans point ni extension), <code>json</code> sera utilis&eacute;.</p><p>Permet d'ex&eacute;cuter une requ&ecirc;te SQL <code>SELECT</code> sur la base de donn&eacute;es.</p><p>S'il n'y a pas de limite &agrave; la requ&ecirc;te, une limite &agrave; 1000 r&eacute;sultats sera ajout&eacute;e obligatoirement.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
   -G --data-urlencode sql='SELECT nom, code_postal FROM users LIMIT 2;'</code></pre><p>Exemple de r&eacute;ponse :</p><pre><code class="language-response">{
@@ -231,8 +236,12 @@
             "code_postal": "78990"
         }
     ]
-}</code></pre><p><strong>Attention :</strong> Les requ&ecirc;tes en &eacute;criture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas accept&eacute;es, il n'est pas possible de modifier la base de donn&eacute;es directement via Paheko, afin d'&eacute;viter les soucis de donn&eacute;es corrompues.</p></details><details class="api"><summary id="post-sql-format" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/sql.<u>{FORMAT}</u></code> <span>Idem que la m&eacute;thode en GET, mais le la requ&ecirc;te peut &ecirc;tre pass&eacute;e dans le corps de la requ&ecirc;te HTTP :</span></summary><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
-  -d 'SELECT nom, code_postal FROM users LIMIT 2;'</code></pre></details><h2 id="telechargements">T&eacute;l&eacute;chargements</h2><details class="api"><summary id="get-download" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download</code> <span>T&eacute;l&eacute;charger la base de donn&eacute;es</span></summary><p>Renvoie directement le fichier SQLite de la base de donn&eacute;es.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite</code></pre></details><details class="api"><summary id="get-download-files" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download/files</code> <span>T&eacute;l&eacute;charger un fichier ZIP contenant tous les fichiers</span></summary><p><em>(Depuis la version 1.3.4)</em></p><p>Les fichiers inclus sont :</p><ul>
+}</code></pre><p><strong>Attention :</strong> Les requ&ecirc;tes en &eacute;criture (<code>INSERT, DELETE, UPDATE, CREATE TABLE</code>, etc.) ne sont pas accept&eacute;es, il n'est pas possible de modifier la base de donn&eacute;es directement via Paheko, afin d'&eacute;viter les soucis de donn&eacute;es corrompues.</p><p>Il est possible d'utiliser des param&egrave;tres nomm&eacute;s dans les requ&ecirc;tes SQL, il suffit de les rajouter en param&egrave;tres. Exemple :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -G --data-urlencode sql='SELECT nom FROM users WHERE ville = :ville;' \
+  --data-urlencode ville='Dijon'</code></pre></details><details class="api"><summary id="post-sql-format" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-POST">POST</b> <code>/sql.<u>{FORMAT}</u></code> <span>Idem que la m&eacute;thode en GET, mais le la requ&ecirc;te peut &ecirc;tre pass&eacute;e dans le corps de la requ&ecirc;te HTTP :</span></summary><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -d 'SELECT nom, code_postal FROM users LIMIT 2;'</code></pre><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/sql \
+  -F sql='SELECT nom, code_postal FROM users WHERE code_postal = :cp LIMIT 2;'
+  -F cp=21000</code></pre></details><h2 id="telechargements">T&eacute;l&eacute;chargements</h2><details class="api"><summary id="get-download" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download</code> <span>T&eacute;l&eacute;charger la base de donn&eacute;es</span></summary><p>Renvoie directement le fichier SQLite de la base de donn&eacute;es.</p><p>Exemple de requ&ecirc;te :</p><pre><code class="language-request">curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite</code></pre></details><details class="api"><summary id="get-download-files" onclick="if (!this.parentNode.open) window.history.replaceState(null, '', '#' + this.id); return true;"><b class="method-GET">GET</b> <code>/download/files</code> <span>T&eacute;l&eacute;charger un fichier ZIP contenant tous les fichiers</span></summary><p><em>(Depuis la version 1.3.4)</em></p><p>Les fichiers inclus sont :</p><ul>
 <li>documents</li>
 <li>fichiers li&eacute;s aux &eacute;critures,</li>
 <li>fichiers li&eacute;s des membres,</li>
@@ -338,7 +347,7 @@
 <tr>
 <td style="text-align: left;"><code>format</code></td>
 <td style="text-align: left;"><code>string</code></td>
-<td style="text-align: left;">Format de la page : <code>markdown</code>, <code>encrypted</code> ou <code>skriv</code></td>
+<td style="text-align: left;">Format de la page : <code>markdown</code> ou <code>encrypted</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>published</code></td>

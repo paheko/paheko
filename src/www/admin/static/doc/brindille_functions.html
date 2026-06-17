@@ -88,9 +88,17 @@
 			<li><a href="#table">table</a>
 			<ol>
 				<li><a href="#exporter-une-table">Exporter une table</a></li>
-				<li><a href="#creer-une-table"> Créer une table</a></li>
-				<li><a href="#definition-d-une-colonne"> Définition d'une colonne</a></li>
-				<li><a href="#utilisation-d-index-uniques">Utilisation d'index uniques</a></li>
+				<li><a href="#creer-une-table"> Créer une table</a>
+				<ol>
+					<li><a href="#definition-d-une-colonne"> Définition d'une colonne</a></li>
+					<li><a href="#definition-sous-forme-de-tableau">Définition sous forme de tableau</a></li>
+					<li><a href="#cles-etrangeres-foreign-keys">Clés étrangères (foreign keys)</a></li>
+					<li><a href="#cles-etrangeres-sur-des-tables-de-paheko">Clés étrangères sur des tables de Paheko</a>
+					<ol>
+						<li><a href="#restrictions-sur-les-cles-etrangeres">Restrictions sur les clés étrangères</a>
+					</ol></li>
+					<li><a href="#utilisation-d-index-uniques">Utilisation d'index uniques</a>
+				</ol></li>
 				<li><a href="#renommer-une-table">Renommer une table</a></li>
 				<li><a href="#supprimer-une-table">Supprimer une table</a>
 			</ol></li>
@@ -103,6 +111,7 @@
 			</ol></li>
 			<li><a href="#save">save</a>
 			<ol>
+				<li><a href="#enregistrer-plusieurs-lignes-en-une-fois">Enregistrer plusieurs lignes en une fois</a></li>
 				<li><a href="#enregistrer-la-configuration-du-module">Enregistrer la configuration du module</a>
 			</ol></li>
 			<li><a href="#delete">delete</a>
@@ -890,7 +899,7 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
   id_user="INTEGER NOT NULL REFERENCES !users (id) ON DELETE CASCADE"
   id_service="INTEGER NULL REFERENCES !services (id)"
 }}</code></pre>
-<h3 id="definition-d-une-colonne"> Définition d'une colonne</h3>
+<h4 id="definition-d-une-colonne"> Définition d'une colonne</h4>
 <p>Une définition de colonne peut être un tableau (array) ou une chaîne de texte (string).</p>
 <p>Si la définition est une chaîne de texte, il convient de respecter le format suivant :</p>
 <pre><code>TYPE[ NULL][ DEFAULT][ REFERENCES][ UNIQUE][ INDEX][ COMMENT]</code></pre>
@@ -916,7 +925,7 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REFERENCES nom_table (nom_colonne) ON DELETE (SET NULL|CASCADE)</code></td>
-<td style="text-align: left;">Indique une clé étrangère ("foreign key" en anglais) qui référence une autre colonne. Le nom de la table et de la colonne doivent suivre : <code>REFERENCES !users (id)</code>. Si aucune action à effectuer si la clé étrangère est supprimée n'est spécifiée, c'est <code>SET NULL</code> qui est utilisé.</td>
+<td style="text-align: left;">Indique une clé étrangère (foreign key) qui référence une autre colonne.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>UNIQUE</code></td>
@@ -934,14 +943,7 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </table>
 <p>Aucun autre code SQL n'est accepté.</p>
 <p>Note : le type <code>DATETIME</code> n'existe pas réellement dans SQLite, mais si ce type est spécifié, Paheko ajoutera une contrainte pour n'accepter que des chaînes de date/heure dans cette colonne (<code>CHECK (datetime(nom_colonne) = nom_colonne)</code>).</p>
-<p>Précisions sur les clés étrangères :</p>
-<ul>
-<li>elles doivent forcément faire référence à une table et une colonne qui existe déjà (ou à la même table et une autre colonne de la table qui est définie avant)</li>
-<li>l'action par défaut est <code>SET NULL</code> si la clé étrangère est une table en dehors du module</li>
-<li>l'action <code>RESTRICT</code> ne peut être utilisée pour une table externe au module (sinon cela pourrait bloquer des actions normales dans Paheko)</li>
-<li>pour faire référence à une table externe au module il faut ajouter le caractère <code>!</code> devant le nom de la table, sinon la table sera considérée comme interne au module</li>
-<li>il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.</li>
-</ul>
+<h4 id="definition-sous-forme-de-tableau">Définition sous forme de tableau</h4>
 <p>Si la définition est un tableau il convient d'utiliser les clés suivantes :</p>
 <table>
 <thead>
@@ -999,7 +1001,50 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="utilisation-d-index-uniques">Utilisation d'index uniques</h3>
+<h4 id="cles-etrangeres-foreign-keys">Clés étrangères (foreign keys)</h4>
+<p>Les clés étrangères permettent de faire référence à une autre table et ainsi d'assurer une certaine cohérence dans les données.</p>
+<p>Il faut utiliser le nom de la table et de la colonne :</p>
+<pre><code>{{:table create="answers"
+  id_question="NULL INTEGER REFERENCES questions (id) ON DELETE CASCADE"
+}}</code></pre>
+<p>Ainsi la colonne <code>id_question</code> devra contenir la valeur d'un ID existant de la table <code>questions</code>. Il ne sera pas possible d'insérer dans la table un ID qui n'existe pas. Quand la question sera supprimée, toute réponse associée sera aussi supprimée.</p>
+<p>Il existe deux actions possibles :</p>
+<ul>
+<li><code>ON DELETE CASCADE</code> : la ligne sera supprimée si la ligne référencée clé étrangère est supprimée (action de cascade)</li>
+<li><code>ON DELETE SET NULL</code> : la valeur sera remplacée par <code>NULL</code> si la ligne référencée par la clé étrangère est supprimée</li>
+</ul>
+<p>Note : l'action <code>RESTRICT</code> n'est pas disponible à cause des interactions potentielles entre modules et autres tables, qui pourraient empêcher la suppression d'un module ou d'une table.</p>
+<h4 id="cles-etrangeres-sur-des-tables-de-paheko">Clés étrangères sur des tables de Paheko</h4>
+<p>On peut utiliser le caractère <code>!</code> pour faire référence à une table de Paheko (externe au module) :</p>
+<pre><code>{{:table create="answers"
+  id_user="NULL INTEGER REFERENCES !users (id) ON DELETE CASCADE"
+}}</code></pre>
+<p>Dans ce cas la colonne sera obligatoirement <code>id</code> : aucune autre colonne ne pourra être référencée.</p>
+<p>Seules les tables suivantes peuvent être référencées par un module :</p>
+<ul>
+<li><code>users</code></li>
+<li><code>users_categories</code></li>
+<li><code>services</code></li>
+<li><code>services_fees</code></li>
+<li><code>services_subscriptions</code></li>
+<li><code>acc_charts</code></li>
+<li><code>acc_accounts</code></li>
+<li><code>acc_projects</code></li>
+<li><code>acc_years</code></li>
+<li><code>acc_transactions</code></li>
+<li><code>acc_transactions_lines</code></li>
+<li><code>web_pages</code></li>
+</ul>
+<h5 id="restrictions-sur-les-cles-etrangeres">Restrictions sur les clés étrangères</h5>
+<p>Les clés étrangères sont puissantes mais attention elles ont plusieurs restrictions :</p>
+<ul>
+<li>une clé étrangère doit forcément faire référence à une table et une colonne qui existent déjà (ou à la même table et une autre colonne de la table qui est définie précédemment)</li>
+<li>une colonne avec une clé étrangère doit obligatoirement être <code>NULL</code> (il n'est pas possible qu'elle soit <code>NOT NULL</code>)</li>
+<li>si aucune action n'est spécifiée, c'est <code>SET NULL</code> qui est utilisé</li>
+<li>l'action <code>RESTRICT</code> n'est pas autorisée</li>
+<li>il n'est pas possible de faire référence à une clé d'une table d'un autre module, car cela rendrait les deux modules dépendants l'un de l'autre (il ne serait plus possible de supprimer l'un) : la table de la clé étrangère doit forcément être une table du module, ou une table interne à Paheko.</li>
+</ul>
+<h4 id="utilisation-d-index-uniques">Utilisation d'index uniques</h4>
 <p>Il est possible de créer un index unique pour une colonne, pour indiquer qu'une seule ligne doit avoir la valeur :</p>
 <pre><code>{{:table create="personnes"
   nom="TEXT NOT NULL UNIQUE"
@@ -1175,6 +1220,11 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 <td style="text-align: left;">Si renseigné, les informations de la nouvelle ligne seront indiqués dans cette variable, y compris l'ID et la clé, si la ligne est nouvelle.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>from</code></td>
+<td style="text-align: left;">optionnel</td>
+<td style="text-align: left;">Si renseigné avec un tableau, chaque entrée du tableau sera traitée comme un élément à enregistrer.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>where</code></td>
 <td style="text-align: left;">optionnel</td>
 <td style="text-align: left;">Si renseigné, sera utilisé comme clause <code>WHERE</code> pour mettre à jour plusieurs lignes en une fois.</td>
@@ -1194,6 +1244,17 @@ L'écriture n°{{$result.id}} a été créée.</code></pre>
 Le numéro de cette personne est {{$personne.id}}</code></pre>
 <p>Exemple de mise à jour de ligne :</p>
 <pre><code>{{:save table="personnes" id=42 nom="Albert-Charlie-Antoine-Baptiste"}}</code></pre>
+<h3 id="enregistrer-plusieurs-lignes-en-une-fois">Enregistrer plusieurs lignes en une fois</h3>
+<p>Le paramètre <code>from</code> est équivalent à appeler la fonction <code>save</code> dans une boucle. Ainsi au lieu de :</p>
+<pre><code>{{:assign var="rows." title="Titre 1"}}
+{{:assign var="rows." title="Titre 2"}}
+{{#foreach from=$rows item="row"}}
+  {{:save table="trucs" title=$row.title type="page"}}
+{{/foreach}}</code></pre>
+<p>On peut simplement utiliser :</p>
+<pre><code>{{:assign var="rows." title="Titre 1"}}
+{{:assign var="rows." title="Titre 2"}}
+{{:save table="trucs" from=$rows type="page"}}</code></pre>
 <h3 id="enregistrer-la-configuration-du-module">Enregistrer la configuration du module</h3>
 <p>Il est aussi possible de stocker des clés dans la configuration du module, toujours avec la fonction save. Pour cela il suffit de spécifier <code>key="config"</code> et aucune table :</p>
 <pre><code>{{:save key="config" ma_preference="oui"}}</code></pre>

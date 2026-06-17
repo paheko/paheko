@@ -950,7 +950,7 @@ Il y a {{$result.count}} articles.</code></pre>
 <tr>
 <td style="text-align: left;"><code>module</code></td>
 <td style="text-align: left;"><em>optionnel</em></td>
-<td style="text-align: left;">Nom unique du module lié (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
+<td style="text-align: left;">Nom unique du module à utiliser (par exemple : <code>recu_don</code>). Si non spécifié, alors le nom du module courant sera utilisé.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>join</code></td>
@@ -1056,7 +1056,7 @@ Il y a {{$result.count}} articles.</code></pre>
     date="Date d'émission"
     address="Adresse du bénéficiaire"
     amount="Montant"}}
-{{#list tables="recus" columns=$columns}}
+{{#list table="recus" columns=$columns}}
     &lt;tr&gt;
         &lt;th&gt;{{$name}}&lt;/th&gt;
         &lt;td&gt;{{$date|date_short}}&lt;/td&gt;

@@ -47,7 +47,6 @@ class Page extends Entity
 	const FORMATS_LIST = [
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 		Render::FORMAT_ENCRYPTED => 'Chiffré',
-		Render::FORMAT_SKRIV => 'SkrivML',
 	];
 
 	const STATUS_DRAFT = 0;

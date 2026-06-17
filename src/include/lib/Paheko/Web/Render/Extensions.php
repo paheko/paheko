@@ -6,12 +6,11 @@ use Paheko\Entities\Files\File;
 
 use Paheko\Plugins;
 use Paheko\Utils;
-use KD2\SkrivLite;
 
 use const Paheko\{ADMIN_URL, ROOT};
 
 /**
- * Common extensions between Skriv and Markdown
+ * Markdown extensions
  */
 class Extensions
 {

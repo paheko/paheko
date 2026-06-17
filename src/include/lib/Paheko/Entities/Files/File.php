@@ -1238,7 +1238,7 @@ class File extends Entity
 	{
 		$editor_type = $this->renderFormat();
 
-		if ($editor_type == 'skriv' || $editor_type == 'markdown') {
+		if ($editor_type == 'markdown') {
 			return Render::render($editor_type, $this->path, $this->fetch(), $user_prefix);
 		}
 		elseif ($editor_type == 'text') {
@@ -1427,10 +1427,7 @@ class File extends Entity
 
 	public function renderFormat(): ?string
 	{
-		if (substr($this->name, -6) == '.skriv') {
-			$format = Render::FORMAT_SKRIV;
-		}
-		elseif (substr($this->name, -3) == '.md') {
+		if (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
 		elseif ($this->mime && substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
@@ -1451,7 +1448,7 @@ class File extends Entity
 
 		$format = $this->renderFormat();
 
-		if ($format == Render::FORMAT_SKRIV || $format == Render::FORMAT_MARKDOWN) {
+		if ($format == Render::FORMAT_MARKDOWN) {
 			return 'web';
 		}
 		elseif ($format == 'text' || in_array($ext, $text_extensions)) {

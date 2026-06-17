@@ -84,11 +84,10 @@ components:
         format:
           type: string
           example: markdown
-          enum: ['markdown', 'encrypted', 'skriv']
+          enum: ['markdown', 'encrypted']
           description: |
             * `markdown`: MarkDown
             * `encrypted`: Chiffré
-            * `skriv`: SkrivML
         published:
           $ref: '#/components/schemas/DateTime'
         modified:

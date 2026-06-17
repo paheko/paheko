@@ -48,7 +48,7 @@ if ($type == 'image') {
 else {
 	$content = $file ? $file->fetch() : '';
 	$path = Config::FILES[$key];
-	$format = $file ? $file->renderFormat() : 'skriv';
+	$format = $file ? $file->renderFormat() : 'markdown';
 	$tpl->assign(compact('content', 'path', 'format'));
 	$tpl->display(sprintf('common/files/edit_%s.tpl', $type));
 }

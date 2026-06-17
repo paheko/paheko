@@ -179,6 +179,8 @@ $block = FALSE</code></pre>
 <li><code>allow_user_restrict</code> (depuis 1.3.18) : indique si l'administrateur peut modifier les restrictions d'accès au module (via l'onglet <mark>Permissions</mark> de l'extension). <code>true</code> ou <code>false</code>. Défaut si non spécifié : <code>true</code>.</li>
 <li><code>restrict_details</code> : petit texte d'explication supplémentaire (qui sera affiché dans la page des détails de l'extension) sur les droits d'accès requis pour accéder à certaines parties du module.</li>
 <li><code>doc_url</code> : adresse web HTTP menant à la documentation du module</li>
+<li><code>version</code> : indique la version du module (surtout utile pour le stockage dans les tables SQL, voir plus bas)</li>
+<li><code>min_version</code> : version minimale de Paheko requise pour installer et utiliser le module</li>
 </ul>
 <p>Il est possible d'ajouter un commentaire dans ce fichier, pour cela il faut que la ligne commence par un point virgule.</p>
 <h3 id="exemple-de-module-ini">Exemple de module.ini</h3>
@@ -189,7 +191,9 @@ author="Paheko"
 author_url="https://paheko.cloud/"
 restrict_section="accounting"
 restrict_level="read"
-doc_url="https://paheko.cloud/extension-recu-don"</code></pre>
+doc_url="https://paheko.cloud/extension-recu-don"
+version="1.0"
+min_version="1.4.0"</code></pre>
 <h1 id="variables-speciales">Variables spéciales</h1>
 <p>Toutes les pages d'un module disposent de la variable <code>$module</code> qui contient l'entité du module en cours :</p>
 <ul>
@@ -214,7 +218,7 @@ doc_url="https://paheko.cloud/extension-recu-don"</code></pre>
 <p>Pour cela il convient de définir une version dans le fichier <code>module.ini</code> :</p>
 <pre><code>version = "1.0.0"</code></pre>
 <p>Cela permettra ensuite de gérer les évolutions (migrations) du schéma de bases de données du module.</p>
-<p>Un module sans version ne peut pas créer de tables.</p>
+<p>Un module sans <code>version</code> indiquée dans son <code>module.ini</code> ne peut pas créer de tables.</p>
 <p>Si le module n'a encore jamais été utilisé, ou si la version de la base de données ne correspond pas à la version du module, le squelette <code>migration.tpl</code> sera automatiquement exécuté. Ce squelette doit contenir de quoi créer ou mettre à jour la base de données.</p>
 <p>Pour cela il faut utiliser les variables suivantes :</p>
 <ul>
@@ -228,7 +232,8 @@ doc_url="https://paheko.cloud/extension-recu-don"</code></pre>
   {{:column table="personnes" create="prenom" type="TEXT" null=false}}
 {{/if}}</code></pre>
 <p>Ce squelette ne doit rien afficher. Si quelque chose est affiché, l'exécution du module sera stoppée, car on considère que le squelette a produit une erreur ou le développeur veut afficher quelque chose pour faire du debug.</p>
-<p>Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.</p><p>Jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle sera supprimée à l'avenir. <a href="brindille_storage_json.md">Voir l'ancienne documentation</a>.</p>
+<p>Toutes les requêtes SQL exécutées dans cette page sont effectuées dans une seule transaction, ainsi si une requête échoue, aucune modification ne sera appliquée à la base de données.</p>
+<p>Note : jusqu'à la version 1.4.0 les modules pouvaient stocker des données sous forme de documents JSON. Cette possibilité existe toujours mais est découragée car elle pourrait être supprimée à l'avenir. <a href="brindille_storage_json.md">Voir l'ancienne documentation</a>.</p>
 <h1 id="export-et-import-de-modules">Export et import de modules</h1>
 <p>Il est possible d'exporter un module modifié. Cela créera un fichier ZIP contenant à la fois le code modifié et le code non modifié.</p>
 <p>De la même manière il est possible d'importer un module à partir d'un fichier ZIP d'export. Si vous créez votre fichier ZIP manuellement, attention à respecter le fait que le code du module doit se situer dans le répertoire <code>modules/nom_du_module</code> du fichier ZIP. Tout fichier ou répertoire situé en dehors de cette arborescence provoquera une erreur et l'impossibilité d'importer le module.</p>

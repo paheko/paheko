@@ -137,7 +137,7 @@
 
 		var openSyntaxHelp = function (new_window)
 		{
-			let url = config.format != 'skriv' ? 'markdown.html' : 'skriv.html';
+			let url = 'markdown.html';
 			url = g.admin_url + 'static/doc/' + url;
 
 			if (new_window) {
@@ -268,7 +268,7 @@
 		};
 
 		let applyHeader = () => {
-			return wrapTags(config.format != 'skriv' ? '## ' : '== ', '');
+			return wrapTags('## ', '');
 		};
 
 		let applyBold = () => {
@@ -276,12 +276,7 @@
 		};
 
 		let applyItalic = () => {
-			if (config.format != 'skriv') {
-				return wrapTags("_", "_");
-			}
-			else {
-				return wrapTags("''", "''");
-			}
+			return wrapTags("_", "_");
 		};
 
 		var wrapTags = function (left, right)
@@ -297,12 +292,7 @@
 				return true;
 			}
 
-			if (config.format != 'skriv') {
-				return wrapTags("[", "](" + url + ')');
-			}
-			else {
-				return wrapTags("[[", "|" + url + ']]');
-			}
+			return wrapTags("[", "](" + url + ')');
 		};
 
 		let findTableCells = function (line) {

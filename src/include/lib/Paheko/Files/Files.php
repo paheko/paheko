@@ -1143,7 +1143,6 @@ class Files
 			case 'pptx':
 				return 'gallery';
 			case 'txt':
-			case 'skriv':
 				return 'text';
 			case 'md':
 				return 'markdown';
