@@ -10,6 +10,7 @@ use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
+use Paheko\Users\Session;
 use Paheko\Users\Users;
 use Paheko\Accounting\Transactions;
 use Paheko\Entities\Accounting\Transaction;

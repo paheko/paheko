@@ -5,6 +5,7 @@ use Paheko\Accounting\Accounts;
 use Paheko\Accounting\Transactions;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
+use Paheko\Users\Session;
 
 require_once __DIR__ . '/../_inc.php';
 

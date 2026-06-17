@@ -465,7 +465,7 @@ class Config extends Entity
 		$text = $file->fetch();
 
 		if (false !== strpos('{{', $text)) {
-			$template = UserTemplate::createFromUserString($text, 'html');
+			$template = UserTemplate::createFromUserString($text);
 			$text = $template->fetch();
 		}
 

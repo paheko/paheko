@@ -45,6 +45,8 @@ class TableFunctions
 			throw new TemplateException('A module cannot use the "table" function if it doesn\'t have a "version" in module.ini');
 		}
 
+		$db = DB::getInstance();
+
 		if (($params['delete'] ?? null) === '@DOCUMENTS') {
 			$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($tpl->module->getDocumentsTableName())));
 			return;
@@ -152,7 +154,7 @@ class TableFunctions
 
 		// this would be catched by getTable (as documents is not a regular table),
 		// but it's better to have a clear error message
-		if ($table === $module::DOCUMENTS_TABLE_NAME) {
+		if ($table_name === $module::DOCUMENTS_TABLE_NAME) {
 			throw new TemplateException('The documents table cannot be modified');
 		}
 
@@ -259,7 +261,7 @@ class TableFunctions
 				$row = array_merge($params, $row);
 
 				try {
-					self::save($row);
+					self::save($row, $tpl, $line);
 				}
 				catch (TemplateException $e) {
 					$db->rollback();
@@ -382,7 +384,7 @@ class TableFunctions
 
 		$table = Modules::getModuleTableName($tpl->module->name, $params['table']);
 
-		if ($table === $module->getDocumentsTableName()) {
+		if ($table === $tpl->module->getDocumentsTableName()) {
 			throw new TemplateException('The documents table cannot be modified');
 		}
 
@@ -391,11 +393,11 @@ class TableFunctions
 
 		if (!empty($params['id'])) {
 			$where = 'id = :id';
-			$sql_params['id'] = $id;
+			$sql_params['id'] = (int) $params['id'];
 		}
-		elseif ($key) {
+		elseif (!empty($params['key'])) {
 			$where = 'key = :key';
-			$sql_params['key'] = $key;
+			$sql_params['key'] = $params['key'];
 		}
 		elseif (!empty($params['where'])) {
 			$where = $params['where'];
@@ -429,7 +431,7 @@ class TableFunctions
 	{
 		$db = DB::getInstance();
 		$sql = $params['sql'];
-		$sql = str_replace('@MODULE_', $tpl->module->table_prefix(), $sql);
+		$sql = str_replace('@MODULE_', $tpl->module->getTableNamePrefix(), $sql);
 
 		// set authorizer to only allow working on modules tables (except documents table)
 		$db->enableTablesAuthorizer(array_values($tpl->module->getTablesNames(false)));

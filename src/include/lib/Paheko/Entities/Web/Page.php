@@ -322,7 +322,7 @@ class Page extends Entity
 		}
 
 		if (!isset($this->format)) {
-			$this->set('format', self::FORMAT_MARKDOWN);
+			$this->set('format', Render::FORMAT_MARKDOWN);
 		}
 
 		if (!isset($this->published)) {

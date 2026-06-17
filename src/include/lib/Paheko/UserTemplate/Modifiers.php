@@ -698,7 +698,7 @@ EOS;
 		return preg_match_all('/\S+/u', $str);
 	}
 
-	static public function version_compare($v1, $operator, $v2): int
+	static public function version_compare($v1, $operator, $v2): bool
 	{
 		return version_compare($v1, $v2, $operator);
 	}

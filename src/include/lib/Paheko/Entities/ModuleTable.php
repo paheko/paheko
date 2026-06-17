@@ -96,10 +96,10 @@ class ModuleTable extends Entity
 			'Cannot rename, this column already exists: ' . $new_name);
 
 		$this->assert(!array_key_exists($old_name, self::DEFAULT_COLUMNS),
-			'Cannot modify a default table column: ' . $name);
+			'Cannot modify a default table column: ' . $old_name);
 
 		$this->assert(!array_key_exists($new_name, self::DEFAULT_COLUMNS),
-			'Column name is already used by a default table column: ' . $name);
+			'Column name is already used by a default table column: ' . $new_name);
 
 		$this->_renamed_columns[$old_name] = $new_name;
 		$this->columns[$new_name] = $this->columns[$old_name];
@@ -214,7 +214,7 @@ class ModuleTable extends Entity
 
 		// We don't need to enable foreign keys (to perform foreign key updates),
 		// as there should be no other table referencing this one with a foreign key
-		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($table_name)));
+		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $db->quoteIdentifier($this->getRealName())));
 		$r = parent::delete();
 
 		return $r;

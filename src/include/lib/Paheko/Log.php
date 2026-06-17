@@ -6,6 +6,7 @@ use Paheko\Config;
 use Paheko\DB;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
+use Paheko\Users\Users;
 
 class Log
 {
@@ -116,6 +117,8 @@ class Log
 		$params['id_user'] ??= $id_user;
 		$params['user_name'] ??= null;
 		$params['entity'] ??= null;
+		$params['created'] ??= new \DateTime;
+		$params['details'] = isset($params['details']) ? json_encode($params['details']) : null;
 
 		if (!isset($params['user_name'], $params['id_user'])) {
 			$session = Session::getInstance();
@@ -136,10 +139,10 @@ class Log
 			file_put_contents(AUDIT_LOG_FILE, sprintf('[%s] %s (IP=%s, ID_USER=%d, USER_NAME=%s) %s' . PHP_EOL,
 				date('Y-m-d H:i:s'),
 				self::ACTIONS[$action] ?? 'Action',
-				$ip,
+				$params['user_ip'],
 				$params['id_user'],
 				$params['user_name'],
-				$params['entity'] ? ($params['entity'] . ' = ' . ($params['id'] ?? '')) : json_encode($details)
+				$params['entity'] ? ($params['entity'] . ' = ' . ($params['id'] ?? '')) : $params['details']
 			), FILE_APPEND);
 
 			$i = random_int(0, 100);
@@ -171,9 +174,6 @@ class Log
 				return;
 			}
 		}
-
-		$params['created'] ??= new \DateTime;
-		$params['details'] = isset($params['details']) ? json_encode($params['details']) : null;
 
 		DB::getInstance()->insert('logs', $params);
 	}

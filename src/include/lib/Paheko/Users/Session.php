@@ -689,15 +689,8 @@ class Session extends \KD2\UserSession
 		}
 
 		// Make sure we set the user ID for the error report
-		if ($this->user->exists()) {
-			ErrorManager::setContextProperty('logged_user_id', $this->user->id);
-			ErrorManager::setContextProperty('logged_user_name', null);
-		}
-		else {
-			ErrorManager::setContextProperty('logged_user_id', null);
-			ErrorManager::setContextProperty('logged_user_name', $this->user->name());
-		}
-
+		ErrorManager::setContextProperty('logged_user_id', $this->user->exists() ? $this->user->id : null);
+		ErrorManager::setContextProperty('logged_user_name', $this->user->name());
 	}
 
 	static public function getUserId(): ?int

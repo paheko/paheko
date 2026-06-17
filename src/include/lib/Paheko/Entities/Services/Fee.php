@@ -12,8 +12,9 @@ use Paheko\Users\DynamicFields;
 use Paheko\Entities\Accounting\Account;
 use Paheko\Entities\Accounting\Project;
 use Paheko\Entities\Accounting\Year;
-use KD2\DB\EntityManager;
+use KD2\DB\Date;
 use KD2\DB\DB_Exception;
+use KD2\DB\EntityManager;
 
 class Fee extends Entity
 {

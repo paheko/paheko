@@ -3,16 +3,15 @@
 namespace Paheko\UserTemplate\Modules;
 
 use Paheko\TemplateException;
+use Paheko\Entities\Module;
 use Paheko\UserTemplate\Functions;
-use Paheko\UserTemplate\LegacySections;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\DB;
 use Paheko\Utils;
 use KD2\JSONSchema;
 
 /**
- * @deprecated
- * @todo remove when all modules have been migrated to tables
+ * @deprecated This might be deleted in the future (or not)
  */
 class LegacyFunctions
 {

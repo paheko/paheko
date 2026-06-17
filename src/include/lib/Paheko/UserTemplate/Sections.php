@@ -342,7 +342,7 @@ class Sections
 		}
 
 		if (isset($params['group'])) {
-			$list->groupBy($params['group'], $table);
+			$list->groupBy($params['group']);
 		}
 
 		if ($params['user_sorting'] ?? true) {

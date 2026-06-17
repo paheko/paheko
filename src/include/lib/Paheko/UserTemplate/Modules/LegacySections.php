@@ -2,17 +2,21 @@
 
 namespace Paheko\UserTemplate\Modules;
 
+use Paheko\UserTemplate\CommonFunctions;
 use Paheko\UserTemplate\Functions;
 use Paheko\UserTemplate\Sections;
 use Paheko\UserTemplate\UserTemplate;
 use Paheko\DB;
+use Paheko\UserTemplate\Modules;
 use Paheko\DynamicList;
 use Paheko\Template;
 use Paheko\TemplateException;
+use Paheko\Utils;
+
+use KD2\DB\DB_Exception;
 
 /**
- * @deprecated
- * @todo remove when all modules have been migrated to tables
+ * @deprecated Might be removed in the future (or not)
  */
 class LegacySections
 {
