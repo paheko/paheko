@@ -3,7 +3,9 @@
 namespace Paheko;
 use Paheko\Accounting\Charts;
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Web\Page;
 use Paheko\Files\Files;
+use KD2\DB\EntityManager as EM;
 
 $db::toggleAuthorizer($db, false);
 $db->beginSchemaUpdate();
@@ -51,6 +53,13 @@ if (isset($config->rules)) {
 
 	unset($config->rules);
 	$db->update('plugins', ['config' => json_encode($config)], 'name = \'acc_tools\'');
+}
+
+// Migrate SkrivML pages to markdown
+foreach (EM::getInstance(Page::class)->iterate('SELECT * FROM @TABLE WHERE format = \'skriv\';') as $page) {
+	$page->set('content', Utils::skrivToMarkdown($page->content));
+	$page->set('format', 'markdown');
+	$page->save();
 }
 
 $db->commitSchemaUpdate();
