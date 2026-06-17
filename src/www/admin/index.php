@@ -2,10 +2,7 @@
 
 namespace Paheko;
 
-use Paheko\Web\Web;
-use Paheko\Files\Files;
 use Paheko\Users\Session;
-use Paheko\Entities\Files\File;
 use Paheko\Extensions;
 use Paheko\Plugins;
 

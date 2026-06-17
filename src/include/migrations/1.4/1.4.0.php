@@ -34,7 +34,7 @@ Charts::updateInstalled('fr_pca_2025');
 
 // Import rules from acc_tools plugin
 $config = $db->firstColumn('SELECT config FROM plugins WHERE name = \'acc_tools\';');
-$config = json_decode($config ?? 'null');
+$config = json_decode($config ?: 'null');
 
 if (isset($config->rules)) {
 	foreach ($config->rules as $rule) {
