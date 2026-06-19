@@ -686,7 +686,9 @@ CREATE TRIGGER IF NOT EXISTS web_search_bd BEFORE DELETE ON web_pages BEGIN
 	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
 
-CREATE TRIGGER IF NOT EXISTS web_search_au BEFORE UPDATE ON web_pages BEGIN
+-- Make sure index is deleted when title or content are modified
+-- the actual indexing is done in PHP code, as the formatting (HTML, markdown) must be removed
+CREATE TRIGGER IF NOT EXISTS web_search_bu BEFORE UPDATE OF content, title ON web_pages BEGIN
 	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
 

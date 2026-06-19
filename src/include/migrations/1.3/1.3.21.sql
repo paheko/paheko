@@ -50,6 +50,6 @@ CREATE TRIGGER IF NOT EXISTS web_search_bd BEFORE DELETE ON web_pages BEGIN
 	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
 
-CREATE TRIGGER IF NOT EXISTS web_search_au BEFORE UPDATE ON web_pages BEGIN
+CREATE TRIGGER IF NOT EXISTS web_search_bu BEFORE UPDATE OF title, content ON web_pages BEGIN
 	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
