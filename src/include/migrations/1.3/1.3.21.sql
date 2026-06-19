@@ -55,7 +55,7 @@ CREATE TRIGGER IF NOT EXISTS web_search_ai AFTER INSERT ON web_pages BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS web_search_au AFTER UPDATE OF content, title ON web_pages BEGIN
-	UPDATE web_search SET content = NEW.content, title = NEW.name WHERE docid = NEW.rowid;
+	UPDATE web_search SET content = NEW.content, title = NEW.title WHERE docid = NEW.rowid;
 END;
 
 INSERT INTO web_search (docid, title, content) SELECT rowid, title, content FROM web_pages;
