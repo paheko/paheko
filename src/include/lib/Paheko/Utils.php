@@ -2423,7 +2423,13 @@ class Utils
 		$str = preg_replace('!<<.*?>>!s', '', $str);
 
 		// Headings
-		$str = preg_replace('!^\s$#+!', '', $str);
+		$str = preg_replace('!^\s*#+!', '', $str);
+
+		// Quotes
+		$str = preg_replace('!^\s*>+!', '', $str);
+
+		// Remove HTML tags
+		$str = strip_tags($str);
 
 		// Other symbols
 		$str = str_replace(['*', '_', '[toc]', '`', '~~', '=='], '', $str);
