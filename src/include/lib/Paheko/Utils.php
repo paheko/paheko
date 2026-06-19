@@ -2418,7 +2418,7 @@ class Utils
 	{
 		// Links and images
 		$str = preg_replace(';!?\[(.*?)\]\(.*?\);', '$1', $str);
-		$str = preg_replace('/<(?:https?://|mailto:).*?>/', '', $str);
+		$str = preg_replace('!<(?:https?://|mailto:).*?>!', '', $str);
 
 		// Extensions
 		$str = preg_replace('!<<.*?>>!s', '', $str);
