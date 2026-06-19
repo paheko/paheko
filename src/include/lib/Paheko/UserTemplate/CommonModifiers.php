@@ -103,6 +103,7 @@ class CommonModifiers
 
 	static public function highlight_search_snippet(string $str): string
 	{
+		$str = Utils::stripMarkdown($str);
 		$str = strtr($str, ['&lt;mark&gt;' => '<mark>', '&lt;/mark&gt;' => '</mark>']);
 		return $str;
 	}

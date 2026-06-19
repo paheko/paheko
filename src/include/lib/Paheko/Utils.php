@@ -2413,4 +2413,12 @@ class Utils
 		@ob_end_flush();
 		@flush();
 	}
+
+	static public function stripMarkdown(string $str): string
+	{
+		$str = preg_replace(';!?\[(.*?)\]\(.*?\);', '$1 ($2)', $str);
+		$str = preg_replace('!<<.*?>>|&lt;&lt;.*?&gt;&gt;!', '', $str);
+		$str = str_replace(['*', '_', '#', '[toc]', '`', '~~', '=='], '', $str);
+		return $str;
+	}
 }
