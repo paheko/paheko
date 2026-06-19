@@ -2416,11 +2416,17 @@ class Utils
 
 	static public function stripMarkdown(string $str): string
 	{
+		// Links and images
 		$str = preg_replace(';!?\[(.*?)\]\(.*?\);', '$1 ($2)', $str);
-		$str = preg_replace('!<<.*?>>|&lt;&lt;.*?&gt;&gt;|^.*?>>|<<.*?$|&lt;&lt;.*?$|^.*?&gt;&gt;!', '', $str);
-		$str = preg_replace('!<<.*?>>|&lt;&lt;.*?&gt;&gt;!', '', $str);
-		$str = preg_replace('!\s+#+\s+!', ' ', $str);
-		$str = str_replace(['*', '_', '[toc]', '`', '~~', '==', '](', '['], '', $str);
+
+		// Extensions
+		$str = preg_replace('!<<.*?>>!s', '', $str);
+
+		// Headings
+		$str = preg_replace('!^\s$#+!', '', $str);
+
+		// Other symbols
+		$str = str_replace(['*', '_', '[toc]', '`', '~~', '=='], '', $str);
 		return $str;
 	}
 }

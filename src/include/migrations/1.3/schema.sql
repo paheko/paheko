@@ -686,12 +686,8 @@ CREATE TRIGGER IF NOT EXISTS web_search_bd BEFORE DELETE ON web_pages BEGIN
 	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
 
-CREATE TRIGGER IF NOT EXISTS web_search_ai AFTER INSERT ON web_pages BEGIN
-	INSERT INTO web_search (docid, title, content) VALUES (NEW.rowid, NEW.name, NEW.content);
-END;
-
-CREATE TRIGGER IF NOT EXISTS web_search_au AFTER UPDATE OF content, title ON web_pages BEGIN
-	UPDATE web_search SET content = NEW.content, title = NEW.title WHERE docid = NEW.rowid;
+CREATE TRIGGER IF NOT EXISTS web_search_au BEFORE UPDATE ON web_pages BEGIN
+	DELETE FROM web_search WHERE docid = OLD.rowid;
 END;
 
 CREATE TABLE IF NOT EXISTS web_pages_versions

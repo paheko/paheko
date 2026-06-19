@@ -83,6 +83,13 @@ class Web
 		return DB::getInstance()->iterate($sql);
 	}
 
+	static public function rebuildSearchIndex(): void
+	{
+		foreach (EM::getInstance(Page::class)->all('SELECT * FROM @TABLE;') as $page) {
+			$page->rebuildSearchIndex();
+		}
+	}
+
 	static public function search(string $search): array
 	{
 		if (strlen($search) > 100) {
