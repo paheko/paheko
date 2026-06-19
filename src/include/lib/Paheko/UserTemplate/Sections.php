@@ -1157,9 +1157,11 @@ class Sections
 			$params[':search'] = substr(trim($params['search']), 0, 100);
 			unset($params['search']);
 
-			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = \'web/\' || w.uri';
-			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2) AS snippet';
-			$params['where'] .= ' AND files_search MATCH :search';
+			$params['tables'] .= ' INNER JOIN web_search ON web_search.docid = w.rowid';
+			$params['select'] .= ', rank(matchinfo(web_search), 1.0, 0.9) AS points, '
+				. 'snippet(web_search, \'<mark>\', \'</mark>\', \'…\', 1, -30) AS snippet, '
+				. 'snippet(web_search, \'<mark>\', \'</mark>\', \'…\', 0, -30) AS title_snippet';
+			$params['where'] .= ' AND web_search MATCH :search';
 
 			$params['order'] = 'points DESC';
 			$params['limit'] = '30';
@@ -1244,7 +1246,7 @@ class Sections
 		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
-				unset($data['points'], $data['snippet']);
+				unset($data['points'], $data['snippet'], $data['title_snippet']);
 
 				$page = new Page;
 				$page->exists(true);

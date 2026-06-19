@@ -11,7 +11,7 @@ $q = trim((string) f('q'));
 $tpl->assign('query', $q);
 
 if ($q) {
-	$r = Files::search($q, File::CONTEXT_DOCUMENTS . '%');
+	$r = Files::search($q, File::CONTEXT_DOCUMENTS);
 	$tpl->assign('results', $r);
 	$tpl->assign('results_count', count($r));
 }

@@ -16,11 +16,19 @@
 	</p>
 
 	<section class="search-results">
-	{foreach from=$results item="result"}
+	{foreach from=$results item="r"}
 		<article>
-			<h4><a href="{"!docs/?f=%s"|local_url|args:$result.path}" target="_parent">{$result.breadcrumbs}</a></h4>
-			<h3><a href="{"!docs/?f=%s"|local_url|args:$result.path}" target="_parent">{$result.title_snippet|escape|restore_snippet_markup}</a></h3>
-			<p>{$result.snippet|escape|restore_snippet_markup}</p>
+			<h4><a href="{"!docs/?id=%s"|local_url|args:$r.file.hash_id}" target="_parent">{$r.result.breadcrumbs|escape|highlight_search_snippet}</a></h4>
+			<h3>
+				<a href="{"!docs/?id=%s"|local_url|args:$r.file.hash_id}" target="_parent">{$r.result.name_snippet|escape|highlight_search_snippet}</a>
+			</h3>
+			<p>
+				{if $r.file->isDir()}
+					<em>(répertoire)</em>
+				{else}
+					{$r.result.snippet|escape|highlight_search_snippet}
+				{/if}
+			</p>
 		</article>
 	{/foreach}
 	</section>

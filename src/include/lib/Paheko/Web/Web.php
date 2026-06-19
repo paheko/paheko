@@ -85,17 +85,32 @@ class Web
 
 	static public function search(string $search): array
 	{
-		$results = Files::search($search, File::CONTEXT_WEB . '%');
-
-		foreach ($results as &$result) {
-			$path = substr($result->path, strlen(File::CONTEXT_WEB) + 1);
-			$result->uri = strtok($path, '/');
-			strtok('');
+		if (strlen($search) > 100) {
+			throw new ValidationException('Recherche trop longue : maximum 100 caractères');
 		}
 
-		unset($result);
+		$db = DB::getInstance();
+		$params = [trim($search)];
 
-		return $results;
+		$query = 'SELECT docid AS id,
+			snippet(web_search, \'<mark>\', \'</mark>\', \'…\', 1, -30) AS snippet,
+			snippet(web_search, \'<mark>\', \'</mark>\', \'…\', 0, -30) AS title_snippet,
+			rank(matchinfo(web_search), 1.0, 0.9) AS points
+			FROM web_search
+			WHERE web_search MATCH ?
+			ORDER BY points DESC
+			LIMIT 0,50;';
+
+		try {
+			return $db->get($query, ...$params);
+		}
+		catch (DB_Exception $e) {
+			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
+				throw new UserException('Motif de recherche invalide', 0, $e);
+			}
+
+			throw $e;
+		}
 	}
 
 	static public function getBreadcrumbs(int $id): array

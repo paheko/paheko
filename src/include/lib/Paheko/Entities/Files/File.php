@@ -664,8 +664,6 @@ class File extends Entity
 	 * Store contents in file, either from a local path, from a binary string or from a pointer
 	 *
 	 * @param  array $source [path, content or pointer]
-	 * @param  string $source_content
-	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
 	 * @return self
 	 */
 	public function store(array $source): self
@@ -810,7 +808,7 @@ class File extends Entity
 			$db->commit();
 
 			// Index regular files, not directories
-			if ($this->type == self::TYPE_FILE) {
+			if ($this->type === self::TYPE_FILE) {
 				$this->indexForSearch($content);
 			}
 
@@ -830,24 +828,27 @@ class File extends Entity
 		}
 	}
 
-	public function indexForSearch(?string $content = null, ?string $title = null, ?string $forced_mime = null): void
+	public function indexForSearch(?string $content = null): void
 	{
-		$mime = $forced_mime ?? $this->mime;
-		$ext = $this->extension();
-
-		if ($this->isDir() && (!$mime || !$content)) {
+		if ($this->isDir()) {
 			return;
 		}
 
+		$ext = $this->extension();
+
 		// Store content in search table
-		if (substr($mime, 0, 5) == 'text/') {
+		if ($this->mime
+			&& substr($this->mime, 0, 5) === 'text/') {
 			$content ??= $this->fetch();
 
-			if ($mime === 'text/html' || $mime == 'text/xml') {
+			// Remove XML/HTML tags
+			if ($mime === 'text/html'
+				|| $mime == 'text/xml') {
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
-		elseif ($ext && Conversion::canConvertToText($ext)) {
+		elseif ($ext
+			&& Conversion::canConvertToText($ext)) {
 			$content = Conversion::fileToText($this, $content);
 		}
 		else {
@@ -855,22 +856,25 @@ class File extends Entity
 		}
 
 		// Only index valid UTF-8
-		if (isset($content) && preg_match('//u', $content)) {
-			// Truncate text at 500KB
-			$content = substr(trim($content), 0, 500*1024);
-		}
-		else {
+		if (null !== $content
+			&& !preg_match('//u', $content)) {
 			$content = null;
 		}
 
-		if (null === $content && null === $title) {
-			// This is already the same as what has been inserted by SQLite
+		if (null === $content) {
+			// This is already the same as what has been inserted by SQLite (path)
 			return;
 		}
 
+		$content = trim($content);
+		$content = preg_replace('/\s{2,}/', ' ', $content);
+
+		// Truncate text at 500KB
+		$content = substr(trim($content), 0, 500*1024);
+
 		$db = DB::getInstance();
-		$db->preparedQuery('REPLACE INTO files_search (docid, path, title, content) VALUES (?, ?, ?, ?);',
-			$this->id(), $this->path, $title ?? $this->name, $content);
+		$db->preparedQuery('REPLACE INTO files_search (docid, parent, name, content) VALUES (?, ?, ?, ?);',
+			$this->id(), $this->parent, $this->name, $content);
 	}
 
 	/**
