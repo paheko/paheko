@@ -2418,7 +2418,7 @@ class Utils
 	{
 		$str = preg_replace(';!?\[(.*?)\]\(.*?\);', '$1 ($2)', $str);
 		$str = preg_replace('!<<.*?>>|&lt;&lt;.*?&gt;&gt;!', '', $str);
-		$str = str_replace(['*', '_', '#', '[toc]', '`', '~~', '=='], '', $str);
+		$str = str_replace(['*', '_', '#', '[toc]', '`', '~~', '==', '](', '['], '', $str);
 		return $str;
 	}
 }
