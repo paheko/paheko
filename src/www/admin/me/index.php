@@ -15,6 +15,7 @@ $user = Session::getInstance()->user();
 
 $variables = compact('user', 'parent_name', 'children', 'ok');
 $tpl->assign('snippets', Modules::snippetsAsString(Modules::SNIPPET_MY_DETAILS, $variables));
+$tpl->assign('can_edit', $user->canEditOneField());
 
 $tpl->assign($variables);
 

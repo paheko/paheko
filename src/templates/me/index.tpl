@@ -8,10 +8,13 @@
 </p>
 {/if}
 
-<dl class="describe">
-	<dd>{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}</dd>
-</dl>
-
+{if !$can_edit}
+	<p class="block alert">Vous ne pouvez modifier aucun champ de votre fiche membre, merci de contacter un⋅e administrateur⋅trice si vous souhaitez modifier votre fiche de membre.</p>
+{else}
+	<dl class="describe">
+		<dd>{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}</dd>
+	</dl>
+{/if}
 
 {if $user->isChild() || count($children)}
 <aside class="describe">

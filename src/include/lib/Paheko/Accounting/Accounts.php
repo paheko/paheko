@@ -104,6 +104,12 @@ class Accounts
 		return [$a->id => $a->label];
 	}
 
+	public function getCodeForLocalType(int $type): ?string
+	{
+		$country = DB::getInstance()->firstColumn('SELECT country FROM acc_charts WHERE id = ?;', $this->chart_id);
+		return Account::LOCAL_TYPES[$country][$type] ?? null;
+	}
+
 	public function list(?array $types = null): DynamicList
 	{
 		$columns = [

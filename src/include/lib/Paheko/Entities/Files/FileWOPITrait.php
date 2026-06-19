@@ -43,11 +43,13 @@ trait FileWOPITrait
 		$ext = $this->extension();
 		$url = null;
 
-		if ($action) {
+		if ($ext && $action) {
 			$url = $data['extensions'][$ext][$action] ?? null;
-			$url ??= $data['mimetypes'][$this->mime][$action] ?? null;
 		}
-		elseif (isset($data['extensions'][$ext])) {
+		elseif ($action) {
+			$url = $data['mimetypes'][$this->mime][$action] ?? null;
+		}
+		elseif ($ext && isset($data['extensions'][$ext])) {
 			$url = current($data['extensions'][$ext]);
 		}
 		elseif (isset($data['mimetypes'][$this->mime])) {

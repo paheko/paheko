@@ -332,9 +332,9 @@ code,label,description,position,bookmark
 6247,Transports collectifs du personnel,,Charge,
 6248,Transports divers,,Charge,
 625,"Déplacements, missions et réceptions","Billet de train, remboursement de frais kilométrique, etc.",Charge,Favori
-6251,Voyages et déplacements,"Seulement quand le déplacement n’a pas d’autres frais (restauration par exemple), sinon utiliser le 6256.",Charge,
+6251,Voyages et déplacements,"Seulement les frais de transport (billet de train, remboursement kilométrique, etc.)",Charge,
 6255,Frais de déménagement,,Charge,
-6256,Frais de missions,,Charge,
+6256,Frais de missions,"Frais de restaurant ou nourriture engagés par les salariés ou pour les réunions du CA.",Charge,
 6257,Frais de réceptions,Frais de nourriture ou d’hébergement de bénévoles ou d’invités de l’association à l’occasion d’événements par exemple.,Charge,Favori
 626,Frais postaux et de télécommunications,"Fournisseur d'accès à Internet, timbres, hébergeur du site web, etc.",Charge,Favori
 627,Services bancaires et assimilés,"Frais bancaires, sauf agios en cas de découvert, à saisir en 6616.",Charge,Favori

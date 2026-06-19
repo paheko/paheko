@@ -557,6 +557,7 @@ class Backup
 		// First try to open database
 		try {
 			$db = new \SQLite3($file, \SQLITE3_OPEN_READONLY);
+			$db->enableExceptions(true);
 		}
 		catch (\Exception $e) {
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
@@ -630,18 +631,28 @@ class Backup
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Paheko (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
-		// module and plugins names should never contain a slash, if it does it might be a malicious database
-		$malicious_plugins = $db->querySingle('SELECT 1 FROM plugins WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
-		$malicious_modules = $db->querySingle('SELECT 1 FROM modules WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+		try {
+			// module and plugins names should never contain a slash, if it does it might be a malicious database
+			$malicious_plugins = $db->querySingle('SELECT 1 FROM plugins WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
+			$malicious_modules = $db->querySingle('SELECT 1 FROM modules WHERE name LIKE \'%/%\' OR name LIKE \'%\\%\';', false);
 
-		// File names or paths must never try to do path traversal, or it might be malicious
-		$malicious_modules_templates = $db->querySingle('SELECT 1 FROM modules_templates WHERE name LIKE \'%..%\';', false);
-		$malicious_files = $db->querySingle('SELECT 1 FROM files WHERE name LIKE \'%../%\' OR name LIKE \'%..\\%\'
-			OR path LIKE \'%../%\' OR path LIKE \'%..\\%\'
-			OR parent LIKE \'%../%\' OR parent LIKE \'%..\\%\';', false);
+			// File names or paths must never try to do path traversal, or it might be malicious
+			$malicious_modules_templates = $db->querySingle('SELECT 1 FROM modules_templates WHERE name LIKE \'%..%\';', false);
+			$malicious_files = $db->querySingle('SELECT 1 FROM files WHERE name LIKE \'%../%\' OR name LIKE \'%..\\%\'
+				OR path LIKE \'%../%\' OR path LIKE \'%..\\%\'
+				OR parent LIKE \'%../%\' OR parent LIKE \'%..\\%\';', false);
 
-		if ($malicious_plugins || $malicious_modules || $malicious_modules_templates || $malicious_files) {
-			throw new UserException('Malicious database detected (path traversal attempt)');
+			if ($malicious_plugins || $malicious_modules || $malicious_modules_templates || $malicious_files) {
+				throw new UserException('Malicious database detected (path traversal attempt)');
+			}
+		}
+		catch (\Throwable $e) {
+			if ($db->lastErrorCode()) {
+				throw new UserException('Invalid database: ' . $db->lastErrorMsg());
+			}
+			else {
+				throw $e;
+			}
 		}
 
 		// Try to handle case where the admin performing the restore is no longer an admin in the restored database

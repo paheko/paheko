@@ -41,7 +41,13 @@ if (!defined('Paheko\LOGIN_PROCESS'))
 		}
 	}
 
-	if ($session->user()->isOTPRequired()
+	$user = $session->user();
+
+	if (!$user) {
+		throw new \LogicException('No user object in session!');
+	}
+
+	if ($user->isOTPRequired()
 		&& !defined('Paheko\OTP_PROCESS')) {
 		Utils::redirect(ADMIN_URL . 'me/security_otp.php');
 	}

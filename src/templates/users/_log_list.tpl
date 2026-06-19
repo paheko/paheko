@@ -18,7 +18,7 @@
 			{elseif $row.type == Log::LOGIN_SUCCESS && $row.details.otp}
 			<strong>(avec double authentification réussie)</strong><br />
 			{/if}
-			{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_SUCCESS || $row.type == Log::LOGIN_RECOVER}
+			{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_SUCCESS || $row.type == Log::LOGIN_RECOVER || $row.type === Log::LOGIN_REMEMBER_ME}
 				{$row.details.user_agent}
 			{elseif $row.type == Log::LOGIN_AS}
 				"{$row.details.admin}" s'est connecté à la place du membre

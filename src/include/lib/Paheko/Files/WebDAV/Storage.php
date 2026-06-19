@@ -380,11 +380,16 @@ class Storage extends AbstractStorage
 			throw new WebDAV_Exception('File not found', 404);
 		}
 
-		if (!$source->canMoveTo($destination, $this->session)) {
-			throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
+		if ($move) {
+			if (!$source->canMoveTo($destination, $this->session)) {
+				throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de déplacer ce fichier', 403);
+			}
 		}
+		else {
+			if (!$source->canCopyTo($destination, $this->session)) {
+				throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de copier ce fichier à cet endroit', 403);
+			}
 
-		if (!$move) {
 			if ($source->size > Files::getRemainingQuota()) {
 				throw new WebDAV_Exception('Your quota is exhausted', 403);
 			}

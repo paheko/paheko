@@ -194,8 +194,9 @@ class Session extends \KD2\UserSession
 			$user_id = $this->getUser()->id;
 			Plugins::fire('user.login.auto', false, compact('user_id'));
 
-			// Update login date as well
-			$this->db->preparedQuery('UPDATE users SET date_login = ? WHERE id = ?;', [new \DateTime, $user_id]);
+			// Log
+			$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
+			Log::add(Log::LOGIN_REMEMBER_ME, compact('user_agent'));
 		}
 
 		return $r;

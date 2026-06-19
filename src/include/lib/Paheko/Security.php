@@ -188,7 +188,23 @@ class Security
 
 	static public function getReport(?string $version = null): \stdClass
 	{
+		$has_commands = false;
+
+		if (Utils::getPDFCommand()) {
+			$has_commands = true;
+		}
+		elseif (is_array(CONVERSION_TOOLS)) {
+			foreach (CONVERSION_TOOLS as $cmd) {
+				if ($cmd !== 'collabora' && $cmd !== 'onlyoffice') {
+					$has_commands = true;
+					break;
+				}
+			}
+		}
+
 		return (object) [
+			'jail_recommended'    => $has_commands,
+			'execution_jail'      => !empty(EXECUTION_JAIL),
 			'open_basedir'        => !empty(OPEN_BASEDIR),
 			//'dangerous_functions' => self::checkDangerousFunctions(),
 			'cache_suspicious'    => self::scanCacheForSuspiciousFunctionCalls(),

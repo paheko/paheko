@@ -1073,11 +1073,15 @@ namespace Paheko;
  *
  * Ce n'est pas une sécurité absolue, mais c'est une mesure supplémentaire.
  *
+ * Attention : ces outils utilisent souvent les namespaces et autres mesures du noyau
+ * Linux, et peuvent donc ne pas fonctionner à l'intérieur d'une VM LXC ou
+ * dans Docker/podman.
+ *
  * Actuellement les outils supportés sont :
  *
  * - bubblewrap (apt install bubblewrap)
  *
- * Défaut : null (sera 'bubblewrap' dans une prochaine version)
+ * Défaut : null
  * @var bool
  */
 //const EXECUTION_JAIL = 'bubblewrap';
