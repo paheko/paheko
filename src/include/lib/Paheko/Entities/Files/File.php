@@ -842,8 +842,8 @@ class File extends Entity
 			$content ??= $this->fetch();
 
 			// Remove XML/HTML tags
-			if ($mime === 'text/html'
-				|| $mime == 'text/xml') {
+			if ($this->mime === 'text/html'
+				|| $this->mime == 'text/xml') {
 				$content = html_entity_decode(strip_tags($content),  ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
 			}
 		}
