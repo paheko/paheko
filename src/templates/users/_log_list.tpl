@@ -14,9 +14,9 @@
 		</td>
 		<td>
 			{if $row.type == Log::LOGIN_FAIL && $row.details.otp}
-			<strong>Code OTP erroné</strong><br />
+			<strong>Erreur à la double authentification (code OTP erroné)</strong><br />
 			{elseif $row.type == Log::LOGIN_SUCCESS && $row.details.otp}
-			<strong>(avec code OTP)</strong><br />
+			<strong>(avec double authentification réussie)</strong><br />
 			{/if}
 			{if $row.type == Log::LOGIN_FAIL || $row.type == Log::LOGIN_SUCCESS || $row.type == Log::LOGIN_RECOVER}
 				{$row.details.user_agent}
