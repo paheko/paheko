@@ -28,6 +28,16 @@ $form->runIf('save', function () use ($cat, $session) {
 	// pour la catégorie du membre qui édite les catégories, sinon il pourrait s'empêcher
 	// de se connecter ou n'avoir aucune catégorie avec le droit de modifier les catégories !
 	if ($cat->id() === $user->id_category) {
+		// Require force_otp to already have set up OTP, or you might not understand what you are doing
+		if ($cat->isModified('force_otp') && $cat->force_otp) {
+			if (!$user->otp_secret) {
+				throw new UserException('Vous devez déjà activer la double authentification pour votre compte avant de pouvoir l\'obliger à la connexion.');
+			}
+			elseif (!$user->otp_recovery_codes) {
+				throw new UserException('Vous devez déjà avoir des codes de secours configurés dans votre compte avant de pouvoir obliger la double authentification à la connexion.');
+			}
+		}
+
 		$cat->set('perm_connect', Session::ACCESS_READ);
 		$cat->set('perm_config', Session::ACCESS_ADMIN);
 	}
