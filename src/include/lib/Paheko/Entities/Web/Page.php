@@ -253,16 +253,19 @@ class Page extends Entity
 			WHERE a.id_page = ? AND a.id = ?;', $this->id(), $id) ?: null;
 	}
 
-	public function syncSearch(): void
+	public function rebuildSearchIndex(): void
 	{
-		if ($this->format == Render::FORMAT_ENCRYPTED) {
+		if ($this->format === Render::FORMAT_ENCRYPTED) {
 			$content = null;
 		}
+		elseif ($this->format === Render::FORMAT_MARKDOWN) {
+			$content = Utils::stripMarkdown($this->content);
+		}
 		else {
-			$content = $this->render();
+			$content = html_entity_decode(strip_tags($this->render())); // FIXME: remove when SkrivML is deleted (1.4)
 		}
 
-		$this->dir()->indexForSearch($content, $this->title, 'text/html');
+		DB::getInstance()->preparedQuery('REPLACE INTO web_search (docid, title, content) VALUES (?, ?, ?);', $this->id(), $this->title, $content);
 	}
 
 	public function saveNewVersion(?int $user_id = null): bool
@@ -357,7 +360,7 @@ class Page extends Entity
 		}
 
 		if ($update_search) {
-			$this->syncSearch();
+			$this->rebuildSearchIndex();
 		}
 
 		// Keep trace of old URIs so that a page that has been moved will get a redirect

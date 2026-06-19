@@ -2413,4 +2413,27 @@ class Utils
 		@ob_end_flush();
 		@flush();
 	}
+
+	static public function stripMarkdown(string $str): string
+	{
+		// Links and images
+		$str = preg_replace(';!?\[(.*?)\]\(.*?\);', '$1', $str);
+		$str = preg_replace('!<(?:https?://|mailto:).*?>!', '', $str);
+
+		// Extensions
+		$str = preg_replace('!<<.*?>>!s', '', $str);
+
+		// Headings
+		$str = preg_replace('!^\s*#+!m', '', $str);
+
+		// Quotes
+		$str = preg_replace('!^\s*>+!m', '', $str);
+
+		// Remove HTML tags
+		$str = strip_tags($str);
+
+		// Other symbols
+		$str = str_replace(['*', '_', '[toc]', '`', '~~', '=='], '', $str);
+		return $str;
+	}
 }

@@ -142,6 +142,7 @@ class Accounts
 			'bookmark' => [
 				'label' => 'Favori',
 			],
+			'archived' => [],
 		];
 
 		$tables = 'acc_accounts';
@@ -209,7 +210,13 @@ class Accounts
 			$where = substr($where, 0, -4) . ')';
 		}
 
-		return $where === '' ? '1' : $where;
+		$where = $where === '' ? '1' : $where;
+
+		if (isset($criterias['archived'])) {
+			$where = sprintf('(%s) AND archived = %d', $where, (int) $criterias['archived']);
+		}
+
+		return $where;
 	}
 
 	/**

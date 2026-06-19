@@ -305,6 +305,7 @@ class Account extends Entity
 	protected int $type;
 	protected bool $user = false;
 	protected bool $bookmark = false;
+	protected bool $archived = false;
 
 	protected $_position = [];
 	protected ?Chart $_chart = null;
@@ -901,7 +902,8 @@ class Account extends Entity
 	{
 		$source ??= $_POST;
 
-		$data = array_intersect_key($source, array_flip(['type', 'description', 'bookmark', 'bookmark_present']));
+		$allowed = ['type', 'description', 'bookmark', 'bookmark_present', 'archived', 'archived_present'];
+		$data = array_intersect_key($source, array_flip($allowed));
 		$this->importForm($data);
 	}
 

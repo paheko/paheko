@@ -5,6 +5,7 @@ namespace Paheko;
 use Paheko\Files\Storage;
 use Paheko\Users\Session;
 use Paheko\Accounting\Charts;
+use Paheko\Web\Web;
 
 use KD2\HTTP;
 use KD2\FossilInstaller;
@@ -156,6 +157,13 @@ class Upgrade
 			if (version_compare($v, '1.3.20', '<')) {
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/migrations/1.3/1.3.20.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.3.21', '<')) {
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/migrations/1.3/1.3.21.sql');
+				Web::rebuildSearchIndex();
 				$db->commitSchemaUpdate();
 			}
 

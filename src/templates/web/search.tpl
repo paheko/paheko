@@ -18,8 +18,8 @@
 	<section class="search-results">
 	{foreach from=$results item="result"}
 		<article>
-			<h3><a href="{"!web/?uri=%s"|local_url|args:$result.uri}" target="_parent">{$result.title_snippet|escape|restore_snippet_markup}</a></h3>
-			<p>{$result.snippet|escape|restore_snippet_markup}</p>
+			<h3><a href="{"!web/?id=%d"|local_url|args:$result.id}" target="_parent">{$result.title_snippet|escape|highlight_search_snippet}</a></h3>
+			<p>{$result.snippet|escape|highlight_search_snippet}</p>
 		</article>
 	{/foreach}
 	</section>

@@ -68,6 +68,7 @@ class CommonModifiers
 		'format_phone_number' => ['string+'],
 		'get_country_name' => ['callback' => [Utils::class, 'getCountryName']],
 		'str_getcsv' => ['string+', 'string', 'string', 'string'],
+		'highlight_search_snippet' => ['string+'],
 	];
 
 	static public function strval($value): string
@@ -98,6 +99,12 @@ class CommonModifiers
 			$url = htmlspecialchars($type ? $type . ':' : '') . $label;
 			return sprintf('<a href="%s">%s</a>', $url, $label);
 		}
+	}
+
+	static public function highlight_search_snippet(string $str): string
+	{
+		$str = strtr($str, ['&lt;mark&gt;' => '<mark>', '&lt;/mark&gt;' => '</mark>']);
+		return $str;
 	}
 
 	static public function markdown($str): string
