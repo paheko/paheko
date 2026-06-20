@@ -10,6 +10,8 @@ use Paheko\Files\Files;
 use Paheko\Files\Shares;
 use Paheko\Files\Trash;
 
+use Paheko\Web\Web;
+
 use Paheko\Install;
 use Paheko\Upgrade;
 use Paheko\Utils;
@@ -46,6 +48,7 @@ class CLI
 		'server',
 		'ext',
 		'security',
+		'site',
 	];
 
 	protected array $defaults = [];
@@ -850,6 +853,27 @@ class CLI
 		}
 
 		$this->success();
+	}
+
+	/**
+	 * Usage: paheko site SUBCOMMAND
+	 *
+	 * paheko site rebuild-search-index
+	 *   Rebuild search index
+	 */
+	public function site(array $args): void
+	{
+		@list($name) = $this->parseOptions($args, [], 1);
+
+		if (!$name) {
+		}
+
+		if ($name === 'rebuild-search-index') {
+			Web::rebuildSearchIndex();
+		}
+		else {
+			$this->help(['site']);
+		}
 	}
 
 	/**

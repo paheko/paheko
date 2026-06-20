@@ -671,6 +671,20 @@ class User extends Entity
 		return null;
 	}
 
+	public function canEditOneField(): bool
+	{
+		foreach (DynamicFields::getInstance()->all() as $field) {
+			if ($field->isPassword()) {
+				continue;
+			}
+
+			if ($field->user_access_level >= Session::ACCESS_WRITE) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	public function canEmail(): bool
 	{

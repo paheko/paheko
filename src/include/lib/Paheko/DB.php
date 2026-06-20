@@ -713,7 +713,7 @@ class DB extends SQLite3
 	public function getTablesList(): array
 	{
 		return $this->getGrouped('SELECT name, sql, NULL AS count, NULL AS schema FROM sqlite_master
-			WHERE type = \'table\' AND name NOT LIKE \'files_search_%\' AND name NOT IN (\'sqlite_stat1\')
+			WHERE type = \'table\' AND name NOT LIKE \'files_search_%\' AND name NOT like \'web_search_%\' AND name NOT IN (\'sqlite_stat1\')
 			ORDER BY name;');
 	}
 }

@@ -643,23 +643,21 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
 	tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-	path TEXT NOT NULL,
-	title TEXT NOT NULL,
-	content TEXT NULL, -- Text content
-	notindexed=path
+	parent,
+	name,
+	content
 );
 
--- Delete/insert search item when item is deleted/inserted from files
 CREATE TRIGGER IF NOT EXISTS files_search_bd BEFORE DELETE ON files BEGIN
 	DELETE FROM files_search WHERE docid = OLD.rowid;
 END;
 
 CREATE TRIGGER IF NOT EXISTS files_search_ai AFTER INSERT ON files BEGIN
-	INSERT INTO files_search (docid, path, title, content) VALUES (NEW.rowid, NEW.path, NEW.name, NULL);
+	INSERT INTO files_search (docid, parent, name, content) VALUES (NEW.rowid, NEW.parent, NEW.name, NULL);
 END;
 
-CREATE TRIGGER IF NOT EXISTS files_search_au AFTER UPDATE OF name, path ON files BEGIN
-	UPDATE files_search SET path = NEW.path, title = NEW.name WHERE docid = NEW.rowid;
+CREATE TRIGGER IF NOT EXISTS files_search_au AFTER UPDATE OF name, parent ON files BEGIN
+	UPDATE files_search SET parent = NEW.parent, name = NEW.name WHERE docid = NEW.rowid;
 END;
 
 CREATE TABLE IF NOT EXISTS files_shares
@@ -719,6 +717,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
 CREATE INDEX IF NOT EXISTS web_pages_id_parent ON web_pages (id_parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
 CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS web_search USING fts4
+-- Search inside web pages
+(
+	tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
+	title TEXT NOT NULL,
+	content TEXT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS web_search_bd BEFORE DELETE ON web_pages BEGIN
+	DELETE FROM web_search WHERE docid = OLD.rowid;
+END;
+
+-- Make sure index is deleted when title or content are modified
+-- the actual indexing is done in PHP code, as the formatting (HTML, markdown) must be removed
+CREATE TRIGGER IF NOT EXISTS web_search_bu BEFORE UPDATE OF content, title ON web_pages BEGIN
+	DELETE FROM web_search WHERE docid = OLD.rowid;
+END;
 
 CREATE TABLE IF NOT EXISTS web_pages_versions
 (

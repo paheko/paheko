@@ -251,28 +251,43 @@ class Files
 			throw new ValidationException('Recherche trop longue : maximum 100 caractères');
 		}
 
-		$where = '';
+		$db = DB::getInstance();
 		$params = [trim($search)];
+		$search_keys = array_flip(['snippet', 'name_snippet', 'parent_snippet', 'points']);
+		$where = '';
 
 		if (null !== $path) {
-			$where = ' AND path LIKE ?';
+			$params[] = $db->escapeLike($path) . '/%';
 			$params[] = $path;
+			$where = ' AND (f.parent LIKE ? OR f.parent = ?)';
 		}
 
-		$query = sprintf('SELECT
-			*,
-			dirname(path) AS parent,
-			REPLACE(path, \'/\', \' / \') AS breadcrumbs,
+		$query = sprintf('SELECT f.*,
 			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 2, -30) AS snippet,
-			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 1, -30) AS title_snippet,
-			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
-			FROM files_search
+			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 1, -30) AS name_snippet,
+			snippet(files_search, \'<mark>\', \'</mark>\', \'…\', 0, -30) AS parent_snippet,
+			rank(matchinfo(files_search), 0.2, 1.0, 1.0) AS points
+			FROM files_search s
+			INNER JOIN files f ON f.rowid = s.docid
 			WHERE files_search MATCH ? %s
 			ORDER BY points DESC
 			LIMIT 0,50;', $where);
 
+		$query = sprintf($query, $where);
+
 		try {
-			return DB::getInstance()->get($query, ...$params);
+			$out = [];
+
+			foreach ($db->iterate($query, ...$params) as $row) {
+				$row = (array)$row;
+				$file = new File;
+				$file->load(array_diff_key($row, $search_keys));
+				$result = array_intersect_key($row, $search_keys);
+				$result['breadcrumbs'] = preg_replace(';(?<!<)/;', ' / ', $result['parent_snippet']);
+				$out[] = compact('file', 'result');
+			}
+
+			return $out;
 		}
 		catch (DB_Exception $e) {
 			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {
