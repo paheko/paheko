@@ -10,9 +10,9 @@ use Paheko\Web\Web;
 
 use Paheko\API;
 use Paheko\Config;
-use Paheko\DB;
 use Paheko\Plugins;
 use Paheko\Entities\Plugin;
+use Paheko\SharedKeyValueCache;
 use Paheko\Template;
 use Paheko\UserException;
 use Paheko\Utils;
@@ -279,17 +279,16 @@ class Router
 
 	static public function markClientSuspicious(): void
 	{
-		$db = DB::getInstance();
-		$expiry = new \DateTime('+7 days');
-		$db->preparedQuery('REPLACE INTO web_suspicious_clients (ip, expiry) VALUES (?, ?);', Utils::getIP(), $expiry);
+		$kv = SharedKeyValueCache::getInstance();
+		$kv->set('suspicious_ip_' . Utils::getIP(), '1', 7 * 24 * 60);
 	}
 
 	static public function blockSuspiciousClient(): bool
 	{
-		$db = DB::getInstance();
 		$ip = Utils::getIP();
+		$kv = SharedKeyValueCache::getInstance();
 
-		if (!$db->test('web_suspicious_clients', 'ip = ? AND expiry >= ?', Utils::getIP(), new \DateTime)) {
+		if (!$kv->exists('suspicious_ip_' . Utils::getIP())) {
 			return false;
 		}
 

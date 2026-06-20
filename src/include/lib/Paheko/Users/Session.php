@@ -239,6 +239,44 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('users_sessions', $this->db->where('id_user', $user_id));
 	}
 
+	/**
+	 * Returns true if a password exists in the local cached list of compromised passwords
+	 * @param string $hash
+	 * @return bool
+	 */
+	protected function isPasswordCompromisedInCache($hash)
+	{
+		$kv = KeyValueCache::getInstance();
+		return $kv->exists('compromised_hash_' . $hash);
+	}
+
+	/**
+	 * Store a list of compromised hash suffixes in cache
+	 * @param  string $prefix Hash prefix
+	 * @param  array  $range  List of hash suffixes
+	 * @return bool
+	 */
+	protected function storeCompromisedPasswordsRange($prefix, array $range)
+	{
+		$kv = KeyValueCache::getInstance();
+		$kv->begin();
+
+		$kv->set('compromised_range_' . $prefix, '1', 60 * 24 * 7);
+
+		foreach ($range as $suffix) {
+			$kv->set('compromised_hash_' . $prefix . $suffix, '1');
+		}
+
+		$kv->commit();
+	}
+
+	protected function isPasswordRangeExpiredInCache($prefix)
+	{
+		$kv = KeyValueCache::getInstance();
+
+		return $kv->exists('compromised_range_' . $prefix);
+	}
+
 	public function refresh(): bool
 	{
 		if (!$this->isLogged()) {

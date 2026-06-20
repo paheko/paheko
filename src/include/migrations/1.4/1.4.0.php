@@ -62,6 +62,10 @@ foreach (EM::getInstance(Page::class)->iterate('SELECT * FROM @TABLE WHERE forma
 	$page->save();
 }
 
+$db->exec('DROP TABLE IF EXISTS web_suspicious_clients;');
+$db->exec('DROP TABLE IF EXISTS compromised_passwords_cache;');
+$db->exec('DROP TABLE IF EXISTS compromised_passwords_cache_ranges;');
+
 $db->commitSchemaUpdate();
 
 $old_path = File::CONTEXT_CONFIG . '/admin_homepage.skriv';

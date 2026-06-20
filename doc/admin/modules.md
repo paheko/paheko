@@ -252,8 +252,6 @@ Tenter de lire les données des tables suivantes résultera également en une er
 
 * emails
 * emails_queue
-* compromised_passwords_cache
-* compromised_passwords_cache_ranges
 * api_credentials
 * plugins_signals
 * config

@@ -34,6 +34,7 @@ KD2/Office/Calc/Reader.php
 KD2/Office/Excel/Reader.php
 KD2/Office/ToText.php
 KD2/OpenIDConnect.php
+KD2/RedisClient.php
 KD2/Security.php
 KD2/Security_OTP.php
 KD2/SimpleDiff.php

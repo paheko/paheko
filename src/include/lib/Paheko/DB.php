@@ -46,8 +46,6 @@ class DB extends SQLite3
 		// Restrict access to some private tables
 		'!emails' => null,
 		'!emails_queue' => null,
-		'!compromised_passwords_cache' => null,
-		'!compromised_passwords_cache_ranges' => null,
 		'!api_credentials' => null,
 		'!plugins_signals' => null,
 		'!config' => null,

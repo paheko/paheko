@@ -126,20 +126,6 @@ CREATE TABLE IF NOT EXISTS searches
 	content TEXT NOT NULL
 );
 
-
-CREATE TABLE IF NOT EXISTS compromised_passwords_cache
--- Cache des hash de mots de passe compromis
-(
-	hash TEXT NOT NULL PRIMARY KEY
-);
-
-CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
--- Cache des préfixes de mots de passe compromis
-(
-	prefix TEXT NOT NULL PRIMARY KEY,
-	date INTEGER NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS emails (
 -- List of emails addresses
 -- We are not storing actual email addresses here for privacy reasons
@@ -754,11 +740,4 @@ CREATE TABLE IF NOT EXISTS web_pages_uris
 	id_page INTEGER NOT NULL REFERENCES web_pages ON DELETE CASCADE,
 	uri TEXT NOT NULL,
 	UNIQUE (uri)
-);
-
-CREATE TABLE IF NOT EXISTS web_suspicious_clients
-(
-	ip TEXT NOT NULL,
-	expiry TEXT NOT NULL CHECK (datetime(expiry) = expiry),
-	UNIQUE(ip)
 );
