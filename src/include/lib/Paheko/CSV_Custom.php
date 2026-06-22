@@ -423,11 +423,18 @@ class CSV_Custom
 
 	public function searchColumn(string $str, array $columns)
 	{
+		static $replace = [
+			// proper quotes are fine, but they are confusing
+			'’' => '\'',
+			// remove non breaking space U+00A0
+			"\xc2\xa0" => ' ',
+		];
+
 		foreach ($columns as $key => $value) {
-			$columns[$key] = mb_strtolower(str_replace('’', '\'', $value));
+			$columns[$key] = mb_strtolower(strtr($value, $replace));
 		}
 
-		$str = mb_strtolower(str_replace('’', '\'', $str));
+		$str = mb_strtolower(strtr($str, $replace));
 
 		return array_search($str, $columns, true);
 	}
