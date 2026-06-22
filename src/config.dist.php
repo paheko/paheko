@@ -349,6 +349,22 @@ namespace Paheko;
 //const DB_FILE = DATA_ROOT . '/association.sqlite';
 
 /**
+ * KEY_VALUE_CACHE_ENGINE
+ *
+ * Définit le moteur de stockage clé/valeur de cache
+ *
+ * Moteurs supportés :
+ *
+ * - 'sqlite' : le cache sera stocké dans SHARED_CACHE_ROOT/kvcache.sqlite
+ * - 'redis' : le cache sera stocké dans Redis, dans ce cas préciser l'adresse
+ *   du serveur Redis (exemple: 'redis:tcp///localhost:6379')
+ *
+ * @var string
+ */
+
+//const KEY_VALUE_CACHE_ENGINE = 'redis:tcp///localhost:6379';
+
+/**
  * Emplacement de stockage des plugins
  *
  * Défaut : DATA_ROOT . '/plugins'

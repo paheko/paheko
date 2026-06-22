@@ -180,6 +180,7 @@ static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
 	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'WEB_CACHE_ROOT'        => DATA_ROOT . '/cache/web/%host%',
+	'KEY_VALUE_CACHE_ENGINE' => 'sqlite',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/migrations/1.4/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
