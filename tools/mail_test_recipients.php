@@ -207,6 +207,10 @@ class TestMailbox
 					throw new \RuntimeException('Cannot fetch OAuth token: ' . $r);
 				}
 
+				if (!isset($d['expires_in'], $d['access_token'])) {
+					throw new \RuntimeException('Invalid OAuth token: ' . $r);
+				}
+
 				$d['expiry'] = time() + $d['expires_in'];
 				$data[$config->address] = $d;
 
