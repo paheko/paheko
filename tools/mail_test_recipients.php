@@ -165,8 +165,14 @@ class TestMailbox
 			$config->user ??= $address;
 			$config->provider ??= substr($address, strrpos($address, '@')+1);
 
-			$t = new self($config);
-			yield from $t->report($since);
+			try {
+				$t = new self($config);
+				yield from $t->report($since);
+			}
+			catch (\RuntimeException $e) {
+				echo "Skipping $address ERROR:\n";
+				echo $e;
+			}
 		}
 	}
 
