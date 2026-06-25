@@ -36,6 +36,7 @@ class CommonFunctions
 		'delete_form',
 		'edit_user_field',
 		'user_field',
+		'tabitem',
 		'tag',
 		'dropdown',
 	];
@@ -1098,6 +1099,19 @@ class CommonFunctions
 
 		$out .= '</ul></nav>';
 		return $out;
+	}
+
+	static public function tabitem(array $params): string
+	{
+		$selected = $params['selected'] ?? null;
+		$name = $params['name'] ?? null;
+		$label = htmlspecialchars($params['label'] ?? '');
+
+		if (isset($params['href'])) {
+			$label = sprintf('<a href="%s">%s</a>', htmlspecialchars(Utils::getLocalUrl($params['href'])), $label);
+		}
+
+		return sprintf('<li%s>%s</li>', $selected === $name ? ' class="current"' : '', $label);
 	}
 
 	const TAG_PRESETS = [
