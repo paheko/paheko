@@ -347,7 +347,7 @@ class CSV_Custom
 
 		$i = 0;
 
-		if (count($this->rows) <= $this->skip) {
+		if (count($this->rows[$this->sheet]) <= $this->skip) {
 			throw new UserException('Le fichier ne comporte aucune ligne de données');
 		}
 
