@@ -111,6 +111,10 @@ class CSV extends CSV_Custom
 	{
 		$transactions = (new QIFParser)->parse(file_get_contents($path));
 
+		if (empty($transactions)) {
+			throw new UserException('Fichier QIF invalide : aucune transaction n\'a été trouvée');
+		}
+
 		$table = ['date', 'label', 'amount'];
 		$extended = false;
 
@@ -130,7 +134,7 @@ class CSV extends CSV_Custom
 			// In most banks, memo is mostly the second line of the transaction label… that sucks
 			$label = trim(sprintf('%s %s', (string)$t->label, (string)$t->memo));
 
-			$row = [$t->date->format($date_format), $label, $t->amount];
+			$row = [$t->date ? $t->date->format($date_format) : '', $label, $t->amount ?? ''];
 
 			if ($extended) {
 				$row[] = $t->check_number;
