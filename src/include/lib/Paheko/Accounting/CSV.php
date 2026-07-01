@@ -153,6 +153,10 @@ class CSV extends CSV_Custom
 				throw new UserException('aucun compte n\'a été trouvé');
 			}
 
+			if (empty($account->statement->transactions)) {
+				throw new UserException('aucune transaction n\'a été trouvée');
+			}
+
 			$table = ['date', 'label', 'amount'];
 			$extended = false;
 
