@@ -132,7 +132,9 @@ class CSV_Custom
 	 */
 	public function upload(?array $file): void
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
+		if (empty($file['size'])
+			|| empty($file['tmp_name'])
+			|| empty($file['name'])) {
 			throw new UserException('Fichier invalide, ou aucun fichier fourni');
 		}
 

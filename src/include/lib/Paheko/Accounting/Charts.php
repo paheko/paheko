@@ -273,7 +273,10 @@ class Charts
 
 	static public function import(string $file_key, ?string $label, ?string $country): void
 	{
-		if (empty($_FILES[$file_key]) || empty($_FILES[$file_key]['size']) || empty($_FILES[$file_key]['tmp_name'])) {
+		if (empty($_FILES[$file_key])
+			|| empty($_FILES[$file_key]['size'])
+			|| empty($_FILES[$file_key]['tmp_name'])
+			|| !is_uploaded_file($_FILES[$file_key]['tmp_name'])) {
 			throw new UserException('Fichier invalide');
 		}
 

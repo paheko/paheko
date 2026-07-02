@@ -39,8 +39,8 @@ $form->runIf('cancel', function() use ($csv) {
 	$csv->clear();
 }, $csrf_key, Utils::getSelfURI());
 
-$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($csv, $params) {
-	$csv->upload($_FILES['file']);
+$form->runIf(f('load'), function () use ($csv, $params) {
+	$csv->upload($_FILES['file'] ?? []);
 	Utils::redirect(Utils::getSelfURI($params));
 }, $csrf_key);
 
