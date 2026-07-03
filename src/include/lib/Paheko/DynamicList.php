@@ -622,6 +622,9 @@ class DynamicList implements \Countable
 		}
 
 		if ($export) {
+			// Make sure we remove any content before, eg. partial template output
+			@ob_end_clean();
+
 			$this->export($this->title, $export);
 			exit;
 		}
