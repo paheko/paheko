@@ -64,27 +64,9 @@
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="textarea" name="org_address_public" source=$config label="Adresse publique" help="Si renseignée, sera utilisée à la place de l'adresse postale sur le site web et dans les e-mails.\nUtile si le lieu d'activité est différent du siège de l'association."}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
+			{input type="url" name="org_web" source=$config label="Site web" help="Cette adresse sera affichée dans les messages collectifs ou les reçus.\nSi ce champ est vide, l'adresse du site web intégré à Paheko sera utilisé (s'il est activé)."}
 			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}
 		</dl>
-	</fieldset>
-
-	<fieldset>
-		<legend>Site web</legend>
-		<p class="help">
-			Cette option permet d'activer ou désactiver la visibilité publique du site web intégré à Paheko.<br/>
-			En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
-			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés, dans le menu <strong>Site web</strong> de l'administration.
-		</p>
-		<dl>
-			{input type="radio" name="site_disabled" value=0 source=$config label="Activer le site web public"}
-			{input type="radio" name="site_disabled" value=1 source=$config label="Désactiver le site web"}
-		</dl>
-		<div class="external-web">
-			<p class="help">Si vous avez déjà un site web à une autre adresse, vous pouvez l'indiquer ici&nbsp;:</p>
-			<dl>
-				{input type="url" name="org_web" source=$config label="Site web externe"}
-			</dl>
-		</div>
 	</fieldset>
 
 	<fieldset>
@@ -127,12 +109,6 @@ c.onchange = () => {
 		}
 	});
 };
-function toggleWebInput() {
-	g.toggle('.external-web', $('#f_site_disabled_1').checked);
-}
-toggleWebInput();
-$('#f_site_disabled_0').onchange = toggleWebInput;
-$('#f_site_disabled_1').onchange = toggleWebInput;
 {/literal}
 </script>
 

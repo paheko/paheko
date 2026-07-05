@@ -313,7 +313,7 @@ class Config extends Entity
 
 	public function getSiteURL(): ?string
 	{
-		if ($this->site_disabled && $this->org_web) {
+		if ($this->org_web) {
 			return $this->org_web;
 		}
 		elseif ($this->site_disabled) {
