@@ -370,7 +370,12 @@ EOS;
 
 		unset($param);
 
-		$expression = vsprintf($expression, $params);
+		try {
+			$expression = vsprintf($expression, $params);
+		}
+		catch (\ArgumentCountError|\ValueError $e) {
+			throw new TemplateException('Invalid printf value: ' . $e->getMessage());
+		}
 
 		try {
 			$tokens = Brindille::tokenize($expression, $tokens_list);
