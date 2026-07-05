@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Move\sweb\s/\sprojects\sconfig\sto\sconfig\smenu
-D 2026-07-05T12:45:01.116
+C Move\smoney_int\sto\sCommonModifiers
+D 2026-07-05T19:49:50.824
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -182,9 +182,9 @@ F src/include/lib/Paheko/Template.php c87e412840dc895d6c4ef5f626ebf5280f064dc3ef
 F src/include/lib/Paheko/Upgrade.php 89b822df6446decafc0e301d392736d0ce76e54f1af3f1cc43c432f6dd75c6f6
 F src/include/lib/Paheko/UserException.php d1cf6d5aa76d7004f8a663338771044307a0b4e5b419971aa3a78dc283bdd121
 F src/include/lib/Paheko/UserTemplate/CommonFunctions.php f43bd6be45960c7b95e9765890c1b4651c86c40aec3b8f526d14492108e39e6b
-F src/include/lib/Paheko/UserTemplate/CommonModifiers.php b1051bfe4a3b2c5833807406425ac7daaaeda5bcc84d1f5c109198d20ac02ef5
+F src/include/lib/Paheko/UserTemplate/CommonModifiers.php f55b68e1b05bc45629a5a633e531d363108a5f3ec83c45e686015387c54037e5
 F src/include/lib/Paheko/UserTemplate/Functions.php 56211867c8e31d7de9d58f7505d16dd1157fe1cc5ec18e9d6e53b031e8244d7b
-F src/include/lib/Paheko/UserTemplate/Modifiers.php b5fa5679f67e89d08962a389d58165a70694a6b0ee3a173cd89f154cafc7af6d
+F src/include/lib/Paheko/UserTemplate/Modifiers.php 9b2f52daa559231ac888e6b994af63bddc0044291a4b55b85cd15c9a4a0615b9
 F src/include/lib/Paheko/UserTemplate/Modules.php 8886300c9036ec824817916c8e5d03883b94acbcdc0852143e66ac561e44112f
 F src/include/lib/Paheko/UserTemplate/Sections.php c2234141288bf4d5835fbd4793ff0476d0df6a88e436e3ed4c6e5639df8f684d
 F src/include/lib/Paheko/UserTemplate/UserDefinedFunctions.php 6e314253622f2d298ee04a0b3cf46b03534cb621f9ae625dba89882836323fb4
@@ -348,7 +348,7 @@ F src/templates/common/files/upload.tpl f4e3d9978c99d9ae9c2f23a008cb1832d1ec55fc
 F src/templates/common/search/advanced.tpl 9cdcf3661e4fadc6c6e908816e40790b4d89f11353e4d6294e48e397e7827fba
 F src/templates/common/search/saved_searches.tpl a592ff7bd15b31811a3130978c103aa22a1e396bdab84d147932159dfaea2254
 F src/templates/config/_menu.tpl cbdba3f946d4194e2d34eeaa733572e163ce29e67c27aaf1442061fc96062396
-F src/templates/config/accounting.tpl 7162d0a8725ea5236cead82e0340befd59e85ebbcecb4106f73edaa28d4887b5 w src/templates/acc/projects/config.tpl
+F src/templates/config/accounting.tpl 7162d0a8725ea5236cead82e0340befd59e85ebbcecb4106f73edaa28d4887b5
 F src/templates/config/advanced/api.tpl 369e3c4ce61fc8ca4988f9fefa6965918b7e337ad12acdb425e7e297d1ab9d9b
 F src/templates/config/advanced/audit.tpl 5ecb9cb203ffe49626195e86c0101a2f8b4aa16f55b603139fb078de7e700ca6
 F src/templates/config/advanced/errors.tpl 286b66c96854e23a163c99f1869c303fa31db7e0707c5cb921bc2ef57dee32e5
@@ -593,7 +593,7 @@ F src/www/admin/common/files/upload.php d0b873fd7c19cd80aa595a9d962b2ccbd323149b
 F src/www/admin/common/saved_searches.php 67364c4a5ead14f5a231c6472902cf11bb0a5eb010fe47c71fe993318c4f0a8e
 F src/www/admin/common/search.php 0fbbc52fc636158f7bb31fd5a771e0a61f81cb04db33f5ca56797d25d97b2c5a
 F src/www/admin/config/_inc.php 38dbaa8eceba69256ce410069345adbfb22d8fe7682f9df4decdacc6468f5186
-F src/www/admin/config/accounting.php 4b7ba056114ec6bf1e0f7137e79805d7e6cfb69dc04423494615440125773364 w src/www/admin/acc/projects/config.php
+F src/www/admin/config/accounting.php 4b7ba056114ec6bf1e0f7137e79805d7e6cfb69dc04423494615440125773364
 F src/www/admin/config/advanced/api.php 38c3b53ff6f7dff029c450270ba9bcdbf0bbe450edb89fd4a9f6f56f1cc6c627
 F src/www/admin/config/advanced/audit.php 03c22ee4a5984848ce4aec9056a0d2e69c4e869398622136556c0f5ecefaffc1
 F src/www/admin/config/advanced/errors.php 11eac7346acc44f433896d8c298e4e4984513b3dd1d35a09868e98ad7361ffd7
@@ -858,24 +858,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 8747ddccd7d2e248ee3b55998dab1d05af05c5e2e10d1602fc6434620242a64a
-R 6607c627a792209fe6e7996861c95c60
+P 283dcd1a28ac89f90a19d5e0ebf2b1649edb5dfdaf1a51d3e80e01ebb0c3e966
+R 7b4b576a196c5a69864c5fd214fdcb39
 U bohwaz
-Z f7b7e52ec44ff29d0c1a5947d4b4e9dc
+Z d04c22765cbfc1db1aa33a7736be7046
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmpKUc0ACgkQksnacbiI
-6jT1pw/+MG9PqrjCVx06aVpjgIYUWvs7o36swZQF0Ftihh8cVQdGz7OvDKMojRun
-zCkwvwlUxyyw3TXZGqC7SbK6dcoPuShwKWpZvFYhCc0hIfR8AOwcYGJdrs3qt+g0
-GX+QgKC4gli9B+vPBvz+eOKq4uT6kGszaHwt+v3WBDKny3vUliG7iNocVJ7Vdt1K
-JwJ2EURdOI0wqY9UlTTBgzFee6qmYIlbZVh+1+AUu6pZiIdDYPUg8CX8UwavNlG5
-xVmgWQRnudbSt8/D5GVIcIt7RwR/LGQlg3Qw0UfWJQqQNIrjVG89JIOQBQqdJtiU
-CTHrNXOqRb4IS+2EHVJU+ZBjG/0o5tyq566sZGS9iOfDPSosg9NbhM0Gb43DXZ6d
-1rD+pH53cSa5NTJWeDO6YLjjfkY4lP78VA1bI7SPLiNHbLODt5jTvcAXmCFUbBQG
-CjmKwjb0VVnxv2ECUe0d6Vk1r28t285cbqGU7lWCHRPkeIxys/NoCK6V3KFsecAY
-fu75fLrsstZY0eS4rxFhSfyaJSMkCCsH+q6kWUOOgZ4h/wVCkwk/j4O3ZpjS6fIh
-T/zi3iS3ySfTYxjzPMjdBiTD/9O9fJ+jiH858aQYofPHl9tWLRHtCVAAE8i84LLs
-xfkucrtGDjgNRHtkpbWB8xjCj7LPQEpwVRlt20Hm+j++gyq55Q0=
-=2Wwx
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmpKtV4ACgkQksnacbiI
+6jSLFg/9FsLNo/7IvdSv3C2eAlg3q3/lW7Qsz0sAtPg+2oNANXbeGDWyCrwAc2Tu
+lCMHAPMc44D/rN4xKHdBzVsEinRWY4N7/dI0gsxyTpCkdk0EHGR4Yc2DUhwgXbq+
+Mu88A/2F4vm+tcDzsH3s7KMc8kYP2VYuM9ySD81eB8wYA8zgRrszYt7SvhGrp6Az
+p4IQ77xcxB5EaRhgkqCf2npvSD549dfP5mrfmSWG+oShFwNj6z027obxBGzRu+kL
+ZisvTGlzdLcd8vVB6UFS9jRC1d+2pymo7yHh+G82wGi8rCuu++XpRvP/BdsCuVTR
+kkD8LBmNfckmA32QytiQLL9h4yndlWFkirDJtf2HhERKigZtHR1tfoVmjG7uUkdy
+gUBr1fr1qRFw9bmG3vOstuJV9kOal/40feu9LQEV1bP33Ctq6GVl5FuCgJYRc8Ma
+NmFzi8VXFGqIvlmJGrEX1gXYQFnwaVp+t+TEeSzBqB2w8cfM6T9GuPu+xb3EBGTo
+pBlMMKSTnD2T80t9CQJIt+aZjv2UQ/wyujNVml/yVEA4aPZmnUorJDnNh456dxvE
+dyblKsyR/KzdsVrOnSfW/Jx8SkijLA70D2WHEqKGcwnhjFvJ8HSzgpC8vQFdLJ1m
+S9okRPusF4bjw52KL9+itn1rFDSko2TPF+gfaekmR/JSOvQaGio=
+=X9PY
 -----END PGP SIGNATURE-----
