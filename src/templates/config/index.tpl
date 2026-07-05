@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Configuration" current="config"}
 
-{include file="config/_menu.tpl" current="index"}
+{include file="config/_menu.tpl" current="index" sub_current="index"}
 
 {if isset($_GET['ok']) && !$form->hasErrors()}
 	<p class="block confirm">
@@ -64,7 +64,6 @@
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="textarea" name="org_address_public" source=$config label="Adresse publique" help="Si renseignée, sera utilisée à la place de l'adresse postale sur le site web et dans les e-mails.\nUtile si le lieu d'activité est différent du siège de l'association."}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
-			{input type="url" name="org_web" source=$config label="Site web" help="Cette adresse sera affichée dans les messages collectifs ou les reçus.\nSi ce champ est vide, l'adresse du site web intégré à Paheko sera utilisé (s'il est activé)."}
 			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}
 		</dl>
 	</fieldset>

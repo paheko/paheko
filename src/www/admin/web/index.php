@@ -16,11 +16,6 @@ if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
 		$config->set('site_disabled', false);
 		$config->save();
 	}, $csrf_key, Utils::getSelfURI());
-	$form->runIf('disable', function() {
-		$config = Config::getInstance();
-		$config->set('site_disabled', true);
-		$config->save();
-	}, $csrf_key, Utils::getSelfURI());
 }
 
 $page = false;

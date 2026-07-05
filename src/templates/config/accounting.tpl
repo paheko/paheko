@@ -1,6 +1,6 @@
-{include file="_head.tpl" title="Projets - configuration" current="acc/years"}
+{include file="_head.tpl" title="Comptabilité — configuration" current="config"}
 
-{include file="./_nav.tpl" current="config" order_code=null}
+{include file="./_menu.tpl" current="index" sub_current="acc"}
 
 {if $_GET.msg == 'SAVED'}
 	<p class="block confirm">
@@ -24,8 +24,8 @@
 	</dl>
 </fieldset>
 <p>
-	{csrf_field key="save_config"}
-	{button type="submit" name="save_config" label="Enregistrer" shape="right" class="main"}
+	{csrf_field key=$csrf_key}
+	{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 </p>
 </form>
 

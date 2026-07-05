@@ -27,12 +27,6 @@
 					{linkbutton shape="settings" href=$url label="Configurer le thème" target="_dialog"}
 				{/if}
 				{linkbutton shape="code" href="!config/ext/edit.php?module=%s"|args:$module.name label="Code du site"}
-				{if !$config.site_disabled}
-					<form method="post" action="">
-						{button shape="eye-off" name="disable" value=1 type="submit" label="Désactiver le site"}
-						{csrf_field key=$csrf_key}
-					</form>
-				{/if}
 			{/if}
 		{/linkmenu}
 	</nav>

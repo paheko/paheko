@@ -6,15 +6,23 @@
 		{if DESKTOP_CONFIG_FILE}
 			<li{if $current === 'desktop'} class="current"{/if}><a href="{$admin_url}config/desktop.php">Ordinateur</a></li>
 		{/if}
-		<li{if $current == 'custom'} class="current"{/if}><a href="{$admin_url}config/custom.php">Personnalisation</a></li>
 		<li{if $current == 'users'} class="current"{/if}><a href="{$admin_url}config/users/">Membres</a></li>
 		<li{if $current == 'backup'} class="current"{/if}><a href="{$admin_url}config/backup/">Sauvegardes</a></li>
 		<li{if $current == 'ext'} class="current"{/if}><a href="{$admin_url}config/ext/">Extensions</a></li>
 		<li{if $current == 'advanced'} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 	</ul>
 
-	{if $current == 'users'}
-		{if $sub_current == 'fields'}
+	{if $current === 'index'}
+
+		<ul class="sub">
+			{tabitem label="Général" href="!config/" selected=$sub_current name="index"}
+			{tabitem label="Personnalisation" href="!config/custom.php" selected=$sub_current name="custom"}
+			{tabitem label="Site web" href="!config/web.php" selected=$sub_current name="web"}
+			{tabitem label="Comptabilité" href="!config/accounting.php" selected=$sub_current name="acc"}
+		</ul>
+
+	{elseif $current === 'users'}
+		{if $sub_current === 'fields'}
 			<aside>{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}</aside>
 		{/if}
 
