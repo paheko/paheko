@@ -805,7 +805,10 @@ class Utils
 
 	static public function getCountryList()
 	{
-		return Translate::getCountriesList('fr');
+		$list = Translate::getCountriesList('fr');
+		$collator = new \Collator('fr_FR');
+		$collator->asort($list);
+		return $list;
 	}
 
 	static public function getCountryName(string $code): ?string
@@ -2362,7 +2365,7 @@ class Utils
 			#__profiler { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30000; }
 			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 2em; }
 			#__profiler header:hover { background: #600; }
-			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; }
+			#__profiler span, #__profiler a { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; color: inherit; }
 			#__profiler span i { display: block; font-size: 1.8em; font-style: normal; margin-right: .5em; line-height: 1em; }
 			#__profiler.log { top: 0; }
 			#__profiler table { display: none; }
@@ -2380,6 +2383,7 @@ class Utils
 					<span title="Time taken by Paheko" class="%s"><i>🕑</i> %s ms</span>
 					<span title="RAM usage"><i>🍔</i>%s MiB</span>
 					<span title="SQL" class="%s"><i>⛁</i> %d in %d ms</span>
+					<a href="%s">Open SQL</a>
 				</header>
 				<table>
 					<thead><tr><td>Time</td><td>SQL</td><td>EXPLAIN</td><td></td></tr></thead>
@@ -2390,7 +2394,8 @@ class Utils
 			$mem,
 			$has_slow_queries ? 'slow' : '',
 			count($db_log),
-			round($db_time / 1000)
+			round($db_time / 1000),
+			self::getLocalURL('!config/advanced/sql.php')
 		);
 
 		$sql_url = self::getLocalURL('!config/advanced/sql.php') . '?query=';
