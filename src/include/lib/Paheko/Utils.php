@@ -958,39 +958,63 @@ class Utils
 		return preg_replace('![^\d\+\(\)p#,;-]!', '', trim($n));
 	}
 
-	static public function normalizeSIRET(string $n): string
+	static public function normalizeBusinessNumber(string $country, string $value): string
 	{
-		$n = trim($n);
-		$n = str_replace(' ', '', $n);
-		return $n;
+		$value = trim($value);
+
+		// Remove ^BE for Belgium, ^CHE- and any other characters, spaces etc.
+		// don't do it for other countries, I don't know how they work
+		if (in_array($country, ['FR', 'BE', 'CH'])) {
+			$value = preg_replace('/[^0-9]+/', '', $value);
+		}
+
+		return $value;
 	}
 
-	static public function checkSIRET(string $n): bool
+	static public function verifyBusinessNumber(string $country, string $value): bool
 	{
-		$n = self::normalizeSIRET($n);
-
-		if (strlen($n) !== 14) {
-			return false;
-		}
-
-		if (!ctype_digit($n)) {
-			return false;
-		}
-
-		$sum = 0;
-
-		for ($i = 0; $i < 14; ++$i) {
-			if ($i % 2 === 0) {
-				$tmp = ((int) $n[$i]) * 2;
-				$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
-			} else {
-				$tmp = $n[$i];
+		if ($country === 'FR') {
+			if (!in_array(strlen($value), [9, 14], true)) {
+				return false;
 			}
 
-			$sum += $tmp;
+			if (!ctype_digit($value)) {
+				return false;
+			}
+
+			$sum = 0;
+			$value = strrev($value); // walk from right
+
+			for ($i = 0; $i < strlen($value); ++$i) {
+				if ($i % 2 === 0) {
+					$tmp = ((int) $value[$i]) * 2;
+					$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
+				} else {
+					$tmp = $value[$i];
+				}
+
+				$sum += $tmp;
+			}
+
+			return ($sum % 10) === 0;
+		}
+		elseif ($country === 'BE') {
+			$base = intval(substr($value, 0, 8));
+			$key  = intval(substr($value, -2));
+
+			$expected = 97 - ($base % 97);
+
+			if ($expected === 0) {
+				$expected = 97;
+			}
+
+			return $key === $expected;
+		}
+		elseif ($country === 'CH') {
+			return strlen($value) === 9;
 		}
 
-		return !($sum % 10 !== 0);
+		return true;
 	}
 
 	static public function write_ini_string($in)

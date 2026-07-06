@@ -119,6 +119,7 @@ class Config extends Entity
 
 	protected string $org_name;
 	protected ?string $org_infos = null;
+	protected ?string $org_business_number = null;
 	protected string $org_email;
 	protected ?string $org_address = null;
 	protected ?string $org_address_public = null;
@@ -269,6 +270,10 @@ class Config extends Entity
 			$source['color2'] = null;
 		}
 
+		if (isset($source['org_business_number'])) {
+			$source['org_business_number'] = Utils::normalizeBusinessNumber($source['country'] ?? $this->country, $source['org_business_number']);
+		}
+
 		parent::importForm($source);
 	}
 
@@ -309,6 +314,12 @@ class Config extends Entity
 
 		$this->assert(!isset($this->color1) || preg_match('/^#[a-f0-9]{6}$/i', $this->color1));
 		$this->assert(!isset($this->color2) || preg_match('/^#[a-f0-9]{6}$/i', $this->color2));
+
+		if (isset($this->org_business_number)) {
+			$this->assert(
+				Utils::verifyBusinessNumber($this->country, $this->org_business_number),
+				$this->getBusinessNumberFieldName() . ' : numéro invalide');
+		}
 	}
 
 	public function getSiteURL(): ?string
@@ -321,6 +332,22 @@ class Config extends Entity
 		}
 
 		return WWW_URL;
+	}
+
+	public function getBusinessNumberFieldName(): string
+	{
+		if ($this->country === 'FR') {
+			return 'Numéro SIREN ou SIRET';
+		}
+		elseif ($this->country === 'BE') {
+			return 'Numéro BCE';
+		}
+		elseif ($this->country === 'CH') {
+			return 'Numéro IDE';
+		}
+		else {
+			return 'Numéro d\'identification d\'entreprise';
+		}
 	}
 
 	public function getCurrencySymbol(): string

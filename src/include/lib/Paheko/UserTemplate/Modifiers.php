@@ -40,7 +40,7 @@ class Modifiers
 		'parse_time' => ['?DateTimeInterface|scalar'],
 		'math' => ['scalar+', '...' => 'scalar+'],
 		'array_transpose' => ['callback' => [Utils::class, 'array_transpose'], 'types' => ['?array']],
-		'check_siret_number' => ['callback' => [Utils::class, 'checkSIRET'], 'types' => ['scalar+=']],
+		'check_siret_number' => ['scalar+='],
 		'check_email' => ['scalar+='],
 		'gettype' => [null],
 		'arrayval' => [null],
@@ -99,6 +99,11 @@ class Modifiers
 	static public function match($str, $pattern)
 	{
 		return (int) (stripos($str, $pattern) !== false);
+	}
+
+	static public function check_siret_number($str): bool
+	{
+		return Utils::verifyBusinessNumber('FR', $str);
 	}
 
 	static public function check_email($str)
