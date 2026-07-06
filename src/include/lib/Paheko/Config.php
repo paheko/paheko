@@ -275,7 +275,8 @@ class Config extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
-		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
+		$this->assert(trim($this->currency) != '', 'La devise ne peut rester vide.');
+		$this->assert(preg_match('/^[A-Z]{3}$/', $this->currency), 'La devise doit comporter 3 lettres majuscules.');
 		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
 		$this->assert(!isset($this->org_web) || Utils::validateURL($this->org_web), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');

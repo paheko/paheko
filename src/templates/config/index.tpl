@@ -90,7 +90,7 @@
 	<fieldset>
 		<legend>Localisation</legend>
 		<dl>
-			{input type="text" name="currency" required=true source=$config label="Monnaie" help="Inscrire ici la devise utilisée : €, CHF, XPF, etc." size="3"}
+			{input type="text" name="currency" required=true source=$config label="Devise" pattern="[A-Z]{3}" minlength=3 maxlength=3 help="Inscrire ici la devise utilisée : EUR, CHF, XPF, etc." size="3"}
 			{input type="select" name="country" required=true source=$config label="Pays" options=$countries}
 			{input type="select" name="timezone" required=true source=$config label="Fuseau horaire" options=$timezones default="Europe/Paris"}
 		</dl>
