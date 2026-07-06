@@ -139,11 +139,13 @@ class Template extends Smartyer
 			$session = Session::getInstance();
 			$config = Config::getInstance();
 			$this->assign('config', $config);
+			$this->assign('currency_symbol', $config->getCurrencySymbol());
 			$this->assign('site_url', $config->getSiteURL());
 		}
 		else {
 			$this->assign('config', null);
 			$this->assign('site_url', null);
+			$this->assign('currency_symbol', null);
 		}
 
 		$is_logged = $session ? $session->isLogged() : null;

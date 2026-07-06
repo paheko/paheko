@@ -238,7 +238,7 @@ class Install
 
 		file_put_contents(SHARED_CACHE_ROOT . '/version', paheko_version());
 
-		$currency = $country_code == 'CH' ? 'CHF' : '€';
+		$currency = $country_code === 'CH' ? 'CHF' : 'EUR';
 
 		// Configuration de base
 		$config = Config::getInstance();

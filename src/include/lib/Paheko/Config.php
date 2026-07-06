@@ -323,6 +323,17 @@ class Config extends Entity
 		return WWW_URL;
 	}
 
+	public function getCurrencySymbol(): string
+	{
+		$currency = $this->currency;
+
+		if ($currency === 'EUR') {
+			$currency = '€';
+		}
+
+		return $currency;
+	}
+
 	public function file(string $key): ?File
 	{
 		if (!isset(self::FILES[$key])) {
