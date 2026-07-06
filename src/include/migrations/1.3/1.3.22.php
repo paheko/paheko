@@ -21,7 +21,6 @@ if (!$config->org_business_number
 		$config->save();
 	}
 	catch (\Exception $e) {
-		throw $e;
 		// Ignore errors
 	}
 }
