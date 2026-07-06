@@ -11,5 +11,3 @@ UPDATE config SET value = 'BRL' WHERE key = 'currency' AND value LIKE '%R$%';
 UPDATE config SET value = 'USD' WHERE key = 'currency' AND value LIKE '%$%';
 
 UPDATE config SET value = UPPER(value) WHERE key = 'currency';
-
-UPDATE config SET value = 'EUR' WHERE length(value) != 3 AND key = 'currency';
