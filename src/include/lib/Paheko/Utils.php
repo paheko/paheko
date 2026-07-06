@@ -983,7 +983,6 @@ class Utils
 			}
 
 			$sum = 0;
-			$value = strrev($value); // walk from right
 
 			for ($i = 0; $i < strlen($value); ++$i) {
 				if ($i % 2 === 0) {
