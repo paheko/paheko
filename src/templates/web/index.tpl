@@ -44,14 +44,17 @@
 	</nav>
 {/if}
 
-{if !$page && $config.site_disabled && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-<form method="post" action="">
-	<p class="block alert">
-		Le site public est désactivé.
-		{button shape="right" name="enable" value=1 type="submit" class="main" label="Activer le site"}
-		{csrf_field key=$csrf_key}
-	</p>
-</form>
+{if $config.site_disabled && !$page && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+	<form method="post" action="">
+		<div class="block alert">
+			<h3>Le site public est désactivé</h3>
+			<p>Seuls les membres connectés pourront accéder à ce menu.</p>
+			<p>
+				{button shape="right" name="enable" value=1 type="submit" class="main" label="Activer le site"}
+				{csrf_field key=$csrf_key}
+			</p>
+		</div>
+	</form>
 {/if}
 
 {if $_GET.check && !$page}

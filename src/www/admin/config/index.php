@@ -16,6 +16,7 @@ if (qg('check_version') !== null) {
 }
 
 if ($code = qg('tzlist')) {
+	header('Content-Type: application/json');
 	echo json_encode([
 		'list' => TimeZones::listForCountry($code),
 		'default' => TimeZones::getDefaultForCountry($code),

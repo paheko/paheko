@@ -1,6 +1,6 @@
 {include file="_head.tpl" title="Configuration" current="config"}
 
-{include file="config/_menu.tpl" current="index"}
+{include file="config/_menu.tpl" current="index" sub_current="index"}
 
 {if isset($_GET['ok']) && !$form->hasErrors()}
 	<p class="block confirm">
@@ -69,25 +69,6 @@
 	</fieldset>
 
 	<fieldset>
-		<legend>Site web</legend>
-		<p class="help">
-			Cette option permet d'activer ou désactiver la visibilité publique du site web intégré à Paheko.<br/>
-			En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
-			Vous pourrez toujours y publier des informations, mais celles-ci ne seront visibles que pour les membres connectés, dans le menu <strong>Site web</strong> de l'administration.
-		</p>
-		<dl>
-			{input type="radio" name="site_disabled" value=0 source=$config label="Activer le site web public"}
-			{input type="radio" name="site_disabled" value=1 source=$config label="Désactiver le site web"}
-		</dl>
-		<div class="external-web">
-			<p class="help">Si vous avez déjà un site web à une autre adresse, vous pouvez l'indiquer ici&nbsp;:</p>
-			<dl>
-				{input type="url" name="org_web" source=$config label="Site web externe"}
-			</dl>
-		</div>
-	</fieldset>
-
-	<fieldset>
 		<legend>Localisation</legend>
 		<dl>
 			{input type="text" name="currency" required=true source=$config label="Devise" pattern="[A-Z]{3}" minlength=3 maxlength=3 help="Inscrire ici la devise utilisée : EUR, CHF, XPF, etc." size="3"}
@@ -127,12 +108,6 @@ c.onchange = () => {
 		}
 	});
 };
-function toggleWebInput() {
-	g.toggle('.external-web', $('#f_site_disabled_1').checked);
-}
-toggleWebInput();
-$('#f_site_disabled_0').onchange = toggleWebInput;
-$('#f_site_disabled_1').onchange = toggleWebInput;
 {/literal}
 </script>
 

@@ -911,7 +911,23 @@ class Emails
 
 	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
-		$address = self::getOrCreateEmail($raw_address);
+		try {
+			$address = self::getOrCreateEmail($raw_address);
+		}
+		catch (\InvalidArgumentException $e) {
+			// In case raw_address is "Undisclosed Recipients <X>" or similar
+			// try to find address from unsubscribe link
+			if (preg_match('/un=([a-z0-9A-Z]+)/', $message, $match)) {
+				$address = getEmailFromQueryStringValue($match[1]);
+
+				if (!$address) {
+					return null;
+				}
+			}
+			else {
+				return null;
+			}
+		}
 
 		$address->hasBounced($type, $message);
 		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'type', 'message'));

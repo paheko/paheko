@@ -10,6 +10,7 @@ use KD2\SMTP;
 use KD2\Translate;
 use KD2\DB\Date;
 use KD2\DB\DB_Exception;
+use KD2\Office\Money;
 
 use Paheko\Users\Session;
 use Paheko\ValidationException;
@@ -365,67 +366,12 @@ class Utils
 
 	static public function moneyToInteger($value, bool $throw_on_invalid = true): ?int
 	{
-		if (null === $value || trim($value) === '') {
-			return 0;
+		$value = Money::fromUserEntry($value, 2);
+
+		if ($value === null && $throw_on_invalid) {
+			throw new \InvalidArgumentException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
 		}
 
-		// Remove whitespace characters
-		$value = preg_replace('/\h/u', '', $value);
-
-		// Remove plus sign
-		if (substr($value, 0, 1) === '+') {
-			$value = substr($value, 1);
-		}
-
-		// Replace international decimal notation: ,12 ; 123,45 ; 1.043,12
-		if (substr($value, 0, 1) === ','
-			|| strpos($value, ',') > strpos($value, '.')) {
-			$value = strtr($value, ['.' => '', ',' => '.']);
-		}
-
-		// Remove US thousands separator
-		$value = str_replace(',', '', $value);
-
-		if (substr($value, 0, 1) === '-') {
-			$sign = -1;
-			$value = substr($value, 1);
-		}
-		else {
-			$sign = 1;
-		}
-
-		$value = preg_replace('/[^\d.]/', '', $value);
-
-		$parts = explode('.', $value);
-
-		if (count($parts) > 2
-			|| !count($parts)
-			|| !(empty($parts[0]) || ctype_digit($parts[0]))
-			|| !(empty($parts[1]) || ctype_digit($parts[1]))) {
-			if ($throw_on_invalid) {
-				throw new \InvalidArgumentException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
-			}
-
-			return null;
-		}
-
-		$cents = $parts[1] ?? '00';
-
-		// pad cents with zeros
-		if (strlen($cents) === 1) {
-			$cents .= '0';
-		}
-
-		$more = (int) substr($cents, 2, 1);
-		$cents = (int) substr($cents, 0, 2);
-
-		// Round if cent of a cent, eg. 1,505 -> 1,51 / 1,504 -> 1,50
-		if ($more >= 5) {
-			$cents++;
-		}
-
-		$value = $parts[0] . str_pad((string)$cents, 2, '0', STR_PAD_LEFT);
-		$value = $sign * (int) $value;
 		return $value;
 	}
 
@@ -464,6 +410,31 @@ class Utils
 
 		if ($append_unit) {
 			$out .= ' kg';
+		}
+
+		return $out;
+	}
+
+	static public function format_unit($number, string $unit, bool $empty_is_zero = false, bool $append_unit = false): string
+	{
+		if (empty($number) || $number < 0) {
+			return $empty_is_zero ? '0' : '';
+		}
+
+		$n = strtok((string)(float)$number, '.');
+		$decimals = strtok('');
+
+		if ((int)$decimals > 0) {
+			$decimals = ',' . $decimals;
+		}
+		else {
+			$decimals = '';
+		}
+
+		$out = $n . $decimals;
+
+		if ($append_unit) {
+			$out .= ' ' . $unit;
 		}
 
 		return $out;
@@ -805,7 +776,10 @@ class Utils
 
 	static public function getCountryList()
 	{
-		return Translate::getCountriesList('fr');
+		$list = Translate::getCountriesList('fr');
+		$collator = new \Collator('fr_FR');
+		$collator->asort($list);
+		return $list;
 	}
 
 	static public function getCountryName(string $code): ?string
@@ -1354,51 +1328,51 @@ class Utils
 		return array($h * 360, $s, $l);
 	}
 
-    static public function hsl2rgb (int $h, int $s, int $l): string
-    {
-        $h /= 60;
-        if ($h < 0) $h = 6 - fmod(-$h, 6);
-        $h = fmod($h, 6);
+	static public function hsl2rgb (int $h, int $s, int $l): string
+	{
+		$h /= 60;
+		if ($h < 0) $h = 6 - fmod(-$h, 6);
+		$h = fmod($h, 6);
 
-        $s = max(0, min(1, $s / 100));
-        $l = max(0, min(1, $l / 100));
+		$s = max(0, min(1, $s / 100));
+		$l = max(0, min(1, $l / 100));
 
-        $c = (1 - abs((2 * $l) - 1)) * $s;
-        $x = $c * (1 - abs(fmod($h, 2) - 1));
+		$c = (1 - abs((2 * $l) - 1)) * $s;
+		$x = $c * (1 - abs(fmod($h, 2) - 1));
 
-        if ($h < 1) {
-            $r = $c;
-            $g = $x;
-            $b = 0;
-        } elseif ($h < 2) {
-            $r = $x;
-            $g = $c;
-            $b = 0;
-        } elseif ($h < 3) {
-            $r = 0;
-            $g = $c;
-            $b = $x;
-        } elseif ($h < 4) {
-            $r = 0;
-            $g = $x;
-            $b = $c;
-        } elseif ($h < 5) {
-            $r = $x;
-            $g = 0;
-            $b = $c;
-        } else {
-            $r = $c;
-            $g = 0;
-            $b = $x;
-        }
+		if ($h < 1) {
+			$r = $c;
+			$g = $x;
+			$b = 0;
+		} elseif ($h < 2) {
+			$r = $x;
+			$g = $c;
+			$b = 0;
+		} elseif ($h < 3) {
+			$r = 0;
+			$g = $c;
+			$b = $x;
+		} elseif ($h < 4) {
+			$r = 0;
+			$g = $x;
+			$b = $c;
+		} elseif ($h < 5) {
+			$r = $x;
+			$g = 0;
+			$b = $c;
+		} else {
+			$r = $c;
+			$g = 0;
+			$b = $x;
+		}
 
-        $m = $l - $c / 2;
-        $r = round(($r + $m) * 255);
-        $g = round(($g + $m) * 255);
-        $b = round(($b + $m) * 255);
+		$m = $l - $c / 2;
+		$r = round(($r + $m) * 255);
+		$g = round(($g + $m) * 255);
+		$b = round(($b + $m) * 255);
 
-        return '#' . dechex($r) . dechex($g) . dechex($b);
-    }
+		return '#' . dechex($r) . dechex($g) . dechex($b);
+	}
 
 	static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600, bool $immutable = false): bool
 	{
@@ -2362,7 +2336,7 @@ class Utils
 			#__profiler { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30000; }
 			#__profiler header { display: flex; cursor: pointer; background: #000; color: #fff; height: 2em; }
 			#__profiler header:hover { background: #600; }
-			#__profiler span { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; }
+			#__profiler span, #__profiler a { display: flex; align-items: center; padding: .2em .7em; font-size: 1em; border-right: 1px solid #666; color: inherit; }
 			#__profiler span i { display: block; font-size: 1.8em; font-style: normal; margin-right: .5em; line-height: 1em; }
 			#__profiler.log { top: 0; }
 			#__profiler table { display: none; }
@@ -2380,6 +2354,7 @@ class Utils
 					<span title="Time taken by Paheko" class="%s"><i>🕑</i> %s ms</span>
 					<span title="RAM usage"><i>🍔</i>%s MiB</span>
 					<span title="SQL" class="%s"><i>⛁</i> %d in %d ms</span>
+					<a href="%s">Open SQL</a>
 				</header>
 				<table>
 					<thead><tr><td>Time</td><td>SQL</td><td>EXPLAIN</td><td></td></tr></thead>
@@ -2390,7 +2365,8 @@ class Utils
 			$mem,
 			$has_slow_queries ? 'slow' : '',
 			count($db_log),
-			round($db_time / 1000)
+			round($db_time / 1000),
+			self::getLocalURL('!config/advanced/sql.php')
 		);
 
 		$sql_url = self::getLocalURL('!config/advanced/sql.php') . '?query=';

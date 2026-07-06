@@ -150,7 +150,7 @@
 		{/if}
 	</table>
 	<p class="submit noprint">
-		{csrf_field key="acc_reconcile_%s"|args:$account.id}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
 		{if $next}
 			{button type="submit" name="save_next" label="Enregistrer et aller au mois suivant" class="main minor" shape="right"}

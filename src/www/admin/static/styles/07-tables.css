@@ -198,7 +198,7 @@ thead .cur [data-icon]::before {
     color: rgb(var(--gBgColor));
 }
 
-table.list .actions {
+table.list .actions, table.list .total {
     text-align: right;
 }
 

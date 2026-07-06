@@ -11,7 +11,8 @@ $csrf_key = 'module_import';
 $exists = false;
 
 $form->runIf('import', function () use (&$exists) {
-	if (empty($_FILES['zip']['tmp_name'])) {
+	if (empty($_FILES['zip']['tmp_name'])
+		|| !is_uploaded_file($_FILES['zip']['tmp_name'])) {
 		throw new UserException('Aucun fichier reçu.');
 	}
 

@@ -14,12 +14,5 @@
 		{linkbutton label="Créer un nouveau projet" href="edit.php" shape="plus" target="_dialog"}
 	{/if}
 	</aside>
-
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-	<ul class="sub">
-		<li{if $current != 'config'} class="current"{/if}>{link href="!acc/projects/" label="Liste des projets"}</li>
-		<li{if $current == 'config'} class="current"{/if}>{link href="!acc/projects/config.php" label="Configuration"}</li>
-	</ul>
-	{/if}
 </nav>
 {/if}

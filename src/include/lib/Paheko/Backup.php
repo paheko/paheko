@@ -477,7 +477,10 @@ class Backup
 	 */
 	static public function restoreFromUpload(array $file, ?Session $session, bool $check_integrity = true): int
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error'])) {
+		if (empty($file['size'])
+			|| empty($file['tmp_name'])
+			|| !empty($file['error'])
+			|| !is_uploaded_file($file['tmp_name'])) {
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
 		}
 

@@ -348,7 +348,9 @@ class API
 			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
 
 			if ($this->method === 'POST') {
-				if (empty($_FILES['file']['tmp_name']) || !empty($_FILES['file']['error'])) {
+				if (empty($_FILES['file']['tmp_name'])
+					|| !empty($_FILES['file']['error'])
+					|| !is_uploaded_file($_FILES['file']['tmp_name'])) {
 					throw new APIException('Empty file or no file was sent.', 400);
 				}
 
@@ -750,7 +752,9 @@ class API
 			$path = tempnam(CACHE_ROOT, 'tmp-import-api');
 
 			if ($this->method === 'POST') {
-				if (empty($_FILES['file']['tmp_name']) || !empty($_FILES['file']['error'])) {
+				if (empty($_FILES['file']['tmp_name'])
+					|| !empty($_FILES['file']['error'])
+					|| !is_uploaded_file($_FILES['file']['tmp_name'])) {
 					throw new APIException('Empty file or no file was sent.', 400);
 				}
 

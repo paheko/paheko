@@ -132,7 +132,9 @@ class CSV_Custom
 	 */
 	public function upload(?array $file): void
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
+		if (empty($file['size'])
+			|| empty($file['tmp_name'])
+			|| empty($file['name'])) {
 			throw new UserException('Fichier invalide, ou aucun fichier fourni');
 		}
 
@@ -347,6 +349,10 @@ class CSV_Custom
 
 		$i = 0;
 
+		if (count($this->rows[$this->sheet]) <= $this->skip) {
+			throw new UserException('Le fichier ne comporte aucune ligne de données');
+		}
+
 		foreach ($this->rows[$this->sheet] as $line => $row) {
 			if ($i++ < $this->skip) {
 				continue;
@@ -423,11 +429,18 @@ class CSV_Custom
 
 	public function searchColumn(string $str, array $columns)
 	{
+		static $replace = [
+			// proper quotes are fine, but they are confusing
+			'’' => '\'',
+			// remove non breaking space U+00A0
+			"\xc2\xa0" => ' ',
+		];
+
 		foreach ($columns as $key => $value) {
-			$columns[$key] = mb_strtolower(str_replace('’', '\'', $value));
+			$columns[$key] = mb_strtolower(strtr($value, $replace));
 		}
 
-		$str = mb_strtolower(str_replace('’', '\'', $str));
+		$str = mb_strtolower(strtr($str, $replace));
 
 		return array_search($str, $columns, true);
 	}
