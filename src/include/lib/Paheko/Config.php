@@ -337,7 +337,15 @@ class Config extends Entity
 	public function getBusinessNumberFieldName(): string
 	{
 		if ($this->country === 'FR') {
-			return 'Numéro SIREN ou SIRET';
+			if ($this->org_business_number && strlen($this->org_business_number) === 9) {
+				return 'Numéro SIREN';
+			}
+			elseif ($this->org_business_number) {
+				return 'Numéro SIRET';
+			}
+			else {
+				return 'Numéro SIREN ou SIRET';
+			}
 		}
 		elseif ($this->country === 'BE') {
 			return 'Numéro BCE';
