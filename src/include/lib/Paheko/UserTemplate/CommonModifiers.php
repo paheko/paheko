@@ -152,7 +152,8 @@ class CommonModifiers
 		$out = self::money($number, $hide_empty, $force_sign, $html);
 
 		if ($out !== '') {
-			$out .= ($html ? '&nbsp;' : ' ') . Config::getInstance()->get('currency');
+			$currency = Config::getInstance()->getCurrencySymbol();
+			$out .= ($html ? '&nbsp;' : ' ') . $currency;
 		}
 
 		return $out;

@@ -183,7 +183,7 @@ class UserTemplate extends \KD2\Brindille
 			return $root_variables;
 		}
 
-		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_address_public', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files', 'timezone'];
+		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_address_public', 'org_email', 'org_phone', 'org_web', 'org_infos', 'org_business_number', 'currency', 'country', 'files', 'timezone'];
 
 		$config = Config::getInstance();
 
@@ -228,6 +228,8 @@ class UserTemplate extends \KD2\Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $cfg,
+			'currency_symbol' => $config->getCurrencySymbol(),
+			'business_number_field_name' => $config->getBusinessNumberFieldName(),
 			'now'          => time(),
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,

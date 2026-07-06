@@ -39,6 +39,6 @@
 	</tbody>
 </table>
 
-<p class="help">Toutes les écritures sont libellées en {$config.currency}. Les lignes grisées correspondent aux comptes soldés.</p>
+<p class="help">Toutes les écritures sont libellées en {$currency_symbol}. Les lignes grisées correspondent aux comptes soldés.</p>
 
 {include file="_foot.tpl"}

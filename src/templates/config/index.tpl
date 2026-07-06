@@ -64,7 +64,8 @@
 			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
 			{input type="textarea" name="org_address_public" source=$config label="Adresse publique" help="Si renseignée, sera utilisée à la place de l'adresse postale sur le site web et dans les e-mails.\nUtile si le lieu d'activité est différent du siège de l'association."}
 			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
-			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Informations diverses" help="Ce champ sera utilisé sur les reçus. Il peut être utile de faire figurer ici le numéro de SIRET par exemple."}
+			{input type="text" name="org_business_number" required=false source=$config label=$config->getBusinessNumberFieldName()}
+			{input type="textarea" cols="50" rows="2" name="org_infos" required=false source=$config label="Autres informations" help="Ce champ sera affiché dans les reçus par exemple."}
 		</dl>
 	</fieldset>
 

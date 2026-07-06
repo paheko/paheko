@@ -465,7 +465,7 @@ class CommonFunctions
 			);
 
 			if ($type !== 'money-no-currency') {
-				$currency = Config::getInstance()->currency;
+				$currency = Config::getInstance()->getCurrencySymbol();
 				$input = sprintf('<nobr>%s<b>%s</b></nobr>', $input, $currency);
 			}
 		}
