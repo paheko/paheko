@@ -782,8 +782,12 @@ class Utils
 		return $list;
 	}
 
-	static public function getCountryName(string $code): ?string
+	static public function getCountryName(?string $code): ?string
 	{
+		if (null === $code) {
+			return null;
+		}
+
 		$code = strtoupper($code);
 		$list = self::getCountryList();
 		return $list[$code] ?? null;
