@@ -234,7 +234,7 @@ class UserTemplate extends \KD2\Brindille
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
-			'pdf_enabled'  => PDF_COMMAND !== null,
+			'pdf_enabled'  => Utils::canDoPDF(),
 		];
 
 		return $root_variables;

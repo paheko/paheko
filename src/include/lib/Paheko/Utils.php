@@ -1646,6 +1646,7 @@ class Utils
 	static public function quick_exec(string $cmd, int $timeout = 20, ?int &$code = null): string
 	{
 		$output = '';
+		// using function is mandatory, fn($data) => $out.= $data doesn't work!
 		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
 		return $output;
 	}
