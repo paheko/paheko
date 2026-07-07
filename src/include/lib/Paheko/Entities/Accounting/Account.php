@@ -1042,6 +1042,11 @@ class Account extends Entity
 		if (isset($source['bookmark_present'])) {
 			$source['bookmark'] = !empty($source['bookmark']);
 		}
+
+		if (isset($source['archived_present'])) {
+			$source['archived'] = !empty($source['archived']);
+		}
+
 		parent::importForm($source);
 	}
 
