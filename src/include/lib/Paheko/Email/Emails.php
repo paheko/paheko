@@ -282,7 +282,7 @@ class Emails
 			&& count($ids)) {
 
 			foreach (MAIL_TEST_RECIPIENTS as $recipient) {
-				$this->appendToQueue($context, $recipient, $subject, $content, compact('sender', 'content_html', 'attachments'));
+				self::appendToQueue($context, $recipient, $subject, $content, compact('sender', 'content_html', 'attachments'));
 			}
 		}
 
