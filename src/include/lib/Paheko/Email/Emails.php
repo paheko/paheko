@@ -129,12 +129,6 @@ class Emails
 			return null;
 		}
 
-		foreach ($attachments as $i => $file) {
-			if (!is_object($file) || !($file instanceof File) || $file->context() != $file::CONTEXT_ATTACHMENTS) {
-				throw new \InvalidArgumentException(sprintf('Attachment #%d is not a valid file', $i));
-			}
-		}
-
 		$list = [];
 
 		// Build email list
@@ -239,10 +233,6 @@ class Emails
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
 
-			// We won't try to reject invalid/optout recipients here,
-			// it's done in the queue clearing (more efficient)
-			$recipient_hash = Email::getHash($recipient);
-
 			// Replace placeholders in template: {{$name}}, etc.
 			if ($template) {
 				$template->assignArray((array) $data, null, false);
@@ -277,22 +267,10 @@ class Emails
 				$content_html = self::applyHTMLTemplate($content_html);
 			}
 
-			$signal = Plugins::fire('email.queue.insert', true,
-				compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+			$id = self::appendToQueue($context, $recipient, $subject, $content, compact('sender', 'recipient_pgp_key', 'content_html', 'attachments'));
 
-			if ($signal && $signal->isStopped()) {
-				// queue insert was done by a plugin, stop here
+			if (null === $id) {
 				continue;
-			}
-
-			unset($signal);
-
-			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
-
-			$id = $db->lastInsertId();
-
-			foreach ($attachments as $file) {
-				$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
 			}
 
 			$ids[] = $id;
@@ -302,21 +280,9 @@ class Emails
 		if (MAIL_TEST_RECIPIENTS
 			&& ($context === self::CONTEXT_BULK || $context === self::CONTEXT_NOTIFICATION || $context === self::CONTEXT_REMINDER)
 			&& count($ids)) {
-			$recipient_pgp_key = null;
 
 			foreach (MAIL_TEST_RECIPIENTS as $recipient) {
-				$recipient_hash = Email::getHash($recipient);
-				$signal = Plugins::fire('email.queue.insert', true,
-					compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
-
-				if ($signal && $signal->isStopped()) {
-					// queue insert was done by a plugin, stop here
-					continue;
-				}
-
-				unset($signal);
-
-				$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+				$this->appendToQueue($context, $recipient, $subject, $content, compact('sender', 'content_html', 'attachments'));
 			}
 		}
 
@@ -342,6 +308,45 @@ class Emails
 		}
 
 		return $ids;
+	}
+
+	static public function appendToQueue(int $context, string $recipient, string $subject, string $content, array $options = []): ?int
+	{
+		$sender = $options['sender'] ?? null;
+		$attachments = $options['attachments'] ?? [];
+		$recipient_pgp_key = $options['recipient_pgp_key'] ?? null;
+		$content_html = $options['content_html'] ?? null;
+
+		foreach ($attachments as $i => $file) {
+			if (!is_object($file) || !($file instanceof File) || $file->context() != $file::CONTEXT_ATTACHMENTS) {
+				throw new \InvalidArgumentException(sprintf('Attachment #%d is not a valid file', $i));
+			}
+		}
+
+		// We won't try to reject invalid/optout recipients here,
+		// it's done in the queue clearing (more efficient)
+		$recipient_hash = Email::getHash($recipient);
+
+		$db = DB::getInstance();
+		$signal = Plugins::fire('email.queue.insert', true,
+			compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+
+		if ($signal && $signal->isStopped()) {
+			// queue insert was done by a plugin, stop here
+			return null;
+		}
+
+		unset($signal);
+
+		$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+
+		$id = $db->lastInsertId();
+
+		foreach ($attachments as $file) {
+			$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
+		}
+
+		return $id;
 	}
 
 	/**
