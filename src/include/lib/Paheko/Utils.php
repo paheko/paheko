@@ -987,16 +987,22 @@ class Utils
 			}
 
 			$sum = 0;
+			$value = strrev($value);
+			$parity = strlen($value) % 2;
+			$digits = str_split($value, 1);
 
-			for ($i = 0; $i < strlen($value); ++$i) {
-				if ($i % 2 === 0) {
-					$tmp = ((int) $value[$i]) * 2;
-					$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
-				} else {
-					$tmp = $value[$i];
+			foreach ($digits as $pos => $digit) {
+				$digit = (int) $digit;
+
+				if ($pos % 2 === $parity) {
+					$digit *= 2;
+
+					if ($digit > 9) {
+						$digit -= 9;
+					}
 				}
 
-				$sum += $tmp;
+				$sum += $digit;
 			}
 
 			return ($sum % 10) === 0;
