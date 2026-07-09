@@ -561,12 +561,12 @@ class CSV_Custom
 						break;
 					}
 
-					$names[] = implode(', ', $c);
+					$names[] = implode(' et ', $c);
 				}
 
 				if (!$is_found) {
-					$names = array_map(fn($a) => '"' . $a . '"', $names);
-					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
+					$names = array_map(fn($a) => '[' . $a . ']', $names);
+					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(' ou ', $names)));
 				}
 			}
 		}
