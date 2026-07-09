@@ -561,7 +561,7 @@ class CSV_Custom
 						break;
 					}
 
-					$names[] = array_merge($names, $c);
+					$names[] = implode(', ', $c);
 				}
 
 				if (!$is_found) {
