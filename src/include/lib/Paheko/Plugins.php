@@ -43,6 +43,18 @@ class Plugins
 	 */
 	static protected $signals = true;
 
+	static protected ?Plugin $current = null;
+
+	static public function setCurrent(?Plugin $plugin): void
+	{
+		self::$current = $plugin;
+	}
+
+	static public function getCurrent(): ?Plugin
+	{
+		return self::$current;
+	}
+
 	static public function toggleSignals(bool $enabled)
 	{
 		self::$signals = $enabled;
