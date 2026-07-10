@@ -11,7 +11,7 @@ Charts::updateInstalled('fr_pcc_2020');
 Charts::updateInstalled('be_pcmn_2019');
 
 // Make sure rules are applied correctly
-Charts::resetRules(['FR', 'BE']);
+//Charts::resetRules(['FR', 'BE']); // Commented, as version 1.3.21 changes the schema of the acc_accounts table, making this fail
 
 $db->import(__DIR__ . '/1.3.19.sql');
 
