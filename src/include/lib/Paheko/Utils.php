@@ -978,6 +978,7 @@ class Utils
 	static public function verifyBusinessNumber(string $country, string $value): bool
 	{
 		if ($country === 'FR') {
+			// SIREN or SIRET
 			if (!in_array(strlen($value), [9, 14], true)) {
 				return false;
 			}
@@ -988,7 +989,7 @@ class Utils
 
 			$sum = 0;
 			$value = strrev($value);
-			$parity = strlen($value) % 2;
+			$parity = 1;
 			$digits = str_split($value, 1);
 
 			foreach ($digits as $pos => $digit) {
