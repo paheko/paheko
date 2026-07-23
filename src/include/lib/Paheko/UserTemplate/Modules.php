@@ -413,6 +413,13 @@ class Modules
 
 		// Check if the file actually exists in the module
 		if (!$has_local_file && !$has_dist_file) {
+			// Redirect eg. /m/bookings/manage to /m/bookings/manage/
+			if ((false === strpos(Utils::basename($path), '.'))
+				&& $module->hasFile($path . '/index.html')) {
+				Utils::redirect('/' . $uri . '/');
+				return;
+			}
+
 			throw new UserException('This path does not exist, sorry.', 404);
 		}
 

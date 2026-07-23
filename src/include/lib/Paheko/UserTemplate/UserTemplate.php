@@ -397,6 +397,10 @@ class UserTemplate extends \KD2\Brindille
 			throw new \InvalidArgumentException('File not found: ' . $path);
 		}
 
+		if (is_dir($path)) {
+			throw new \InvalidArgumentException('File is a directory: ' . $path);
+		}
+
 		$this->file = null;
 		$this->path = $path;
 

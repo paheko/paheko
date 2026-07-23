@@ -374,7 +374,7 @@ class Module extends Entity
 
 	public function hasLocalFile(string $path): bool
 	{
-		return Files::exists($this->path($path));
+		return Files::getType($this->path($path)) === File::TYPE_FILE;
 	}
 
 	public function hasLocalDir(string $path): bool
@@ -384,7 +384,8 @@ class Module extends Entity
 
 	public function hasDistFile(string $path): bool
 	{
-		return @file_exists($this->distPath($path));
+		$dist_path = $this->distPath($path);
+		return @file_exists($dist_path) && !is_dir($dist_path);
 	}
 
 	public function fetchFile(string $path): ?string
