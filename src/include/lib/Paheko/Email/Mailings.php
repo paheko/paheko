@@ -63,7 +63,7 @@ class Mailings
 		$db = DB::getInstance();
 
 		$db->begin();
-		foreach ($em->iterate('SELECT * FROM @TABLE WHERE sent < datetime(\'now\', \'-6 month\') AND anonymous = 0;') as $m) {
+		foreach ($em->iterate('SELECT * FROM @TABLE WHERE sent < datetime(\'now\', \'localtime\', \'-6 month\') AND anonymous = 0;') as $m) {
 			$m->anonymize();
 			$m->set('anonymous', true);
 			$m->save();

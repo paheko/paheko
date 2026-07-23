@@ -729,7 +729,7 @@ Il est possible de spécifier d'autres paramètres, ou une clause `where` et des
 * Supprimer le document avec la clé `ABCD` et dont la propriété `type` du document correspond à la valeur `facture` : `{{:delete key="ABCD" type="facture"}}`
 * Supprimer tous les documents : `{{:delete}}`
 * Supprimer tous les documents ayant le type `facture` : `{{:delete type="facture"}}`
-* Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime()"}}`
+* Supprimer tous les documents de type `devis` ayant une date dans le passé : `{{:delete :type="devis" where="$$.type = :type AND $$.date < datetime('now', 'localtime')"}}`
 
 ## read
 

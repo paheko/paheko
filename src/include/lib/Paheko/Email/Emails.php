@@ -603,7 +603,7 @@ class Emails
 	 */
 	static public function resetFailed(bool $force = false): void
 	{
-		$condition = $force ? '' : 'AND sending_started < datetime(\'now\', \'-3 hours\')';
+		$condition = $force ? '' : 'AND sending_started < datetime(\'now\', \'localtime\', \'-3 hours\')';
 
 		$sql = sprintf('UPDATE emails_queue SET sending = 0, sending_started = NULL
 			WHERE sending = 1 %s;', $condition);
