@@ -478,10 +478,10 @@ class Transaction extends Entity
 
 		foreach ($lines as &$line) {
 			if (isset($line['credit'])) {
-				$line['credit'] = Utils::moneyToInteger($line['credit']);
+				$line['credit'] = Utils::moneyToInteger($line['credit'], false);
 			}
 			if (isset($line['debit'])) {
-				$line['debit'] = Utils::moneyToInteger($line['debit']);
+				$line['debit'] = Utils::moneyToInteger($line['debit'], false);
 			}
 		}
 
@@ -1715,7 +1715,7 @@ class Transaction extends Entity
 
 		// a = amount, in single currency units
 		if (isset($_GET['a'])) {
-			$amount = Utils::moneyToInteger($_GET['a']);
+			$amount = Utils::moneyToInteger($_GET['a'], false);
 		}
 
 		// a00 = Amount, in cents
@@ -1821,8 +1821,8 @@ class Transaction extends Entity
 			foreach ($_GET['ll'] as $l) {
 				$lock = $l['k'] ?? null;
 				$lines[] = [
-					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? ''),
-					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? ''),
+					'debit'            => $l['d0'] ?? Utils::moneyToInteger($l['d'] ?? '', false),
+					'credit'           => $l['c0'] ?? Utils::moneyToInteger($l['c'] ?? '', false),
 					'debit_locked'     => $lock === 'd' || $lock === 'a',
 					'credit_locked'    => $lock === 'c' || $lock === 'a',
 					'account_selector' => $accounts->getSelectorFromCode($l['a'] ?? null),
