@@ -16,11 +16,16 @@
 	<dl>
 		{input type="checkbox" name="analytical_mandatory" source=$config label="Obliger à préciser un projet pour toutes les écritures" value=1}
 		<dd class="help">
-			Si cette case est cochée, il sera obligatoire d'indiquer un projet lors de la saisie ou la modification d'une écriture.
+			Si cette case est cochée, il sera obligatoire d'indiquer un projet lors de la saisie ou la modification d'une écriture.<br />
+			Si l'affectation ne se fait qu'aux comptes de charge et de produit (ci-dessous), alors les autres types de compte ne comporteront jamais de projet.
 		</dd>
-		<dt><label for="f_analytical_set_all_0">Lors de la saisie d'une écriture simplifiée (recette ou dépense), affecter le projet analytique…</label></dt>
-		{input type="radio" name="analytical_set_all" value="1" label="à tous les comptes" source=$config help="permet de suivre la caisse, banque, comptes de tiers, etc. dans un projet"}
-		{input type="radio" name="analytical_set_all" value="0" label="seulement aux comptes de charge et de produit" source=$config}
+	</dl>
+</fieldset>
+<fieldset>
+	<legend>Affectation des projets</legend>
+	<dl>
+		{input type="radio-btn" prefix_required=true prefix_title="Affecter les projets analytiques…" name="analytical_set_all" value="0" label="Seulement aux comptes de charge et de produit" source=$config help="Fonctionnement habituel en comptabilité, recommandé."}
+		{input type="radio-btn" name="analytical_set_all" value="1" label="À tous les comptes" source=$config help="Permet de suivre la caisse, banque, comptes de tiers, etc. dans un projet."}
 	</dl>
 </fieldset>
 <p>
