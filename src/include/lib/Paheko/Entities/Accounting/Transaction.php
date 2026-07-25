@@ -1020,21 +1020,36 @@ class Transaction extends Entity
 	 */
 	public function validateUsingConfig(Config $config): void
 	{
+		// If set_all is false, then remove id_project from lines where account is not revenue or expense
+		if (!$config->analytical_set_all) {
+			foreach ($this->getLinesWithAccounts() as $line) {
+				if (!in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+					$line->line->set('id_project', null);
+				}
+			}
+		}
+
 		// Check for analytical projects here, and not in selfCheck
 		// or we won't be able to create project-less transactions
 		// from plugins etc.
 		if (self::TYPE_ADVANCED === $this->type
-			&& $config->get('analytical_mandatory')) {
-			$has_project = false;
+			&& $config->analytical_mandatory) {
+			$has_project = null;
 
-			foreach ($this->getLines() as $line) {
-				if ($line->id_project) {
+			foreach ($this->getLinesWithAccounts() as $line) {
+				if (!in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+					continue;
+				}
+
+				$has_project = false;
+
+				if ($line->line->id_project) {
 					$has_project = true;
 					break;
 				}
 			}
 
-			$this->assert($has_project, 'Aucun projet analytique n\'a été choisi, mais l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
+			$this->assert($has_project !== false, 'Aucun projet analytique n\'a été choisi, mais l\'affectation d\'un projet est obligatoire pour toutes les écritures.');
 		}
 	}
 
@@ -1089,6 +1104,8 @@ class Transaction extends Entity
 
 			$line = [
 				'reference' => $source['payment_reference'] ?? null,
+				// Respecting analytical_set_all is done in validateUsingConfig
+				'id_project' => $source['id_project'] ?? null,
 			];
 
 			$source['lines'] = [
@@ -1105,14 +1122,6 @@ class Transaction extends Entity
 					'account' => $source[$accounts[1]->direction] ?? null,
 				],
 			];
-
-			if ($this->type != self::TYPE_TRANSFER || Config::getInstance()->analytical_set_all) {
-				$source['lines'][0]['id_project'] = $source['id_project'] ?? null;
-			}
-
-			if (Config::getInstance()->analytical_set_all) {
-				$source['lines'][1]['id_project'] = $source['lines'][0]['id_project'];
-			}
 
 			unset($line, $accounts, $account, $source['simple']);
 		}
@@ -1270,10 +1279,10 @@ class Transaction extends Entity
 			$payoff->payment_line->set('reference', $source['payment_reference'] ?? null);
 			$payoff->payment_line->set('id_project', $id_project);
 
-			if (Config::getInstance()->analytical_set_all) {
-				foreach ($this->getLines() as $line) {
-					$line->set('id_project', $id_project);
-				}
+			$set_all = Config::getInstance()->analytical_set_all;
+
+			foreach ($this->getLines() as $line) {
+				$line->set('id_project', $set_all ? $id_project : null);
 			}
 
 			$source['lines'] = $this->getLinesWithAccounts(true, false);
