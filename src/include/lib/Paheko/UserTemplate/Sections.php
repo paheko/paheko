@@ -969,6 +969,7 @@ class Sections
 		$id_field = DynamicFields::getNameFieldsSQL();
 
 		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			COUNT(l.id) AS lines_count,
 			GROUP_CONCAT(DISTINCT a.code) AS accounts_codes,
 			CASE WHEN t.type != 0 THEN l.reference ELSE NULL END AS payment_reference,
 			(SELECT GROUP_CONCAT(DISTINCT %s) FROM users WHERE id IN (SELECT id_user FROM acc_transactions_users WHERE id_transaction = t.id)) AS users_names', $id_field);
