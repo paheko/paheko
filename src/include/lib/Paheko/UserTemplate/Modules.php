@@ -343,16 +343,6 @@ class Modules
 		if (!$path || substr($path, -1) == '/') {
 			$path .= 'index.html';
 		}
-		// Redirect /m/module/directory to /m/module/directory/
-		elseif ($module->hasLocalDir($path)) {
-			// Unless this directory doesn't have an index
-			if (!$module->hasLocalFile($path . '/' . $module::INDEX_FILE)) {
-				throw new UserException('This path does not exist, sorry.', 404);
-			}
-
-			Utils::redirect('/' . $uri . '/');
-			return;
-		}
 
 		$name = Utils::basename($uri);
 
