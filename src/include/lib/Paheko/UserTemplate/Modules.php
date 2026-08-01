@@ -309,6 +309,12 @@ class Modules
 
 	static public function route(string $uri): void
 	{
+		// Just a quick sanity check
+		if (false !== strpos(rawurldecode($uri), '..')
+			|| false !== strpos(rawurldecode($uri), '.php')) {
+			throw new UserException('Invalid path.', 400);
+		}
+
 		$page = null;
 		$path = null;
 		$has_local_file = null;

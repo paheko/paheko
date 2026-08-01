@@ -174,7 +174,7 @@ class Module extends Entity
 			$ini = $file->fetch();
 			$from_dist = false;
 		}
-		elseif (file_exists($this->distPath(self::META_FILE))) {
+		elseif ($this->hasDistFile(self::META_FILE)) {
 			$ini = file_get_contents($this->distPath(self::META_FILE));
 			$from_dist = true;
 		}
@@ -302,7 +302,7 @@ class Module extends Entity
 		$db->delete('modules_templates', 'id_module = ' . (int)$this->id());
 
 		foreach ($check as $file => $label) {
-			if (Files::exists($this->path($file)) || file_exists($this->distPath($file))) {
+			if (Files::exists($this->path($file)) || $this->hasDistFile($file)) {
 				$db->insert('modules_templates', ['id_module' => $this->id(), 'name' => $file]);
 			}
 		}
@@ -342,9 +342,20 @@ class Module extends Entity
 		return self::ROOT . '/' . $this->name . ($file ? '/' . $file : '');
 	}
 
-	public function distPath(?string $file = null): string
+	public function distPath(?string $file = null): ?string
 	{
-		return self::DIST_ROOT . '/' . $this->name . ($file ? '/' . $file : '');
+		$path =  self::DIST_ROOT . '/' . $this->name . ($file ? '/' . $file : '');
+
+		if ($file) {
+			$path = realpath($path);
+
+			// Make sure path is inside module root, or it might be some path traversal issue
+			if (0 !== strpos($path, $this->distPath())) {
+				return null;
+			}
+		}
+
+		return $path;
 	}
 
 	public function dir(): ?File
@@ -385,6 +396,11 @@ class Module extends Entity
 	public function hasDistFile(string $path): bool
 	{
 		$dist_path = $this->distPath($path);
+
+		if (null === $dist_path) {
+			return false;
+		}
+
 		return @file_exists($dist_path) && !is_dir($dist_path);
 	}
 
@@ -410,7 +426,13 @@ class Module extends Entity
 
 	public function fetchDistFile(string $path): ?string
 	{
-		return @file_get_contents($this->distPath($path)) ?: null;
+		$path = $this->distPath($path);
+
+		if (null === $path) {
+			return null;
+		}
+
+		return @file_get_contents($path) ?: null;
 	}
 
 	public function hasConfig(): bool
@@ -562,7 +584,7 @@ class Module extends Entity
 
 		$dist_path = $this->distPath($path);
 
-		if (is_dir($dist_path)) {
+		if ($dist_path && is_dir($dist_path)) {
 			foreach (scandir($dist_path) as $file) {
 				if (substr($file, 0, 1) == '.') {
 					continue;
@@ -740,7 +762,7 @@ class Module extends Entity
 			$type = $this->getFileTypeFromExtension($path);
 			$real_path = $this->distPath($path);
 
-			if (!is_file($real_path)) {
+			if (null === $real_path || !is_file($real_path)) {
 				throw new UserException('Invalid path', 404);
 			}
 
