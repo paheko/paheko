@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\supgrade\sissue
-D 2026-08-01T18:06:04.899
+C Treat\sfailed\spassword\srecovery\sattemps\sas\sfailed\slogin\sattempts,\suse\scaptcha\sand\slock
+D 2026-08-01T18:41:31.647
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -195,7 +195,7 @@ F src/include/lib/Paheko/Users/DynamicFields.php 3e238e0ce5694676d51d00a64ada540
 F src/include/lib/Paheko/Users/Export.php 30e94ef055e99afaba4689c058717ac37760e41c2da28b879733c8d080641c5b
 F src/include/lib/Paheko/Users/Import.php b37be145a548d2bbb46e95a8a1c4de79952082a24cdc14f514c8a80f1f8d3c02
 F src/include/lib/Paheko/Users/LocalAddressFinder.php aa015abb65784ab06c489986d3f4dbd8d6f9aafd23d994bc0351c0831d85f844
-F src/include/lib/Paheko/Users/Session.php 97c8f960914575dc52a4a884f10739f4cbb0740db93586447051a8d5148f8838
+F src/include/lib/Paheko/Users/Session.php ec9579e9efdd65ab859d223d6fdc4aff35e56a87acc306f414650ff4e6728f71
 F src/include/lib/Paheko/Users/Users.php 13c7871e7716c6d64f21eb06c89b1521f97c62a490eeb12da8d62e64fc1ff4fd
 F src/include/lib/Paheko/Utils.php 25cbe798fae8c431d55d9b9e56ead5070a3609dd94db62fec5b7eb64f074265a
 F src/include/lib/Paheko/Web/Cache.php 92d31aa40f483cadeda2f133a9be389d42d24de24094c356cfb0eabee872361d
@@ -432,7 +432,7 @@ F src/templates/me/security_password.tpl 54cf67e78e4938d9ed86554f7bc24fb4d60a4c6
 F src/templates/me/security_pgp.tpl 69dd4324ac39736eea1f6ca23cec8ca784c2a40b90d6971c24a401db3610b57f
 F src/templates/me/services.tpl 997f6cbdc328365f42e3600cf531b81ce7eb498745192aec1e1466f996f76137
 F src/templates/open_db.tpl c4b1fc0d6b1fca0ebd9c22c608dd33909c0dcf263023fb325a52b9fc9024bdd4
-F src/templates/password.tpl 31ba1206d06499ce283bea1fe3dd4725ae01995e6ec7fb7f5bd3442e95ac4302
+F src/templates/password.tpl 9883579427ee73c77e254788a9b18cbbc4892a8cc2a500bbbe702570d61e4f41
 F src/templates/password_change.tpl 6a5f87eb36c02174bc8dc45ba93c773856071c5e5ade90918b7a369223ce9dd8
 F src/templates/services/_nav.tpl afa8d253cdd80fe96d5f0cf7c1759f6989aa33c11c7f1b4d80e102d01c298c17
 F src/templates/services/_service_form.tpl 3f5b9119a9f85e151976535a94d9c5aa3c08162be8b3daf26dd346a3ecf1b31e
@@ -651,7 +651,7 @@ F src/www/admin/handle_bounce.php ac546e03a21ec3687a12482fed3753a8e4632fab632297
 F src/www/admin/index.php fccd42856b5d95f35cf3c0999e2581caa35587f460ad1b99b8e52370d55b0925
 F src/www/admin/install.php 1782ca5c09e74a872eca35ee36cd898eb6dcf0443c88f327bb527550cb62691b
 F src/www/admin/legal.php 0a9422c75dcd77fa25491251bcd50133701cedea52b375ef4bb04dad99400a57
-F src/www/admin/login.php a949fa8c1e27d05da96618735643adf63ae6ec80106eec39d8f2cdafb1806e83
+F src/www/admin/login.php d065782b97698f92b9ebb90040503c442ab1ed82f9ce0729e179ac6827e3a213
 F src/www/admin/login_app.php d686b28a90aed936f5cdcf7ff636b56a870c072cfa1b1b971bcf9dccc6411176
 F src/www/admin/login_otp.php ca608bad4b4a9503241ddc1ea2c296eed2c1b1c590395a433af53c609f80c044
 F src/www/admin/logout.php 5976597893d20d84a0b61f11aeb59ef4132db8a3ee4abf5ee02f67da2f95f1a9
@@ -668,7 +668,7 @@ F src/www/admin/me/security_password.php 75c2d239a2143ba11b0808686bde7731ddb03f9
 F src/www/admin/me/security_pgp.php f8a918e8ff6257c6d599ea5a07eacd828dc928ce28102307b4a68dddb19dc81d
 F src/www/admin/me/services.php 01519cc713f0657c8f261dbb184975de3ed48a57fce0ebfb3ec0f4b6ad06b7b7
 F src/www/admin/open_db.php f812f9067ee1086b1e060c95018f0f86b85da9774df8a8cc0390fb7c06408a40
-F src/www/admin/password.php da82b12eace60d4c30cd48f9cc2516803a7b17a1cb4f8be3be785b4ef57e05df
+F src/www/admin/password.php 8dbfea7fef3d7546a4a42439d59840ef55cd82af63c95bf9d528cb747cef8c4b
 F src/www/admin/services/_inc.php 2ee23bab80c9f3a0e11e0952eb9d4b7e08e6232ff3a8460f2b4f3e994a92a084
 F src/www/admin/services/delete.php 9505dfb7053aa03d3a4c923f2d6aa08626a9b40bfda37669846f42a43217b9cc
 F src/www/admin/services/details.php 16494bbf2867f07e6808b70e7a05cc4f2af778824092063abb7f1c1606732089
@@ -858,24 +858,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P e5643375bf36cafdf03007a329b7faa584f7e3bd9e3e400dc6c216828c26465f
-R 7cb26d8f2ea2f26d23c94ed65d84006b
+P 0c8938cc808db7e18096d08a95e1bf21749dc6fb06b6462494af6d79bce1f300
+R b4a46748303c38addba51a1ea1780a6c
 U bohwaz
-Z f059f55dcab35650789c91150e821df1
+Z 56fa7bf25863eb862994df031ac1536f
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmpuNYwACgkQksnacbiI
-6jTjwA//SvufdexgKdoJ+TLq9JtzdHBQmW+/gVQ/+hmRbmBKh+E6xRXVJxRlpj/v
-EVgh6lZV0wX7+QXCHvHT60FnwGibK2A0HNAP2NJwtzrMOyHEl5k/ubG5pMOVYbVM
-I1lhAuIYa1j+vtSq90gPiqUcm34wrvoKx9dX2s0lNmwHDUfqijXnCmERJ5UI1FGx
-lL2R2EqxPa03pe+ucWtQfWNa5hmLND/JUX4PrHS0ljJ2nQzGYbf22cBI2UWipxkT
-hAvKNhhWIMlSPXvUu/cKJDymx32qLpWLZmmVRUSuhUYB4tyaXwCjIv6mqV4JJprr
-U0WmuejvPe+SuuRTWyeaDqAJ1xS2cSkj8i5Sy7gLA1hZk3vJffB1uxuqU1tYc7Ul
-627VIQUC7REL5OAojtcmD8zRUm1gQNi0oXo8hj9RiHz1AV6sM5APGGML+UPRrDQ8
-DcNnDi2cYRd3cbpt6JM7PIRBhIoA3pL5H72pzxeBI0Lx7z5mDYd8vasVWC6IguL3
-V8+wh36GfwqK03Kf80j8zUylEow38tT4q1y9C7XgBimSedLr8F7vdqIBRegRSSrS
-nJvDiv/4tJ0+VkwteNk1hogG/Nd+QryXIewwqbf+qnUSPOUgN3+RnAheTqaEyHU8
-0S9XeMJIWX98WS/bdXxgn98OatKRcVagw3Zw3uEUvH3FwbZ3YVY=
-=YzEG
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmpuPdsACgkQksnacbiI
+6jScJQ/9HaVAUw2zckPh0dREZo/VIFeU6v+cWQQnq3UtieIxWI+nOYmZdDsFPJUe
+jtu053zoJVV+iwjU4elS3sYTV7JAbODRK6zKY0RHzDgM3W5u6DfBb6qCilwKWuYX
+DgwJmQ+yc9LUp1hbUXsKXwZqVdWwOqfO1dI/0ttQe+pek0GnYy7yoglaGL6lmAAS
+L0enS2awuNQ0cVUueUugw/vPGIFOnDYjdQQKx1sKx+fMsK5lzjzkdRV2jPOAyhpP
+m0k1uybsAt8ZinfSKIPdtblXNNpg424PsdO4Am83lUNrUPTgNHSgWxuLsMEp8o8p
+WdO4TenBbiP12lSeA643eL5NI/X8s5jFAroNoaxLpr/HYd/LEU5poSqQC2/q5aKp
+OlMWpM/sRDcsz7C3/Z0fwmyCR6h7VKAmb2/BftI+8PcpSPpJil4kYH78KOzY+LdM
+EpwgOc0vHD7WGeYrLBWU0f1yz2kR/p8KreUCwlHy+WELaiB/gCxl3QpxgTLc9mbo
+91haBDxA2Qzte+W2OQ1ZF2UTuuuS8xfqVGGeVBEGCWcy+d67m16xA1iB1nXR3NLb
+UEflM5Qx0SUvIR0j3fZWZw8TGPjIT/4WSj/zmFaTtzowNJPoE54gxRggXnJhxAPx
+uNhj2Ol/FYFdYmS7+P8Y7HpAdr0gFjeZZMi98kjQkY3+9hzsqdQ=
+=vhz+
 -----END PGP SIGNATURE-----

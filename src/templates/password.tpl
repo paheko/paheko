@@ -33,6 +33,20 @@
 			</dl>
 		</fieldset>
 
+		{if $captcha}
+		<fieldset>
+			<legend>Vérification de sécurité</legend>
+			<input type="hidden" name="c_hash" value="{$captcha.hash}" />
+			<dl>
+				<dt><label for="f_c_answer">Merci de recopier en chiffres (par exemple <em>1234</em>) le nombre suivant :<b>(obligatoire)</b></label></dt>
+				<dd><tt>{$captcha.spellout}</tt></dd>
+				<dd>{input name="c_answer" type="text" maxlength=4 label=null required=true}</dd>
+				<dd class="help">Cette vérification est demandée après plusieurs tentatives de connexion infructueuses.</dd>
+			</dl>
+		</fieldset>
+		{/if}
+
+
 		<p class="submit">
 			{csrf_field key=$csrf_key}
 			{button type="submit" name="recover" label="Envoyer" shape="right" class="main"}

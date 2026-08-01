@@ -5,6 +5,7 @@ namespace Paheko;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Session;
 use Paheko\Log;
+use KD2\Security;
 
 const LOGIN_PROCESS = true;
 
@@ -34,8 +35,18 @@ $form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
 
 $csrf_key = 'recover_password';
 $new = qg('new') !== null;
+$lock = Log::isLocked();
 
-$form->runIf('recover', function () use ($session) {
+$form->runIf('recover', function () use ($session, $lock) {
+	if ($lock === 1) {
+		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de récupération de mot de passe.\nMerci d'attendre %d minutes avant de ré-essayer.", Log::LOCKOUT_DELAY/60));
+	}
+	elseif ($lock === -1 && !Security::checkCaptcha(LOCAL_SECRET_KEY, $_POST['c_hash'] ?? '', $_POST['c_answer'] ?? '')) {
+		throw new UserException('Le code de vérification entré n\'est pas correct.');
+	}
+
+	$_POST['c_answer'] = null;
+
 	if (Log::isPasswordRecoveryLocked()) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de demandes de récupération de mot de passe perdu.\nSi vous n'avez pas reçu l'e-mail de récupération de mot de passe, vérifiez votre dossier Spam ou indésirables.\nSinon merci d'attendre %d minutes avant de ré-essayer.", Log::LOCKOUT_DELAY/60));
 	}
@@ -53,7 +64,8 @@ $sent = !$form->hasErrors() && null !== qg('sent');
 
 $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $title = $new ? 'Première connexion ?' : 'Mot de passe perdu ?';
+$captcha = $lock == -1 ? Security::createCaptcha(LOCAL_SECRET_KEY, 'fr_FR') : null;
 
-$tpl->assign(compact('id_field', 'sent', 'csrf_key', 'title', 'new'));
+$tpl->assign(compact('id_field', 'sent', 'csrf_key', 'title', 'new', 'captcha'));
 
 $tpl->display('password.tpl');

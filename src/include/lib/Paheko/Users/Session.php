@@ -485,21 +485,27 @@ class Session extends \KD2\UserSession
 	{
 		$user = Users::getFromLogin($login);
 
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
 		if (!$user) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 			throw new UserException('Aucun membre trouvé avec cet identifiant.');
 		}
 
 		if (!$user->canLogin()) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
 		if (!$user->canRecoverPassword()) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Vous n\'avez pas le droit de changer votre mot de passe. Merci de demander à un⋅e administrateur⋅trice.');
 		}
 
 		$email = $user->email();
 
 		if (!trim($email)) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
 
