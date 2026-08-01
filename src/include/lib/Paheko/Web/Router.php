@@ -64,6 +64,11 @@ class Router
 	{
 		$uri = self::getRequestURI($uri);
 
+		// Just a quick sanity check
+		if (false !== strpos(rawurldecode($uri), '..')) {
+			throw new UserException('Invalid path.', 400);
+		}
+
 		// Redirect if there is a double slash
 		if (false !== strpos($uri, '//')) {
 			Utils::redirect(preg_replace('!//+!', '/', $uri));
