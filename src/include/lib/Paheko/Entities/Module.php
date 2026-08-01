@@ -345,9 +345,9 @@ class Module extends Entity
 	public function distPath(?string $file = null): ?string
 	{
 		$path =  self::DIST_ROOT . '/' . $this->name . ($file ? '/' . $file : '');
+		$path = realpath($path);
 
 		if ($file) {
-			$path = realpath($path);
 
 			// Make sure path is inside module root, or it might be some path traversal issue
 			if (0 !== strpos($path, $this->distPath())) {
