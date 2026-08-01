@@ -500,6 +500,11 @@ class CSV_Custom
 		$this->setTranslationTable($sel);
 	}
 
+	public function resetTranslationTable(): void
+	{
+		$this->translation = null;
+	}
+
 	/**
 	 * Save translation table
 	 */
