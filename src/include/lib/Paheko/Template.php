@@ -132,6 +132,7 @@ class Template extends Smartyer
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
+		$this->assign('pdf_enabled', Utils::canDoPDF());
 
 		$session = null;
 

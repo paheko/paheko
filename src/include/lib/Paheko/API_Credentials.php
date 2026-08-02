@@ -53,7 +53,7 @@ class API_Credentials
 			return null;
 		}
 
-		EM::getInstance(Entity::class)->DB()->exec(sprintf('UPDATE %s SET last_use = datetime() WHERE id = %d;', Entity::TABLE, $e->id()));
+		EM::getInstance(Entity::class)->DB()->exec(sprintf('UPDATE %s SET last_use = datetime(\'now\', \'localtime\') WHERE id = %d;', Entity::TABLE, $e->id()));
 
 		return $e;
 	}

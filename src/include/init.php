@@ -376,17 +376,27 @@ if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
 	ini_set('open_basedir', ltrim($basedir, PATH_SEPARATOR));
 }
 
-// PHP devrait être assez intelligent pour chopper la TZ système mais nan
-// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
-// éviter le message d'erreur à la con on définit une timezone par défaut
-if (!ini_get('date.timezone') || ini_get('date.timezone') === 'UTC') {
-	if (($tz = @date_default_timezone_get()) && $tz !== 'UTC') {
-		ini_set('date.timezone', $tz);
-	}
-	else {
-		ini_set('date.timezone', 'Europe/Paris');
-	}
+// PHP is not always clever enough to get the timezone from the local system
+// (except on Debian which has a patch)
+// see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=730771
+// and https://salsa.debian.org/php-team/php/-/blob/debian/main/8.5/debian/patches/0020-Use-system-timezone.patch
+$tz = ini_get('date.timezone');
+
+if (!$tz
+	|| $tz === 'UTC') {
+	// Try to get timezone (Debian patch)
+	$tz = @date_default_timezone_get();
 }
+
+// Default to Europe/Paris
+if (!$tz || $tz === 'UTC') {
+	$tz = 'Europe/Paris';
+}
+
+// This is overwritten by the configured timezone later, but PHP
+// requires a timezone to be set before that in some cases
+ini_set('date.timezone', $tz);
+date_default_timezone_set($tz);
 
 class ValidationException extends UserException
 {
@@ -568,3 +578,7 @@ if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 		@date_default_timezone_set(Config::getInstance()->timezone);
 	}
 }
+
+// This is for SQLite, as its localtime modifier is just calling
+// the OS-level localtime function which depends on the TZ env variable.
+putenv('TZ=' . date_default_timezone_get());

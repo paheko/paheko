@@ -782,8 +782,12 @@ class Utils
 		return $list;
 	}
 
-	static public function getCountryName(string $code): ?string
+	static public function getCountryName(?string $code): ?string
 	{
+		if (null === $code) {
+			return null;
+		}
+
 		$code = strtoupper($code);
 		$list = self::getCountryList();
 		return $list[$code] ?? null;
@@ -974,6 +978,7 @@ class Utils
 	static public function verifyBusinessNumber(string $country, string $value): bool
 	{
 		if ($country === 'FR') {
+			// SIREN or SIRET
 			if (!in_array(strlen($value), [9, 14], true)) {
 				return false;
 			}
@@ -983,16 +988,22 @@ class Utils
 			}
 
 			$sum = 0;
+			$value = strrev($value);
+			$parity = 1;
+			$digits = str_split($value, 1);
 
-			for ($i = 0; $i < strlen($value); ++$i) {
-				if ($i % 2 === 0) {
-					$tmp = ((int) $value[$i]) * 2;
-					$tmp = $tmp > 9 ? $tmp - 9 : $tmp;
-				} else {
-					$tmp = $value[$i];
+			foreach ($digits as $pos => $digit) {
+				$digit = (int) $digit;
+
+				if ($pos % 2 === $parity) {
+					$digit *= 2;
+
+					if ($digit > 9) {
+						$digit -= 9;
+					}
 				}
 
-				$sum += $tmp;
+				$sum += $digit;
 			}
 
 			return ($sum % 10) === 0;
@@ -1642,6 +1653,7 @@ class Utils
 	static public function quick_exec(string $cmd, int $timeout = 20, ?int &$code = null): string
 	{
 		$output = '';
+		// using function is mandatory, fn($data) => $out.= $data doesn't work!
 		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
 		return $output;
 	}
