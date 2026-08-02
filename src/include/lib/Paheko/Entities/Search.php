@@ -182,13 +182,11 @@ class Search extends Entity
 		try {
 			$db->toggleUnicodeLike(true);
 
-			// Lock database against changes
-			$db->setReadOnly(true);
-
-			$st = $db->protectSelect($allowed_tables, $sql);
+			// We can't use DB::setReadOnly here as it should be set before the query
+			// and AFTER they have been displayed, or it will cancel the authorizer
+			// see https://sqlite.org/forum/forumpost/745ffe0c59ec0efb393f02424ff60b001b2434a824bca437d0260d0b255d8d38
+			$st = $db->prepareRestricted($allowed_tables, $sql);
 			$result = $db->execute($st);
-
-			$db->setReadOnly(false);
 
 			if (empty($options['no_cache'])) {
 				$this->_result = $result;
@@ -269,11 +267,8 @@ class Search extends Entity
 		try {
 			$db->toggleUnicodeLike(true);
 
-			// Lock database against changes
-			$db->setReadOnly(true);
-			$st = $db->protectSelect($allowed_tables, $sql);
+			$st = $db->prepareRestricted($allowed_tables, $sql);
 			$r = $db->execute($st);
-			$db->setReadOnly(false);
 
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
 			$r->finalize();
@@ -313,15 +308,28 @@ class Search extends Entity
 
 	public function getProtectedTables(): ?array
 	{
-		if ($this->type != self::TYPE_SQL || $this->target == self::TARGET_ALL) {
+		if ($this->type !== self::TYPE_SQL) {
 			return null;
 		}
 
+		if ($this->target === self::TARGET_ALL) {
+			return DB::DEFAULT_AUTHORIZER_RULES;
+		}
+
 		$list = $this->getAdvancedSearch()->tables();
-		$tables = [];
+		$tables = DB::DEFAULT_AUTHORIZER_RULES;
+		unset($tables['*']);
+
+		if (!in_array('users', $list)) {
+			unset($tables['users']);
+		}
 
 		foreach ($list as $name) {
-			$tables[$name] = null;
+			$tables[$name] ??= null;
+		}
+
+		if (array_key_exists('users', $tables)) {
+			$tables['users_search'] = $tables['users'];
 		}
 
 		return $tables;

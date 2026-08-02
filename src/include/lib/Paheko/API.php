@@ -164,6 +164,9 @@ class API
 			throw new APIException('Missing SQL statement', 400);
 		}
 
+		// Juste make sure we can't write to the database
+		DB::getInstance()->setReadOnly(true);
+
 		try {
 			$s = Search::fromSQL($body);
 			$result = $s->iterateResults();

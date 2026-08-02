@@ -17,6 +17,32 @@ class DB extends SQLite3
 	 */
 	const APPID = 0x5da2d811;
 
+	/**
+	 * List of tables and columns that are restricted in SQL queries
+	 *
+	 * ~column means the column will always be returned as NULL
+	 * -column or !table means trying to access this column or table will return an error
+	 * see KD2/DB/SQLite3 code for details
+	 *
+	 * Note: column restrictions are only possible with PHP >= 8.0
+	 */
+	const DEFAULT_AUTHORIZER_RULES = [
+		// Allow access to all tables
+		'*' => null,
+		// Restrict access to private fields in users
+		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
+		// Restrict access to some private tables
+		'!emails' => null,
+		'!emails_queue' => null,
+		'!compromised_passwords_cache' => null,
+		'!compromised_passwords_cache_ranges' => null,
+		'!api_credentials' => null,
+		'!plugins_signals' => null,
+		'!config' => null,
+		'!users_sessions' => null,
+		'!logs' => null,
+	];
+
 	static protected $_instance = null;
 
 	protected ?string $_version = '';

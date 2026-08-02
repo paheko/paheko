@@ -70,32 +70,6 @@ class Sections
 		'count',
 	];
 
-	/**
-	 * List of tables and columns that are restricted in SQL queries
-	 *
-	 * ~column means the column will always be returned as NULL
-	 * -column or !table means trying to access this column or table will return an error
-	 * see KD2/DB/SQLite3 code for details
-	 *
-	 * Note: column restrictions are only possible with PHP >= 8.0
-	 */
-	const SQL_TABLES = [
-		// Allow access to all tables
-		'*' => null,
-		// Restrict access to private fields in users
-		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
-		// Restrict access to some private tables
-		'!emails' => null,
-		'!emails_queue' => null,
-		'!compromised_passwords_cache' => null,
-		'!compromised_passwords_cache_ranges' => null,
-		'!api_credentials' => null,
-		'!plugins_signals' => null,
-		'!config' => null,
-		'!users_sessions' => null,
-		'!logs' => null,
-	];
-
 	static protected $_cache = [];
 
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
@@ -1148,7 +1122,7 @@ class Sections
 			unset($params['private']);
 		}
 
-		$allowed_tables = self::SQL_TABLES;
+		$allowed_tables = DB::DEFAULT_AUTHORIZER_RULES;
 
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
@@ -1478,7 +1452,7 @@ class Sections
 		}
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator
+	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = DB::DEFAULT_AUTHORIZER_RULES): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
