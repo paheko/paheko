@@ -341,7 +341,8 @@ class DB extends SQLite3
 	}
 
 	/**
-	 * Authorizer that allows changes to a limited set of tables
+	 * Authorizer that allows changes to a limited set of tables,
+	 * but allows reading from everything except self::RESTRICTED_SQL_TABLES
 	 */
 	static public function restrictedTablesAuthorizer(array $allowed_tables, int $action, ...$args)
 	{
