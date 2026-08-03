@@ -56,6 +56,7 @@
 			{input type="text" name="key" label="Identifiant" help="Seules les lettres minuscules, chiffres et tirets bas sont acceptés." pattern="[a-z0-9_]+" required=true default=$default_key}
 			{input type="text" label="Mot de passe" default=$secret readonly="readonly" help="Ce mot de passe ne sera plus affiché, il est conseillé de le copier/coller et l'enregistrer de votre côté." name="secret" copy=true}
 			{input type="select" required=true label="Autorisation d'accès" options=$access_levels name="access_level"}
+			<dd class="help">Attention, le niveau lecture permet également de télécharger la base de données complète, et donc les mots de passe (chiffrés) des membres.</dd>
 		</dl>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
