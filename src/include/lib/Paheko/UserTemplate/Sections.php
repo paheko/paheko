@@ -318,10 +318,11 @@ class Sections
 		// @see https://sqlite.org/forum/forumpost/d28110be11
 		if (isset($params['each']) && !$db->hasFeatures('json_each_readonly')) {
 			$t = 'module_tmp_each' . md5($params['each']);
+			$rodb = $db->getReadOnlyDB();
 
 			// We create a temporary table, to get around authorizer issues in SQLite
-			$db->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
-			$db->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
+			$rodb->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
+			$rodb->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
 				$t, $table, $db->quote('$.' . trim($params['each']))
 			));
 
@@ -1288,10 +1289,12 @@ class Sections
 		}
 
 		$db = DB::getInstance();
+		$rodb = $db->getReadOnlyDB();
+
 		$params['where'] ??= '';
 
 		// Fetch page
-		$page = self::cache('page_' . $id, function () use ($id, $db) {
+		$page = self::cache('page_' . $id, function () use ($id, $rodb) {
 			$page = Web::get($id);
 
 			if (!$page) {
@@ -1299,8 +1302,8 @@ class Sections
 			}
 
 			// Store attachments in temp table
-			$db->begin();
-			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
+			$rodb->begin();
+			$rodb->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
 
 			foreach ($page->listAttachments() as $file) {
 				if ($file->type != File::TYPE_FILE) {
@@ -1318,11 +1321,11 @@ class Sections
 				$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
 				$row['large_url'] = $file->thumb_url(File::THUMB_SIZE_LARGE);
 
-				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
+				$rodb->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
 					$page->id(), $file->uri(), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));
 			}
 
-			$db->commit();
+			$rodb->commit();
 
 			return $page;
 		});
@@ -1342,18 +1345,18 @@ class Sections
 		if (!empty($params['except_in_text'])) {
 			// Don't regenerate that table for each section called in the page,
 			// we assume the content and list of files will not change between sections
-			self::cache('page_files_text_' . $id, function () use ($page, $db) {
-				$db->begin();
+			self::cache('page_files_text_' . $id, function () use ($page, $rodb) {
+				$rodb->begin();
 
 				// Put files mentioned in the text in a temporary table
-				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, uri);');
+				$rodb->exec('CREATE TEMP TABLE IF NOT EXISTS temp.files_tmp_in_text (page_id, uri);');
 
 				foreach ($page->listTaggedAttachments() as $uri) {
-					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
+					$rodb->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
 				}
 
 
-				$db->commit();
+				$rodb->commit();
 			});
 
 			$params['where'] .= sprintf(' AND uri NOT IN (SELECT uri FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
@@ -1461,6 +1464,8 @@ class Sections
 			'limit' => 10000,
 			'where' => '',
 		];
+
+		$allowed_tables['temp.'] = [];
 
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];

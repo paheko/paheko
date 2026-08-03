@@ -659,6 +659,12 @@ class DB extends SQLite3
 		self::registerCustomFunctions($this->_readonly_db);
 	}
 
+	public function getReadOnlyDB(): SQLite3
+	{
+		$this->connectReadOnly();
+		return $this->_readonly_db;
+	}
+
 	/**
 	 * Use a specific readonly DB connection for restricted statements
 	 * because removing the authorizer while having active statements with an authorizer
