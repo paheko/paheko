@@ -583,8 +583,9 @@ class Session extends \KD2\UserSession
 		$id = (int) base_convert($id, 36, 10);
 		$expire = (int) base_convert($expire, 36, 10);
 
+
 		// Check that the query has not expired yet
-		if ($expire > time()) {
+		if ($expire < time()) {
 			return null;
 		}
 
