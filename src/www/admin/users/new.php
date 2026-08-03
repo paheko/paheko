@@ -16,15 +16,7 @@ $is_duplicate = null;
 $user->importForm(!empty($_POST) ? $_POST : $_GET);
 
 $form->runIf('save', function () use ($user, $session, &$is_duplicate) {
-	$id_category = (int)f('id_category');
-
-	if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
-		$user->set('id_category', $id_category);
-	}
-	else {
-		$user->setCategorySafe($id_category, $session);
-	}
-
+	$user->setCategorySafe(intval($_POST['id_category'] ?? 0), $session);
 	$user->importForm();
 
 	if (f('save') != 'anyway' && ($is_duplicate = $user->checkDuplicate())) {
