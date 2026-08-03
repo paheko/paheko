@@ -648,6 +648,17 @@ class DB extends SQLite3
 		}
 	}
 
+	protected function connectReadOnly(): void
+	{
+		if (null !== $this->_readonly_db) {
+			return;
+		}
+
+		$this->_readonly_db = new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
+		$this->_readonly_db->connect();
+		self::registerCustomFunctions($this->_readonly_db);
+	}
+
 	/**
 	 * Use a specific readonly DB connection for restricted statements
 	 * because removing the authorizer while having active statements with an authorizer
@@ -655,13 +666,13 @@ class DB extends SQLite3
 	 */
 	public function prepareRestricted(?array $allowed, string $query): \SQLite3Stmt
 	{
-		$this->_readonly_db ??= new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
+		$this->connectReadOnly();
 		return $this->_readonly_db->prepareRestricted($allowed, $query);
 	}
 
 	public function iterateRestricted(?array $allowed, string $query, ...$args)
 	{
-		$this->_readonly_db ??= new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
+		$this->connectReadOnly();
 		return $this->_readonly_db->iterateRestricted($allowed, $query, ...$args);
 	}
 }
