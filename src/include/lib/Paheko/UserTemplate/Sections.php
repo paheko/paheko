@@ -1528,9 +1528,6 @@ class Sections
 		$db = DB::getInstance();
 
 		try {
-			// Lock database against changes
-			$db->setReadOnly(true);
-
 			$statement = $db->protectSelect($allowed_tables, $sql);
 
 			$args = [];
@@ -1554,8 +1551,6 @@ class Sections
 			if (!empty($params['explain'])) {
 				self::_debugExplain($statement->getSQL(true));
 			}
-
-			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
 			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {

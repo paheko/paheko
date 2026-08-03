@@ -57,6 +57,8 @@ class DB extends SQLite3
 
 	protected bool $_install_check = true;
 
+	protected ?SQLite3 $_readonly_db = null;
+
 	static public function getInstance()
 	{
 		if (null === self::$_instance) {
@@ -111,6 +113,10 @@ class DB extends SQLite3
 	public function __destruct()
 	{
 		parent::__destruct();
+
+		if (null !== $this->_readonly_db) {
+			$this->_readonly_db = null;
+		}
 
 		if (SQL_DEBUG && null !== $this->callback) {
 			$this->saveLog();
@@ -640,5 +646,22 @@ class DB extends SQLite3
 
 			$this->exec(sprintf('DROP INDEX IF EXISTS %s;', $index));
 		}
+	}
+
+	/**
+	 * Use a specific readonly DB connection for restricted statements
+	 * because removing the authorizer while having active statements with an authorizer
+	 * yields unexpected results
+	 */
+	public function prepareRestricted(?array $allowed, string $query): \SQLite3Stmt
+	{
+		$this->_readonly_db ??= new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
+		return $this->_readonly_db->prepareRestricted($allowed, $query);
+	}
+
+	public function iterateRestricted(?array $allowed, string $query, ...$args)
+	{
+		$this->_readonly_db ??= new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
+		return $this->_readonly_db->iterateRestricted($allowed, $query, ...$args);
 	}
 }

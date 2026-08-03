@@ -182,9 +182,6 @@ class Search extends Entity
 		try {
 			$db->toggleUnicodeLike(true);
 
-			// We can't use DB::setReadOnly here as it should be set before the query
-			// and AFTER they have been displayed, or it will cancel the authorizer
-			// see https://sqlite.org/forum/forumpost/745ffe0c59ec0efb393f02424ff60b001b2434a824bca437d0260d0b255d8d38
 			$st = $db->prepareRestricted($allowed_tables, $sql);
 			$result = $db->execute($st);
 

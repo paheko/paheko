@@ -11,11 +11,6 @@ if (!defined('Paheko\CURRENT_SEARCH_TARGET') || !array_key_exists(CURRENT_SEARCH
 	throw new UserException('Cible inconnue');
 }
 
-// Lock database against changes
-// This can't be undone before results are displayed
-// see https://sqlite.org/forum/forumpost/745ffe0c59ec0efb393f02424ff60b001b2434a824bca437d0260d0b255d8d38
-DB::getInstance()->setReadOnly(true);
-
 $session = Session::getInstance();
 $id = f('id') ?: qg('id');
 
