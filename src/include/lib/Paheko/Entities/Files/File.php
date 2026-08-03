@@ -1145,13 +1145,8 @@ class File extends Entity
 		Utils::HTTPCache($this->etag(), $this->modified->getTimestamp(), 24*3600, $is_versioned_url);
 		header('X-Powered-By: Paheko/PHP');
 
-		// Security: disable running scripts from SVG images and HTML documents
-		if (strpos($this->mime, 'svg') !== false
-			|| stripos($this->name, '.svg') !== false
-			|| strpos($this->mime, 'html') !== false
-			|| stripos($this->name, '.htm') !== false) {
-			header('Content-Security-Policy: script-src ;');
-		}
+		// Security: disable running scripts from SVG, HTML, XSL and XML
+		header('Content-Security-Policy: script-src ;');
 
 		if (null === $path) {
 			$type = $this->mime;
