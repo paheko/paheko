@@ -32,6 +32,8 @@ class Fee extends Entity
 	protected ?int $id_year = null;
 	protected ?int $id_project = null;
 
+	const FORMULA_RESTRICTED_RULES = ['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null];
+
 	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'amount' && $value !== null) {
@@ -103,7 +105,7 @@ class Fee extends Entity
 			return $this->amount;
 		}
 		elseif (null !== $this->formula) {
-			$db = DB::getInstance();
+			$db = DB::getInstance()->getRestrictedConnection(['rules' => self::FORMULA_RESTRICTED_RULES]);
 			return (int) $db->firstColumn($this->getFormulaSQL(), $user_id);
 		}
 
@@ -118,9 +120,9 @@ class Fee extends Entity
 	protected function checkFormula(): ?string
 	{
 		try {
-			$db = DB::getInstance();
+			$db = DB::getInstance()->getRestrictedConnection(['rules' => self::FORMULA_RESTRICTED_RULES]);
 			$sql = $this->getFormulaSQL();
-			$db->protectSelect(['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null], $sql);
+			$db->firstColumn($sql);
 			return null;
 		}
 		catch (DB_Exception $e) {

@@ -89,8 +89,9 @@ class Fees
 		}
 
 		try {
+			$db = DB::getInstance()->getRestrictedConnection(['rules' => self::FORMULA_RESTRICTED_RULES]);
 			$sql = sprintf('SELECT (%s) FROM users WHERE id = %d;', $object->formula, $user_id);
-			$object->user_amount = DB::getInstance()->firstColumn($sql);
+			$object->user_amount = $db->firstColumn($sql);
 		}
 		catch (DB_Exception $e) {
 			$object->user_amount_error = $e->getMessage();
