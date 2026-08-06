@@ -305,10 +305,6 @@ class Search extends Entity
 
 	public function getProtectedTables(): ?array
 	{
-		if ($this->type !== self::TYPE_SQL) {
-			return null;
-		}
-
 		if ($this->target === self::TARGET_ALL) {
 			return DB::DEFAULT_AUTHORIZER_RULES;
 		}
