@@ -284,6 +284,10 @@ class Router
 
 	static public function markClientSuspicious(): void
 	{
+		if (!DETECT_SUSPICIOUS_IPS) {
+			return;
+		}
+
 		$db = DB::getInstance();
 		$expiry = new \DateTime('+7 days');
 		$db->preparedQuery('REPLACE INTO web_suspicious_clients (ip, expiry) VALUES (?, ?);', Utils::getIP(), $expiry);
@@ -291,6 +295,10 @@ class Router
 
 	static public function blockSuspiciousClient(): bool
 	{
+		if (!DETECT_SUSPICIOUS_IPS) {
+			return false;
+		}
+
 		$db = DB::getInstance();
 		$ip = Utils::getIP();
 
