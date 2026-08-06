@@ -168,6 +168,11 @@ class NextCloud extends WebDAV_NextCloud
 		$exists = Files::exists($target);
 
 		try {
+			// Assert we can create the file at the desired location
+			if (!File::canCreate($target, Session::getInstance())) {
+				throw new WebDAV_Exception('Vous n\'avez pas l\'autorisation de créer ce fichier', 403);
+			}
+
 			$out = fopen($tmp_file, 'wb');
 			$processed = 0;
 
