@@ -565,10 +565,6 @@ class File extends Entity
 		self::validatePath($new_path);
 		self::validateFileName($name);
 
-		if ($session !== null) {
-			self::validateCanHTML($name, $new_path, $session);
-		}
-
 		if ($new_path == $this->path) {
 			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));
 		}
@@ -690,15 +686,19 @@ class File extends Entity
 		$pointer = $source['pointer'] ?? null;
 		$new = !$this->exists();
 
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
+
 		if ($path) {
 			$this->set('size', filesize($path));
 			Files::checkQuota($this->size);
 			$this->set('md5', md5_file($path));
+			$this->set('mime', finfo_file($finfo, $path));
 		}
 		elseif (null !== $content) {
 			$this->set('size', strlen($content));
 			Files::checkQuota($this->size);
 			$this->set('md5', md5($content));
+			$this->set('mime', finfo_buffer($finfo, $content));
 		}
 		elseif ($pointer) {
 			// See https://github.com/php/php-src/issues/9441
@@ -718,6 +718,12 @@ class File extends Entity
 			Files::checkQuota($this->size);
 
 			$this->rehash($pointer);
+			$this->set('mime', mime_content_type($pointer));
+		}
+
+		// Force empty files as text/plain
+		if ($this->mime == 'application/x-empty' && !$this->size) {
+			$this->set('mime', 'text/plain');
 		}
 
 		// File hasn't changed
@@ -1146,7 +1152,19 @@ class File extends Entity
 		header('X-Powered-By: Paheko/PHP');
 
 		// Security: disable running scripts from SVG, HTML, XSL and XML
-		header('Content-Security-Policy: script-src ;');
+		if (false !== strpos($this->mime, 'html')
+			|| false !== strpos($this->mime, 'xml')
+			|| false !== strpos($this->mime, 'svg')
+			|| false !== stripos($this->name, '.svg')
+			|| false !== stripos($this->name, '.htm')
+			|| false !== stripos($this->name, '.xhtm')
+			|| false !== stripos($this->name, '.xsl')
+			|| false !== stripos($this->name, '.xml')) {
+			header('Content-Security-Policy: default-src \'none\' ; frame-ancestors \'self\'; base-uri \'none\'; sandbox');
+			header('X-Content-Type-Options: nosniff');
+			header('Referrer-Policy: no-referrer');
+			header('X-Frame-Options: SAMEORIGIN');
+		}
 
 		if (null === $path) {
 			$type = $this->mime;
@@ -1395,35 +1413,6 @@ class File extends Entity
 		return [$context, $ref ?: null, $name];
 	}
 
-	/**
-	 * Only admins can create or rename files to .html / .js
-	 * This is to avoid XSS attacks from a non-admin user
-	 */
-	static public function validateCanHTML(string $name, string $path, ?Session $session = null): void
-	{
-		// If no session was given, the file creation / rename comes from a plugin
-		// probably, so it's always allowed to create HTML
-		if (null === $session) {
-			return;
-		}
-
-		if (!preg_match('/\.(?:htm|js|xhtm)/', $name)) {
-			return;
-		}
-
-		// Web module allows web admin to create HTML files
-		if (0 === strpos($path, self::CONTEXT_MODULES . '/web')
-			&& $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
-			return;
-		}
-
-		if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
-			return;
-		}
-
-		throw new ValidationException('Seuls les administrateurs peuvent créer des fichiers de ce type.');
-	}
-
 	public function renderFormat(): ?string
 	{
 		if (substr($this->name, -6) == '.skriv') {
@@ -1432,7 +1421,7 @@ class File extends Entity
 		elseif (substr($this->name, -3) == '.md') {
 			$format = Render::FORMAT_MARKDOWN;
 		}
-		elseif ($this->mime && substr($this->mime, 0, 5) == 'text/' && $this->mime != 'text/html') {
+		elseif ($this->mime && substr($this->mime, 0, 5) == 'text/' && $this->mime !== 'text/html' && !strpos($this->name, '.html')) {
 			$format = 'text';
 		}
 		else {
