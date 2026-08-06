@@ -249,6 +249,7 @@ static $default_config = [
 	'LOCAL_ADDRESSES_ROOT'  => null,
 	'DONATE_URL'            => 'https://paheko.cloud/don/',
 	'OPEN_BASEDIR'          => null,
+	'DETECT_SUSPICIOUS_IPS' => true,
 ];
 
 foreach ($default_config as $const => $value)
