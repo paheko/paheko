@@ -1923,13 +1923,13 @@ class Utils
 		$str = preg_replace_callback('!url\s*\((.+?)\)!im', function (array $match): string {
 			$url = trim(html_entity_decode(trim($match[1], '\'"')));
 
-			if (0 !== strpos($url, 'http')
-				|| !self::isLocalURL($url)) {
-				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in CSS used in PDF: ' . $match[0]));
-				return 'url()';
+			if (0 === strpos($url, 'http')
+				&& (self::isLocalURL($url) || 0 === strpos($url, 'https://paheko.cloud/'))) {
+				return $match[0];
 			}
 
-			return $match[0];
+			ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in CSS used in PDF: ' . $match[0]));
+			return 'url()';
 		}, $str);
 
 		// Restrict external URLs in HTML tags
