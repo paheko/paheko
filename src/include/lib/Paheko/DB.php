@@ -681,8 +681,12 @@ class DB extends SQLite3
 		if (!array_key_exists('rules', $options)) {
 			$rules = self::DEFAULT_AUTHORIZER_RULES;
 		}
-		else {
+		elseif (isset($options['rules'])) {
 			$rules = $options['rules'];
+		}
+		else {
+			// Set options['rules'] = NULL to disable any rules
+			$rules = null;
 		}
 
 		// Enable SQL debug log if configured

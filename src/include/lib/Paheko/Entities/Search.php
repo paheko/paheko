@@ -68,7 +68,7 @@ class Search extends Entity
 
 		$this->assert(strlen($this->label) > 0, 'Le champ libellé doit être renseigné');
 		$this->assert(strlen($this->label) <= 500, 'Le champ libellé est trop long');
-		$this->assert(is_null($this->description) || strlen($this->description) <= 50000, 'Le champ description est trop long');
+		$this->assert(is_null($this->description) || strlen($this->description) <= 10000, 'Le champ description est trop long');
 
 		$db = DB::getInstance();
 
@@ -80,6 +80,7 @@ class Search extends Entity
 		$this->assert(array_key_exists($this->target, self::TARGETS));
 
 		$this->assert(strlen($this->content), 'Le contenu de la recherche ne peut être vide');
+		$this->assert(strlen($this->content) <= 100_000, 'Le contenu de la recherche est trop long');
 
 		if ($this->type === self::TYPE_JSON) {
 			$this->assert(json_decode($this->content) !== null, 'Recherche invalide pour le type JSON');
@@ -296,24 +297,21 @@ class Search extends Entity
 
 	public function getProtectedTables(): ?array
 	{
-		if ($this->target === self::TARGET_ALL) {
+		if ($this->target === self::TARGET_ALL
+			|| $this->type === self::TYPE_SQL_UNPROTECTED) {
 			return DB::DEFAULT_AUTHORIZER_RULES;
 		}
 
 		$list = $this->getAdvancedSearch()->tables();
-		$tables = DB::DEFAULT_AUTHORIZER_RULES;
-		unset($tables['*']);
-
-		if (!in_array('users', $list)) {
-			unset($tables['users']);
-		}
+		$tables = [];
 
 		foreach ($list as $name) {
-			$tables[$name] ??= null;
-		}
+			$tables[$name] = null;
 
-		if (array_key_exists('users', $tables)) {
-			$tables['users_search'] = $tables['users'];
+			if ($name === 'users') {
+				// Make sure we block access to private fields of users table
+				$tables[$name] = DB::DEFAULT_AUTHORIZER_RULES['users'];
+			}
 		}
 
 		return $tables;
