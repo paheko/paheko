@@ -1923,10 +1923,19 @@ class Utils
 			$url = $match[4] ?? ($match[3] ?? $match[2]);
 			$url = trim(html_entity_decode($url));
 
-			if (0 !== strpos($url, 'http')
-				|| !self::isLocalURL($url)) {
+			$is_trusted = false;
+
+			// Allow xmlns
+			if (0 === strpos($url, 'http://www.w3.org/')) {
+				$is_trusted = true;
+			}
+			elseif (self::isLocalURL($url)) {
+				$is_trusted = true;
+			}
+
+			if (!$is_trusted) {
 				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
-				return '<!-- Disabled external request -->';
+				return '';
 			}
 
 			return $match[0];
