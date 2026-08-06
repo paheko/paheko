@@ -80,7 +80,10 @@ else {
 
 $save_action_url = Utils::getLocalURL($save_action_url);
 
+$operators = $s->getAdvancedSearch()::OPERATORS;
+
 $tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count',
+	'operators',
 	'schema', 'title', 'save_action_url'));
 
 $tpl->display($template_path);

@@ -6,6 +6,32 @@ use Paheko\Users\Session;
 
 abstract class AdvancedSearch
 {
+	const OPERATORS = [
+		'= ?' => 'is equal to',
+		'!= ?' => 'is not equal to',
+		'IN (??)' => 'is equal to one of',
+		'NOT IN (??)' => 'is not equal to one of',
+		'> ?' => 'is greater than',
+		'>= ?' => 'is greater than or equal to',
+		'< ?' => 'is less than',
+		'<= ?' => 'is less than or equal to',
+		'BETWEEN ? AND ?' => 'is between',
+		'NOT BETWEEN ? AND ?' => 'is not between',
+		'IS NULL' => 'is null',
+		'IS NOT NULL' => 'is not null',
+		'LIKE ?%' => 'begins with',
+		'NOT LIKE ?%' => 'doesn\'t begin with',
+		'LIKE %?' => 'ends with',
+		'NOT LIKE %?' => 'doesn\'t end with',
+		'LIKE %?%' => 'contains',
+		'NOT LIKE %?%' => 'doesn\'t contain',
+		'&' => 'matches one of',
+		'NOT &' => 'doesn\'t match one of',
+		'= 1' => 'is true',
+		'= 0' => 'is false',
+		'1' => 'display this column',
+	];
+
 	protected ?Session $session = null;
 
 	/**
@@ -129,8 +155,12 @@ abstract class AdvancedSearch
 				if (!isset($condition['column'], $condition['operator'])
 					|| (isset($condition['values']) && !is_array($condition['values'])))
 				{
-					// Ignorer les conditions invalides
+					// Ignore invalid conditions
 					continue;
+				}
+
+				if (!array_key_exists($condition['operator'], self::OPERATORS)) {
+					throw new \InvalidArgumentException('Unknown operator: ' . $condition['operator']);
 				}
 
 				if (!array_key_exists($condition['column'], $columns)) {
@@ -148,10 +178,10 @@ abstract class AdvancedSearch
 					continue;
 				}
 
-				$column = $columns[$condition['column']] ?? null;
+				$column = $columns[$condition['column']];
 
 				// Type is required
-				if (!isset($column, $column['type'])) {
+				if (!isset($column['type'])) {
 					continue;
 				}
 
