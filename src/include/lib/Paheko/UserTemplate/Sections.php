@@ -804,12 +804,15 @@ class Sections
 			$params['select'] = 'u.*';
 		}
 
-		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number, u.%s AS _email',
+		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number',
 			$id_field,
 			$db->quoteIdentifier($login_field),
 			$db->quoteIdentifier($number_field),
-			$db->quoteIdentifier($email_field)
 		);
+
+		if ($email_field) {
+			$params['select'] .= sprintf(', u.%s AS _email', $db->quoteIdentifier($email_field));
+		}
 
 		$params['tables'] = 'users_view AS u';
 
