@@ -79,7 +79,7 @@ class Module extends Entity
 	 */
 	protected bool $system = false;
 
-	protected bool $_table_exist;
+	protected bool $_table_exists;
 
 	protected ?\stdClass $_ini;
 
