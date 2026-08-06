@@ -1929,6 +1929,10 @@ class Utils
 			if (0 === strpos($url, 'http://www.w3.org/')) {
 				$is_trusted = true;
 			}
+			// Allow mailto/tel
+			elseif (0 === strpos($url, 'mailto:') || 0 === strpos($url, 'tel:') || 0 === strpos($url, 'geo:')) {
+				$is_trusted = true;
+			}
 			elseif (self::isLocalURL($url)) {
 				$is_trusted = true;
 			}
