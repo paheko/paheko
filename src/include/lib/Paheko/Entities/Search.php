@@ -94,6 +94,7 @@ class Search extends Entity
 
 		if ($this->type == self::TYPE_JSON) {
 			$this->_list = $this->getAdvancedSearch()->make($this->content);
+			$this->_list->setRestrictedTables($this->getProtectedTables());
 			return $this->_list;
 		}
 		else {
@@ -177,12 +178,10 @@ class Search extends Entity
 		$sql = $this->SQL($options);
 
 		$allowed_tables = $this->getProtectedTables();
-		$db = DB::getInstance();
+		$db = DB::getInstance()->getRestrictedConnection(['rules' => $allowed_tables, 'unicode_like' => true]);
 
 		try {
-			$db->toggleUnicodeLike(true);
-
-			$st = $db->prepareRestricted($allowed_tables, $sql);
+			$st = $db->prepare($sql);
 			$result = $db->execute($st);
 
 			if (empty($options['no_cache'])) {
@@ -193,9 +192,6 @@ class Search extends Entity
 		}
 		catch (DB_Exception $e) {
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
-		}
-		finally {
-			$db->toggleUnicodeLike(false);
 		}
 	}
 
@@ -259,12 +255,10 @@ class Search extends Entity
 		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
-		$db = DB::getInstance();
+		$db = DB::getInstance()->getRestrictedConnection(['rules' => $allowed_tables, 'unicode_like' => true]);
 
 		try {
-			$db->toggleUnicodeLike(true);
-
-			$st = $db->prepareRestricted($allowed_tables, $sql);
+			$st = $db->prepare($sql);
 			$r = $db->execute($st);
 
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
@@ -278,9 +272,6 @@ class Search extends Entity
 			}
 
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
-		}
-		finally {
-			$db->toggleUnicodeLike(false);
 		}
 	}
 
