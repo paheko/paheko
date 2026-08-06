@@ -1901,43 +1901,43 @@ class Utils
 	 */
 	static public function filterHTMLForPDF(string $str): string
 	{
-		// Some security things. This is probably not 100% perfect but will avoid most possible attacks, and alert us.
+		// Some security things.
+		// This is probably not 100% perfect but will avoid most possible attacks, and might alert us.
+		// Using a proxy is better, see config.dist.php for details
 
 		// Remove <base href="..."> tags to avoid relative URIs
 		$str = preg_replace('/<base[^>]*>/i', '', $str);
 
 		// Remove any javascript
-		$str = preg_replace('/<script.*<\/script[^>]*>/si', '', $str);
+		$str = preg_replace('/<script.*?<\/script[^>]*>/si', '', $str);
 
-		// This should cover a variety of URL identifiers
-		// src="file:///etc/passwd"
-		// url(\68\74\74\70\3A//evil.com/x.png);
-		// src="data:text/html;base64,..."
+		// Remove any CSS @import rules
 		// @import http://evil.com/style.css;
-		// etc.
-		$pattern = '!([\'"`])((?:[a-z0-9]+:|//).+?)\1|(?:=|import)\s*((?:[a-z0-9]+:|//).+?)(?=[\s>]|$)|url\s*\((.+?)\)!im';
+		// @import url('http://evil.com/style.css');
+		$str = preg_replace('/@import.*(?:;|$);/ims', '', $str);
 
-		// Make sure no external request is allowed
-		// (Just in case the PDF program doesn't have an allow-list for remote hosts)
-		$str = preg_replace_callback($pattern, function (array $match): string {
-			$url = $match[4] ?? ($match[3] ?? $match[2]);
-			$url = trim(html_entity_decode($url));
+		// Remove meta tags: content="0; url=http://evil.com/"
+		$str = preg_replace('!<meta[^>]*url\s*=[^>]*>!i', '', $str);
 
-			$is_trusted = false;
+		// Restrict external URLs in CSS
+		$str = preg_replace_callback('!url\s*\((.+?)\)!im', function (array $match): string {
+			$url = trim(html_entity_decode(trim($match[1], '\'"')));
 
-			// Allow xmlns
-			if (0 === strpos($url, 'http://www.w3.org/')) {
-				$is_trusted = true;
-			}
-			// Allow mailto/tel
-			elseif (0 === strpos($url, 'mailto:') || 0 === strpos($url, 'tel:') || 0 === strpos($url, 'geo:')) {
-				$is_trusted = true;
-			}
-			elseif (self::isLocalURL($url)) {
-				$is_trusted = true;
+			if (0 !== strpos($url, 'http')
+				|| !self::isLocalURL($url)) {
+				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in CSS used in PDF: ' . $match[0]));
+				return 'url()';
 			}
 
-			if (!$is_trusted) {
+			return $match[0];
+		}, $str);
+
+		// Restrict external URLs in HTML tags
+		$str = preg_replace_callback('!(?:src|data)\s*=\s*([\'"`])((?:[a-z0-9]+:|//).+?)\1!im', function (array $match): string {
+			$url = trim(html_entity_decode($match[2]));
+
+			if (0 !== strpos($url, 'http')
+				|| !self::isLocalURL($url)) {
 				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
 				return '';
 			}
