@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate;
 
 use KD2\DB\DB_Exception;
+use KD2\DB\SQLite3;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Extensions;
@@ -291,7 +292,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
@@ -318,11 +319,11 @@ class Sections
 		// @see https://sqlite.org/forum/forumpost/d28110be11
 		if (isset($params['each']) && !$db->hasFeatures('json_each_readonly')) {
 			$t = 'module_tmp_each' . md5($params['each']);
-			$rodb = $db->getReadOnlyDB();
+			$db = $db->ro();
 
 			// We create a temporary table, to get around authorizer issues in SQLite
-			$rodb->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
-			$rodb->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
+			$db->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
+			$db->exec(sprintf('INSERT INTO %s SELECT a.id, a.key, value, a.document FROM %s AS a, json_each(a.document, %s);',
 				$t, $table, $db->quote('$.' . trim($params['each']))
 			));
 
@@ -495,7 +496,7 @@ class Sections
 		if (empty($params['schema']) && empty($params['select'])) {
 			throw new TemplateException('Missing schema parameter');
 		}
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
@@ -760,7 +761,7 @@ class Sections
 
 		if (!empty($params['assign_list'])) {
 			$list = [];
-			$db = DB::getInstance();
+			$db = self::DB();
 			$sql = sprintf('SELECT id, label, code FROM %s WHERE archived = %d ORDER BY code, label COLLATE U_NOCASE;',
 				$params['tables'],
 				$params['archived']
@@ -1219,7 +1220,7 @@ class Sections
 
 		unset($params['duplicates']);
 
-		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
+		foreach (self::sql($params, $tpl, $line) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
 				unset($data['points'], $data['snippet'], $data['title_snippet']);
@@ -1267,7 +1268,7 @@ class Sections
 	static protected function _getPageIdFromPath(string $path): ?int
 	{
 		return self::cache('page_id_' . md5($path), function () use ($path) {
-			$db = DB::getInstance();
+			$db = self::DB();
 			return $db->firstColumn('SELECT id FROM web_pages WHERE uri = ?;', Utils::basename($path)) ?: null;
 		});
 	}
@@ -1288,13 +1289,12 @@ class Sections
 			return;
 		}
 
-		$db = DB::getInstance();
-		$rodb = $db->getReadOnlyDB();
+		$db = self::DB();
 
 		$params['where'] ??= '';
 
 		// Fetch page
-		$page = self::cache('page_' . $id, function () use ($id, $rodb) {
+		$page = self::cache('page_' . $id, function () use ($id, $db) {
 			$page = Web::get($id);
 
 			if (!$page) {
@@ -1302,8 +1302,8 @@ class Sections
 			}
 
 			// Store attachments in temp table
-			$rodb->begin();
-			$rodb->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
+			$db->begin();
+			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image, data);');
 
 			foreach ($page->listAttachments() as $file) {
 				if ($file->type != File::TYPE_FILE) {
@@ -1321,11 +1321,11 @@ class Sections
 				$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
 				$row['large_url'] = $file->thumb_url(File::THUMB_SIZE_LARGE);
 
-				$rodb->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
+				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?, ?);',
 					$page->id(), $file->uri(), $file->path, $file->name, $file->modified, $file->isImage(), json_encode($row));
 			}
 
-			$rodb->commit();
+			$db->commit();
 
 			return $page;
 		});
@@ -1345,18 +1345,18 @@ class Sections
 		if (!empty($params['except_in_text'])) {
 			// Don't regenerate that table for each section called in the page,
 			// we assume the content and list of files will not change between sections
-			self::cache('page_files_text_' . $id, function () use ($page, $rodb) {
-				$rodb->begin();
+			self::cache('page_files_text_' . $id, function () use ($page, $db) {
+				$db->begin();
 
 				// Put files mentioned in the text in a temporary table
-				$rodb->exec('CREATE TEMP TABLE IF NOT EXISTS temp.files_tmp_in_text (page_id, uri);');
+				$db->exec('CREATE TEMP TABLE IF NOT EXISTS temp.files_tmp_in_text (page_id, uri);');
 
 				foreach ($page->listTaggedAttachments() as $uri) {
-					$rodb->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
+					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
 				}
 
 
-				$rodb->commit();
+				$db->commit();
 			});
 
 			$params['where'] .= sprintf(' AND uri NOT IN (SELECT uri FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
@@ -1455,7 +1455,24 @@ class Sections
 		}
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = DB::DEFAULT_AUTHORIZER_RULES): \Generator
+	static protected function DB(): SQLite3
+	{
+		static $db = null;
+
+		if (null !== $db) {
+			return $db;
+		}
+
+		$rules = DB::DEFAULT_AUTHORIZER_RULES;
+
+		// Allow access to temp database (CREATE TEMP TABLE etc.)
+		$rules['temp.'] = [];
+
+		$db = DB::getInstance()->getRestrictedConnection(compact('rules'));
+		return $db;
+	}
+
+	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
@@ -1464,8 +1481,6 @@ class Sections
 			'limit' => 10000,
 			'where' => '',
 		];
-
-		$allowed_tables['temp.'] = [];
 
 		if (isset($params['sql'])) {
 			$sql = $params['sql'];
@@ -1530,10 +1545,10 @@ class Sections
 			$sql = self::_moduleReplaceJSONExtract($sql, $table);
 		}
 
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		try {
-			$statement = $db->protectSelect($allowed_tables, $sql);
+			$statement = $db->prepare($sql);
 
 			$args = [];
 
