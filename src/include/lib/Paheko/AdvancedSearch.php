@@ -148,6 +148,11 @@ abstract class AdvancedSearch
 					continue;
 				}
 
+				// Type is required
+				if (!isset($column['type'])) {
+					continue;
+				}
+
 				$column = $columns[$condition['column']];
 
 				if (isset($column['where'])) {
