@@ -57,7 +57,7 @@ class DB extends SQLite3
 
 	protected bool $_install_check = true;
 
-	protected ?SQLite3 $_readonly_db = null;
+	protected array $_restricted_db = [];
 
 	static public function getInstance()
 	{
@@ -114,10 +114,6 @@ class DB extends SQLite3
 	{
 		parent::__destruct();
 
-		if (null !== $this->_readonly_db) {
-			$this->_readonly_db = null;
-		}
-
 		if (SQL_DEBUG && null !== $this->callback) {
 			$this->saveLog();
 		}
@@ -168,7 +164,7 @@ class DB extends SQLite3
 	/**
 	 * Log current SQL query
 	 */
-	protected function log(string $method, ?string $timing, $object, ...$params): void
+	public function log(string $method, ?string $timing, $object, ...$params): void
 	{
 		if ($method === '__destruct') {
 			$this->_log_store[] = ['duration' => 0, 'time' => round((microtime(true) - $this->_log_start) * 1000 * 1000), 'sql' => null, 'trace' => null];
@@ -648,37 +644,77 @@ class DB extends SQLite3
 		}
 	}
 
-	protected function connectReadOnly(): void
-	{
-		if (null !== $this->_readonly_db) {
-			return;
-		}
-
-		$this->_readonly_db = new SQLite3('sqlite', ['file' => DB_FILE, 'flags' => \SQLITE3_OPEN_READONLY]);
-		$this->_readonly_db->connect();
-		self::registerCustomFunctions($this->_readonly_db);
-	}
-
-	public function getReadOnlyDB(): SQLite3
-	{
-		$this->connectReadOnly();
-		return $this->_readonly_db;
-	}
-
 	/**
-	 * Use a specific readonly DB connection for restricted statements
+	 * Use a specific DB handle for restricted statements
 	 * because removing the authorizer while having active statements with an authorizer
 	 * yields unexpected results
 	 */
-	public function prepareRestricted(?array $allowed, string $query): \SQLite3Stmt
+	public function getRestrictedConnection(array $options): SQLite3
 	{
-		$this->connectReadOnly();
-		return $this->_readonly_db->prepareRestricted($allowed, $query);
-	}
+		ksort($options);
+		$hash = md5(serialize($options));
 
-	public function iterateRestricted(?array $allowed, string $query, ...$args)
-	{
-		$this->connectReadOnly();
-		return $this->_readonly_db->iterateRestricted($allowed, $query, ...$args);
+		if (array_key_exists($hash, $this->_restricted_db)) {
+			return $this->_restricted_db[$hash];
+		}
+
+		$params = ['file' => DB_FILE];
+
+		if (empty($options['write'])) {
+			$params['flags'] = \SQLITE3_OPEN_READONLY;
+		}
+
+		$db = new SQLite3('sqlite', $params);
+
+		// Enforce foreign_keys
+		$db->exec('PRAGMA foreign_keys = ON;');
+
+		// 10 seconds timeout
+		$db->db->busyTimeout(10 * 1000);
+
+		self::registerCustomFunctions($db);
+
+		if (!empty($options['unicode_like'])) {
+			$db->createFunction('like', [$this, 'unicodeLike']);
+		}
+
+		if (!array_key_exists('rules', $options)) {
+			$rules = self::DEFAULT_AUTHORIZER_RULES;
+		}
+		else {
+			$rules = $options['rules'];
+		}
+
+		// Enable SQL debug log if configured
+		if (SQL_DEBUG || ENABLE_PROFILER) {
+			$db->callback = [$this, 'log'];
+		}
+
+		if (null !== $rules && count($rules)) {
+			// Make sure users_search mirrors access to users
+			if (array_key_exists('users', $rules)) {
+				$rules['users_search'] = $rules['users'];
+				$rules['users_view'] = $rules['users'];
+			}
+
+			// Chain safetyAuthorizer and restrictedAuthorizer
+			$db->setAuthorizer(function(int $action, ...$args) use ($rules) {
+				$r = self::safetyAuthorizer($action, ...$args);
+
+				if ($r !== \SQLite3::OK) {
+					return $r;
+				}
+
+				$r = self::restrictedAuthorizer($rules, $action, ...$args);
+				return $r;
+			});
+		}
+		else {
+			self::toggleAuthorizer($db, true);
+		}
+
+		$this->_restricted_db[$hash] = $db;
+
+		return $db;
 	}
 }
