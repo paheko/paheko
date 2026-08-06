@@ -1901,12 +1901,29 @@ class Utils
 	 */
 	static public function filterHTMLForPDF(string $str): string
 	{
+		// Some security things. This is probably not 100% perfect but will avoid most possible attacks, and alert us.
+
+		// Remove <base href="..."> tags to avoid relative URIs
+		$str = preg_replace('/<base[^>]*>/i', '', $str);
+
+		// Remove any javascript
+		$str = preg_replace('/<script.*<\/script[^>]*>/si', '', $str);
+
+		// This should cover a variety of URL identifiers
+		// src="file:///etc/passwd"
+		// url(\68\74\74\70\3A//evil.com/x.png);
+		// src="data:text/html;base64,..."
+		// @import http://evil.com/style.css;
+		// etc.
+		$pattern = '!([\'"`])((?:[a-z0-9]+:|//).+?)\1|(?:=|import)\s*((?:[a-z0-9]+:|//).+?)(?=[\s>]|$)|url\s*\((.+?)\)!im';
+
 		// Make sure no external request is allowed
 		// (Just in case the PDF program doesn't have an allow-list for remote hosts)
-		$str = preg_replace_callback('/<[^>]+(?:src)\s*=\s*(".*?"|\'.*?\'|[^\s]+)[^>]*>/', function (array $match): string {
-			$url = trim(trim($match[1], '"\''));
+		$str = preg_replace_callback($pattern, function (array $match): string {
+			$url = $match[4] ?? ($match[3] ?? $match[2]);
+			$url = trim(html_entity_decode($url));
 
-			if (false !== strpos($url, 'file:')
+			if (0 !== strpos($url, 'http')
 				|| !self::isLocalURL($url)) {
 				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
 				return '<!-- Disabled external request -->';
