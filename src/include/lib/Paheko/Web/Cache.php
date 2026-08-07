@@ -5,6 +5,8 @@ namespace Paheko\Web;
 use Paheko\Utils;
 use Paheko\UserException;
 
+use KD2\ErrorManager;
+
 use const Paheko\{DATA_ROOT, ROOT, WEB_CACHE_ROOT, WWW_URL};
 
 /**
@@ -54,8 +56,13 @@ class Cache
 
 	static public function getFileExtension(string $name): ?string
 	{
-		if (preg_match('/\.[a-z0-9]{1,10}$/', $name, $match)) {
-			return $match[0];
+		if (preg_match('/\.([a-z0-9]{1,10})$/i', $name, $match)) {
+			$ext = strtolower($match[0]);
+
+			if (preg_match(File::FORBIDDEN_EXTENSIONS, $ext)) {
+				ErrorManager::reportExceptionSilent(new \LogicException('[SECURITY] RCE attempt in web cache: ' . $name));
+				return null;
+			}
 		}
 
 		return null;
@@ -133,6 +140,13 @@ class Cache
 
 		$target = self::getPath($uri);
 
+		$ext = self::getFileExtension($uri);
+
+		// Make sure we don't cache forbidden extensions
+		if (!$ext) {
+			return;
+		}
+
 		@unlink($target);
 		@symlink($destination, $target);
 	}
@@ -140,7 +154,13 @@ class Cache
 	static public function store(string $uri, string $html): void
 	{
 		// Do not store if the page content might be influenced by either POST, query string, or logged-in user
-		if (!isset($_GET['__reload']) && ($_SERVER['REQUEST_METHOD'] != 'GET' || !empty($_SERVER['QUERY_STRING']) || isset($_COOKIE['pko']))) {
+		if (!isset($_GET['__reload']) && ($_SERVER['REQUEST_METHOD'] !== 'GET' || !empty($_SERVER['QUERY_STRING']) || isset($_COOKIE['pko']))) {
+			return;
+		}
+
+		// Protect against trying to store PHP code in the web root
+		if (false !== strpos($html, '<?')) {
+			ErrorManager::reportExceptionSilent(new \LogicException('[SECURITY] RCE attempt in web cache: ' . $uri . "\n" . $html));
 			return;
 		}
 
