@@ -68,7 +68,7 @@ class Search extends Entity
 
 		$this->assert(strlen($this->label) > 0, 'Le champ libellé doit être renseigné');
 		$this->assert(strlen($this->label) <= 500, 'Le champ libellé est trop long');
-		$this->assert(is_null($this->description) || strlen($this->description) <= 50000, 'Le champ description est trop long');
+		$this->assert(is_null($this->description) || strlen($this->description) <= 10000, 'Le champ description est trop long');
 
 		$db = DB::getInstance();
 
@@ -80,6 +80,7 @@ class Search extends Entity
 		$this->assert(array_key_exists($this->target, self::TARGETS));
 
 		$this->assert(strlen($this->content), 'Le contenu de la recherche ne peut être vide');
+		$this->assert(strlen($this->content) <= 100_000, 'Le contenu de la recherche est trop long');
 
 		if ($this->type === self::TYPE_JSON) {
 			$this->assert(json_decode($this->content) !== null, 'Recherche invalide pour le type JSON');
@@ -94,6 +95,7 @@ class Search extends Entity
 
 		if ($this->type == self::TYPE_JSON) {
 			$this->_list = $this->getAdvancedSearch()->make($this->content);
+			$this->_list->setRestrictedTables($this->getProtectedTables());
 			return $this->_list;
 		}
 		else {
@@ -177,18 +179,11 @@ class Search extends Entity
 		$sql = $this->SQL($options);
 
 		$allowed_tables = $this->getProtectedTables();
-		$db = DB::getInstance();
+		$db = DB::getInstance()->getRestrictedConnection(['rules' => $allowed_tables, 'unicode_like' => true]);
 
 		try {
-			$db->toggleUnicodeLike(true);
-
-			// Lock database against changes
-			$db->setReadOnly(true);
-
-			$st = $db->protectSelect($allowed_tables, $sql);
+			$st = $db->prepare($sql);
 			$result = $db->execute($st);
-
-			$db->setReadOnly(false);
 
 			if (empty($options['no_cache'])) {
 				$this->_result = $result;
@@ -198,9 +193,6 @@ class Search extends Entity
 		}
 		catch (DB_Exception $e) {
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
-		}
-		finally {
-			$db->toggleUnicodeLike(false);
 		}
 	}
 
@@ -264,16 +256,11 @@ class Search extends Entity
 		$sql = 'SELECT COUNT(*) FROM (' . $sql . ')';
 
 		$allowed_tables = $this->getProtectedTables();
-		$db = DB::getInstance();
+		$db = DB::getInstance()->getRestrictedConnection(['rules' => $allowed_tables, 'unicode_like' => true]);
 
 		try {
-			$db->toggleUnicodeLike(true);
-
-			// Lock database against changes
-			$db->setReadOnly(true);
-			$st = $db->protectSelect($allowed_tables, $sql);
+			$st = $db->prepare($sql);
 			$r = $db->execute($st);
-			$db->setReadOnly(false);
 
 			$count = (int) $r->fetchArray(\SQLITE3_NUM)[0] ?? 0;
 			$r->finalize();
@@ -286,9 +273,6 @@ class Search extends Entity
 			}
 
 			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
-		}
-		finally {
-			$db->toggleUnicodeLike(false);
 		}
 	}
 
@@ -313,8 +297,9 @@ class Search extends Entity
 
 	public function getProtectedTables(): ?array
 	{
-		if ($this->type != self::TYPE_SQL || $this->target == self::TARGET_ALL) {
-			return null;
+		if ($this->target === self::TARGET_ALL
+			|| $this->type === self::TYPE_SQL_UNPROTECTED) {
+			return DB::DEFAULT_AUTHORIZER_RULES;
 		}
 
 		$list = $this->getAdvancedSearch()->tables();
@@ -322,6 +307,11 @@ class Search extends Entity
 
 		foreach ($list as $name) {
 			$tables[$name] = null;
+
+			if ($name === 'users') {
+				// Make sure we block access to private fields of users table
+				$tables[$name] = DB::DEFAULT_AUTHORIZER_RULES['users'];
+			}
 		}
 
 		return $tables;

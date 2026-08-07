@@ -26,7 +26,6 @@ foreach ($releases as $rv => $release) {
 
 $latest = $i->latest();
 $tpl->assign('downloaded', false);
-$tpl->assign('can_verify', Security::canUseEncryption());
 
 $form->runIf('download', function () use ($i, $tpl) {
 	$version = $_POST['download'];
@@ -46,9 +45,10 @@ $form->runIf('download', function () use ($i, $tpl) {
 
 	$i->download($version);
 	$tpl->assign('downloaded', true);
-	$tpl->assign('verified', $i->verify($version));
+	$tpl->assign('verification', $i->verify($version));
 	$tpl->assign('diff', $i->diff($version));
 	$tpl->assign('version', $version);
+	$tpl->assign('installer', $i);
 }, $csrf_key);
 
 $form->runIf('upgrade', function () use ($i) {

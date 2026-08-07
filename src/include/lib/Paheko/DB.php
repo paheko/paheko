@@ -17,6 +17,32 @@ class DB extends SQLite3
 	 */
 	const APPID = 0x5da2d811;
 
+	/**
+	 * List of tables and columns that are restricted in SQL queries
+	 *
+	 * ~column means the column will always be returned as NULL
+	 * -column or !table means trying to access this column or table will return an error
+	 * see KD2/DB/SQLite3 code for details
+	 *
+	 * Note: column restrictions are only possible with PHP >= 8.0
+	 */
+	const DEFAULT_AUTHORIZER_RULES = [
+		// Allow access to all tables
+		'*' => null,
+		// Restrict access to private fields in users
+		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
+		// Restrict access to some private tables
+		'!emails_queue' => null,
+		'!compromised_passwords_cache' => null,
+		'!compromised_passwords_cache_ranges' => null,
+		'!api_credentials' => null,
+		'!plugins_signals' => null,
+		'!config' => null,
+		'!users_sessions' => null,
+		'!logs' => null,
+		'!web_suspicious_clients' => null,
+	];
+
 	static protected $_instance = null;
 
 	protected ?string $_version = '';
@@ -30,6 +56,8 @@ class DB extends SQLite3
 	protected int $_schema_update = 0;
 
 	protected bool $_install_check = true;
+
+	protected array $_restricted_db = [];
 
 	static public function getInstance()
 	{
@@ -136,7 +164,7 @@ class DB extends SQLite3
 	/**
 	 * Log current SQL query
 	 */
-	protected function log(string $method, ?string $timing, $object, ...$params): void
+	public function log(string $method, ?string $timing, $object, ...$params): void
 	{
 		if ($method === '__destruct') {
 			$this->_log_store[] = ['duration' => 0, 'time' => round((microtime(true) - $this->_log_start) * 1000 * 1000), 'sql' => null, 'trace' => null];
@@ -614,5 +642,85 @@ class DB extends SQLite3
 
 			$this->exec(sprintf('DROP INDEX IF EXISTS %s;', $index));
 		}
+	}
+
+	/**
+	 * Use a specific DB handle for restricted statements
+	 * because removing the authorizer while having active statements with an authorizer
+	 * yields unexpected results
+	 */
+	public function getRestrictedConnection(array $options): SQLite3
+	{
+		ksort($options);
+		$hash = md5(serialize($options));
+
+		if (array_key_exists($hash, $this->_restricted_db)) {
+			return $this->_restricted_db[$hash];
+		}
+
+		$params = ['file' => DB_FILE];
+
+		if (empty($options['write'])) {
+			$params['flags'] = \SQLITE3_OPEN_READONLY;
+		}
+
+		$db = new SQLite3('sqlite', $params);
+
+		// Enforce foreign_keys
+		$db->exec('PRAGMA foreign_keys = ON;');
+
+		// 10 seconds timeout
+		$db->db->busyTimeout(10 * 1000);
+
+		self::registerCustomFunctions($db);
+
+		if (!empty($options['unicode_like'])) {
+			$db->createFunction('like', [$this, 'unicodeLike']);
+		}
+
+		if (!array_key_exists('rules', $options)) {
+			$rules = self::DEFAULT_AUTHORIZER_RULES;
+		}
+		elseif (isset($options['rules'])) {
+			$rules = $options['rules'];
+		}
+		else {
+			// Set options['rules'] = NULL to disable any rules
+			$rules = null;
+		}
+
+		// Enable SQL debug log if configured
+		if (SQL_DEBUG || ENABLE_PROFILER) {
+			$db->callback = [$this, 'log'];
+		}
+
+		if (null !== $rules && count($rules)) {
+			// Make sure users_search mirrors access to users
+			if (array_key_exists('users', $rules)) {
+				// Make sure users table apply the correct columns rules
+				$rules['users'] ??= self::DEFAULT_AUTHORIZER_RULES['users'];
+				$rules['users_search'] = $rules['users'];
+				$rules['users_view'] = $rules['users'];
+			}
+
+			// Chain safetyAuthorizer and restrictedAuthorizer
+			$db->setAuthorizer(function(int $action, ...$args) use ($rules) {
+				$r = self::safetyAuthorizer($action, ...$args);
+
+				if ($r !== \SQLite3::OK) {
+					return $r;
+				}
+
+				$r = self::restrictedAuthorizer($rules, $action, ...$args);
+				return $r;
+			});
+		}
+		else {
+			self::toggleAuthorizer($db, true);
+		}
+
+		$this->_restricted_db[$hash] = $db;
+
+		return $db;
 	}
 }

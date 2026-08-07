@@ -826,7 +826,7 @@ class CLI
 		}
 		else {
 			echo "[SQL] " . $sql . PHP_EOL;
-			$st = $db->protectSelect(null, $sql);
+			$st = $db->getRestrictedConnection()->prepare($sql);
 		}
 
 		$r = $st->execute();

@@ -53,8 +53,8 @@ elseif (f('category')) {
 
 	$users = iterator_to_array(Users::iterateAssocByCategory($category->id));
 }
-elseif (qg('users')) {
-	$users = explode(',', qg('users'));
+elseif (isset($_GET['users']) && is_string($_GET['users'])) {
+	$users = explode(',', $_GET['users']);
 	$users = array_map('intval', $users);
 	$users = Users::getNames($users);
 }

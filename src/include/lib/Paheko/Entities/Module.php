@@ -63,21 +63,21 @@ class Module extends Entity
 	protected string $name;
 
 	protected string $label;
-	protected ?string $description;
-	protected ?string $author;
-	protected ?string $author_url;
-	protected ?string $restrict_section;
-	protected ?int $restrict_level;
-	protected bool $home_button;
-	protected bool $menu;
-	protected ?\stdClass $config;
-	protected bool $enabled;
-	protected bool $web;
+	protected ?string $description = null;
+	protected ?string $author = null;
+	protected ?string $author_url = null;
+	protected ?string $restrict_section = null;
+	protected ?int $restrict_level = null;
+	protected bool $home_button = false;
+	protected bool $menu = false;
+	protected ?\stdClass $config = null;
+	protected bool $enabled = false;
+	protected bool $web = false;
 
 	/**
 	 * System modules are always available, disabling them only hides the links
 	 */
-	protected bool $system;
+	protected bool $system = false;
 
 	protected bool $_table_exists;
 
@@ -99,7 +99,7 @@ class Module extends Entity
 	{
 		$this->assert(!$this->_broken_message, $this->_broken_message);
 		$this->assertIsValid();
-		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
+		$this->assert(isset($this->label) && trim($this->label) !== '', 'Le libellé ne peut rester vide');
 		$this->assert(!isset($this->author_url) || preg_match('!^(?:https?://|mailto:)!', $this->author_url), 'L\'adresse du site de l\'auteur est invalide');
 
 		$this->assert(!isset($this->restrict_section) || in_array($this->restrict_section, Session::SECTIONS, true), 'Restriction de section invalide');

@@ -495,7 +495,7 @@ class Modules
 				}
 
 				// Same for dist file
-				if ($dist_file = $module->fetchDistFile($local_name)) {
+				if ($module->hasDistFile($local_name) && ($dist_file = $module->fetchDistFile($local_name))) {
 					if (md5($dist_file) == md5($content)) {
 						continue;
 					}

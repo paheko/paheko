@@ -862,6 +862,36 @@ class Functions
 		unset($params['method'], $params['path'], $params['assign'], $params['assign_code'], $params['fail']);
 
 		if (isset($params['url'])) {
+			$url = parse_url($params['url']);
+			$url['scheme'] ??= '';
+			$url['host'] ??= '';
+
+			if (!empty($url['path']) && $url['path'] !== '/') {
+				throw new TemplateException('Unexpected path in "url" parameter: ' . $params['url']);
+			}
+
+			if (!in_array($url['scheme'], ['http', 'https'])) {
+				throw new TemplateException('Invalid scheme in "url" parameter: ' . $params['url']);
+			}
+
+			if (!empty($url['port'])) {
+				throw new TemplateException('Unauthorized port in "url" parameter: ' . $params['url']);
+			}
+
+			if (!trim($url['host']) || preg_match('/^[\d.]+$|\[/', $url['host'])) {
+				throw new TemplateException('Unauthorized host in "url" parameter: ' . $url['host']);
+			}
+
+			static $host_to_ip = [];
+			// This only returns IPv4 addresses, making IPv6 only hosts unreachable
+			$host_to_ip[$url['host']] ??= gethostbyname($url['host']);
+			$ip = $host_to_ip[$url['host']];
+
+			// Don't allow to make requests to localhost or internal networks
+			if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+				throw new TemplateException('Unauthorized resolved IP in "url" parameter: ' . $ip);
+			}
+
 			if (empty($params['user'])) {
 				throw new TemplateException('"user" parameter is missing');
 			}
@@ -870,7 +900,7 @@ class Functions
 				throw new TemplateException('"password" parameter is missing');
 			}
 
-			$url = str_replace('://', '://' . $params['user'] . '@' . $params['password'], $params['url']);
+			$url = sprintf('%s://%s:%s@%s', $url['scheme'], $params['user'], $params['password'], $url['host']);
 			unset($params['user'], $params['password'], $params['url']);
 		}
 		else {
@@ -891,7 +921,7 @@ class Functions
 		// External HTTP request
 		if ($url) {
 			$http = new HTTP;
-			$url = rtrim($url, '/') . '/' . $path;
+			$url = rtrim($url, '/') . '/api/' . $path;
 			$body ??= json_encode($params);
 
 			if ($method === 'POST') {

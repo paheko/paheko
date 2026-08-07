@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate;
 
 use KD2\DB\DB_Exception;
+use KD2\DB\SQLite3;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Extensions;
@@ -68,32 +69,6 @@ class Sections
 		'assign',
 		'debug',
 		'count',
-	];
-
-	/**
-	 * List of tables and columns that are restricted in SQL queries
-	 *
-	 * ~column means the column will always be returned as NULL
-	 * -column or !table means trying to access this column or table will return an error
-	 * see KD2/DB/SQLite3 code for details
-	 *
-	 * Note: column restrictions are only possible with PHP >= 8.0
-	 */
-	const SQL_TABLES = [
-		// Allow access to all tables
-		'*' => null,
-		// Restrict access to private fields in users
-		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
-		// Restrict access to some private tables
-		'!emails' => null,
-		'!emails_queue' => null,
-		'!compromised_passwords_cache' => null,
-		'!compromised_passwords_cache_ranges' => null,
-		'!api_credentials' => null,
-		'!plugins_signals' => null,
-		'!config' => null,
-		'!users_sessions' => null,
-		'!logs' => null,
 	];
 
 	static protected $_cache = [];
@@ -317,7 +292,7 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
@@ -520,7 +495,7 @@ class Sections
 		if (empty($params['schema']) && empty($params['select'])) {
 			throw new TemplateException('Missing schema parameter');
 		}
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
@@ -785,7 +760,7 @@ class Sections
 
 		if (!empty($params['assign_list'])) {
 			$list = [];
-			$db = DB::getInstance();
+			$db = self::DB();
 			$sql = sprintf('SELECT id, label, code FROM %s WHERE archived = %d ORDER BY code, label COLLATE U_NOCASE;',
 				$params['tables'],
 				$params['archived']
@@ -828,12 +803,15 @@ class Sections
 			$params['select'] = 'u.*';
 		}
 
-		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number, u.%s AS _email',
+		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number',
 			$id_field,
 			$db->quoteIdentifier($login_field),
 			$db->quoteIdentifier($number_field),
-			$db->quoteIdentifier($email_field)
 		);
+
+		if ($email_field) {
+			$params['select'] .= sprintf(', u.%s AS _email', $db->quoteIdentifier($email_field));
+		}
 
 		$params['tables'] = 'users_view AS u';
 
@@ -1148,7 +1126,7 @@ class Sections
 			unset($params['private']);
 		}
 
-		$allowed_tables = self::SQL_TABLES;
+		$allowed_tables = DB::DEFAULT_AUTHORIZER_RULES;
 
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
@@ -1244,7 +1222,7 @@ class Sections
 
 		unset($params['duplicates']);
 
-		foreach (self::sql($params, $tpl, $line, $allowed_tables) as $row) {
+		foreach (self::sql($params, $tpl, $line) as $row) {
 			if (empty($params['count'])) {
 				$data = $row;
 				unset($data['points'], $data['snippet'], $data['title_snippet']);
@@ -1292,7 +1270,7 @@ class Sections
 	static protected function _getPageIdFromPath(string $path): ?int
 	{
 		return self::cache('page_id_' . md5($path), function () use ($path) {
-			$db = DB::getInstance();
+			$db = self::DB();
 			return $db->firstColumn('SELECT id FROM web_pages WHERE uri = ?;', Utils::basename($path)) ?: null;
 		});
 	}
@@ -1313,7 +1291,8 @@ class Sections
 			return;
 		}
 
-		$db = DB::getInstance();
+		$db = self::DB();
+
 		$params['where'] ??= '';
 
 		// Fetch page
@@ -1372,7 +1351,7 @@ class Sections
 				$db->begin();
 
 				// Put files mentioned in the text in a temporary table
-				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, uri);');
+				$db->exec('CREATE TEMP TABLE IF NOT EXISTS temp.files_tmp_in_text (page_id, uri);');
 
 				foreach ($page->listTaggedAttachments() as $uri) {
 					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
@@ -1478,7 +1457,24 @@ class Sections
 		}
 	}
 
-	static public function sql(array $params, UserTemplate $tpl, int $line, ?array $allowed_tables = self::SQL_TABLES): \Generator
+	static protected function DB(): SQLite3
+	{
+		static $db = null;
+
+		if (null !== $db) {
+			return $db;
+		}
+
+		$rules = DB::DEFAULT_AUTHORIZER_RULES;
+
+		// Allow access to temp database (CREATE TEMP TABLE etc.)
+		$rules['temp.'] = [];
+
+		$db = DB::getInstance()->getRestrictedConnection(compact('rules'));
+		return $db;
+	}
+
+	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
@@ -1551,13 +1547,10 @@ class Sections
 			$sql = self::_moduleReplaceJSONExtract($sql, $table);
 		}
 
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		try {
-			// Lock database against changes
-			$db->setReadOnly(true);
-
-			$statement = $db->protectSelect($allowed_tables, $sql);
+			$statement = $db->prepare($sql);
 
 			$args = [];
 
@@ -1580,8 +1573,6 @@ class Sections
 			if (!empty($params['explain'])) {
 				self::_debugExplain($statement->getSQL(true));
 			}
-
-			$db->setReadOnly(false);
 		}
 		catch (DB_Exception $e) {
 			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {

@@ -32,6 +32,8 @@ class Fee extends Entity
 	protected ?int $id_year = null;
 	protected ?int $id_project = null;
 
+	const FORMULA_RESTRICTED_RULES = ['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null];
+
 	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'amount' && $value !== null) {
@@ -97,13 +99,23 @@ class Fee extends Entity
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}
 
+	static public function getFormulaConnection()
+	{
+		$rules = self::FORMULA_RESTRICTED_RULES;
+		// We don't want to ignore columns, but forbid them
+		$rules['users'] = array_map(fn($rule) => str_replace('~', '-', $rule), DB::DEFAULT_AUTHORIZER_RULES['users']);
+
+		$db = DB::getInstance()->getRestrictedConnection(compact('rules'));
+		return $db;
+	}
+
 	public function getAmountForUser(int $user_id): ?int
 	{
 		if ($this->amount) {
 			return $this->amount;
 		}
 		elseif (null !== $this->formula) {
-			$db = DB::getInstance();
+			$db = $this->getFormulaConnection();
 			return (int) $db->firstColumn($this->getFormulaSQL(), $user_id);
 		}
 
@@ -118,9 +130,9 @@ class Fee extends Entity
 	protected function checkFormula(): ?string
 	{
 		try {
-			$db = DB::getInstance();
+			$db = $this->getFormulaConnection();
 			$sql = $this->getFormulaSQL();
-			$db->protectSelect(['users' => null, 'services_users' => null, 'services' => null, 'services_fees' => null], $sql);
+			$db->firstColumn($sql);
 			return null;
 		}
 		catch (DB_Exception $e) {

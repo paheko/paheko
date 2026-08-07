@@ -1901,15 +1901,45 @@ class Utils
 	 */
 	static public function filterHTMLForPDF(string $str): string
 	{
-		// Make sure no external request is allowed
-		// (Just in case the PDF program doesn't have an allow-list for remote hosts)
-		$str = preg_replace_callback('/<[^>]+(?:src)\s*=\s*(".*?"|\'.*?\'|[^\s]+)[^>]*>/', function (array $match): string {
-			$url = trim(trim($match[1], '"\''));
+		// Some security things.
+		// This is probably not 100% perfect but will avoid most possible attacks, and might alert us.
+		// Using a proxy is better, see config.dist.php for details
 
-			if (false !== strpos($url, 'file:')
+		// Remove <base href="..."> tags to avoid relative URIs
+		$str = preg_replace('/<base[^>]*>/i', '', $str);
+
+		// Remove any javascript
+		$str = preg_replace('/<script.*?<\/script[^>]*>/si', '', $str);
+
+		// Remove any CSS @import rules
+		// @import http://evil.com/style.css;
+		// @import url('http://evil.com/style.css');
+		$str = preg_replace('/@import.*(?:;|$);/ims', '', $str);
+
+		// Remove meta tags: content="0; url=http://evil.com/"
+		$str = preg_replace('!<meta[^>]*url\s*=[^>]*>!i', '', $str);
+
+		// Restrict external URLs in CSS
+		$str = preg_replace_callback('!url\s*\((.+?)\)!im', function (array $match): string {
+			$url = trim(html_entity_decode(trim($match[1], '\'"')));
+
+			if (0 === strpos($url, 'http')
+				&& (self::isLocalURL($url) || 0 === strpos($url, 'https://paheko.cloud/'))) {
+				return $match[0];
+			}
+
+			ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in CSS used in PDF: ' . $match[0]));
+			return 'url()';
+		}, $str);
+
+		// Restrict external URLs in HTML tags
+		$str = preg_replace_callback('!(?:src|data)\s*=\s*([\'"`])((?:[a-z0-9]+:|//).+?)\1!im', function (array $match): string {
+			$url = trim(html_entity_decode($match[2]));
+
+			if (0 !== strpos($url, 'http')
 				|| !self::isLocalURL($url)) {
 				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
-				return '<!-- Disabled external request -->';
+				return '';
 			}
 
 			return $match[0];
@@ -2124,7 +2154,7 @@ class Utils
 	 */
 	static public function getVersionHash(): string
 	{
-		return substr(sha1(paheko_version() . paheko_manifest() . ROOT . SECRET_KEY), 0, 10);
+		return substr(sha1(paheko_version() . paheko_manifest() . ROOT . LOCAL_SECRET_KEY), 0, 10);
 	}
 
 	/**

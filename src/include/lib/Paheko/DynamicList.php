@@ -6,6 +6,7 @@ use Paheko\DB;
 use Paheko\Users\Session;
 
 use KD2\DB\EntityManager as EM;
+use KD2\DB\SQLite3;
 
 class DynamicList implements \Countable
 {
@@ -31,6 +32,11 @@ class DynamicList implements \Countable
 	 * List of tables (including joins)
 	 */
 	protected string $tables;
+
+	/**
+	 * List of restricted tables for authorizer (optional)
+	 */
+	protected array $restricted_tables = [];
 
 	/**
 	 * WHERE clause
@@ -248,19 +254,24 @@ class DynamicList implements \Countable
 		}
 	}
 
-	public function removeColumns(array $columns)
+	public function removeColumns(array $columns): void
 	{
 		foreach ($columns as $name) {
 			unset($this->columns[$name]);
 		}
 	}
 
-	public function hasColumn(string $key)
+	public function hasColumn(string $key): bool
 	{
 		return array_key_exists($key, $this->columns);
 	}
 
-	public function addTables(string $tables)
+	public function setRestrictedTables(array $tables): void
+	{
+		$this->restricted_tables = $tables;
+	}
+
+	public function addTables(string $tables): void
 	{
 		$this->tables .= ' ' . ltrim($tables);
 	}
@@ -270,7 +281,7 @@ class DynamicList implements \Countable
 	 * (using the SELECT clause passed) instead of the specified columns.
 	 * Columns will only be used for the header and ordering
 	 */
-	public function setEntity(string $entity, string $select = '*')
+	public function setEntity(string $entity, string $select = '*'): void
 	{
 		$this->entity = $entity;
 		$this->entity_select = $select;
@@ -301,11 +312,21 @@ class DynamicList implements \Countable
 		return $this->group;
 	}
 
+	public function DB(): SQLite3
+	{
+		if (count($this->restricted_tables)) {
+			return DB::getInstance()->getRestrictedConnection(['rules' => $this->restricted_tables]);
+		}
+		else {
+			return DB::getInstance();
+		}
+	}
+
 	public function count(): int
 	{
 		if (null === $this->count_result) {
 			$sql = $this->SQL(true);
-			$this->count_result = DB::getInstance()->firstColumn($sql, $this->parameters);
+			$this->count_result = $this->DB()->firstColumn($sql, $this->parameters);
 		}
 
 		return (int) $this->count_result;
@@ -389,7 +410,7 @@ class DynamicList implements \Countable
 			$this->iterator = EM::getInstance($this->entity)->iterate($this->SQL());
 		}
 		else {
-			$this->iterator = DB::getInstance()->iterate($this->SQL(), $this->parameters);
+			$this->iterator = $this->DB()->iterate($this->SQL(), $this->parameters);
 		}
 
 		$row = null;
