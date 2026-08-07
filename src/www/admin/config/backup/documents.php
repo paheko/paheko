@@ -18,7 +18,11 @@ $form->runIf('restore', function () {
 		}
 
 		// Decompress (inflate) raw data
-		if (empty($_FILES['file1']['error']) && !empty($_FILES['file1']['tmp_name']) && f('compressed')) {
+		if (empty($_FILES['file1']['error'])
+			&& !empty($_FILES['file1']['tmp_name'])
+			&& is_uploaded_file($_FILES['file1']['tmp_name'])
+			&& f('compressed'))
+		{
 			$f = $_FILES['file1']['tmp_name'];
 			$in = fopen($f, 'rb');
 			$out = fopen($f . '.inflated', 'w');

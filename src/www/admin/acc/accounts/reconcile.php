@@ -24,6 +24,8 @@ if ($account->id_chart != $current_year->id_chart) {
 	Utils::redirect(ADMIN_URL . 'acc/accounts/?chart_change');
 }
 
+$csrf_key = 'acc_reconcile_' . $account->id;
+
 $start = new \DateTime('first day of this month');
 $end = new \DateTime('last day of this month');
 $filter = (int)qg('filter') ?: $account::RECONCILE_ALL;
@@ -90,7 +92,7 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $ac
 			ADMIN_URL, $account->id(), $start->format('01/m/Y'), $start->format('t/m/Y'), $filter, $desc);
 		Utils::redirect($url);
 	}
-}, 'acc_reconcile_' . $account->id());
+}, $csrf_key);
 
 $prev = clone $start;
 $next = clone $start;
@@ -144,7 +146,8 @@ $tpl->assign(compact(
 	'has_unreconciled',
 	'has_advanced_options',
 	'desc',
-	'desc_options'
+	'desc_options',
+	'csrf_key'
 ));
 
 $tpl->display('acc/accounts/reconcile.tpl');

@@ -27,7 +27,7 @@ class LegacySections
 	 */
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$db = DB::getInstance();
+		$db = Sections::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];
@@ -262,7 +262,7 @@ class LegacySections
 			throw new TemplateException('Missing schema parameter');
 		}
 
-		$db = DB::getInstance();
+		$db = Sections::DB();
 
 		if (isset($params['module'])) {
 			$name = $params['module'];

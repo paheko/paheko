@@ -729,12 +729,9 @@ class Files
 		File::validateFileName($name);
 		File::validatePath($parent);
 
-		File::validateCanHTML($name, $parent, $session);
-
 		$target = $parent . '/' . $name;
 
 		self::ensureDirectoryExists($parent);
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 
 		$file = self::get($target);
 
@@ -743,6 +740,7 @@ class Files
 			$file->set('path', $target);
 			$file->set('parent', $parent);
 			$file->set('name', $name);
+			$file->set('mime', 'text/plain');
 		}
 
 		if (isset($source['pointer'])) {
@@ -752,28 +750,19 @@ class Files
 
 			$file->set('size', ftell($source['pointer']));
 			fseek($source['pointer'], 0, SEEK_SET);
-			$file->set('mime', mime_content_type($source['pointer']));
 		}
 		elseif (isset($source['path'])) {
-			$file->set('mime', finfo_file($finfo, $source['path']));
 			$file->set('size', filesize($source['path']));
 			$file->set('modified', new \DateTime('@' . filemtime($source['path'])));
 		}
 		elseif (isset($source['content'])) {
 			$file->set('size', strlen($source['content']));
-			$file->set('mime', finfo_buffer($finfo, $source['content']));
 		}
 		else {
 			$file->set('size', 0);
-			$file->set('mime', 'text/plain');
 		}
 
 		$file->set('image', in_array($file->mime, $file::IMAGE_TYPES));
-
-		// Force empty files as text/plain
-		if ($file->mime == 'application/x-empty' && !$file->size) {
-			$file->set('mime', 'text/plain');
-		}
 
 		return $file;
 	}

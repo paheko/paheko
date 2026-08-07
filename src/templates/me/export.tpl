@@ -47,9 +47,9 @@
 	{foreach from=$services_list->iterate() item="row"}
 		<tr>
 			<th scope="row">{$row.label}</th>
+			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td>{$row.expiry|date_short}</td>
-			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
 		</tr>

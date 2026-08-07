@@ -125,6 +125,15 @@ nav.tabs aside form {
     text-align: left;
 }
 
+.menu-btn > span > span form {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-btn > span > span form button {
+    justify-content: start;
+}
+
 .menu-btn:hover > b, .menu-btn:active > b, .menu-btn.active > b {
     background-color: rgba(var(--gSecondColor), .7);
 }

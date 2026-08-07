@@ -524,21 +524,27 @@ class Session extends \KD2\UserSession
 	{
 		$user = Users::getFromLogin($login);
 
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
 		if (!$user) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'));
 			throw new UserException('Aucun membre trouvé avec cet identifiant.');
 		}
 
 		if (!$user->canLogin()) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
 		}
 
 		if (!$user->canRecoverPassword()) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Vous n\'avez pas le droit de changer votre mot de passe. Merci de demander à un⋅e administrateur⋅trice.');
 		}
 
 		$email = $user->email();
 
 		if (!trim($email)) {
+			Log::add(Log::LOGIN_FAIL, compact('user_agent'), $user->id);
 			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
 
@@ -585,7 +591,7 @@ class Session extends \KD2\UserSession
 	protected function makePasswordRecoveryHash(User $user, ?int $expire = null): string
 	{
 		// valide pour 1 heure minimum
-		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
+		$expire ??= time() + 3600;
 
 		$hash = hash_hmac('sha256', $user->email() . $user->id() . $user->password . $expire, LOCAL_SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
@@ -594,7 +600,7 @@ class Session extends \KD2\UserSession
 
 	protected function makePasswordRecoveryQuery(User $user): string
 	{
-		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
+		$expire = time() + 3600;
 		$hash = $this->makePasswordRecoveryHash($user, $expire);
 		$id = base_convert($user->id(), 10, 36);
 		$expire = base_convert($expire, 10, 36);
@@ -616,10 +622,9 @@ class Session extends \KD2\UserSession
 		$id = (int) base_convert($id, 36, 10);
 		$expire = (int) base_convert($expire, 36, 10);
 
-		$expire_timestamp = ($expire * 3600) + strtotime('2017-01-01');
 
 		// Check that the query has not expired yet
-		if (time() / 3600 > $expire_timestamp) {
+		if ($expire < time()) {
 			return null;
 		}
 

@@ -216,6 +216,7 @@ class Backup
 		// Use a temporary file so that if BACKUPS_ROOT is on NFS,
 		// we don't have issues with SQLite writing over NFS
 		$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
+		$start = time();
 
 		if (!$db->hasFeatures('vacuum_into')) {
 			throw new \LogicException('Your SQLite version is too old: SQLite 3.27+ is required');
@@ -231,6 +232,11 @@ class Backup
 
 		if (null !== $destination) {
 			rename($tmp, $destination);
+
+			// The backup can take a while, make sure the file time is defined
+			// as when the backup started, not when it finished, to avoid issues
+			// with running the cron only once a day
+			touch($destination, $start);
 		}
 
 		return $destination ?? $tmp;
@@ -463,7 +469,10 @@ class Backup
 	 */
 	static public function restoreFromUpload(array $file, ?Session $session, bool $check_integrity = true): int
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error'])) {
+		if (empty($file['size'])
+			|| empty($file['tmp_name'])
+			|| !empty($file['error'])
+			|| !is_uploaded_file($file['tmp_name'])) {
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
 		}
 

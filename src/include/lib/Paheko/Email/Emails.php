@@ -129,12 +129,6 @@ class Emails
 			return null;
 		}
 
-		foreach ($attachments as $i => $file) {
-			if (!is_object($file) || !($file instanceof File) || $file->context() != $file::CONTEXT_ATTACHMENTS) {
-				throw new \InvalidArgumentException(sprintf('Attachment #%d is not a valid file', $i));
-			}
-		}
-
 		$list = [];
 
 		// Build email list
@@ -239,10 +233,6 @@ class Emails
 			$data = $r['data'];
 			$recipient_pgp_key = $r['pgp_key'];
 
-			// We won't try to reject invalid/optout recipients here,
-			// it's done in the queue clearing (more efficient)
-			$recipient_hash = Email::getHash($recipient);
-
 			// Replace placeholders in template: {{$name}}, etc.
 			if ($template) {
 				$template->assignArray((array) $data, null, false);
@@ -270,29 +260,13 @@ class Emails
 			// but personal messages, reminders, and mailings are sent wrapped in the
 			// global HTML template
 			if (!$is_system) {
-				if ($context === self::CONTEXT_BULK) {
-					$content_html = self::replaceExternalLinksInHTML($content_html);
-				}
-
 				$content_html = self::applyHTMLTemplate($content_html);
 			}
 
-			$signal = Plugins::fire('email.queue.insert', true,
-				compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+			$id = self::appendToQueue($context, $recipient, $subject, $content, compact('sender', 'recipient_pgp_key', 'content_html', 'attachments'));
 
-			if ($signal && $signal->isStopped()) {
-				// queue insert was done by a plugin, stop here
+			if (null === $id) {
 				continue;
-			}
-
-			unset($signal);
-
-			$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
-
-			$id = $db->lastInsertId();
-
-			foreach ($attachments as $file) {
-				$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
 			}
 
 			$ids[] = $id;
@@ -302,21 +276,9 @@ class Emails
 		if (MAIL_TEST_RECIPIENTS
 			&& ($context === self::CONTEXT_BULK || $context === self::CONTEXT_NOTIFICATION || $context === self::CONTEXT_REMINDER)
 			&& count($ids)) {
-			$recipient_pgp_key = null;
 
 			foreach (MAIL_TEST_RECIPIENTS as $recipient) {
-				$recipient_hash = Email::getHash($recipient);
-				$signal = Plugins::fire('email.queue.insert', true,
-					compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
-
-				if ($signal && $signal->isStopped()) {
-					// queue insert was done by a plugin, stop here
-					continue;
-				}
-
-				unset($signal);
-
-				$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+				self::appendToQueue($context, $recipient, $subject, $content, compact('sender', 'content_html', 'attachments'));
 			}
 		}
 
@@ -342,6 +304,45 @@ class Emails
 		}
 
 		return $ids;
+	}
+
+	static public function appendToQueue(int $context, string $recipient, string $subject, string $content, array $options = []): ?int
+	{
+		$sender = $options['sender'] ?? null;
+		$attachments = $options['attachments'] ?? [];
+		$recipient_pgp_key = $options['recipient_pgp_key'] ?? null;
+		$content_html = $options['content_html'] ?? null;
+
+		foreach ($attachments as $i => $file) {
+			if (!is_object($file) || !($file instanceof File) || $file->context() != $file::CONTEXT_ATTACHMENTS) {
+				throw new \InvalidArgumentException(sprintf('Attachment #%d is not a valid file', $i));
+			}
+		}
+
+		// We won't try to reject invalid/optout recipients here,
+		// it's done in the queue clearing (more efficient)
+		$recipient_hash = Email::getHash($recipient);
+
+		$db = DB::getInstance();
+		$signal = Plugins::fire('email.queue.insert', true,
+			compact('context', 'recipient', 'sender', 'subject', 'content', 'recipient_hash', 'recipient_pgp_key', 'content_html', 'attachments'));
+
+		if ($signal && $signal->isStopped()) {
+			// queue insert was done by a plugin, stop here
+			return null;
+		}
+
+		unset($signal);
+
+		$db->insert('emails_queue', compact('sender', 'subject', 'context', 'recipient', 'recipient_pgp_key', 'recipient_hash', 'content', 'content_html'));
+
+		$id = $db->lastInsertId();
+
+		foreach ($attachments as $file) {
+			$db->insert('emails_queue_attachments', ['id_queue' => $id, 'path' => $file->path]);
+		}
+
+		return $id;
 	}
 
 	/**
@@ -598,7 +599,7 @@ class Emails
 	 */
 	static public function resetFailed(bool $force = false): void
 	{
-		$condition = $force ? '' : 'AND sending_started < datetime(\'now\', \'-3 hours\')';
+		$condition = $force ? '' : 'AND sending_started < datetime(\'now\', \'localtime\', \'-3 hours\')';
 
 		$sql = sprintf('UPDATE emails_queue SET sending = 0, sending_started = NULL
 			WHERE sending = 1 %s;', $condition);
@@ -911,7 +912,23 @@ class Emails
 
 	static public function handleManualBounce(string $raw_address, string $type, ?string $message): ?array
 	{
-		$address = self::getOrCreateEmail($raw_address);
+		try {
+			$address = self::getOrCreateEmail($raw_address);
+		}
+		catch (\InvalidArgumentException $e) {
+			// In case raw_address is "Undisclosed Recipients <X>" or similar
+			// try to find address from unsubscribe link
+			if (preg_match('/un=([a-z0-9A-Z]+)/', $message, $match)) {
+				$address = getEmailFromQueryStringValue($match[1]);
+
+				if (!$address) {
+					return null;
+				}
+			}
+			else {
+				return null;
+			}
+		}
 
 		$address->hasBounced($type, $message);
 		Plugins::fire('email.bounce.save.before', false, compact('address', 'raw_address', 'type', 'message'));
@@ -941,6 +958,10 @@ class Emails
 	/**
 	 * Redirect to external resource
 	 * @return exit|null|string Will return a string if the signed link has expired but is still valid
+	 * @deprecated No longer used, remove in 1.4.0 or 1.5.0 (TODO)
+	 * The rewrite of externals URLs has been removed as it creates issues if SECRET_KEY is changed
+	 * and it doesn't make it clear what the user is clicking on, it is better to put direct links
+	 * in the mail body.
 	 */
 	static public function redirectURL(string $str): ?string
 	{
@@ -973,57 +994,5 @@ class Emails
 
 		Utils::redirect($url);
 		return null;
-	}
-
-	/**
-	 * Sign (HMAC) external links in mailing body,
-	 * to make sure that we are using the same URL everywhere
-	 * and limit the number of external domains used.
-	 */
-	static public function encodeURL(string $url): string
-	{
-		$parts = parse_url($url);
-
-		if (empty($parts['scheme'])
-			|| ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
-			return $url;
-		}
-
-		// Don't do redirects for URLs from the same domain name
-		if (Utils::isLocalURL($url)) {
-			return $url;
-		}
-
-		$url = preg_replace('!^https?://!', '', $url);
-		$expiry = time() + 3600*24*365;
-		$hash = hash_hmac('sha1', $expiry . $url, SECRET_KEY);
-
-		$param = sprintf('%s:%s:%s', $hash, $expiry, $url);
-		return WWW_URL . '?rd=' . rawurlencode($param);
-	}
-
-	static public function replaceExternalLinksInHTML(string $html): string
-	{
-		// Replace external links with redirect URL
-		// But don't trigger phishing detection for external links
-		// eg. <a href="https://example.org/">https://example.org/</a>
-		// shouldn't be changed to
-		// <a href="https://paheko.example.org/?rd=example.org">https://example.org/</a>
-		// so we are replacing the text of the link as well
-		$html = preg_replace_callback('!(<a[^>]*href=")([^"]*)("[^>]*>)(.*)</a>!U', function ($match) {
-			$text = $match[4];
-
-			$url = self::encodeURL($match[2]);
-
-			// Only replace content if URL is external
-			if ($match[2] === $match[4]
-				&& $match[2] !== $url) {
-				$text = '[cliquer ici]';
-			}
-
-			return $match[1] . $url . $match[3] . $text . '</a>';
-		}, $html);
-
-		return $html;
 	}
 }

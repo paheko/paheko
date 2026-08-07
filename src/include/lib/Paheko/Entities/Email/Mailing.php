@@ -231,7 +231,7 @@ class Mailing extends Entity
 			FROM mailings_recipients r1
 			INNER JOIN mailings m ON m.id = r1.id_mailing
 			INNER JOIN mailings_recipients r2 ON r2.id_email = r1.id_email AND r2.id_mailing = %d
-			WHERE m.sent >= datetime(\'now\', \'-%d days\')
+			WHERE m.sent >= datetime(\'now\', \'localtime\', \'-%d days\')
 			GROUP BY m.id', $this->id(), $delay);
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {

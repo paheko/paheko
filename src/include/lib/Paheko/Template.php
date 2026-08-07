@@ -132,6 +132,7 @@ class Template extends Smartyer
 		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
+		$this->assign('pdf_enabled', Utils::canDoPDF());
 
 		$session = null;
 
@@ -139,11 +140,13 @@ class Template extends Smartyer
 			$session = Session::getInstance();
 			$config = Config::getInstance();
 			$this->assign('config', $config);
+			$this->assign('currency_symbol', $config->getCurrencySymbol());
 			$this->assign('site_url', $config->getSiteURL());
 		}
 		else {
 			$this->assign('config', null);
 			$this->assign('site_url', null);
+			$this->assign('currency_symbol', null);
 		}
 
 		$is_logged = $session ? $session->isLogged() : null;

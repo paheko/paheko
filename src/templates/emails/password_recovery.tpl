@@ -6,4 +6,6 @@ Il vous suffit de cliquer sur le lien ci-dessous pour modifier votre mot de pass
 
 {$recovery_url}
 
+(Ce lien est valide une heure.)
+
 Si vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.

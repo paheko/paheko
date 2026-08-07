@@ -187,11 +187,11 @@ class Log
 
 		// Delete old logs according to configuration
 		$db->exec(sprintf('DELETE FROM logs
-			WHERE action != %d AND action != %d AND created < datetime(\'now\', \'-%d days\');',
+			WHERE action != %d AND action != %d AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, $days_delete));
 
 		// Delete failed login attempts and reminders after 30 days
-		$db->exec(sprintf('DELETE FROM logs WHERE action = %d OR action = %d AND created < datetime(\'now\', \'-%d days\');',
+		$db->exec(sprintf('DELETE FROM logs WHERE action = %d OR action = %d AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, 30));
 	}
 
@@ -204,7 +204,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'localtime\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if ($count >= self::LOCKOUT_ATTEMPTS) {
@@ -226,7 +226,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'localtime\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_FAIL_OTP, $ip);
 
 		return $count >= self::OTP_LOCKOUT_ATTEMPTS;
@@ -240,7 +240,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE action = ? AND user_ip = ? AND created > datetime(\'now\', \'localtime\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = DB::getInstance()->firstColumn($sql, self::LOGIN_RECOVER, $ip);
 
 		return $count >= self::PASSWORD_LOCKOUT_ATTEMPTS;

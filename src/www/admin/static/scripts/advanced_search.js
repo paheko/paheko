@@ -33,7 +33,8 @@ g.script('scripts/lib/query_builder.js', () => {
 		"Add a new set of conditions below this one": "— Ajouter un groupe de critères",
 		"Remove this set of conditions": "— Supprimer ce groupe de critères",
 		"AND": "ET",
-		"OR": "OU"
+		"OR": "OU",
+		"display this column": "afficher cette colonne"
 	};
 
 	var q = new SQLQueryBuilder(columns);
@@ -41,13 +42,14 @@ g.script('scripts/lib/query_builder.js', () => {
 		return translations[str] ?? str;
 	};
 	q.loadDefaultOperators();
+	q.operators = JSON.parse(div.dataset.operators);
+	q.operators["1"] = q.__(q.operators["1"]);
 	q.default_operator = "LIKE %?%";
 
-	// Add specific condition just to have the column show up in result
-	q.operators["1"] = "afficher cette colonne";
 	q.types_operators['money'] = q.types_operators['integer'];
 	q.types_operators['tel'] = q.types_operators['text'];
 
+	// Add "display this column" operator to every column
 	for (var i in q.types_operators) {
 		q.types_operators[i]["1"] = q.operators["1"];
 	}

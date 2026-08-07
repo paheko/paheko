@@ -47,6 +47,7 @@ class CommonModifiers
 		'strval' => [null],
 		'protect_contact' => ['string+', '?string'],
 		'markdown' => ['?string+'],
+		'money_int' => ['scalar+='],
 		'money' => ['?numeric', 'bool', 'bool', 'bool'],
 		'money_raw' => ['?numeric', 'bool'],
 		'money_currency' => ['?numeric', 'bool', 'bool', 'bool'],
@@ -61,6 +62,7 @@ class CommonModifiers
 		'size_in_bytes' => ['callback' => [Utils::class, 'format_bytes'], 'types' => ['?numeric']],
 		'weight' => ['callback' => [Utils::class, 'format_weight'], 'types' => ['?numeric', 'bool', 'bool']],
 		'weightval' => ['callback' => [Utils::class, 'weightToInteger'], 'types' => ['?numeric']],
+		'unit' => ['callback' => [Utils::class, 'format_unit'], 'types' => ['?numeric', 'string', 'bool', 'bool']],
 		'typo' => ['string+'],
 		'css_hex_to_rgb' => ['string'],
 		'css_hex_extract_hsv' => ['string'],
@@ -113,6 +115,16 @@ class CommonModifiers
 		return $md->render($str);
 	}
 
+	static public function money_int($value): int
+	{
+		try {
+			return Utils::moneyToInteger($value, true);
+		}
+		catch (\InvalidArgumentException $e) {
+			throw new UserException($e->getMessage(), 0, $e);
+		}
+	}
+
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false, bool $html = false): string
 	{
 		if ($hide_empty && !$number) {
@@ -140,7 +152,8 @@ class CommonModifiers
 		$out = self::money($number, $hide_empty, $force_sign, $html);
 
 		if ($out !== '') {
-			$out .= ($html ? '&nbsp;' : ' ') . Config::getInstance()->get('currency');
+			$currency = Config::getInstance()->getCurrencySymbol();
+			$out .= ($html ? '&nbsp;' : ' ') . $currency;
 		}
 
 		return $out;

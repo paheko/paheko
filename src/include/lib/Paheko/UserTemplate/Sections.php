@@ -3,6 +3,7 @@
 namespace Paheko\UserTemplate;
 
 use KD2\DB\DB_Exception;
+use KD2\DB\SQLite3;
 use Paheko\DB;
 use Paheko\DynamicList;
 use Paheko\Extensions;
@@ -248,7 +249,6 @@ class Sections
 			return;
 		}
 
-		$db = DB::getInstance();
 		$module_name = $params['module'] ?? $tpl->module->name;
 		$table = Modules::getModuleTableName($module_name, $params['table']);
 
@@ -474,7 +474,7 @@ class Sections
 
 		if (!empty($params['assign_list'])) {
 			$list = [];
-			$db = DB::getInstance();
+			$db = self::DB();
 			$sql = sprintf('SELECT id, label, code FROM %s WHERE archived = %d ORDER BY code, label COLLATE U_NOCASE;',
 				$params['tables'],
 				$params['archived']
@@ -517,12 +517,15 @@ class Sections
 			$params['select'] = 'u.*';
 		}
 
-		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number, u.%s AS _email',
+		$params['select'] .= sprintf(', u.id AS id, %s AS _name, u.%s AS _login, u.%s AS _number',
 			$id_field,
 			$db->quoteIdentifier($login_field),
 			$db->quoteIdentifier($number_field),
-			$db->quoteIdentifier($email_field)
 		);
+
+		if ($email_field) {
+			$params['select'] .= sprintf(', u.%s AS _email', $db->quoteIdentifier($email_field));
+		}
 
 		$params['tables'] = 'users_view AS u';
 
@@ -658,6 +661,7 @@ class Sections
 		$id_field = DynamicFields::getNameFieldsSQL();
 
 		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			COUNT(l.id) AS lines_count,
 			GROUP_CONCAT(DISTINCT a.code) AS accounts_codes,
 			CASE WHEN t.type != 0 THEN l.reference ELSE NULL END AS payment_reference,
 			(SELECT GROUP_CONCAT(DISTINCT %s) FROM users WHERE id IN (SELECT id_user FROM acc_transactions_users WHERE id_transaction = t.id)) AS users_names', $id_field);
@@ -836,6 +840,8 @@ class Sections
 			unset($params['private']);
 		}
 
+		$allowed_tables = DB::DEFAULT_AUTHORIZER_RULES;
+
 		if (array_key_exists('search', $params)) {
 			if (trim((string) $params['search']) === '') {
 				return;
@@ -967,7 +973,7 @@ class Sections
 	static protected function _getPageIdFromPath(string $path): ?int
 	{
 		return self::cache('page_id_' . md5($path), function () use ($path) {
-			$db = DB::getInstance();
+			$db = self::DB();
 			return $db->firstColumn('SELECT id FROM web_pages WHERE uri = ?;', Utils::basename($path)) ?: null;
 		});
 	}
@@ -988,7 +994,8 @@ class Sections
 			return;
 		}
 
-		$db = DB::getInstance();
+		$db = self::DB();
+
 		$params['where'] ??= '';
 
 		// Fetch page
@@ -1047,7 +1054,7 @@ class Sections
 				$db->begin();
 
 				// Put files mentioned in the text in a temporary table
-				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, uri);');
+				$db->exec('CREATE TEMP TABLE IF NOT EXISTS temp.files_tmp_in_text (page_id, uri);');
 
 				foreach ($page->listTaggedAttachments() as $uri) {
 					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
@@ -1153,6 +1160,23 @@ class Sections
 		}
 	}
 
+	static protected function DB(): SQLite3
+	{
+		static $db = null;
+
+		if (null !== $db) {
+			return $db;
+		}
+
+		$rules = DB::DEFAULT_AUTHORIZER_RULES;
+
+		// Allow access to temp database (CREATE TEMP TABLE etc.)
+		$rules['temp.'] = [];
+
+		$db = DB::getInstance()->getRestrictedConnection(compact('rules'));
+		return $db;
+	}
+
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [
@@ -1226,13 +1250,10 @@ class Sections
 			$sql = LegacySections::_moduleReplaceJSONExtract($sql, $table); // FIXME: remove in Paheko 1.5+ (?)
 		}
 
-		$db = DB::getInstance();
+		$db = self::DB();
 
 		try {
-			// Lock database against changes
-			$db->setReadOnly(true);
-
-			$statement = $db->prepareRestricted(DB::RESTRICTED_TABLES, $sql);
+			$statement = $db->prepare($sql);
 
 			$args = [];
 
@@ -1252,7 +1273,9 @@ class Sections
 				self::_debug($statement->getSQL(true));
 			}
 
-			$db->setReadOnly(false);
+			if (!empty($params['explain'])) {
+				self::_debugExplain($statement->getSQL(true));
+			}
 		}
 		catch (DB_Exception $e) {
 			if (strpos($e->getMessage(), 'malformed MATCH') !== false) {

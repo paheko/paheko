@@ -36,6 +36,8 @@ class CommonFunctions
 		'delete_form',
 		'edit_user_field',
 		'user_field',
+		'tabitem',
+		'tag',
 		'dropdown',
 		'tabitem',
 		'tag',
@@ -465,7 +467,7 @@ class CommonFunctions
 			);
 
 			if ($type !== 'money-no-currency') {
-				$currency = Config::getInstance()->currency;
+				$currency = Config::getInstance()->getCurrencySymbol();
 				$input = sprintf('<nobr>%s<b>%s</b></nobr>', $input, $currency);
 			}
 		}

@@ -132,7 +132,9 @@ class CSV_Custom
 	 */
 	public function upload(?array $file): void
 	{
-		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
+		if (empty($file['size'])
+			|| empty($file['tmp_name'])
+			|| empty($file['name'])) {
 			throw new UserException('Fichier invalide, ou aucun fichier fourni');
 		}
 
@@ -347,6 +349,10 @@ class CSV_Custom
 
 		$i = 0;
 
+		if (count($this->rows[$this->sheet]) <= $this->skip) {
+			throw new UserException('Le fichier ne comporte aucune ligne de données');
+		}
+
 		foreach ($this->rows[$this->sheet] as $line => $row) {
 			if ($i++ < $this->skip) {
 				continue;
@@ -423,11 +429,18 @@ class CSV_Custom
 
 	public function searchColumn(string $str, array $columns)
 	{
+		static $replace = [
+			// proper quotes are fine, but they are confusing
+			'’' => '\'',
+			// remove non breaking space U+00A0
+			"\xc2\xa0" => ' ',
+		];
+
 		foreach ($columns as $key => $value) {
-			$columns[$key] = mb_strtolower(str_replace('’', '\'', $value));
+			$columns[$key] = mb_strtolower(strtr($value, $replace));
 		}
 
-		$str = mb_strtolower(str_replace('’', '\'', $str));
+		$str = mb_strtolower(strtr($str, $replace));
 
 		return array_search($str, $columns, true);
 	}
@@ -487,6 +500,11 @@ class CSV_Custom
 		$this->setTranslationTable($sel);
 	}
 
+	public function resetTranslationTable(): void
+	{
+		$this->translation = null;
+	}
+
 	/**
 	 * Save translation table
 	 */
@@ -528,30 +546,33 @@ class CSV_Custom
 		}
 
 		foreach ($this->getMandatoryColumns() as $column) {
-			// Either one of these columns is mandatory
-			if (is_array($column)) {
-				$found = false;
+			if (is_string($column)) {
+				if (!in_array($column, $table, true)) {
+					throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$column]));
+				}
+			}
+			// Either one of these columns is mandatory: [date, date_alt]
+			elseif (is_array($column)) {
+				$is_found = false;
 				$names = [];
 
 				foreach ($column as $c) {
-					$found = true;
+					$c = (array)$c; // Sometimes we want to require multiple fields, eg. [amount, [debit, credit]]
 
-					foreach ((array) $c as $key) {
-						if (!in_array($key, $table, true)) {
-							$found = false;
-							$names[] = $this->columns[$key];
-							break;
-						}
+					$found = array_intersect($table, $c);
+
+					if (count($found) === count($c)) {
+						$is_found = true;
+						break;
 					}
+
+					$names[] = implode(' et ', $c);
 				}
 
-				if (!$found) {
-					$names = array_map(fn($a) => '"' . $a . '"', $names);
-					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(', ', $names)));
+				if (!$is_found) {
+					$names = array_map(fn($a) => '[' . $a . ']', $names);
+					throw new UserException(sprintf('Une des colonnes (%s) est obligatoire, mais aucune n\'a été sélectionnée ou n\'existe.', implode(' ou ', $names)));
 				}
-			}
-			elseif (!in_array($column, $table, true)) {
-				throw new UserException(sprintf('La colonne "%s" est obligatoire mais n\'a pas été sélectionnée ou n\'existe pas.', $this->columns[$column]));
 			}
 		}
 

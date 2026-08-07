@@ -183,7 +183,7 @@ class UserTemplate extends \KD2\Brindille
 			return $root_variables;
 		}
 
-		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_address_public', 'org_email', 'org_phone', 'org_web', 'org_infos', 'currency', 'country', 'files', 'timezone'];
+		static $keys = ['color1', 'color2', 'site_disabled', 'org_name', 'org_address', 'org_address_public', 'org_email', 'org_phone', 'org_web', 'org_infos', 'org_business_number', 'currency', 'country', 'files', 'timezone'];
 
 		$config = Config::getInstance();
 
@@ -228,11 +228,13 @@ class UserTemplate extends \KD2\Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $cfg,
+			'currency_symbol' => $config->getCurrencySymbol(),
+			'business_number_field_name' => $config->getBusinessNumberFieldName(),
 			'now'          => time(),
 			'is_logged'    => $is_logged,
 			'logged_user'  => $is_logged ? $session->getUser()->asModuleArray() : null,
 			'dialog'       => isset($_GET['_dialog']) ? ($_GET['_dialog'] ?: true) : false,
-			'pdf_enabled'  => PDF_COMMAND !== null,
+			'pdf_enabled'  => Utils::canDoPDF(),
 		];
 
 		return $root_variables;
@@ -401,6 +403,10 @@ class UserTemplate extends \KD2\Brindille
 	{
 		if (!($this->modified = @filemtime($path))) {
 			throw new \InvalidArgumentException('File not found: ' . $path);
+		}
+
+		if (is_dir($path)) {
+			throw new \InvalidArgumentException('File is a directory: ' . $path);
 		}
 
 		$this->file = null;

@@ -20,6 +20,10 @@ if ($id) {
 	if (!$s) {
 		throw new UserException('Recherche inconnue ou invalide');
 	}
+
+	if ($s->id_user && $session->user()->id() !== $s->id_user) {
+		throw new UserException('Vous n\'avez pas accès à cette recherche');
+	}
 }
 else {
 	$s = Search::create(CURRENT_SEARCH_TARGET);
@@ -80,7 +84,10 @@ else {
 
 $save_action_url = Utils::getLocalURL($save_action_url);
 
+$operators = $s->getAdvancedSearch()::OPERATORS;
+
 $tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'count',
+	'operators',
 	'schema', 'title', 'save_action_url'));
 
 $tpl->display($template_path);

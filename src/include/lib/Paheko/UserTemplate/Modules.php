@@ -306,6 +306,12 @@ class Modules
 
 	static public function route(string $uri): void
 	{
+		// Just a quick sanity check
+		if (false !== strpos(rawurldecode($uri), '..')
+			|| false !== strpos(rawurldecode($uri), '.php')) {
+			throw new UserException('Invalid path.', 400);
+		}
+
 		$page = null;
 		$path = null;
 		$has_local_file = null;
@@ -333,16 +339,6 @@ class Modules
 		// If path ends with trailing slash, then ask for index.html
 		if (!$path || substr($path, -1) == '/') {
 			$path .= 'index.html';
-		}
-		// Redirect /m/module/directory to /m/module/directory/
-		elseif ($module->hasLocalDir($path)) {
-			// Unless this directory doesn't have an index
-			if (!$module->hasLocalFile($path . '/' . $module::INDEX_FILE)) {
-				throw new UserException('This path does not exist, sorry.', 404);
-			}
-
-			Utils::redirect('/' . $uri . '/');
-			return;
 		}
 
 		$name = Utils::basename($uri);
@@ -410,6 +406,13 @@ class Modules
 
 		// Check if the file actually exists in the module
 		if (!$has_local_file && !$has_dist_file) {
+			// Redirect eg. /m/bookings/manage to /m/bookings/manage/
+			if ((false === strpos(Utils::basename($path), '.'))
+				&& $module->hasFile($path . '/index.html')) {
+				Utils::redirect('/' . $uri . '/');
+				return;
+			}
+
 			throw new UserException('This path does not exist, sorry.', 404);
 		}
 
@@ -489,7 +492,7 @@ class Modules
 				}
 
 				// Same for dist file
-				if ($dist_file = $module->fetchDistFile($local_name)) {
+				if ($module->hasDistFile($local_name) && ($dist_file = $module->fetchDistFile($local_name))) {
 					if (md5($dist_file) == md5($content)) {
 						continue;
 					}

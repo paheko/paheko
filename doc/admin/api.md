@@ -148,16 +148,14 @@ curl -u test:abcd https://paheko.monasso.tld/api/sql \
 
 ## Téléchargements
 
-### GET download
+### download (GET)
 
-Télécharger la base de données
+Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données, comme une sauvegarde. Celui-ci contient **toutes** les données de l'association, y compris les mots de passe chiffrés des membres.
 
-Renvoie directement le fichier SQLite de la base de données.
+Exemple :
 
-Exemple de requête :
-
-```request
-curl -u test:abcd https://paheko.monasso.tld/api/download -o db.sqlite
+```
+curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite
 ```
 
 ### GET download/files

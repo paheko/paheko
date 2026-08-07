@@ -20,10 +20,10 @@ if (!$file->canShare()) {
 
 $csrf_key = 'file_share_' . $file->hash_id;
 
-$form->runIf('delete', function () {
+$form->runIf('delete', function () use ($file) {
 	$share = Shares::getByHashID($_POST['delete']);
 
-	if (!$share) {
+	if (!$share || !$share->id_file !== $file->id) {
 		throw new UserException('Ce partage n\'existe pas');
 	}
 

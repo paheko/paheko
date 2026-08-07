@@ -339,7 +339,7 @@ code,label,description,position,bookmark
 626,Frais postaux et de télécommunications,"Fournisseur d'accès à Internet, timbres, hébergeur du site web, etc.",Charge,Favori
 627,Services bancaires et assimilés,"Frais bancaires, sauf agios en cas de découvert, à saisir en 6616.",Charge,Favori
 628,Divers,,Charge,Favori
-6281,Cotisations professionnelles,,Charge,
+6281,Cotisations professionnelles,"Cotisation à un syndicat, une fédération, etc. Anciennement appelé cotisations liées à la vie statutaire (6586)",Charge,
 6284,Frais de recrutement du personnel,,Charge,
 629,"Rabais, remises et ristournes obtenus sur autres services extérieurs",,Charge,
 63,"Impôts, taxes et versements assimilés",,Charge,
@@ -399,7 +399,6 @@ code,label,description,position,bookmark
 6573,Apports ou affectations en numéraire,,Charge,
 658,Pénalités et autres charges,,Charge,Favori
 6582,"Pénalités, amendes fiscales et pénales",,Charge,
-6586,Cotisations (vie statutaire),,Charge,
 66,Charges financières,,Charge,
 661,Charges d'intérêts,,Charge,
 6611,Intérêts des emprunts et dettes,,Charge,

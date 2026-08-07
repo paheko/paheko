@@ -157,6 +157,6 @@ document.querySelector('#close_details').onclick = () => {
 </script>
 {/literal}
 
-<p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
+<p class="help">Toutes les écritures sont libellées en {$currency_symbol}.</p>
 
 {include file="_foot.tpl"}

@@ -165,8 +165,14 @@ class TestMailbox
 			$config->user ??= $address;
 			$config->provider ??= substr($address, strrpos($address, '@')+1);
 
-			$t = new self($config);
-			yield from $t->report($since);
+			try {
+				$t = new self($config);
+				yield from $t->report($since);
+			}
+			catch (\RuntimeException $e) {
+				echo "Skipping $address ERROR:\n";
+				echo $e;
+			}
 		}
 	}
 
@@ -205,6 +211,10 @@ class TestMailbox
 
 				if (!$d) {
 					throw new \RuntimeException('Cannot fetch OAuth token: ' . $r);
+				}
+
+				if (!isset($d['expires_in'], $d['access_token'])) {
+					throw new \RuntimeException('Invalid OAuth token: ' . $r);
 				}
 
 				$d['expiry'] = time() + $d['expires_in'];

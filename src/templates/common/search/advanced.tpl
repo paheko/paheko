@@ -53,7 +53,7 @@ $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 {else}
 	<legend>{if isset($legend)}{$legend}{else}Rechercher{/if}</legend>
 
-	<div class="queryBuilder" id="queryBuilder" data-groups="{$s->getGroups()|escape:'json'|escape}" data-columns="{$columns|escape:'json'|escape}"></div>
+	<div class="queryBuilder" id="queryBuilder" data-groups="{$s->getGroups()|escape:'json'|escape}" data-columns="{$columns|escape:'json'|escape}" data-operators="{$operators|escape:'json'|escape}"></div>
 	<p class="submit">
 		{button name="search" value=1 type="submit" label="Chercher" shape="search" id="send" class="main"}
 		<input type="hidden" name="q" id="jsonQuery" />
