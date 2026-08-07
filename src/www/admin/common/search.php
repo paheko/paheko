@@ -21,7 +21,7 @@ if ($id) {
 		throw new UserException('Recherche inconnue ou invalide');
 	}
 
-	if ($s->id_user && !$session->user()->id !== $s->id_user) {
+	if ($s->id_user && $session->user()->id() !== $s->id_user) {
 		throw new UserException('Vous n\'avez pas accès à cette recherche');
 	}
 }
