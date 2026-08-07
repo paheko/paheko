@@ -4,6 +4,7 @@ namespace Paheko\Web;
 
 use Paheko\Utils;
 use Paheko\UserException;
+use Paheko\Entities\Files\File;
 
 use KD2\ErrorManager;
 
