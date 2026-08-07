@@ -216,6 +216,7 @@ class Backup
 		// Use a temporary file so that if BACKUPS_ROOT is on NFS,
 		// we don't have issues with SQLite writing over NFS
 		$tmp = tempnam(CACHE_ROOT, 'sqlite-backup-');
+		$start = time();
 
 		// use VACUUM INTO when SQLite 3.27+ is available
 		if ($db->hasFeatures('vacuum_into')) {
@@ -245,6 +246,11 @@ class Backup
 
 		if (null !== $destination) {
 			rename($tmp, $destination);
+
+			// The backup can take a while, make sure the file time is defined
+			// as when the backup started, not when it finished, to avoid issues
+			// with running the cron only once a day
+			touch($destination, $start);
 		}
 
 		return $destination ?? $tmp;
