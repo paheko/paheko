@@ -89,7 +89,7 @@ class Fees
 		}
 
 		try {
-			$db = DB::getInstance()->getRestrictedConnection(['rules' => Fee::FORMULA_RESTRICTED_RULES]);
+			$db = Fee::getFormulaConnection();
 			$sql = sprintf('SELECT (%s) FROM users WHERE id = %d;', $object->formula, $user_id);
 			$object->user_amount = $db->firstColumn($sql);
 		}

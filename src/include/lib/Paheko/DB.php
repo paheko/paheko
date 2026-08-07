@@ -697,6 +697,8 @@ class DB extends SQLite3
 		if (null !== $rules && count($rules)) {
 			// Make sure users_search mirrors access to users
 			if (array_key_exists('users', $rules)) {
+				// Make sure users table apply the correct columns rules
+				$rules['users'] ??= self::DEFAULT_AUTHORIZER_RULES['users'];
 				$rules['users_search'] = $rules['users'];
 				$rules['users_view'] = $rules['users'];
 			}
