@@ -32,7 +32,6 @@ class DB extends SQLite3
 		// Restrict access to private fields in users
 		'users' => ['~password', '~pgp_key', '~otp_secret', '~otp_recovery_codes'],
 		// Restrict access to some private tables
-		'!emails' => null,
 		'!emails_queue' => null,
 		'!compromised_passwords_cache' => null,
 		'!compromised_passwords_cache_ranges' => null,
@@ -41,6 +40,7 @@ class DB extends SQLite3
 		'!config' => null,
 		'!users_sessions' => null,
 		'!logs' => null,
+		'!web_suspicious_clients' => null,
 	];
 
 	static protected $_instance = null;
