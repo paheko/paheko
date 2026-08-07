@@ -160,7 +160,8 @@ class Cache
 		}
 
 		// Protect against trying to store PHP code in the web root
-		if (false !== strpos($html, '<?')) {
+		if (false !== strpos($html, '<?php')
+			|| false !== strpos($html, '<?=')) {
 			ErrorManager::reportExceptionSilent(new \LogicException('[SECURITY] RCE attempt in web cache: ' . $uri . "\n" . $html));
 			return;
 		}
