@@ -544,6 +544,6 @@ class Modules
 			throw new \InvalidArgumentException('Invalid table name: ' . $table);
 		}
 
-		return Module::TABLE_PREFIX . sprintf('%s_%s', $module, $table);
+		return Module::TABLE_PREFIX . $module . Module::TABLE_SEPARATOR . $table;
 	}
 }

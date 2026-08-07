@@ -57,6 +57,17 @@ class Module extends Entity
 
 	const VALID_NAME_REGEXP = '/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
 	const TABLE_PREFIX = 'module_';
+
+	/**
+	 * Table name separator, separates a module name from a table name
+	 * This is not a simple underscore, as this would mean a malicious module
+	 * could write to tables of another module, eg. module "foo_bar" as a table "bar2",
+	 * real name "foo_bar_bar2". A module named "foo" could try to access a "bar_bar2"
+	 * table, meaning the table from "foo_bar". The double underscore is not allowed in
+	 * module names or table names.
+	 */
+	const TABLE_SEPARATOR = '__';
+
 	const DOCUMENTS_TABLE_NAME = 'documents';
 	const TABLE_NAME_REGEXP = '/^[a-z]+(?:_[a-z]+)*$/';
 
@@ -538,7 +549,7 @@ class Module extends Entity
 
 	public function getTableNamePrefix(): string
 	{
-		return self::TABLE_PREFIX . $this->name . '_';
+		return self::TABLE_PREFIX . $this->name . self::TABLE_SEPARATOR;
 	}
 
 	public function getRealTableName(string $name): string
