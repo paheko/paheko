@@ -36,7 +36,6 @@ class File extends Entity
 	use FilePermissionsTrait;
 	use FileThumbnailTrait;
 	use FileVersionsTrait;
-	use FileSharingTrait;
 	use FileWOPITrait;
 
 	const TABLE = 'files';

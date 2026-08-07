@@ -215,14 +215,6 @@ class Router
 
 	static public function routeFile(string $uri): bool
 	{
-		// Redirect old sharing links (pre 1.3.7), FIXME: remove this after 1.5.0
-		if (isset($_GET['s'])) {
-			$_GET['path'] = $uri;
-			$_GET['hash'] = $_GET['s'];
-			require ROOT . '/www/admin/share_legacy.php';
-			return true;
-		}
-
 		$context = strtok($uri, '/');
 		strtok('');
 
