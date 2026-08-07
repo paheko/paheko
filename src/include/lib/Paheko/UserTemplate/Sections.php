@@ -319,7 +319,6 @@ class Sections
 		// @see https://sqlite.org/forum/forumpost/d28110be11
 		if (isset($params['each']) && !$db->hasFeatures('json_each_readonly')) {
 			$t = 'module_tmp_each' . md5($params['each']);
-			$db = $db->ro();
 
 			// We create a temporary table, to get around authorizer issues in SQLite
 			$db->exec(sprintf('DROP TABLE IF EXISTS %s; CREATE TEMP TABLE IF NOT EXISTS %1$s (id, key, value, document);', $t));
