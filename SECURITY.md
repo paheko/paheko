@@ -62,6 +62,7 @@ Note: users inside Paheko have different permissions, according to the category 
   * but if importing this broken database may trigger PHP code execution, or opening of database files (eg. on the server filesystem) other than the main database, are security issues.
 * API access with read-only credentials can download all the files and the database, including hashed passwords, this is intentional
 * Ability to bypass URL restriction in HTML-to-PDF generation when a restricting proxy isn't enabled
+* Assisted upgrade of the app code using FossilInstaller doesn't fail (only alerts about lack of verification) if php-gnupg is not installed, or if PGP signature verification fails. This is intentional, as (sadly) the majority of web hosts don't have this extension.
 * Spam
 * Social engineering techniques
 * Denial-of-service attacks
