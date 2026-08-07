@@ -8,22 +8,29 @@
 
 {if !count($releases)}
 	<p class="block alert">Aucune mise à jour n'est disponible.</p>
-{elseif $downloaded && $verified === false}
-	<p class="error block">Le fichier d'installation est corrompu.</p>
+{elseif $downloaded && ($verification === $installer::VERIFY_FAIL || $verification === $installer::VERIFY_FAIL_NETWORK || $verification === $installer::VERIFY_FAIL_UNSIGNED)}
+	<div class="error block">
+		<h2>Le fichier d'installation est corrompu</h2>
+		{if $verification === $installer::VERIFY_FAIL}
+			<p>La vérification de signature PHP du fichier d'installation a échoué : il est possible qu'il ait été modifié et soit malveillant.</p>
+			<p>Merci de prévenir les développeurs⋅euses de Paheko.</p>
+		{else}
+			<p>Cela est probablement dû à un problème réseau. Essayez de recharger cette page.</p>
+		{/if}
+	</div>
 {elseif $downloaded}
 	<fieldset>
 		<legend>Mise à jour vers {$version}</legend>
-		{if $verified === true}
-		<p class="help">
-			Le fichier d'installation a été correctement vérifié.
-		</p>
+		{if $verification === $installer::VERIFY_OK}
+			<p class="help">
+				Le fichier d'installation a été correctement vérifié.
+			</p>
 		{else}
-		<p class="block alert">
-			L'intégrité du fichier d'installation n'a pas pu être vérifié automatiquement.
-			{if !$can_verify}
-			<br />(Cela est probablement dû au fait que votre installation ne dispose pas du module <em>GnuPG</em>.)
-			{/if}
-		</p>
+			<div class="block alert">
+				<h3>L'intégrité du fichier d'installation n'a pas pu être vérifié&nbsp;!</h3>
+				<p>Cela est probablement dû au fait que votre installation ne dispose pas du module <em>GnuPG</em>.</p>
+				<p>Il est conseillé de vérifier le fichier d'installation manuellement avec la commande <code>gpg --verify paheko-{$version}.tar.gz.asc</code></p>
+			</div>
 		{/if}
 		<details>
 			<summary><h3>{$diff.delete|count} fichiers seront supprimés</h3></summary>
