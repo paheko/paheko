@@ -348,9 +348,9 @@ class DB extends SQLite3
 
 	/**
 	 * Authorizer that allows changes to a limited set of tables,
-	 * but allows reading from everything except self::RESTRICTED_SQL_TABLES
+	 * but allows reading from everything except rules from self::DEFAULT_AUTHORIZER_RULES
 	 */
-	static public function restrictedTablesAuthorizer(array $allowed_tables, int $action, ...$args)
+	static public function restrictedWriteAuthorizer(array $allowed_tables, int $action, ...$args)
 	{
 		// Use safety authorizer first
 		$r = self::safetyAuthorizer($action, ...$args);
@@ -374,7 +374,7 @@ class DB extends SQLite3
 		elseif ($action === \SQLite3::SELECT
 			|| $action === \SQLite3::READ) {
 			// Make sure we still can't read from restricted tables
-			return self::restrictedAuthorizer(self::RESTRICTED_SQL_TABLES, $action, ...$args);
+			return self::restrictedAuthorizer(DB::DEFAULT_AUTHORIZER_RULES, $action, ...$args);
 		}
 		else {
 			return \SQLite3::DENY;
@@ -389,11 +389,13 @@ class DB extends SQLite3
 	}
 
 	/**
-	 * Set authorizer to only allow modifying a custom table name
+	 * Enable restricted write-authorizer
+	 * This shouldn't (hopefully) require a specific database connection, as this authorizer is not used
+	 * for SELECT statements that might be kept in memory and re-used later.
 	 */
-	public function enableTablesAuthorizer(array $allowed_tables): void
+	public function enableWriteAuthorizer(array $allowed_tables): void
 	{
-		$this->setAuthorizer(fn (int $action, ...$args) => self::restrictedTablesAuthorizer($allowed_tables, $action, ...$args));
+		$this->setAuthorizer(fn (int $action, ...$args) => self::restrictedWriteAuthorizer($allowed_tables, $action, ...$args));
 	}
 
 	static public function registerCustomFunctions($db)
@@ -752,6 +754,11 @@ class DB extends SQLite3
 
 		self::registerCustomFunctions($db);
 
+		// Enable SQL debug log if configured
+		if (SQL_DEBUG || ENABLE_PROFILER) {
+			$db->callback = [$this, 'log'];
+		}
+
 		if (!empty($options['unicode_like'])) {
 			$db->createFunction('like', [$this, 'unicodeLike']);
 		}
@@ -765,11 +772,6 @@ class DB extends SQLite3
 		else {
 			// Set options['rules'] = NULL to disable any rules
 			$rules = null;
-		}
-
-		// Enable SQL debug log if configured
-		if (SQL_DEBUG || ENABLE_PROFILER) {
-			$db->callback = [$this, 'log'];
 		}
 
 		if (null !== $rules && count($rules)) {

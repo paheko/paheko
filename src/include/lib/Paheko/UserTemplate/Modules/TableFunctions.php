@@ -243,16 +243,33 @@ class TableFunctions
 			return;
 		}
 
-		if ($params['table'] === $module::DOCUMENTS_TABLE_NAME) {
+		unset($params['key'], $params['id']);
+
+		// Save module config
+		if ($key === 'config') {
+			$config = array_merge((array) $module->config, $params);
+
+			// Don't save NULL values, NULL means removed
+			$config = array_filter($config, fn($a) => !is_null($a));
+
+			$module->set('config', (object) $config);
+			$module->save();
+			return;
+		}
+
+		$table = Modules::getModuleTableName($module->name, $params['table']);
+
+		if ($table === $module->getDocumentsTableName()) {
 			throw new TemplateException('The documents table cannot be modified');
 		}
+
+		$db = DB::getInstance();
 
 		if (array_key_exists('from', $params)) {
 			if (empty($params['from'])) {
 				return;
 			}
 
-			$db = DB::getInstance();
 			$db->begin();
 			$from = $params['from'];
 			unset($params['from']);
@@ -289,26 +306,7 @@ class TableFunctions
 			throw new TemplateException('Parameter "validate_only" has been removed');
 		}
 
-		unset($params['key'], $params['id']);
-		$db = DB::getInstance();
-
-		// Save module config
-		if ($key === 'config') {
-			$config = array_merge((array) $module->config, $params);
-
-			// Don't save NULL values, NULL means removed
-			$config = array_filter($config, fn($a) => !is_null($a));
-
-			$module->set('config', (object) $config);
-			$module->save();
-			return;
-		}
-
-		$table = Modules::getModuleTableName($module->name, $params['table']);
-
-		if ($table === $module->getDocumentsTableName()) {
-			throw new TemplateException('The documents table cannot be modified');
-		}
+		$db->enableWriteAuthorizer([$table]);
 
 		$sql_params = [];
 		$where = null;
@@ -337,9 +335,6 @@ class TableFunctions
 
 		unset($value);
 
-		// set authorizer to only allow working on this specific table
-		$db->enableTablesAuthorizer([$table]);
-
 		try {
 			$id = $db->firstColumn(sprintf('SELECT id FROM %s WHERE %s;', $table, $where), $sql_params);
 
@@ -356,9 +351,9 @@ class TableFunctions
 		catch (DB_Exception $e) {
 			throw new TemplateException($e->getMessage(), 0, $e);
 		}
-
-		// Re-enable default authorizer
-		$db->enableSafetyAuthorizer();
+		finally {
+			$db->enableSafetyAuthorizer();
+		}
 
 		// Assign new row values
 		if ($assign) {
@@ -374,8 +369,6 @@ class TableFunctions
 		if (!$tpl->module) {
 			throw new TemplateException('Module name could not be found');
 		}
-
-		$db = DB::getInstance();
 
 		if (!array_key_exists('table', $params)) {
 			LegacyFunctions::delete($params, $tpl, $line);
@@ -407,8 +400,9 @@ class TableFunctions
 			throw new TemplateException('Missing where clause for delete function');
 		}
 
+		$db = DB::getInstance();
 		// set authorizer to only allow working on this specific table
-		$db->enableTablesAuthorizer([$table]);
+		$db->enableWriteAuthorizer([$table]);
 
 		try {
 			// Delete rows
@@ -417,8 +411,9 @@ class TableFunctions
 		catch (DB_Exception $e) {
 			throw new TemplateException($e->getMessage(), 0, $e);
 		}
-
-		$db->enableSafetyAuthorizer();
+		finally {
+			$db->enableSafetyAuthorizer();
+		}
 	}
 
 	static public function compile_insert(string $name, string $params, UserTemplate $tpl, int $line): string
@@ -429,12 +424,14 @@ class TableFunctions
 
 	static public function insert(array $params, UserTemplate $tpl, int $line): void
 	{
-		$db = DB::getInstance();
 		$sql = $params['sql'];
 		$sql = str_replace('@MODULE_', $tpl->module->getTableNamePrefix(), $sql);
 
+		$tables = array_values($tpl->module->getTablesNames(false));
+
+		$db = DB::getInstance();
 		// set authorizer to only allow working on modules tables (except documents table)
-		$db->enableTablesAuthorizer(array_values($tpl->module->getTablesNames(false)));
+		$db->enableWriteAuthorizer($tables);
 
 		try {
 			$db->exec($sql);
@@ -442,7 +439,8 @@ class TableFunctions
 		catch (DB_Exception $e) {
 			throw new TemplateException($e->getMessage(), 0, $e);
 		}
-
-		$db->enableSafetyAuthorizer();
+		finally {
+			$db->enableSafetyAuthorizer();
+		}
 	}
 }

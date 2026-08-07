@@ -285,16 +285,20 @@ class ModuleTable extends Entity
 		}
 
 		// set authorizer to only allow working on this specific table
-		$db->enableTablesAuthorizer([$table_name]);
+		$db->enableWriteAuthorizer([$table_name]);
 
-		foreach ($sql as $line) {
-			$db->exec($line);
+		try {
+			foreach ($sql as $line) {
+				$db->exec($line);
+			}
+
+			$this->_renamed_columns = [];
+		}
+		finally {
+			// Re-enable default authorizer
+			$db->enableSafetyAuthorizer();
 		}
 
-		$this->_renamed_columns = [];
-
-		// Re-enable default authorizer
-		$db->enableSafetyAuthorizer();
 		return $r;
 	}
 
