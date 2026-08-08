@@ -263,7 +263,7 @@ class DynamicList implements \Countable
 
 	public function hasColumn(string $key): bool
 	{
-		return array_key_exists($key, $this->columns);
+		return array_key_exists($key, $this->columns) && isset($this->columns[$key]['label']);
 	}
 
 	public function setRestrictedTables(array $tables): void
