@@ -167,6 +167,10 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.22', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.22.php';
+			}
+
 			Plugins::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
