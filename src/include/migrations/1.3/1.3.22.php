@@ -12,6 +12,7 @@ $config = Config::getInstance();
 
 // Import SIRET/SIREN number
 if (!$config->org_business_number
+	&& $config->org_infos
 	&& preg_match('/(?:Numéro\s+)?SIRE[TN](?:\s*[:-])?\s*([0-9. -]+)/iu', $config->org_infos, $match)) {
 	try {
 		$config->importForm([
