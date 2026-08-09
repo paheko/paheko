@@ -159,13 +159,6 @@ class Cache
 			return;
 		}
 
-		// Protect against trying to store PHP code in the web root
-		if (false !== strpos($html, '<?php')
-			|| false !== strpos($html, '<?=')) {
-			ErrorManager::reportExceptionSilent(new \LogicException('[SECURITY] RCE attempt in web cache: ' . $uri . "\n" . $html));
-			return;
-		}
-
 		if (!self::init()) {
 			return;
 		}
@@ -177,6 +170,13 @@ class Cache
 		// Do not store in cache if URI doesn't have an extension
 		// and is not HTML, this is to avoid serving eg. XML files as HTML
 		if (!$ext && !$is_html) {
+			return;
+		}
+
+		// Protect against trying to store PHP code in the web root
+		if (false !== strpos($html, '<?php')
+			|| false !== strpos($html, '<?=')) {
+			ErrorManager::reportExceptionSilent(new \LogicException('[SECURITY] RCE attempt in web cache: ' . $uri . "\n" . $html));
 			return;
 		}
 
