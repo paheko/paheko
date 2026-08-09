@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Bump\sversion,\sto\sfix\sissue\swhen\sdoing\supgrade
-D 2026-08-09T19:39:44.313
+C Bump\sversion
+D 2026-08-09T19:42:42.771
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -37,7 +37,7 @@ F build/debian/paheko.desktop a6ec11b23a526dd110d79267cbb19cfd1f141fea8873719723
 F build/debian/paheko.menu f93ffda8edce658a00928bb52e7757ca8ce3a17dc1e28944486b73d6fe4781d4
 F build/debian/paheko.png e538df2fa2ebd8b873c77c8e71c1daad3cdc898901d8f06a14966eb655f3d5ab
 F build/kd2fw.version 75279816535151b91f885eb5beb22457358e02dce1bf1f11de94bc2c8a729570
-F build/modules.version f050872d026b8f91064a5b411ce17ee1bfc281ebf83a42dfa3e74d4a4ee98bdf
+F build/modules.version c3d288c0e978702003c5d5a6cf51c8a9fe4c4b1473fff3d5bb36f7f8f916bbc1
 F build/plugins.version fc485ff7ae06115105a946dbe460689fe42ae5f0365d5f507c0dbb9be8858430
 F build/windows/Makefile c210be1bfd32d67d1ac961afea38125e31b60fbcc65f7ca44be575af1a26efd0
 F build/windows/README.md 5c56cc2aa07f74d5b6f78899af2fd482b19d9f35803f1c9cdfc863a0868fbd8a
@@ -858,24 +858,25 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 3d18524455f297eb390fdae37c241c40a492875ffcb394924b85d68ce2c43cee
-R 8003fa95d450540a49bd2f74cd822186
+P 1f61a6359f9dacedd320243fd04c62ccebf6eda5f4bfd6d224ac38fb8a48cd4c
+R 1794aed30fb5c8fac7db710fd11faeba
+T +sym-1.3.22.1 *
 U bohwaz
-Z 5ebb0014d09a4f22d0f71cf6c576b307
+Z 87d860caa7db3c87b31402468b8d6dca
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmp414AACgkQksnacbiI
-6jS30Q/+N/jo0fUZ9o3KSU5OMcYynu1Kf+UMEhL3VgqSXUgS5JPkHx1uPL9fCd6q
-iwuj9N4zQh7s0LzGTzWMBpuzVosC4e+naTz+Qz276lf6Midl+ez3kQ5Uy2ChtvVP
-Qgm+ctU0xvu0d9Hv1DKRwGXeSJeFijnJD7ZGoTfolIZl9JEhF3RTechF1lYh4LVj
-qjnIQV3quc1ZLvHFmqvpvt4TGrUHvMi6zinHaLqoPlxROmo//rjKmiQST6xd+tuG
-9/g4/c7jFsPn3iFwnFENB3Lam7UEiXK+pX4aigoaEC0aoU4ebzNk87MydxKFZqxH
-tIR11m/qWFZMLr6STLfknay1DgEMoAxxPtmJQe4MLjlwI2PE0CPqhZJjTpyUaq+F
-hPMgu1cJEiZsBPLJj0XdEhiVYt0pWgPmLfxyVB67519eEddX7aXy+4gg6PzUIHkR
-gmh350gThqu/H6FZ2xNusFa5K2Zzxx3uZx/5FbgLBOIj0Qp7MHwIfJN+f0Gp6iaO
-z51J7XNi+NH9og6yiblF7M1bJ159TEhK8/eSEnRQEAOVBjaJ7ESwFyz+UZWtSi42
-o+QwLg41oEk2IcP8WCYld3BYuOs8VJERHgo9B2c1aSK2MKMb6TI2YCAwcnGp/Up6
-rxu9XmfoMIH7mTMiW6RXu4VJVPce0Qlvk07soAj3g+UdEjfWQT8=
-=OcE0
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmp42DIACgkQksnacbiI
+6jSnyg/8DzLg3NH59b2Dyp2eIFpougAs2tXwiqNhvXnbHgvDJFUwdh3av2Jmbi4g
+Uz45PGxWSHLJ5V8P47+6mYPF2PxE/Apxg+NTOXr52EX8FYxFQWjvFti0Zvuv2Pcm
+4JWPNug6WOnxKu8lGJSkEj3QCQuDK00r2HRuvOwGOVIRXbEw2o7Pypp7yMWZUxQn
+BCc/GN5v+xP1LzC5E5y6SQih2ogNH090wpX7y1SUtKZ9qwp6Q3Vg4bR+0+d1cBlg
+B7tBdfedV9dyGZsVH3Gip5Aun83vwUET7f8hOTHh116yKhmlqrdl+wYoHNw9BChb
+6XUEM/OT+gRsNFwWl/7We1EXLfRwBWDaw9WhdZ1Yox7n/aQSy+Ma5NYJIUA90pTB
+tJymG32U4izi0aD+RmUVV+uRVU+PGwTJYjQxgpDA84NGltYBb5t1SMRWExVN1aBZ
+bpkeW3OiKtYvwk16uYHOv9cf92YjLfW5w2F9ScMOvgtTco3kEWb9bZtGiU5oxoU+
+i/YcRWz9fwMwgCth/a08G0GQtDg2EFetj2j/BlnY1zG5sZV4q/diESs1cKGpq2HK
+pTkWi7fmrjR6MQvBQAN0ZELuvbRKRCi8zbtTwd4Mewqa2IOrs/l5CCZoq4CAFcyw
+/g5DWRanFPpDuW/TUq7hQTzsV4bUKXA3XfGCHRz5fjiCRSXBsBc=
+=3VCW
 -----END PGP SIGNATURE-----
