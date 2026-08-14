@@ -315,7 +315,7 @@ class DynamicList implements \Countable
 	public function DB(): SQLite3
 	{
 		if (count($this->restricted_tables)) {
-			return DB::getInstance()->getRestrictedConnection(['rules' => $this->restricted_tables]);
+			return DB::getInstance()->getRestrictedConnection(['rules' => $this->restricted_tables, 'unicode_like' => true]);
 		}
 		else {
 			return DB::getInstance();
