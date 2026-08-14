@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Bump\sversion
-D 2026-08-09T19:42:42.771
+C php_admin_flag\scan\screate\serrors\sin\ssome\sconfigs,\sremove\sit
+D 2026-08-14T08:21:45.483
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -69,7 +69,7 @@ F src/Makefile fb97d38fe8475e1f3c819b89aeac7cd1856114f531a76c53e8edbce3b09a8612
 F src/VERSION 66ca50595b6a55e58fe0c8c8b34bd22bf0e98cf258a11af4fef8cc306358c8f7
 F src/apache-bots.conf d24d844e684db8953d189146219998efaeec5a6a3683107c5a5a895b833b4d9d
 F src/apache-htaccess.conf b627aebb1852c80ca663e469eecab2401f6af58387fd4e4cf332c366d59a85c1
-F src/apache-vhost.conf 8941629233853ab57a4cee29af59f9581099ea12a1059596f3e67e2a95faf7d6
+F src/apache-vhost.conf 6e637526b28935eba9e1a39bfb80bab70f1fc46f49e32ee887c10090dacc119b
 F src/bin/paheko 1d03ce88e817ebfef9b3b459c7fd490c838ee5b9c996eae9228f4159d7f12912 x
 F src/config.dist.php 9f9182005855ee316fa7426d1e5d8c0f94d708e79cbf8bcf75ac79c3f4b028e8
 F src/data/index.html abe89f9bfb756bbdfb2f535420e10bb5625eb4e2
@@ -858,25 +858,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 1f61a6359f9dacedd320243fd04c62ccebf6eda5f4bfd6d224ac38fb8a48cd4c
-R 1794aed30fb5c8fac7db710fd11faeba
-T +sym-1.3.22.1 *
+P 7a029180442bcbff2f4884c760ec762a2a6a985e76667a616790ff934eeedd14
+R f11d224bba6522dfa200fd0789426069
 U bohwaz
-Z 87d860caa7db3c87b31402468b8d6dca
+Z c51361524e4a1d7cba691677419a6787
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmp42DIACgkQksnacbiI
-6jSnyg/8DzLg3NH59b2Dyp2eIFpougAs2tXwiqNhvXnbHgvDJFUwdh3av2Jmbi4g
-Uz45PGxWSHLJ5V8P47+6mYPF2PxE/Apxg+NTOXr52EX8FYxFQWjvFti0Zvuv2Pcm
-4JWPNug6WOnxKu8lGJSkEj3QCQuDK00r2HRuvOwGOVIRXbEw2o7Pypp7yMWZUxQn
-BCc/GN5v+xP1LzC5E5y6SQih2ogNH090wpX7y1SUtKZ9qwp6Q3Vg4bR+0+d1cBlg
-B7tBdfedV9dyGZsVH3Gip5Aun83vwUET7f8hOTHh116yKhmlqrdl+wYoHNw9BChb
-6XUEM/OT+gRsNFwWl/7We1EXLfRwBWDaw9WhdZ1Yox7n/aQSy+Ma5NYJIUA90pTB
-tJymG32U4izi0aD+RmUVV+uRVU+PGwTJYjQxgpDA84NGltYBb5t1SMRWExVN1aBZ
-bpkeW3OiKtYvwk16uYHOv9cf92YjLfW5w2F9ScMOvgtTco3kEWb9bZtGiU5oxoU+
-i/YcRWz9fwMwgCth/a08G0GQtDg2EFetj2j/BlnY1zG5sZV4q/diESs1cKGpq2HK
-pTkWi7fmrjR6MQvBQAN0ZELuvbRKRCi8zbtTwd4Mewqa2IOrs/l5CCZoq4CAFcyw
-/g5DWRanFPpDuW/TUq7hQTzsV4bUKXA3XfGCHRz5fjiCRSXBsBc=
-=3VCW
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmp+0BkACgkQksnacbiI
+6jQZsRAAg0QaW7y13UD/rCjmkOTWTBiPqlElgFNdZ9Hb4o04ZenbD8f5AcmyCV5t
+fxgHRnsNMsakCSCUAB/KuFnIE+wpwKS0R83ZjKDkOCV8U8wk+ZS7TZX/YgtlKL3c
+QWh4ugDkIexmg4U0Jl9dHeQIvAcdabiYiG2HWtpldUm/li2vCtM6abcsObNt71dl
+QvJ4EukdR4EnYuONnaw3HkYIItE8WOOCu1VAdVxDIed5DZ6SLmmD4iXRWthu/o75
+HOaKvNPiuGHHMoZ2Px7ykI7+QVyoW8/U/0VAJM0Gy66Ll8rK4PrbxZSYGdVcYoD5
+y9GtAYjYsDJfrM5PCZnhtFDS/JKi10ke9ps9ZvEVcHsjvmXsPoyvSSjZGTtYFX68
+NHDv65ejbFG8q4hhwA2CaJ1CXhzzB5+VWCubrSPt8q2VWFo3WFuSeQVJYfM353Ct
+LIpxikRFHc2d7OKLj4MSM/OU9OJVIDnRGt18nH8CfcuCeXA5zOoxLCUf8YE1WmTd
+By231UF5drnbGDkBx8/AoE3TeYucH2uLo9A3quDInU4AUkXXdZYzvVEuUHcoQzl8
+n5POTG/fSSZNO59DE6Nx8d6VTfQzbTYiUYrWYF9kLnhT9pksasykQDxAEabgYoO1
+2Hx5tjkCwVm8LK5OX0D5JHVDAQAXJD4d8UkIgKb2vniGztov3PI=
+=uF1H
 -----END PGP SIGNATURE-----
