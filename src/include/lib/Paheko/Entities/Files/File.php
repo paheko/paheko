@@ -725,6 +725,8 @@ class File extends Entity
 			$this->set('mime', 'text/plain');
 		}
 
+		$this->set('image', in_array($this->mime, self::IMAGE_TYPES));
+
 		// File hasn't changed
 		if (!$new && !$this->isModified('md5')) {
 			return $this;
