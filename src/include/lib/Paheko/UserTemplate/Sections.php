@@ -75,8 +75,12 @@ class Sections
 
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
 	{
-		$sql = strtok($sql, ';');
-		$extra_params = strtok('');
+		// Split string at semicolon, unless in comment or inside balanced quotes
+		$regexp = "/'(?:''|[^'])*'(*SKIP)(*F)|\"(?:\\\"|[^\"])*\"(*SKIP)(*F)|--[^\\r\\n]*(*SKIP)(*F)|;/";
+		$parts = preg_split($regexp, $sql, 2);
+
+		$sql = trim($parts[0] ?? '');
+		$extra_params = trim($parts[1] ?? '');
 
 		$i = 0;
 		$params = '';
