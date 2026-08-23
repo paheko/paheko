@@ -1875,21 +1875,18 @@ class Utils
 	{
 		$cmd = PDF_COMMAND;
 
-		if ($cmd === 'auto') {
-			// Try to find a local executable
-			$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
-			$cmd = null;
+		if ($cmd !== 'auto') {
+			return $cmd;
+		}
 
-			foreach ($list as $program) {
-				if (self::quick_exec('which ' . $program, 1)) {
-					$cmd = $program;
-					break;
-				}
-			}
+		// Try to find a local executable
+		$list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+		$cmd = null;
 
-			// We still haven't found anything
-			if (!$cmd) {
-				return null;
+		foreach ($list as $program) {
+			if (self::quick_exec('which ' . $program, 1)) {
+				$cmd = $program;
+				break;
 			}
 		}
 
