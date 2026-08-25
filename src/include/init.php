@@ -580,6 +580,8 @@ if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 	}
 }
 
-// This is for SQLite, as its localtime modifier is just calling
-// the OS-level localtime function which depends on the TZ env variable.
-putenv('TZ=' . date_default_timezone_get());
+if (function_exists('putenv')) {
+	// This is for SQLite, as its localtime modifier is just calling
+	// the OS-level localtime function which depends on the TZ env variable.
+	@putenv('TZ=' . date_default_timezone_get());
+}
