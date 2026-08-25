@@ -676,8 +676,11 @@ class Transaction extends Entity
 
 	public function assertCanBeModified(): void
 	{
-		// Allow to change the status
-		if (count($this->_modified) === 1 && array_key_exists('status', $this->_modified)) {
+		// Allow to change the status all the time, even when transactions is locked, or year is closed
+		// because the status is not part of the core properties of the transaction
+		// (eg. you might want to mark a transaction as paid even after the year was closed)
+		if (count($this->_modified) === 1
+			&& $this->isModified('status')) {
 			return;
 		}
 
