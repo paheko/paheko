@@ -249,6 +249,8 @@ echo '42,"Nouveau nom"' >> membres.csv
 curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv
 ```
 
+**Attention :** pour des raisons de sécurité, les membres faisant partie d'une catégorie ayant accès à la gestion des membres en administration ou à la configuration ne peuvent être modifiés par l'import depuis l'API.
+
 #### Paramètres
 
 Les paramètres sont à spécifier dans l'URL, dans la query string.
