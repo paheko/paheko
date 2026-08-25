@@ -10,6 +10,8 @@ Only the latest stable branch is supported.
 
 Security issues are eligible to our bug bounty program. Please contact us.
 
+Keep in mind that we are not a multi-million dollar company (our total annual budget for paying everything is around €150k), expect a maximum bounty of around €500 to €2000 for a critical vulnerability (for example: RCE, or being able to download the data outside of the organization root).
+
 ## Reporting a Vulnerability
 
 **IMPORTANT: Do not use public websites (eg. GitHub) for reporting security vulnerabilities.**
@@ -25,6 +27,8 @@ Researchers may submit reports anonymously or provide contact information, inclu
 By submitting a report to us, you affirm that the report and any attachments do not violate the intellectual property rights of any third party. You also grant us a non-exclusive, royalty-free, worldwide, perpetual license to use, reproduce, create derivative works, and publish the report and any attachments.
 
 We may share vulnerability reports. We will not share the names or contact data of security researchers unless given explicit permission.
+
+Using an AI for finding issues is allowed, but we require that you disclose its use and the name of the AI product used.
 
 ## Scope
 
