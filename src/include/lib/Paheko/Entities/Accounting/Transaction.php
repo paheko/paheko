@@ -815,7 +815,7 @@ class Transaction extends Entity
 		foreach ($lines as $line) {
 			$line = $line->line; // Fetch real object
 			$line->id_transaction = $this->id();
-			$line->save(false);
+			$line->save();
 		}
 
 		foreach ($this->_old_lines as $line) {
@@ -1022,8 +1022,13 @@ class Transaction extends Entity
 	{
 		// If set_all is false, then remove id_project from lines where account is not revenue or expense
 		if (!$config->analytical_set_all) {
-			foreach ($this->getLinesWithAccounts() as $line) {
-				if (!in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+			foreach ($this->getLinesWithAccounts() as $i => $line) {
+				if (isset($line->line->id_project)
+					&& !in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+					if ($this->type === self::TYPE_ADVANCED) {
+						throw new UserException(sprintf('Ligne n°%d : seuls les comptes de charge ou de produit peuvent être affectés à un projet analytique.', $i+1));
+					}
+
 					$line->line->set('id_project', null);
 				}
 			}
@@ -1080,7 +1085,9 @@ class Transaction extends Entity
 		}
 
 		// Simple two-lines transaction
-		if (isset($source['amount']) && $this->type != self::TYPE_ADVANCED && isset($this->type)) {
+		if (isset($source['amount'])
+			&& $this->type !== self::TYPE_ADVANCED
+			&& isset($this->type)) {
 			if (empty($source['amount'])) {
 				throw new ValidationException('Montant non précisé');
 			}
