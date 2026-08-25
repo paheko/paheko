@@ -325,9 +325,11 @@ class Modules
 			$path = substr($uri, 2);
 			$name = strtok($path, '/');
 			$path = strtok('');
+
 			$module = self::get($name);
 
-			if (!$module) {
+			// Disable web module access via /m/web/
+			if (!$module || $module->web) {
 				throw new UserException('This page does not exist.', 404);
 			}
 		}
