@@ -43,7 +43,16 @@ g.script('scripts/lib/query_builder.js', () => {
 	};
 	q.loadDefaultOperators();
 	q.operators = JSON.parse(div.dataset.operators);
-	q.operators["1"] = q.__(q.operators["1"]);
+
+	// Translate operator labels
+	for (var key in q.operators) {
+		if (!q.operators.hasOwnProperty(key)) {
+			continue;
+		}
+
+		q.operators[key] = q.__(q.operators[key]);
+	}
+
 	q.default_operator = "LIKE %?%";
 
 	q.types_operators['money'] = q.types_operators['integer'];

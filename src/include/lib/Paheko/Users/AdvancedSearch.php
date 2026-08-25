@@ -90,7 +90,10 @@ class AdvancedSearch extends A_S
 
 			// Skip fields where you don't have access
 			// Note that this doesn't block access to fields using existing saved searches
-			if ($this->session && !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
+			// because a saved search that cannot be changed by the user is allowed to see
+			// everything that was set in the search by the admin who created the search
+			if ($this->session
+				&& !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
 				continue;
 			}
 
