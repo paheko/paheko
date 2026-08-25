@@ -50,7 +50,7 @@ class Line extends Entity
 				throw new UserException($e->getMessage(), 0, $e);
 			}
 		}
-		elseif ($key == 'id_project' && $value == 0) {
+		elseif ($key === 'id_project' && $value == 0) {
 			$value = null;
 		}
 
@@ -72,7 +72,6 @@ class Line extends Entity
 		$this->assert($this->credit + $this->debit < 100000000000, 'Le montant ne peut être supérieur à un milliard');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
 
-		$this->assert(null === $this->id_project || DB::getInstance()->test(Project::TABLE, 'id = ?', $this->id_project), 'Le projet analytique indiqué n\'existe pas.');
 		$this->assert(!empty($this->id_transaction), 'Aucune écriture n\'a été indiquée pour cette ligne.');
 		parent::selfCheck();
 	}
