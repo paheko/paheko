@@ -6,6 +6,8 @@ use Paheko\Users\Session;
 
 abstract class AdvancedSearch
 {
+	// Allow-list of operators
+	// Other operators are not supported
 	const OPERATORS = [
 		'= ?' => 'is equal to',
 		'!= ?' => 'is not equal to',
