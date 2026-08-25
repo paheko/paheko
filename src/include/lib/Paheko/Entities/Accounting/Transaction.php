@@ -635,12 +635,13 @@ class Transaction extends Entity
 
 	public function isLocked(): bool
 	{
-		// locking just got set
-		if ($this->hash && array_key_exists('hash', $this->_modified) && $this->_modified['hash'] === null) {
+		// locking just got set: allow save
+		if ($this->isModified('hash')
+			&& $this->getModifiedProperty('hash') === null) {
 			return false;
 		}
 
-		return $this->hash === null ? false : true;
+		return $this->hash !== null ? true : false;
 	}
 
 	public function canSaveChanges(): bool
@@ -649,7 +650,10 @@ class Transaction extends Entity
 			return true;
 		}
 
-		if ($this->isModified('hash')) {
+		// Don't allow to change hash-chain
+		if ($this->isModified('hash')
+			|| $this->isModified('prev_hash')
+			|| $this->isModified('prev_id')) {
 			return false;
 		}
 
@@ -1061,6 +1065,9 @@ class Transaction extends Entity
 	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;
+
+		// Make sure user cannot modify internal properties
+		unset($source['hash'], $source['prev_hash'], $source['prev_id']);
 
 		// Transpose lines (HTML transaction forms)
 		if (!empty($source['lines']) && is_array($source['lines']) && is_string(key($source['lines']))) {
