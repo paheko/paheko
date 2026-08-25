@@ -29,12 +29,11 @@ else {
 	$s = Search::create(CURRENT_SEARCH_TARGET);
 }
 
-$p = $s->populate($session);
-$tpl->assign($p);
+$default = $s->populate($session);
 
 $list = $results = $header = $count = null;
 
-if (!$p['default']) {
+if (!$default) {
 	try {
 		if ($s->type == $s::TYPE_JSON) {
 			$list = $s->getDynamicList();
@@ -61,6 +60,7 @@ if (!$p['default']) {
 $schema = $s->schema();
 $columns = $s->getAdvancedSearch()->columns();
 $columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
+$columns = array_filter($columns, fn($c) => !($c['restricted'] ?? false)); // remove restricted columns from list
 
 if (CURRENT_SEARCH_TARGET === SE::TARGET_USERS) {
 	 $save_action_url = '!users/saved_searches.php?edit';

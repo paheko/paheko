@@ -85,6 +85,16 @@ abstract class AdvancedSearch
 	 */
 	abstract public function defaults(): \stdClass;
 
+	/**
+	 * Perform access check for this specific search, this should throw an exception if access is not allowed
+	 */
+	abstract public function requireAccess(): void;
+
+	/**
+	 * Return TRUE if user ($this->session) can check rows for actions
+	 */
+	abstract public function isAdmin(): bool;
+
 	public function makeList(string $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
 	{
 		$query = json_decode($query, true);
@@ -290,8 +300,54 @@ abstract class AdvancedSearch
 		];
 	}
 
+	/**
+	 * Make sure that the user search only contains non-restricted columns
+	 */
+	public function hasRestrictedColumns(array $groups): bool
+	{
+		$columns = $this->columns();
+
+		foreach ($groups as $group) {
+			if (!isset($group['conditions']) || !is_array($group['conditions'])) {
+				throw new \LogicException('Invalid groups query: invalid conditions array');
+			}
+
+			foreach ($group['conditions'] as $condition) {
+				if (!isset($condition['column']) || !is_string($condition['column'])) {
+					throw new \LogicException('Invalid groups query: missing or invalid column value');
+				}
+
+				$column = $columns[$condition['column']];
+
+				if (!empty($column['restricted'])) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public function setSession(?Session $session)
 	{
 		$this->session = $session;
+	}
+
+	/**
+	 * Return TRUE if user (as seen in $this->session) can perform SQL searches
+	 */
+	public function isSQLAllowed(): bool
+	{
+		// Only admins can write custom SQL queries, others can only run existing SQL queries
+		return $this->isAdmin();
+	}
+
+	/**
+	 * Return TRUE if user (as seen in $this->session) can peform unprotected SQL searches (any table)
+	 */
+	public function isUnprotectedSQLAllowed(): bool
+	{
+		// Only super-admins can perform unprotected queries
+		return $this->session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 	}
 }
