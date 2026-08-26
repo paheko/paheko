@@ -1654,12 +1654,9 @@ class Utils
 	/**
 	 * Execute a system command with a timeout, just returning a string from stdout
 	 */
-	static public function quick_exec(string $cmd, int $timeout = 20, ?int &$code = null): string
+	static public function quick_exec(string $cmd, int $timeout = 20, ?int &$code = null): ?string
 	{
-		$output = '';
-		// using function is mandatory, fn($data) => $out.= $data doesn't work!
-		$code = self::exec($cmd, $timeout, null, function($data) use (&$output) { $output .= $data; });
-		return $output;
+		return Exec::quick($cmd, $timeout, $code);
 	}
 
 	/**
@@ -1687,50 +1684,6 @@ class Utils
 			1 => ["pipe", "w"], // stdout is a pipe that the child will write to
 			2 => ['pipe', 'w'], // stderr
 		];
-
-		// Use Bubblewrap to jail running apps
-		// https://jvns.ca/blog/2022/06/28/some-notes-on-bubblewrap/
-		// In some distant future, using nsjail might be better (more options: timeout, network),
-		// but it's not in Debian yet, see https://bugs.debian.org/964199
-		if (EXECUTION_JAIL === 'bubblewrap') {
-			$args = [
-				'--clearenv',
-				'--new-session',
-				'--die-with-parent',
-				'--unshare-all',
-				'--hostname local',
-				// Bind directories
-				'--ro-bind /bin /bin',
-				'--ro-bind /usr /usr',
-				'--ro-bind /lib /lib',
-				'--ro-bind /lib64 /lib64',
-				'--ro-bind /etc/alternatives /etc/alternatives', // Required for java
-				'--bind /tmp /tmp', // Required for chromium + for reading uploaded files
-				'--proc /proc',
-				'--dev /dev',
-				// Only allow to write to cache, commands should be
-				sprintf('--bind %s %1$s', escapeshellarg(CACHE_ROOT)),
-				sprintf('--ro-bind %s %1$s', escapeshellarg(SHARED_CACHE_ROOT)),
-				sprintf('--chdir %s', escapeshellarg(CACHE_ROOT)),
-			];
-
-			// Allow access to locally stored files, but read-only
-			if (FILE_STORAGE_BACKEND === 'FileSystem') {
-				$args[] = sprintf('--ro-bind %s %1$s', escapeshellarg(FILE_STORAGE_CONFIG));
-			}
-
-			// Only allow network access when required (PDF processors)
-			// TODO: restrict network access to some vhosts, see https://jvns.ca/blog/2022/06/28/some-notes-on-bubblewrap/
-			if (preg_match('/^(prince|chromium|weasyprint)\s+/', $cmd)) {
-				$args[] = '--share-net';
-			}
-
-			if (strpos($cmd, 'chromium ') === 0) {
-				$args[] = '--ro-bind /etc/chromium.d /etc/chromium.d';
-			}
-
-			$cmd = sprintf('bwrap %s %s', implode(' ', $args), $cmd);
-		}
 
 		$process = proc_open($cmd, $descriptorspec, $pipes);
 
@@ -1994,7 +1947,10 @@ class Utils
 		$cmd = self::getPrinceCommand() . ' -o - -';
 
 		// Prince is fast, right? Fingers crossed
-		self::exec($cmd, 10, $str, fn ($data) => print($data));
+		$e = new Exec($cmd, 10);
+		$e->setStdin($str);
+		$e->printStdout(true);
+		$e->run();
 
 		if (PDF_USAGE_LOG) {
 			file_put_contents(PDF_USAGE_LOG, date("Y-m-d H:i:s\n"), FILE_APPEND);
