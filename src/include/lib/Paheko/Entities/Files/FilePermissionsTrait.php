@@ -18,7 +18,7 @@ trait FilePermissionsTrait
 
 	public function canRead(?Session $session = null): bool
 	{
-		// Web pages and config files are always public
+		// Web attachments and config files are always public
 		if ($this->isPublic()) {
 			return true;
 		}
