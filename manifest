@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix:\sdon't\sallow\sto\schange\saccounting\syear\sfor\slinked\sfees\sunless\syou're\san\sadmin
-D 2026-08-26T18:49:05.246
+C Make\ssure\sonly\sadmins\scan\schange\sbookmark\svalue\sof\saccounts
+D 2026-08-26T19:09:55.783
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -267,10 +267,10 @@ F src/templates/acc/charts/_country_input.tpl 287d91ed7a1ac2e1545d22d02e53b22199
 F src/templates/acc/charts/_nav.tpl 54421037ef8dd93411cdc8030b733bf3f9545961f0a9bde0881dd76ca5e6e4fc
 F src/templates/acc/charts/accounts/_account_form.tpl 95edf78d9470d2144afdc26f62c7766994949a24dae094ce00fb08c7411a5f07
 F src/templates/acc/charts/accounts/_nav.tpl e9f72cd26f20571e52fb30a35302604252ba0017cf38576f5996e8e9b3f02480
-F src/templates/acc/charts/accounts/all.tpl 7ae317a547241ddd8b83d5babd2e4429653ca4edb706fdcee977e11211e51a89
+F src/templates/acc/charts/accounts/all.tpl 7a5e622ce7b678947ed1cf96abf438986e843bb1be3979638d336fac180ad6ff
 F src/templates/acc/charts/accounts/delete.tpl a20a59f44d562f68568e8c617a83d690246b5df94fd98b0057cb3bd20958c090
 F src/templates/acc/charts/accounts/edit.tpl f19aaf4a8f5c2a0588cc3c1f24f701dc3cf96718159b7f784ad4a94e267cd63a
-F src/templates/acc/charts/accounts/index.tpl 3499f4a08232d1cd8fbd7f2589d1796d9d94db081876c1cf3a444351c721f586
+F src/templates/acc/charts/accounts/index.tpl 644d785b35a25f813521476ac8c7222bbc37ef4bc6ec66be3123531769d5f3a3
 F src/templates/acc/charts/accounts/new.tpl 17d4dd1c6ddb3744003c28a0c84ef5cf4db30bd12e6818acb8b37b70ecf6f769
 F src/templates/acc/charts/accounts/selector.tpl 32315a6fcd00e27bc6c1509c7ccd7f91e0f43081f90fd4f36c8fd119dd8f6499
 F src/templates/acc/charts/delete.tpl 770eef87a72f0fd8f37ff638b21d743c5811e77af9569632275db9836bc45eac
@@ -527,7 +527,7 @@ F src/www/admin/acc/accounts/reconcile_assist.php c43d413538453eadd47a12497f7e5d
 F src/www/admin/acc/accounts/simple.php 292a55a8e927d8f34e8ec7f6d05ee8d6bcacbab040c8ba39c7b40e05614736b4
 F src/www/admin/acc/accounts/users.php 210c364b5e3ebcfea92127db0a3d0fae8bae6080376d6d8971e8ee535a3cda4a
 F src/www/admin/acc/charts/accounts/_inc.php 58ead67c4adecb1684593d397144748adc1fa9bb7d3d90c3ca77cd91b0bdf28e
-F src/www/admin/acc/charts/accounts/all.php 84b53e62996e30da08597ad7780cfd3c53d3d6100a5729d1f5e352cb7097b2b5
+F src/www/admin/acc/charts/accounts/all.php 4d9c25da8c39b9e26864dcccd93bb8ddfd43f7f2175c153d3932d9705057dc2a
 F src/www/admin/acc/charts/accounts/delete.php a15cf614a6b912fb31ad7ac69e89638111b0f77c79e9bbcf0bc67a05051bc90a
 F src/www/admin/acc/charts/accounts/edit.php d996161f87fc99d8cc3ff9b89e6b816f72ac3d6a98b780422d4968cec4c8e8f2
 F src/www/admin/acc/charts/accounts/index.php 4a0d7bb562462117b840bcf2dfc2b983d8faccc9dccdb5904978e29fa6660e83
@@ -730,7 +730,7 @@ F src/www/admin/static/pics/img_right.png e2021d96729d6f28fcc946b5ed6742f6732a96
 F src/www/admin/static/print.css 0f3784e14494b37e3b80ba049345fbdd75d9e33e76be7ababd6d668ee9545eac
 F src/www/admin/static/scripts/accounting.js 97afa7d8c5eb4f77e4a093c5e3cfe3c98a11c166d97f82047501e22649fc2540
 F src/www/admin/static/scripts/accounting_setup.js f3f556d0335951f674918463b69d65870fa32645c1392136ce694c108dd1fa13
-F src/www/admin/static/scripts/accounts_list.js 80250a1e7dc784163feb643b13814c33faf3a52ac615828582473b18e3e8a57a
+F src/www/admin/static/scripts/accounts_list.js 304af39fcb13370b1ae73db0e9adc3e05c44c698fa81130ebae9c41e2ebb79c8
 F src/www/admin/static/scripts/advanced_search.js f2b680ee4a1bcc120d95ce88f1b2534e3b09c7ceaae03d2eaada6bccd4c3892f
 F src/www/admin/static/scripts/auto_logout.js 9e0c4517de170d9d24c29eaf8f73b21a783fe77ecb2f769eae6edf7ad3c12aaa
 F src/www/admin/static/scripts/code_editor.css f56ab02df74b8e494feccad9d611547dab875223272ccd4bb50ea1ab16557fe1
@@ -859,24 +859,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 3a2668e6bb5835a93c2292b6088a535e517a7080fa6baa8c330b19c2c1850e4d
-R 8f87fdab9d312aeb10b014cfffab4a1b
+P 961c68b8fcabdf81381b8312edb820a69d0b2d4b97d6eb851664d81b8096bb58
+R 440d2e6c76ed2f677b6d449fdade8b98
 U bohwaz
-Z ee4c20f8d91833bf95324fce9c2e658c
+Z fc470e39c8da57d09888208401e70fd5
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqPNSEACgkQksnacbiI
-6jR3mBAAggZ49HgVV2ccQmuM8sS27y1lmH5E4cmP98i1f9PxI97WlWYenKEqgBZZ
-IQIFHGpvD5McBOVqrc/iL2dnzNyT6DObfSRxP7rnQ+wREPTwBEHRzvMuLd4yda0T
-mqs546VeapOIPo3f1nmiNkKA1WYsIC/Jb1Bhkldg8CD2QNLMlLdcjIJgHBfVuBfq
-LXAgCKnAO+ZMTTcWzFFY1zdpmvaLg9L7KvrlwuEb5prh5i6wd7D1CLApcEsoKWSW
-h/iypmF94LB3EClChUhybSCsBiHPOq/qQ8KAYEos/DVQfsBgGQrsBBZDvYSgGLx7
-8bO7CLaahqzWi43oVBgVIl/UrL7qkfmEybxE1DPM0voKTcq9wbN3ZMQg7dguz4ST
-ORt38BSXQsduvKgIWqVXkJSkqUZijayS40srRvnN+7PH0Dj/aIh9FaDARQBXDBqB
-mE3kwbJqhy1tZDxCaTBa2QxWa3tePUIKiJQjSujgFNQTQ6BRjTjZ5kbq/n4AhN0d
-ePqvLIjg7s4onfriMwGF7XGBGldc7sEr7e4k0wPrtl5iY9gwbAlhShc3maYX8Yte
-ieYwNqtvD0r2C3CTyLiYomfewFpoVlruuyd+giqFDVGe5AAEGdqQtXw5jRXQAV3m
-cHlAvW426bXhHdAXiOEs0cNHjgsH2ep6/OAwCETe3PfCfKvh83M=
-=k0D/
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqPOgMACgkQksnacbiI
+6jR7oA/+M1QdbXCv1ioYHJR32V5s95BUfPjx/Q7GvDkRuoYqqcEIdPzEvsg+2Iyg
+j0P8m/74hKe9RIzl1Xlv6Pt75rQe+VepqKzD/p3wLtZU/3+cMhETJjeVlCHlVmcQ
+ejQYDnSt5aVJnpe84qncy1PGVpuxfWCyDzRyM4E0jwhmztfaovJawzse/D4keZgc
+UDX1m7ex5HqaGAFrb78suxGSF5DKhDUwqUty0Iy/IJgLSwoaGXvlAN2YvwWVy3sk
+zfBZ17dpGCCEIrQ+uimN/XTZQdxmCS887TmqXoNr/+YSbxTDidGZS9LYSgVz3IYB
++WksB6u4BJ2ZcYOsKIQO+SG6YcPPWmd1cf9/12Q1Jcna75/rTyP6TBqODbQ+y8cQ
+ahoaziGEv3X6QoWITRZBWgs4BbPISWziwAjxBhFLAtu0oeQt1AI8/U7RyY7GKsZn
+qUcBQ1Ds2ASeZM3jzIoFqjKmfMLuubCFlnBZ/mKoaZQG3TluodzIjSqxUELmjl4h
+U785hjNU3UOx/m6Lu2Su9quav28wJfL5HlAR0J9Na/R9HAHdxJbdYJXuSKSDc1C6
+yE5JxThfiHHxpaMUApl9+SUQVnJNV8ifPR3vEgJbnc2x/h8OTl25DHgv9e6+rQ4b
+tGvyZTYpdmrXRHvKG2xStXt3RqUeRfPxrW84VGaAFzseV83iIek=
+=iz/o
 -----END PGP SIGNATURE-----

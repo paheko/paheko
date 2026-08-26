@@ -2,6 +2,7 @@
 namespace Paheko;
 
 use Paheko\Accounting\Charts;
+use Paheko\Users\Session;
 
 $types = null; // Just to silence phpstan
 
@@ -24,6 +25,8 @@ if (!$chart) {
 $accounts = $chart->accounts();
 
 $form->runIf('bookmark', function () use ($accounts) {
+	Session::getInstance()->requireAccess(Session::SECTION_ACCOUNTING, Session::ACCESS_ADMIN);
+
 	$b = f('bookmark');
 
 	if (!is_array($b) || empty($b)) {
@@ -35,7 +38,10 @@ $form->runIf('bookmark', function () use ($accounts) {
 	$a = $accounts->get($id);
 	$a->bookmark = (bool) $value;
 	$a->save();
-}, null, Utils::getSelfURI());
+
+	http_response_code(204);
+	exit;
+}, 'bookmark', Utils::getSelfURI());
 
 
 $list = $accounts->list($types);
