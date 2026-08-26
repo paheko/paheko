@@ -366,7 +366,7 @@ class Search extends Entity
 	/**
 	 * Populate object from what was passed in query string / form (POST)
 	 * Return TRUE if no data was passed and the default was loaded instead
-	 * (in that case, the results shouldn't be loaded).
+	 * (in that case, the results shouldn't be loaded/displayed, only the search form).
 	 */
 	public function populate(Session $session): ?bool
 	{
