@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Refactor\scode\sfor\smaking\ssure\sunauthorized\susers\scannot\swrite\sSQL\squeries.\sRestrict\scolumns\sto\smake\ssure\sthat\susers\sare\sonly\sallowed\sto\ssearch\son\sthe\scolumns\sthey\shave\saccess\sto.
-D 2026-08-25T23:04:12.649
+C Make\sit\sclear\sthat\sissues\sin\sother\ssoftware\sis\snot\sa\ssecurity\sissue\sof\sPaheko
+D 2026-08-26T08:53:52.380
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -12,7 +12,7 @@ F .travis.yml 4da8c0eef1bdf524e1ad6cf8e7bfe3d4d26a680a
 F COPYING 78e50e186b04c8fe1defaa098f1c192181b3d837
 F LICENSE.md cb2589c407f9b774a562f8c1cd6d120fd05b29224a498751965cdfba98431f66
 F README.md 5705bfd77b82d211ff75e7674e1cae6d5b858fa8269caed9dc5a32b785d751b8
-F SECURITY.md d11273bd118e41622fc08240c4e6a628e078c1c829c0d9ec874949b0d1667efe
+F SECURITY.md 982cc5b2099c5d6e20e2790e9dec57adac4840069628a230697a94123239bae6
 F archives/0.7.0_migration.sql acaa57e89553e8763fcbc2bcb50aa6a18b7327ad
 F archives/0.7.2_migration.sql ba4b5fbcc7a56b971532d8fef20aba41e5c963ad
 F archives/0.8.0_migration.sql b56b9689504b83b8ae279a5c5c42ce05e423d883
@@ -858,24 +858,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P bc174185353b2ab743d7f4df234605f780cf505eb3d1d090b789016c6b9ba258
-R f3fbdecba4e1efb253e6faa160705e38
+P 2471842cc3c278813196d1b327c756c84e85aeb22f30fe4e00c061b302692df2
+R 6207f6608e2c610025d580e5e9dcb96d
 U bohwaz
-Z 2cf78a5ec9131ae10d9762c8921a3b90
+Z 99cb86ecc656688ed3119c7ed2fcf5eb
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqOH2wACgkQksnacbiI
-6jQy3RAAsLwFSreflsOuhQm/zkjCWWGosb8GsEM54xkVZFalf7YLJbIwOAZDYHTv
-YonkmxffvwRmS2QTp0hNtvQsocIb9eR6WkYmLGr2ZmyVaoE0k+oxwp3tW2DnQrwh
-hBcavT9PlyJUCf+0xXZrmoJiSUB1fkS1U3Oc+t6pZTPtSCIPJHpvEilldA/OXhzW
-SYAgCV5QsJ1D0qjhPJD25Vu3M3RRf9gK6PJOGlZr2j5MXVhGsrVSuqGvasMu4UY5
-rJU4zNWLZGjCV8SPZjMCYhUbZvYxLwoqG4FRNMjMrXlKvPVcgShXEE2jriHEy4g4
-mM9KJBnNouuqoWdmOp9+PDgC62q35aHUb1GpXDhIEN5UfAz4E6pI0PvieIwgbRLJ
-z4xJH5S6GQKuzRGwHWvc5Sn6Ioz9zxjltopiYOEvIQDQ3A/otH4aS3WI+bdhAjy1
-abV7q3N6WoF2YN2OcrJ1jB44AAkficSIxNO6ZepZEcVgkBg/cWOjIH2lLKlek5eM
-w97uqhliUD/p4dpOEtYrht0+WQN8dUHZ8hMU036WATIOLeYF/7Km6WRx6AeaDuNP
-PZkLJa2/WL/yfhae8ugSZRTxadC4lCNXUzkhpzMsazrhmjWBqQfh0ifmeyBdkrDW
-2Mm+toFwtSbu5I2IjKzBgnsJRwYtk9r3elNG9QHdnu7t//kRlf0=
-=EkOX
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqOqaAACgkQksnacbiI
+6jQm2Q//RFjPnD/Qa/fxjQepQ/LF66ACUwiuEMo/bYIw1pofVgrjz+rtWKKAwhNa
+3H/x9sMgP8XEthANB+osORfA1awu106xBxq0CkN21LKWdVSc+SLT7ugo4aUG+hXn
+TNx/QH1T30CeHYZwf0R2JA0asB1nb+ljQwd5qkCZrJQ1b3nntC+1fruIXs0eTRDh
+jEsCKWxKXqaXLlv7BLNpGAfNRHgn42IEZKMy76Z1WYDHDigJGnUJNe9Mv5ydc2IA
+2MWAarpbfFc6t9SFpqsqFf3LyynDXm7iGLvtmTCDSrtv3GK6S2OK43Zt4M3UTBbV
+MxOH1PNtCn+4owcJtEU+Y3XmNX7dgnOlESnSRsTVfQzJ/Z+U1Xz71qKdkjp6NjlQ
+6aSiaX+V4DvFArBQhX5qQh75hlxyip9Ke+0bTdk0o/U4yRhZmUWrkzHRz4yxiDWf
+v9dGPL6EHIdd95NAb4Il99XO1vZwM28LvaV5m8zwZ/ToqapSoswcUKblSG2GWLJu
+J85saDV7b6XoBwMfbhncm8iGHWV3BmeH6H/mQN7d2MYurPgZh2eiv4UN3KXN0StH
++prGV9t74V5y+MJxTqkZToHfgiFaPnckL6kNpESqOiHLOfNXfQLNy5TaeAX9SxB/
+Ij/FeolOfG00uFK5GNK6b4mpAs1SJLpSzH4TMNCv2snusYOWhKM=
+=pM5B
 -----END PGP SIGNATURE-----

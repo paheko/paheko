@@ -79,3 +79,4 @@ Note: users inside Paheko have different permissions, according to the category 
 * Self-injection of code when having root access
 * Unofficial (community) plugins and modules (but please report issues to their authors)
 * Missing HTTP headers on `https://paheko.cloud/`
+* Issues from other software (eg. [CSV Injection](https://bughunters.google.com/learn/invalid-reports/google-products/csv-formula-injection))
