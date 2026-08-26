@@ -1949,7 +1949,7 @@ class Utils
 		// Prince is fast, right? Fingers crossed
 		$e = new Exec($cmd, 10);
 		$e->setStdin($str);
-		$e->printStdout(true);
+		$e->togglePrintStdout(true);
 		$e->run();
 
 		if (PDF_USAGE_LOG) {

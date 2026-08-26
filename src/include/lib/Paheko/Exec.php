@@ -59,6 +59,11 @@ class Exec
 		$this->network = $enable;
 	}
 
+	public function togglePrintStdout(bool $enable): void
+	{
+		$this->print_stdout = $enable;
+	}
+
 	public function setStdin(string $str): void
 	{
 		$this->stdin_str = $str;
