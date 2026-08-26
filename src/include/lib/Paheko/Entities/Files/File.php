@@ -1276,11 +1276,12 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_MODULES || $context == self::CONTEXT_WEB) {
+		// Files served by website are always public
+		if ($context === self::CONTEXT_WEB) {
 			return true;
 		}
 
-		if ($context == self::CONTEXT_CONFIG) {
+		if ($context === self::CONTEXT_CONFIG) {
 			$file = array_search($this->path, Config::FILES);
 
 			if ($file && in_array($file, Config::FILES_PUBLIC)) {
