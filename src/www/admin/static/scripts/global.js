@@ -662,7 +662,14 @@
 
 		var span = document.createElement('span');
 		span.className = 'label';
-		span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
+
+		var input = document.createElement('input');
+		input.type = 'hidden';
+		input.name = name + '[' + value + ']';
+		input.value = label;
+
+		span.appendChild(input);
+		span.appendChild(document.createTextNode(label));
 
 		// Add delete button
 		if (can_delete == 1) {
