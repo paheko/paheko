@@ -65,7 +65,7 @@ elseif (qg('edit') !== null) {
 		$search->set('id_user', $session->user()->id());
 	}
 
-	$form->runIf('save', function () use ($search, $is_admin) {
+	$form->runIf('save', function () use ($search, $is_admin, $session) {
 		$search->importForm();
 
 		// make sure non-admin user cannot create public search
