@@ -317,7 +317,7 @@ abstract class AdvancedSearch
 					throw new \LogicException('Invalid groups query: missing or invalid column value');
 				}
 
-				$column = $columns[$condition['column']];
+				$column = $columns[$condition['column']] ?? null;
 
 				if (!empty($column['restricted'])) {
 					return true;
