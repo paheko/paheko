@@ -939,6 +939,10 @@ class Utils
 			return false;
 		}
 
+		if (!in_array($url['scheme'], ['http', 'https'], true)) {
+			return false;
+		}
+
 		$url['host'] = idn_to_ascii($url['host']);
 		$n = $url['scheme'] . '://' . $url['host'];
 
