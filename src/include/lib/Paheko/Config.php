@@ -277,6 +277,17 @@ class Config extends Entity
 		parent::importForm($source);
 	}
 
+	public function selfCheckFiles(): void
+	{
+		// Files
+		$this->assert(count($this->files) == count(self::FILES));
+
+		foreach ($this->files as $key => $value) {
+			$this->assert(array_key_exists($key, self::FILES));
+			$this->assert(is_int($value) || is_null($value));
+		}
+	}
+
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
@@ -296,13 +307,7 @@ class Config extends Entity
 			'Fréquence de sauvegarde invalide');
 		$this->assert(is_null($this->backup_limit) || ($this->backup_limit >= 0 && $this->backup_limit <= 50), 'Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
 
-		// Files
-		$this->assert(count($this->files) == count(self::FILES));
-
-		foreach ($this->files as $key => $value) {
-			$this->assert(array_key_exists($key, self::FILES));
-			$this->assert(is_int($value) || is_null($value));
-		}
+		$this->selfCheckFiles();
 
 		$db = DB::getInstance();
 		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
