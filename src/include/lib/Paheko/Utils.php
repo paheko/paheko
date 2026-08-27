@@ -1822,7 +1822,7 @@ class Utils
 		return PDF_COMMAND || Plugins::hasSignal('pdf.create');
 	}
 
-	static public function getPrinceCommand(): string
+	static public function getPrinceCommand(string $profile = 'PDF/A-3b'): string
 	{
 		$org_name = Config::getInstance()->org_name;
 
@@ -1837,7 +1837,10 @@ class Utils
 		}
 
 		// 3 seconds is plenty enough to fetch resources, right?
-		return $cmd . sprintf(' --no-local-files --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
+		return $cmd . sprintf(' --no-local-files --http-timeout=3 --pdf-profile=%s --pdf-author=%s',
+			escapeshellarg($profile),
+			Utils::escapeshellarg($org_name) // Required as it may contain unicode
+		);
 	}
 
 	static public function getPDFCommand(): ?string
