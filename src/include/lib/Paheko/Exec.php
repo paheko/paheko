@@ -195,6 +195,10 @@ class Exec
 			$binds['/etc/fonts'] = false;
 			$binds['/var/cache/fontconfig'] = true;
 
+			if ($name === 'prince' && PRINCE_LICENSE_FILE) {
+				$binds[PRINCE_LICENSE_FILE] = false;
+			}
+
 			// Only allow network access when required (PDF processors)
 			// TODO: restrict network access to some vhosts, see https://jvns.ca/blog/2022/06/28/some-notes-on-bubblewrap/
 			if (!$this->network) {

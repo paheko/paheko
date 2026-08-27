@@ -1822,10 +1822,22 @@ class Utils
 		return PDF_COMMAND || Plugins::hasSignal('pdf.create');
 	}
 
-	static protected function getPrinceCommand(): string
+	static public function getPrinceCommand(): string
 	{
 		$org_name = Config::getInstance()->org_name;
-		return sprintf('prince --no-local-files --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
+
+		$cmd = PDF_COMMAND;
+
+		if ($cmd === 'auto') {
+			$cmd = 'prince';
+		}
+
+		if (PRINCE_LICENSE_FILE) {
+			$cmd .= ' --license-file=' . escapeshellarg(PRINCE_LICENSE_FILE);
+		}
+
+		// 3 seconds is plenty enough to fetch resources, right?
+		return $cmd . sprintf(' --no-local-files --http-timeout=3 --pdf-profile="PDF/A-3b" --pdf-author=%s', Utils::escapeshellarg($org_name));
 	}
 
 	static public function getPDFCommand(): ?string
@@ -1934,16 +1946,18 @@ class Utils
 
 		$cmd = self::getPDFCommand();
 
+		$name = strtok($cmd, ' ');
+		strtok('');
+
 		// Only Prince can handle using STDIN and STDOUT and stream PDF
 		// If the program is not Prince, store PDF in temporary file
-		if ($cmd !== 'prince') {
+		if ($name !== 'prince') {
 			$file = self::filePDF($str, false);
 			readfile($file);
 			unlink($file);
 			return;
 		}
 
-		// 3 seconds is plenty enough to fetch resources, right?
 		$cmd = self::getPrinceCommand() . ' -o - -';
 
 		// Prince is fast, right? Fingers crossed
@@ -2000,21 +2014,24 @@ class Utils
 			throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/paheko/wiki?name=Configuration');
 		}
 
+		$name = strtok($cmd, ' ');
+		strtok('');
+
 		$timeout = 25;
 
-		if ($cmd === 'prince') {
+		if ($name === 'prince') {
 			$timeout = 10;
 			$cmd = self::getPrinceCommand() . ' -o %2$s %1$s';
 		}
-		elseif ($cmd === 'chromium') {
-			$cmd = 'chromium --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
+		elseif ($name === 'chromium') {
+			$cmd .= ' --headless --timeout=5000 --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=%2$s %1$s';
 		}
-		elseif ($cmd === 'wkhtmltopdf') {
-			$cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
+		elseif ($name === 'wkhtmltopdf') {
+			$cmd .= ' -q --print-media-type --enable-local-file-access --disable-smart-shrinking --encoding "UTF-8" %s %s';
 		}
-		elseif ($cmd === 'weasyprint') {
+		elseif ($name === 'weasyprint') {
 			$timeout = 60;
-			$cmd = 'weasyprint %1$s %2$s';
+			$cmd .= ' %1$s %2$s';
 		}
 
 		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));

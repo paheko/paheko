@@ -234,6 +234,7 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'EXECUTION_JAIL'        => null, // FIXME: set to 'bubblewrap' for 1.4.0
 	'PDF_COMMAND'           => 'auto',
+	'PRINCE_LICENSE_FILE'   => null,
 	'PDF_USAGE_LOG'         => null,
 	'SQL_DEBUG'             => null,
 	'ENABLE_PROFILER'       => false,
