@@ -448,7 +448,8 @@ class API
 			case 'attachment':
 				$attachment = Files::getFromURI($param);
 
-				if (!$attachment) {
+				if (!$attachment
+					|| $attachment->context() !== $attachment::CONTEXT_WEB) {
 					throw new APIException('Page not found', 404);
 				}
 
