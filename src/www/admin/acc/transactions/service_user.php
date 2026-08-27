@@ -18,7 +18,8 @@ if (!$id) {
 $user = (int)qg('user');
 $self_url = sprintf('!acc/transactions/service_user.php?id=%d&user=%d', $id, $user);
 
-$form->runIf(qg('unlink') !== null, function () use ($id) {
+$form->runIf(qg('unlink') !== null, function () use ($id, $session) {
+	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 	$t = Transactions::get((int)qg('unlink'));
 	$t->deleteSubscriptionLink($id);
 }, null, $self_url);
