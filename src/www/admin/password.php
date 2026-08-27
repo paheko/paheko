@@ -17,15 +17,15 @@ if ($session->isLogged()) {
 	Utils::redirect('!');
 }
 
-$form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
-	if (!$session->checkRecoveryPasswordQuery(qg('c'))) {
+$form->runIf(isset($_GET['c']), function () use ($session, $form, $tpl) {
+	if (!$session->checkRecoveryPasswordQuery($_GET['c'])) {
 		throw new UserException('Le lien que vous avez suivi est invalide ou a expiré.');
 	}
 
-	$csrf_key = 'password_change_' . md5(qg('c'));
+	$csrf_key = 'password_change_' . md5($_GET['c']);
 
 	$form->runIf('change', function () use ($session) {
-		$session->recoverPasswordChange(qg('c'), f('password'), f('password_confirmed'));
+		$session->recoverPasswordChange($_GET['c'], $_POST['password'] ?? '', $_POST['password_confirmed'] ?? '');
 	}, $csrf_key, '!login.php?changed');
 
 	$tpl->assign(compact('csrf_key'));
@@ -34,7 +34,7 @@ $form->runIf(qg('c') !== null, function () use ($session, $form, $tpl) {
 });
 
 $csrf_key = 'recover_password';
-$new = qg('new') !== null;
+$new = isset($_GET['new']);
 $lock = Log::isLocked();
 
 $form->runIf('recover', function () use ($session, $lock) {
@@ -60,7 +60,7 @@ $form->runIf('recover', function () use ($session, $lock) {
 	$session->recoverPasswordSend($id);
 }, $csrf_key, '!password.php?sent' . ($new ? '&new' : ''));
 
-$sent = !$form->hasErrors() && null !== qg('sent');
+$sent = !$form->hasErrors() && isset($_GET['sent']);
 
 $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $title = $new ? 'Première connexion ?' : 'Mot de passe perdu ?';
