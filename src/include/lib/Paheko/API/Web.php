@@ -121,7 +121,7 @@ trait Web
 			else {
 				$attachment = Files::get($path);
 
-				if (!$attachment) {
+				if (!$attachment || $attachment->context() !== $attachment::CONTEXT_WEB) {
 					throw new APIException('Attachment not found', 404);
 				}
 
