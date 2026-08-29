@@ -6,49 +6,90 @@ const WebDAVNavigator = (url, options) => {
 	const microdown=function(){function l(n,e,r){return"<"+n+(r?" "+Object.keys(r).map(function(n){return r[n]?n+'="'+(a(r[n])||"")+'"':""}).join(" "):"")+">"+e+"</"+n+">"}function c(n,e){return e=n.match(/^[+-]/m)?"ul":"ol",n?"<"+e+">"+n.replace(/(?:[+-]|\d+\.) +(.*)\n?(([ \t].*\n?)*)/g,function(n,e,r){return"<li>"+g(e+"\n"+(t=r||"").replace(new RegExp("^"+(t.match(/^\s+/)||"")[0],"gm"),"").replace(o,c))+"</li>";var t})+"</"+e+">":""}function e(r,t,u,c){return function(n,e){return n=n.replace(t,u),l(r,c?c(n):n)}}function t(n,u){return f(n,[/<!--((.|\n)*?)-->/g,"\x3c!--$1--\x3e",/^("""|```)(.*)\n((.*\n)*?)\1/gm,function(n,e,r,t){return'"""'===e?l("div",p(t,u),{class:r}):u&&u.preCode?l("pre",l("code",a(t),{class:r})):l("pre",a(t),{class:r})},/(^>.*\n?)+/gm,e("blockquote",/^> ?(.*)$/gm,"$1",r),/((^|\n)\|.+)+/g,e("table",/^.*(\n\|---.*?)?$/gm,function(n,t){return e("tr",/\|(-?)([^|]*)\1(\|$)?/gm,function(n,e,r){return l(e||t?"th":"td",g(r))})(n.slice(0,n.length-(t||"").length))}),o,c,/#\[([^\]]+?)]/g,'<a name="$1"></a>',/^(#+) +(.*)(?:$)/gm,function(n,e,r){return l("h"+e.length,g(r))},/^(===+|---+)(?=\s*$)/gm,"<hr>"],p,u)}var i=this,a=function(n){return n?n.replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):""},o=/(?:(^|\n)([+-]|\d+\.) +(.*(\n[ \t]+.*)*))+/g,g=function c(n,i){var o=[];return n=(n||"").trim().replace(/`([^`]*)`/g,function(n,e){return"\\"+o.push(l("code",a(e)))}).replace(/[!&]?\[([!&]?\[.*?\)|[^\]]*?)]\((.*?)( .*?)?\)|(\w+:\/\/[$\-.+!*'()/,\w]+)/g,function(n,e,r,t,u){return u?i?n:"\\"+o.push(l("a",u,{href:u})):"&"==n[0]?(e=e.match(/^(.+),(.+),([^ \]]+)( ?.+?)?$/),"\\"+o.push(l("iframe","",{width:e[1],height:e[2],frameborder:e[3],class:e[4],src:r,title:t}))):"\\"+o.push("!"==n[0]?l("img","",{src:r,alt:e,title:t}):l("a",c(e,1),{href:r,title:t}))}),n=function r(n){return n.replace(/\\(\d+)/g,function(n,e){return r(o[Number.parseInt(e)-1])})}(i?n:r(n))},r=function t(n){return f(n,[/([*_]{1,3})((.|\n)+?)\1/g,function(n,e,r){return e=e.length,r=t(r),1<e&&(r=l("strong",r)),e%2&&(r=l("em",r)),r},/(~{1,3})((.|\n)+?)\1/g,function(n,e,r){return l([,"u","s","del"][e.length],t(r))},/  \n|\n  /g,"<br>"],t)},f=function(n,e,r,t){for(var u,c=0;c<e.length;){if(u=e[c++].exec(n))return r(n.slice(0,u.index),t)+("string"==typeof e[c]?e[c].replace(/\$(\d)/g,function(n,e){return u[e]}):e[c].apply(i,u))+r(n.slice(u.index+u[0].length),t);c++}return n},p=function(n,e){n=n.replace(/[\r\v\b\f]/g,"").replace(/\\./g,function(n){return"&#"+n.charCodeAt(1)+";"});var r=t(n,e);return r!==n||r.match(/^[\s\n]*$/i)||(r=g(r).replace(/((.|\n)+?)(\n\n+|$)/g,function(n,e){return l("p",e)})),r.replace(/&#(\d+);/g,function(n,e){return String.fromCharCode(parseInt(e))})};return{parse:p,block:t,inline:r,inlineBlock:g}}();
 
 	const PREVIEW_TYPES = /^image\/(png|webp|svg|jpeg|jpg|gif|png)|^application\/pdf|^text\/|^audio\/|^video\/|application\/x-empty/;
+	const PREVIEW_EXTENSIONS = /\.(?:png|webp|svg|jpeg|jpg|gif|png|pdf|txt|css|js|html?|md|mp4|mkv|webm|ogg|flac|mp3|aac|m4a|avi)$/i;
+
+	const OPENDOCUMENT_TEMPLATES = {
+		'ods': 'UEsDBBQAAAAAAOw6wVCFbDmKLgAAAC4AAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnNwcmVhZHNoZWV0UEsDBBQAAAAIABxZFFFL43PrmgAAAEABAAAVAAAATUVUQS1JTkYvbWFuaWZlc3QueG1slVDRDoMgDHz3KwjvwvZK1H9poEYSKETqon8vLpluWfawPrXXy921XQTyIxY2r0asMVA5x14uM5kExRdDELEYtiZlJJfsEpHYfPLNXd2kGBpRqzvB0QdsK3nexIUtIbQZeOqllhcc0XloecvYS8g5eAvsE+kHOfWMod7dVckzgisTIkv9p61NxIdGveBHAMaV9bGu0p3++tXQ7FBLAwQUAAAACAAAWRRRA4GGVIkAAAD/AAAACwAAAGNvbnRlbnQueG1sXY/RCsIwDEWf9SvG3uv0Ncz9S01TLLTNWFJwf29xbljzEu49N1wysvcBCRxjSZTVIGetu3ulmAU2eu/LkoGtBIFsEwkoAs+U9yv4TcPtcu2nc1dn/DqCS5hVuqG1fe0y3iIZRxg/+LQzW5ST1YBGdI3Uwge7tcpDy7yQdfIk0i03NMFD/n85vQFQSwECFAMUAAAAAADsOsFQhWw5ii4AAAAuAAAACAAAAAAAAAAAAAAAtIEAAAAAbWltZXR5cGVQSwECFAMUAAAACAAcWRRRS+Nz65oAAABAAQAAFQAAAAAAAAAAAAAAtIFUAAAATUVUQS1JTkYvbWFuaWZlc3QueG1sUEsBAhQDFAAAAAgAAFkUUQOBhlSJAAAA/wAAAAsAAAAAAAAAAAAAALSBIQEAAGNvbnRlbnQueG1sUEsFBgAAAAADAAMAsgAAANMBAAAAAA==',
+		'odp': 'UEsDBBQAAAAAAC6dVEszJqyoLwAAAC8AAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnByZXNlbnRhdGlvblBLAwQUAAAACAAsYRRRP7fJFJoAAABBAQAAFQAAAE1FVEEtSU5GL21hbmlmZXN0LnhtbJVQwQqDMAy97ytK77bbNaj/EmpkhTYtNg79+1VhujF2WC5JXh7vJWkjsh+pCLwKtcTA5Wg7PU8MCYsvwBipgDhImXhIbo7EAp98uJmrVv1F1WgPcPSBmkqeVnVicwhNRrl32uoTjjR4bGTN1GnMOXiH4hPbBw9mX8O8u5s8Ual552j7p69LLJtIPeHHBkKL2G1cpVv79az+8gRQSwMEFAAAAAgAMl4UUXz4vRWJAAAA/gAAAAsAAABjb250ZW50LnhtbF2P0QqDMAxFn+dXiO+d22tw/ksXUyjYpJgI8+8tOGVdXsK994Qkg4QQkWASXBOxORS20ttPmlnhSF/dujCI16jAPpGCIUgmPqfgl4bn/dGNTVtq+DqKS8ymbT82t9MLZZELHslNhHOd+dUkeYvo1LaZ6vAt01bkpfNCWm4ouPAB9hV5yf8fx2YHUEsBAhQDFAAAAAAALp1USzMmrKgvAAAALwAAAAgAAAAAAAAAAAAAALSBAAAAAG1pbWV0eXBlUEsBAhQDFAAAAAgALGEUUT+3yRSaAAAAQQEAABUAAAAAAAAAAAAAALSBVQAAAE1FVEEtSU5GL21hbmlmZXN0LnhtbFBLAQIUAxQAAAAIADJeFFF8+L0ViQAAAP4AAAALAAAAAAAAAAAAAAC0gSIBAABjb250ZW50LnhtbFBLBQYAAAAAAwADALIAAADUAQAAAAA=',
+		'odg': 'UEsDBBQAAAAAAE8+S1PfJa3pNAAAADQAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LmdyYXBoaWNzLXRlbXBsYXRlUEsDBBQAAAAIALZDh1ScUI71nQAAAEEBAAAVAAAATUVUQS1JTkYvbWFuaWZlc3QueG1slVDNDoIwDD7LU5Ddt+l1Ad+lGUWWbF3DioG3F0kEjfHgrf365ftpk4BCj0Xca6jnFKnsa6umkVyGEoojSFiceJcZqct+SkjiPvnuYs7qWp2aHehDRL0Sx6U+sClGzSBDq6w64IRdAC0LY6uAOQYPEjLZO3Vmi2Denc1tBB6CL1owcQRBVdt/rH0meeqsDX6EEJzFbudVuLFfz7pWD1BLAwQUAAAACADDQ4dUUZP77oMAAAD2AAAACwAAAGNvbnRlbnQueG1sXY9BCoNADEXX9RTifmq7Dda7TDOZMjCTiIlUb1/BVrSr8PJ+CL+TGBMSBMGpEJtDYVtnPZfMCpt9NNPIIF6TAvtCCoYgA/HvCo5puF9vTV9dui8qjmkwrdvDLq5fXPRILhDms/OTSfGW0Kktmc7yKWFZcecw+nfi15ZpT6Ed/7v11QdQSwECFAMUAAAAAABPPktT3yWt6TQAAAA0AAAACAAAAAAAAAAAAAAAtIEAAAAAbWltZXR5cGVQSwECFAMUAAAACAC2Q4dUnFCO9Z0AAABBAQAAFQAAAAAAAAAAAAAAtIFaAAAATUVUQS1JTkYvbWFuaWZlc3QueG1sUEsBAhQDFAAAAAgAw0OHVFGT++6DAAAA9gAAAAsAAAAAAAAAAAAAALSBKgEAAGNvbnRlbnQueG1sUEsFBgAAAAADAAMAsgAAANYBAAAAAA==',
+		'odt': 'UEsDBBQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi92bmQub2FzaXMub3BlbmRvY3VtZW50LnRleHRQSwMEFAAAAAgA3U0SUeqX5meSAAAAMQEAABUAAABNRVRBLUlORi9tYW5pZmVzdC54bWyVUEEOgzAMu+8VqHfa7Rq1/CUqQavUphUNE/wemDTYNO2wW2I7thWbkMNAVeA1NHOKXI/VqWlkyFhDBcZEFcRDLsR99lMiFvjUw01fVXdp7AEMIVK7CcelObEpxrag3J0y6oQT9QFbWQo5haXE4FFCZvPgXj8r6PdkLTSLMv+E+cyyX26df8TunmanN19rvr7TrVBLAwQUAAAACACQThJRWmJBaH8AAADjAAAACwAAAGNvbnRlbnQueG1sXY/RCsMgDEXf+xWj767ba+j8FxcjCGpKE6H9+wlbRfYUbs69uWTlECISeMaaqahBLtrm7cipCHzpa657AXYSBYrLJKAIvFG5UjC64Xl/zHZaf0pwj5vKYq9FaA0mOCTjCdMAXFXOTiMa0TNRI/3Im/3ZfUqHttQysqnL/0/sB1BLAQIUAxQAAAAAAPMbH0texjIMJwAAACcAAAAIAAAAAAAAAAAAAACkgQAAAABtaW1ldHlwZVBLAQIUAxQAAAAIAN1NElHql+ZnkgAAADEBAAAVAAAAAAAAAAAAAACkgU0AAABNRVRBLUlORi9tYW5pZmVzdC54bWxQSwECFAMUAAAACACQThJRWmJBaH8AAADjAAAACwAAAAAAAAAAAAAApIESAQAAY29udGVudC54bWxQSwUGAAAAAAMAAwCyAAAAugEAAAAA'
+	};
 
 	const _ = key => typeof lang_strings != 'undefined' && key in lang_strings ? lang_strings[key] : key;
 
-	const rename_button = `<input class="rename" type="button" value="${_('Rename')}" />`;
-	const delete_button = `<input class="delete" type="button" value="${_('Delete')}" />`;
+	const rename_button = `<input class="icon rename" type="button" value="${_('Rename')}" title="${_('Rename')}" />`;
+	const delete_button = `<input class="icon delete" type="button" value="${_('Delete')}" title="${_('Delete')}" />`;
 
-	const edit_button = `<input class="edit" type="button" value="${_('Edit')}" />`;
+	const edit_button = `<input class="icon edit" type="button" value="${_('Edit')}" title="${_('Edit')}" />`;
 
 	const mkdir_dialog = `<input type="text" name="mkdir" placeholder="${_('Directory name')}" />`;
 	const mkfile_dialog = `<input type="text" name="mkfile" placeholder="${_('File name')}" />`;
 	const rename_dialog = `<input type="text" name="rename" placeholder="${_('New file name')}" />`;
 	const paste_upload_dialog = `<h3>Upload this file?</h3><input type="text" name="paste_name" placeholder="${_('New file name')}" />`;
 	const edit_dialog = `<textarea name="edit" cols="70" rows="30"></textarea>`;
-	const markdown_dialog = `<div id="mdp"><textarea name="edit" cols="70" rows="30"></textarea><div id="md"></div></div>`;
+	const markdown_dialog = `<div id="mdp"><textarea name="edit" cols="70" rows="30"></textarea><div class="md_preview"></div></div>`;
 	const delete_dialog = `<h3>${_('Confirm delete?')}</h3>`;
-	const wopi_dialog = `<iframe id="wopi_frame" name="wopi_frame" allowfullscreen="true" allow="autoplay camera microphone display-capture"
-			sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation allow-popups-to-escape-sandbox allow-downloads allow-modals">
+	const wopi_dialog = `<iframe id="wopi_frame" name="wopi_frame" allow="clipboard-read *; clipboard-write *;" allowfullscreen="true">
 		</iframe>`;
 
 	const dialog_tpl = `<dialog open><p class="close"><input type="button" value="&#x2716; ${_('Close')}" class="close" /></p><form><div>%s</div>%b</form></dialog>`;
 
 	const html_tpl = `<!DOCTYPE html><html>
-		<head><title>Files</title><link rel="stylesheet" type="text/css" href="${css_url}" /></head>
+		<head><title></title><link rel="stylesheet" type="text/css" href="${css_url}" /></head>
 		<body><main></main><div class="bg"></div></body></html>`;
 
-	const body_tpl = `<h1>%title%</h1>
-		<div class="upload">
-			<select class="sortorder btn">
-				<option value="name">${_('Sort by name')}</option>
-				<option value="date">${_('Sort by date')}</option>
-				<option value="size">${_('Sort by size')}</option>
-			</select>
-			<input type="button" class="download_all" value="${_('Download all files')}" />
+	const body_tpl = `
+		<div class="buttons">
+			<div class="selected">
+				<input type="button" class="icon download" value="${_('Download')}" />
+				<input type="button" class="icon delete" value="${_('Delete')}" />
+			</div>
 		</div>
-		<table>%table%</table>`;
+		<table>
+			<thead>
+				<tr>
+					<td scope="col" class="check"><input type="checkbox" name="delete" value="%uri%" /><label><span></span></label></td>
+					<td scope="col" class="name" data-sort="name"><button>${_('Name')}</button></td>
+					<td scope="col" class="size" data-sort="size"><button>${_('Size')}</button></td>
+					<td scope="col" class="date" data-sort="date"><button>${_('Date')}</button></td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>%table%</tbody>
+		</table>`;
 
-	const create_buttons = `<input class="mkdir" type="button" value="${_('New directory')}" />
-			<input type="file" style="display: none;" />
-			<input class="mkfile" type="button" value="${_('New text file')}" />
-			<input class="uploadfile" type="button" value="${_('Upload file')}" />`;
+	const create_buttons = `<input type="file" style="display: none;" multiple />
+		<input class="icon upload" type="button" value="${_('Upload files')}" />
+		<input class="icon mk" type="button" value="${_('New')}" />
+		<div class="menu">
+			<input class="icon mkdir" type="button" value="${_('Directory')}" />
+			<input class="icon mktext" type="button" value="${_('Text file')}" />
+		</div>`;
 
-	const dir_row_tpl = `<tr data-permissions="%permissions%"><td class="thumb"><span class="icon dir"><b>%icon%</b></span></td><th colspan="2"><a href="%uri%">%name%</a></th><td>%modified%</td><td class="buttons"><div></div></td></tr>`;
-	const file_row_tpl = `<tr data-permissions="%permissions%" data-mime="%mime%" data-size="%size%"><td class="thumb"><span class="icon %icon%"><b>%icon%</b></span></td><th><a href="%uri%">%name%</a></th><td class="size">%size_bytes%</td><td>%modified%</td><td class="buttons"><div><a href="%uri%" download class="btn">${_('Download')}</a></div></td></tr>`;
+	const create_wopi_buttons = `<h5>${_('Office document')}</h5>
+			<input class="icon ODT" type="button" value="${_('Text')}" />
+			<input class="icon ODS" type="button" value="${_('Spreadsheet')}" />
+			<input class="icon ODP" type="button" value="${_('Presentation')}" />
+			<input class="icon ODG" type="button" value="${_('Drawing')}" />`;
+
+	const dir_row_tpl = `<tr data-permissions="%permissions%" class="%class%" data-name="%name%">
+		<td class="check"><input type="checkbox" name="delete" value="%uri%" /><label><span></span></label></td>
+		<th colspan="2"><a href="%uri%">%thumb% %name%</a></th>
+		<td class="date">%modified%</td>
+		<td class="buttons"><div></div></td>
+	</tr>`;
+
+	const file_row_tpl = `<tr data-permissions="%permissions%" data-mime="%mime%" data-size="%size%" data-name="%name%">
+		<td class="check"><input type="checkbox" name="delete" value="%uri%" /><label><span></span></label></td>
+		<th><a href="%uri%">%thumb% %name%</a></th>
+		<td class="size">%size_bytes%</td>
+		<td class="date">%modified%</td>
+		<td class="buttons"><div><a href="%uri%" download title="${_('Download')}" class="btn">${_('Download')}</a></div></td>
+	</tr>`;
+
+	const icon_tpl = `<span class="icon %icon%"><b>%icon%</b></span>`;
+	const root_url = url.replace(/(?<!\/)\/.*$/, '/');
+	const image_thumb_tpl = `<img src="${root_url}index.php/apps/files/api/v1/thumbnail/150/150/%path%" alt="" />`;
 
 	const propfind_tpl = '<'+ `?xml version="1.0" encoding="UTF-8"?>
 		<D:propfind xmlns:D="DAV:" xmlns:oc="http://owncloud.org/ns">
@@ -60,7 +101,7 @@ const WebDAVNavigator = (url, options) => {
 	const wopi_propfind_tpl = '<' + `?xml version="1.0" encoding="UTF-8"?>
 		<D:propfind xmlns:D="DAV:" xmlns:W="https://interoperability.blob.core.windows.net/files/MS-WOPI/">
 			<D:prop>
-				<W:file-url/><W:token/><W:token-ttl/>
+				<W:wopi-url/><W:token/><W:token-ttl/>
 			</D:prop>
 		</D:propfind>`;
 
@@ -77,21 +118,27 @@ const WebDAVNavigator = (url, options) => {
 			}).then(str => new window.DOMParser().parseFromString(str, "text/xml"));
 	};
 
+	const reqHandler = (r, c) => {
+		if (!r.ok) {
+			return r.text().then(t => {
+				var message;
+				if (a = t.match(/<((?:\w+:)?message)>(.*)<\/\1>/)) {
+					message = "\n" + a[2];
+				}
+
+				throw new Error(r.status + ' ' + r.statusText + message);
+			});
+		}
+		window.setTimeout(c, 200);
+		return r;
+	};
+
 	const reqAndReload = (method, url, body, headers) => {
 		animateLoading();
-		req(method, url, body, headers).then(r => {
+		req(method, url, body, headers).then(r => reqHandler(r, () => {
 			stopLoading();
-			if (!r.ok) {
-				return r.text().then(t => {
-					var message;
-					if (a = t.match(/<((?:\w+:)?message)>(.*)<\/\1>/)) {
-						message = "\n" + a[2];
-					}
-
-					throw new Error(r.status + ' ' + r.statusText + message); });
-			}
 			reloadListing();
-		}).catch(e => {
+		})).catch(e => {
 			console.error(e);
 			alert(e);
 		});
@@ -137,6 +184,32 @@ const WebDAVNavigator = (url, options) => {
 		});
 		return p;
 	};
+
+	const uploadFiles = (files) => {
+		animateLoading();
+
+		(async () => {
+			for (var i = 0; i < files.length; i++) {
+				var f = files[i];
+				await reqOrError('PUT', current_url + encodeURIComponent(f.name), f);
+			}
+
+			window.setTimeout(() => {
+				stopLoading();
+				reloadListing();
+			}, 500);
+		})();
+	};
+
+	const reqOrError = (method, url, body) => {
+		return req(method, url, body).then(reqHandler).catch(e => {
+			console.error(e);
+			alert(e);
+			stopLoading();
+			reloadListing();
+			throw e;
+		});
+	}
 
 	const get_url = async (url) => {
 		var progress = (e) => {
@@ -218,7 +291,7 @@ const WebDAVNavigator = (url, options) => {
 
 	const wopi_open = async (document_url, wopi_url) => {
 		var properties = await reqXML('PROPFIND', document_url, wopi_propfind_tpl, {'Depth': '0'});
-		var src = (a = properties.querySelector('file-url')) ? a.textContent : null;
+		var src = (a = properties.querySelector('wopi-url')) ? a.textContent : null;
 		var token = (a = properties.querySelector('token')) ? a.textContent : null;
 		var token_ttl = (a = properties.querySelector('token-ttl')) ? a.textContent : +(new Date(Date.now() + 3600 * 1000));
 
@@ -305,14 +378,18 @@ const WebDAVNavigator = (url, options) => {
 		window.onbeforeunload = null;
 	};
 
-	const download_all = async () => {
+	const download_selected = async () => {
+		var items = document.querySelectorAll('tbody input[type=checkbox]:checked');
 		for (var i = 0; i < items.length; i++) {
-			var item = items[i];
-			if (item.is_dir) {
-				continue;
+			var input = items[i];
+			var row = input.parentNode.parentNode;
+
+			// Skip directories
+			if (!row.dataset.mime) {
+				return;
 			}
 
-			await download(item.name, item.size, item.uri)
+			await download(row.dataset.name, row.dataset.size, row.querySelector('th a').href);
 		}
 	};
 
@@ -372,7 +449,7 @@ const WebDAVNavigator = (url, options) => {
 			return _('Yesterday, %s').replace(/%s/, date.toLocaleTimeString());
 		}
 
-		return date.toLocaleString();
+		return date.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'});
 	};
 
 	const openListing = (uri, push) => {
@@ -434,12 +511,13 @@ const WebDAVNavigator = (url, options) => {
 	const buildListing = (uri, xml) => {
 		uri = normalizeURL(uri);
 
-		items = [[], []];
+		items = [];
 		var title = null;
 		var root_permissions = null;
 
 		xml.querySelectorAll('response').forEach((node) => {
-			var item_uri = normalizeURL(node.querySelector('href').textContent);
+			var path = node.querySelector('href').textContent;
+			var item_uri = normalizeURL(path);
 			var props = null;
 
 			node.querySelectorAll('propstat').forEach((propstat) => {
@@ -466,10 +544,11 @@ const WebDAVNavigator = (url, options) => {
 			}
 
 			var is_dir = node.querySelector('resourcetype collection') ? true : false;
-			var index = sort_order == 'name' && is_dir ? 0 : 1;
+			var index = is_dir ? 0 : 1;
 
-			items[index].push({
+			items.push({
 				'uri': item_uri,
+				'path': item_uri.substring(base_url.length),
 				'name': name,
 				'size': !is_dir && (prop = node.querySelector('getcontentlength')) ? parseInt(prop.textContent, 10) : null,
 				'mime': !is_dir && (prop = node.querySelector('getcontenttype')) ? prop.textContent : null,
@@ -479,39 +558,35 @@ const WebDAVNavigator = (url, options) => {
 			});
 		});
 
-		if (sort_order == 'name') {
-			items[0].sort((a, b) => a.name.localeCompare(b.name));
-		}
-
-		items[1].sort((a, b) => {
-			if (sort_order == 'date') {
-				return b.modified - a.modified;
+		items.sort((a, b) => {
+			if (sort_order === 'date') {
+				return a.modified - b.modified;
 			}
-			else if (sort_order == 'size') {
-				return b.size - a.size;
+			else if (sort_order === 'size') {
+				return a.size - b.size;
 			}
 			else {
 				return a.name.localeCompare(b.name);
 			}
 		});
 
-		if (sort_order == 'name') {
+		if (sort_order !== 'date') {
 			// Sort with directories first
-			items = items[0].concat(items[1]);
-		}
-		else {
-			items = items[1];
+			items.sort((a, b) => b.is_dir - a.is_dir);
 		}
 
+		if (sort_order_desc) {
+			items = items.reverse();
+		}
 
 		var table = '';
 		var parent = uri.replace(/\/+$/, '').split('/').slice(0, -1).join('/') + '/';
 
 		if (parent.length >= base_url.length) {
-			table += template(dir_row_tpl, {'name': _('Back'), 'uri': parent, 'icon': '&#x21B2;'});
+			table += template(dir_row_tpl, {'name': _('Back'), 'uri': parent, 'class': 'parent', 'thumb': template(icon_tpl, {})});
 		}
 		else {
-			title = 'My files';
+			title = _('My files');
 		}
 
 		items.forEach(item => {
@@ -523,32 +598,134 @@ const WebDAVNavigator = (url, options) => {
 
 			var row = item.is_dir ? dir_row_tpl : file_row_tpl;
 			item.size_bytes = item.size !== null ? formatBytes(item.size).replace(/ /g, '&nbsp;') : null;
-			item.icon = item.is_dir ? '&#x1F4C1;' : (item.uri.indexOf('.') > 0 ? item.uri.replace(/^.*\.(\w+)$/, '$1').toUpperCase() : '');
+
+			if (!item.is_dir && (pos = item.uri.lastIndexOf('.'))) {
+				var ext = item.uri.substr(pos+1).toUpperCase();
+
+				if (ext.length > 4) {
+					ext = '';
+				}
+			}
+
+			item.icon = ext || '';
+			item.class = item.is_dir ? 'dir' : 'file';
 			item.modified = item.modified !== null ? formatDate(item.modified) : null;
 			item.name = html(item.name);
+
+			if (item.mime && item.mime.match(/^image\//) && options.nc_thumbnails) {
+				item.thumb = template(image_thumb_tpl, item);
+			}
+			else {
+				item.thumb = template(icon_tpl, item);
+			}
+
 			table += template(row, item);
 		});
 
 		document.title = title;
 		document.querySelector('main').innerHTML = template(body_tpl, {'title': html(document.title), 'base_url': base_url, 'table': table});
 
-		var select = $('.sortorder');
-		select.value = sort_order;
-		select.onchange = () => {
-			sort_order = select.value;
-			window.localStorage.setItem('sort_order', sort_order);
+		var parent_check = document.querySelector('tbody tr.parent .check');
+
+		if (parent_check) {
+			parent_check.innerHTML = '';
+		}
+
+		var column = document.querySelector('thead td[data-sort="' + sort_order + '"]').className += ' selected ' + (sort_order_desc ? 'desc' : 'asc');
+
+		document.querySelectorAll('thead td[data-sort] button').forEach(elm => elm.onclick = (e) => {
+			var new_sort_order = e.target.parentNode.dataset.sort;
+
+			if (sort_order == new_sort_order) {
+				sort_order_desc = !sort_order_desc;
+			}
+
+			sort_order = new_sort_order;
+
+			window.localStorage.setItem('sort_order', new_sort_order);
+			window.localStorage.setItem('sort_order_desc', sort_order_desc ? '1' : '0');
 			reloadListing();
+		});
+
+		document.querySelector('thead td.check input').onchange = (e) => {
+			document.querySelectorAll('tbody td.check input').forEach(i => i.checked = e.target.checked);
 		};
 
 		if (!items.length) {
-			$('.download_all').disabled = true;
+			$('div.buttons .download').disabled = true;
 		}
 		else {
-			$('.download_all').onclick = download_all;
+			$('div.buttons .download').onclick = download_selected;
 		}
 
+		$('div.buttons .delete').onclick = () => {
+			var l = document.querySelectorAll('input[name=delete]:checked');
+
+			if (!l.length) {
+				alert(_('No file is selected'));
+				return;
+			}
+
+			openDialog(delete_dialog);
+			document.forms[0].onsubmit = () => {
+				animateLoading();
+
+				for (var i = 0; i < l.length; i++) {
+					reqOrError('DELETE', l[i].value);
+				}
+
+				// Don't reload too fast
+				window.setTimeout(() => {
+					stopLoading();
+					reloadListing();
+				}, 500);
+			};
+
+		};
+
 		if (!root_permissions || root_permissions.indexOf('C') != -1 || root_permissions.indexOf('K') != -1) {
-			$('.upload').insertAdjacentHTML('afterbegin', create_buttons);
+			$('.buttons').insertAdjacentHTML('beforeend', create_buttons);
+
+			var menu = $('.buttons .menu');
+			menu.dataset.visible = '0';
+			menu.style.display = 'none';
+
+			var toggle_menu = () => {
+				menu.dataset.visible = menu.dataset.visible == 0 ? 1 : 0;
+				menu.style.display = menu.dataset.visible == 1 ? 'flex' : 'none';
+			};
+
+			$('.buttons > .mk').onclick = toggle_menu;
+
+			if (wopi_extensions) {
+				menu.insertAdjacentHTML('beforeend', create_wopi_buttons);
+
+				menu.querySelectorAll('.ODS, .ODT, .ODG, .ODP').forEach(btn => btn.onclick = () => {
+					toggle_menu();
+					openDialog(mkfile_dialog);
+					var t = $('input[name=mkfile]');
+					var ext = btn.className.substr(-3).toLowerCase();
+					t.focus();
+					document.forms[0].onsubmit = () => {
+						var name = t.value;
+						closeDialog();
+
+						if (!name) return false;
+
+						name = encodeURIComponent(name + '.' + ext);
+						var file_url = current_url + name;
+
+						// Cannot use atob here, or JS will send blob as unicode text
+						fetch('data:application/octet-stream;base64,' + OPENDOCUMENT_TEMPLATES[ext]).then(r => r.blob()).then(r => {
+							req('PUT', file_url, r, {'Content-Type': 'application/octet-stream'}).then(() => {
+								wopi_open(file_url, wopi_getEditURL(file_url, ext));
+							});
+						});
+
+						return false;
+					};
+				});
+			}
 
 			$('.mkdir').onclick = () => {
 				openDialog(mkdir_dialog);
@@ -564,7 +741,7 @@ const WebDAVNavigator = (url, options) => {
 				};
 			};
 
-			$('.mkfile').onclick = () => {
+			$('.mktext').onclick = () => {
 				openDialog(mkfile_dialog);
 				var t = $('input[name=mkfile]');
 				t.value = '.md';
@@ -583,24 +760,19 @@ const WebDAVNavigator = (url, options) => {
 
 			var fi = $('input[type=file]');
 
-			$('.uploadfile').onclick = () => fi.click();
+			$('.upload').onclick = () => fi.click();
 
 			fi.onchange = () => {
 				if (!fi.files.length) return;
 
-				var body = new Blob(fi.files);
-				var name = fi.files[0].name;
-
-				name = encodeURIComponent(name);
-
-				return reqAndReload('PUT', current_url + name, body);
+				uploadFiles(fi.files);
 			};
 		}
 
-		Array.from($('table').rows).forEach((tr) => {
+		document.querySelectorAll('table tbody tr').forEach(tr => {
 			var $$ = (a) => tr.querySelector(a);
 			var file_url = $$('a').href;
-			var file_name = $$('a').innerText;
+			var file_name = tr.dataset.name;
 			var dir = $$('[colspan]');
 			var mime = !dir ? tr.getAttribute('data-mime') : 'dir';
 			var buttons = $$('td.buttons div');
@@ -674,16 +846,26 @@ const WebDAVNavigator = (url, options) => {
 			}
 
 			var view_url, edit_url;
+			var allow_preview = false;
+
+			if (mime.match(PREVIEW_TYPES)
+				|| file_name.match(PREVIEW_EXTENSIONS)) {
+				allow_preview = true;
+			}
 
 			// Don't preview PDF in mobile
-			if (mime.match(PREVIEW_TYPES)
-				&& !(mime == 'application/pdf' && window.navigator.userAgent.match(/Mobi|Tablet|Android|iPad|iPhone/))) {
+			if ((mime == 'application/pdf' || file_name.match(/\.pdf/i))
+				&& window.navigator.userAgent.match(/Mobi|Tablet|Android|iPad|iPhone/)) {
+				allow_preview = false;
+			}
+
+			if (allow_preview) {
 				$$('a').onclick = () => {
 					if (file_url.match(/\.md$/)) {
 						openDialog('<div class="md_preview"></div>', false);
 						$('dialog').className = 'preview';
 						req('GET', file_url).then(r => r.text()).then(t => {
-							$('.md_preview').innerHTML = microdown.parse(html(t));
+							$('.md_preview').innerHTML = microdown.parse(t);
 						});
 						return false;
 					}
@@ -705,7 +887,7 @@ const WebDAVNavigator = (url, options) => {
 			else if (user && password && !dir) {
 				$$('a').onclick = () => { download(file_name, size, file_url); return false; };
 			}
-			else {
+			else if (!dir) {
 				$$('a').download = file_name;
 			}
 
@@ -716,16 +898,97 @@ const WebDAVNavigator = (url, options) => {
 					$$('.edit').onclick = (e) => {
 						req('GET', file_url).then((r) => r.text().then((t) => {
 							let md = file_url.match(/\.md$/);
-							openDialog(md ? markdown_dialog : edit_dialog);
+							var tpl = dialog_tpl.replace(/%b/, '');
+							$('body').classList.add('dialog');
+							$('body').insertAdjacentHTML('beforeend', tpl.replace(/%s/, md ? markdown_dialog : edit_dialog));
+
+							var tb = $('.close');
+							tb.className = 'toolbar';
+							tb.innerHTML = `<input type="button" value="&#x2716; ${_('Cancel')}" class="close" />
+								<label><input type="checkbox" class="autosave" /> ${_('Autosave')}</label>
+								<span class="status"></span>
+								<input class="save" type="button" value="${_('Save and close')}" />`;
+
 							var txt = $('textarea[name=edit]');
 							txt.value = t;
 
+							var saved_status = $('.toolbar .status');
+							var close_btn = $('.toolbar .close');
+							var save_btn = $('.toolbar .save');
+							var autosave = $('.toolbar .autosave');
+
+							var c = localStorage.getItem('autosave') ?? options.autosave;
+							autosave.checked = c == 1 || c ===  true;
+							autosave.onchange = () => {
+								localStorage.setItem('autosave', autosave.checked ? 1 : 0);
+							};
+
+							var preventClose = (e) => {
+								if (txt.value == t) {
+									return;
+								}
+
+								e.preventDefault();
+								e.returnValue = '';
+								return true;
+							};
+
+							var close = () => {
+								if (txt.value !== t) {
+									if (!confirm(_('Your changes have not been saved. Do you want to cancel WITHOUT saving?'))) {
+										return;
+									}
+								}
+
+								window.removeEventListener('beforeunload', preventClose, {capture: true});
+								closeDialog();
+							};
+
+							var save = () => {
+								reqOrError('PUT', file_url, txt.value);
+								t = txt.value;
+								updateSaveStatus();
+							};
+
+							var updateSaveStatus = () => {
+								saved_status.innerHTML = txt.value !== t ? '⚠️ ' + _('Modified') : '✔️ ' + _('Saved');
+							};
+
+							save_btn.onclick = () => { save(); close(); };
+							close_btn.onclick = close;
+
+							// Prevent close of tab if content has changed and is not saved
+							window.addEventListener('beforeunload', preventClose, { capture: true });
+
+							txt.onkeydown = (e) => {
+								if (e.ctrlKey && e.key == 's') {
+									save();
+									e.preventDefault();
+									return false;
+								}
+								else if (e.key === 'Escape') {
+									close();
+									e.preventDefault();
+									return false;
+								}
+							};
+
+							txt.onkeyup = (e) => {
+								updateSaveStatus();
+							};
+
+							window.setInterval(() => {
+								if (autosave.checked && t != txt.value) {
+									save();
+								}
+							}, 10000);
+
 							// Markdown editor
 							if (md) {
-								let pre = $('#md');
+								let pre = $('.md_preview');
 
 								txt.oninput = () => {
-									pre.innerHTML = microdown.parse(html(txt.value));
+									pre.innerHTML = microdown.parse(txt.value);
 								};
 
 								txt.oninput();
@@ -776,9 +1039,11 @@ const WebDAVNavigator = (url, options) => {
 
 	var evt, paste_upload, popstate_evt, temp_object_url;
 	var sort_order = window.localStorage.getItem('sort_order') || 'name';
+	var sort_order_desc = !!parseInt(window.localStorage.getItem('sort_order_desc'), 10);
 	var wopi_mimes = {}, wopi_extensions = {};
 
 	const wopi_discovery_url = options.wopi_discovery_url || null;
+	options.autosave = options.autosave || false;
 
 	document.querySelector('html').innerHTML = html_tpl;
 
@@ -853,28 +1118,19 @@ const WebDAVNavigator = (url, options) => {
 		document.body.classList.remove('dragging');
 		dragcounter = 0;
 
-		const files = [...e.dataTransfer.items].map(item => item.getAsFile());
+		var files = [...e.dataTransfer.items].map(item => item.getAsFile());
+
+		files = files.filter(f => f !== null);
 
 		if (!files.length) return;
 
-		animateLoading();
-
-		(async () => {
-			for (var i = 0; i < files.length; i++) {
-				var f = files[i]
-				await req('PUT', current_url + encodeURIComponent(f.name), f);
-			}
-
-			window.setTimeout(() => {
-				stopLoading();
-				reloadListing();
-			}, 500);
-		})();
+		uploadFiles(files);
 	});
 };
 
 if (url = document.querySelector('html').getAttribute('data-webdav-url')) {
 	WebDAVNavigator(url, {
 		'wopi_discovery_url': document.querySelector('html').getAttribute('data-wopi-discovery-url'),
+		'nc_thumbnails': document.querySelector('html').getAttribute('data-nc-thumbnails') ? true : false
 	});
 }

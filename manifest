@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Allow\sto\sset\sa\sdifferent\sPDF\sprofile
-D 2026-08-27T13:28:51.737
+C Update\sWebDAV\snavigator\sto\slast\sstable\srelease
+D 2026-08-29T17:08:13.105
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -753,9 +753,9 @@ F src/www/admin/static/scripts/lib/prism/prism_editor.js f3f59db7dcdbb1047f7a346
 F src/www/admin/static/scripts/lib/query_builder.js 1e1ade580be3a4add8dadd04e7ff7ed1f8da70855ebf5c7a53a515ee16b14cea
 F src/www/admin/static/scripts/lib/text_editor.js 753a77f49880b00419771b25a1166ff76819f3cd52ad48f2b752339caa64a5bd
 F src/www/admin/static/scripts/lib/unzipit.min.js 8729f4e48a77faee72b09d2503934f705fb5befab597262230c7c26836f52162
-F src/www/admin/static/scripts/lib/webdav.css e95322578b2e34bde605ec29148d22faa17c7c01c2216f42f17298a1a77788d7
-F src/www/admin/static/scripts/lib/webdav.fr.js 5101d45a9c20993e773d59bd185c3b93503fb4d2c4256f1f2c0bab6bc7bc9653
-F src/www/admin/static/scripts/lib/webdav.js 986d04833f6c2fbefb127ca4d6ea663f6977c71233bb996b7445cf9f48236c14
+F src/www/admin/static/scripts/lib/webdav.css 3fc0d32dbfbe3ea87e79d438cd0c05ed322c71b8e9b6a463ab7a33942a2c996e
+F src/www/admin/static/scripts/lib/webdav.fr.js 951a5693c0eca44a156badde57bf0d3fffcdf0fa674250e3fdcfe1e2f03723b4
+F src/www/admin/static/scripts/lib/webdav.js 645221ac9716cdf07be9e6dcb840b8a1ce054fb5c2a9cb724351fbc23b0a879b
 F src/www/admin/static/scripts/password.js 6b890f3fa7aaef7c69b83a52cd6fc271984159983b52bc35bd0ead7dcad604e1
 F src/www/admin/static/scripts/selector.js 51cbb5deb4f797c21f1ed849304ad9ef470305bf7e87a346eb8cbcd9feb88ff1
 F src/www/admin/static/scripts/service_form.js 34795ffd77f34bd609bbf3dba88f70039170593eb2a32cca2c71b7e0d05734f5
@@ -859,24 +859,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P ca1b5f8c8ea424cbd1d79e76ce61801c1ccc77a07573b7e3b29ba4f37aeae46f
-R 5fb332d725e675729b9834bfe2dd6c85
+P 26b3f61cdf9edf666b5abd75877a486d550d70f06681d2d6e3932aaba2702eaf
+R 5d2bcd35eae827b3bcfc7f6d46215102
 U bohwaz
-Z 5be102d7154fdc594763516271871cbf
+Z 086b510f660a2e19bb01550996698a20
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqQO5MACgkQksnacbiI
-6jRYkQ//WkGqh68WnZnLS5oD9YbiElYQA8dOujZcZmcRAcCW8mPJsQvGTt9t1JMd
-y+s9fvjcVOtXEyZt4mb13Nd5vxfOO7VKft2uLUUGC6h8P22ApsA7BTPtMGiml/01
-Py5H9Xr6wUJOv0dukulIlNdUhYOBhb1qiue8667uzOhQcN40NlSGFewdNiOktvfu
-RZoFosabPNEH9l74gPyKQq/4Lg7Zr2kff7CiNKMkWEExF9z/dzLtMaoXbZUE7OvG
-b4EaP6/rRJ7Teg4RB0b6zLzINmSMvzdeo2Mg+lfw/Skzz3iOQIwPTY+lz5KygH/L
-8rISjk9k3efJh0pLH7hJc2oROkjq02CraxGO3Owg/YJZukbpFT3FBpiZ4+wVYQkS
-eF2X44vi3sBguK/Ea3Svp61Fkbx93Ed+lIfaBsSYMvsnP5GiSHS3V+Ua5D8qeY7L
-+DudC4kvP0Mlcvo/Fo8CJFxQKMYLjoISP3LN40ZC8TC+Xnkz8MO356YXDNibsF0S
-t7OBsp0Hhb5H7X2KipouDTdzPA7/KPp8h1KDetorjNojBFFfy2WDo+qDMz9q/CGO
-mhRubrkwY/FJyPmXFt387fTey0ex9KAi/4dOjEzhWVtvbI2xnjLxM0fbOsm7aqly
-hUBPhRIsNBpvXjlsHkTmtpPnudnj3Riv2y27qyYh1rRdIrS7V68=
-=D47P
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqTEf0ACgkQksnacbiI
+6jTFYQ/8DTNU4KtPtGMizDUM20n0SjNbrkaJLxYmerJVs37g/QX8AQWBI43zaOqC
+ZmFxrROOlBL9NUeqv7Ob6G7qTf9SpShWTLcPWy2uBJK4YcEjaE73EHWB5ByrfBwr
+OXxcFebtOg9nPNfxyvIQZ81LCXpR5rsNwzWKLcf4TRRecRfFvAELSl9IQm9CW5yW
+9aEeQt1iSjdL7r/TOXbVv5gYQFKGmSfGBimo9Tl/Qn0s2AFdR24C4LMQiaMp9AwB
+C2xgGCYUFlSt6fciPULSGfhyq/cl+bJI+/UUaYL4h0bEFDsqA/tQboBqdTf+2Z9s
+q0d5xHN1Kwr2cw2EJ/pN6lEoJNEkk6d5M5GEl/HQPw2YtVHadOTedoZuYlYvS2Ok
+dHJNNm97ETV4ZRE4aMYh4aJkpaAkyEKyl3wCSocgMg9Vjf1tSBB/kvkdCkNOX8/y
+qo4AetDtam2vRuLy/C17MLbW3bwupgt5NOnQLvbutEbcvc2mOOxvAstiEA8w7Ry2
+D+LRk8aM2XVTivMUHRhCg21i86FtcU8E0EGJI4UKCsna5eONE+a2eNzLVIp+xSEh
+NDZM+p4P6o8f3KK+T63iENdGkOpftuWRPDG2BhIDmoEfHWCNcNBjrfsVQoeDMR2P
+EW93MvdNz3S5gDSEJ6tSVO44EL+V3VzOJ0qOHzQhnkPSx8SfuxA=
+=tkt/
 -----END PGP SIGNATURE-----
