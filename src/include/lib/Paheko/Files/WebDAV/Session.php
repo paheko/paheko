@@ -32,11 +32,13 @@ class Session extends UserSession
 		$name = DynamicFields::getFirstNameField();
 		$this->user = (new User)->import([$name => $login . ' (API)']);
 
-		$this->_permissions = [];
+		$permissions = [];
 
 		foreach (Category::PERMISSIONS as $perm => $data) {
-			$this->_permissions[$perm] = $access;
+			$permissions[$perm] = $access;
 		}
+
+		$this->user->setPermissions($permissions);
 
 		return true;
 	}

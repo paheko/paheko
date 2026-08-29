@@ -15,7 +15,9 @@ if (empty($search_url)) {
 	throw new \LogicException('Missing $search_url');
 }
 
+$session = Session::getInstance();
 $access_section = CURRENT_SEARCH_TARGET == 'accounting' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+$is_admin = $session->canAccess($access_section, Session::ACCESS_ADMIN);
 
 $mode = null;
 $search = null;
@@ -28,7 +30,7 @@ if (qg('delete')) {
 		throw new UserException('Recherche non trouvée');
 	}
 
-	if ($search->id_user !== null && $search->id_user != Session::getInstance()->getUser()->id) {
+	if ($search->id_user !== null && $search->id_user != $session->user()->id) {
 		throw new UserException('Recherche privée appartenant à un autre membre.');
 	}
 
@@ -46,8 +48,11 @@ elseif (qg('edit') !== null) {
 			throw new UserException('Recherche non trouvée');
 		}
 
-		if ($search->id_user !== null && $search->id_user != Session::getInstance()->getUser()->id) {
+		if ($search->id_user !== null && $search->id_user != $session->user()->id) {
 			throw new UserException('Recherche privée appartenant à un autre membre.');
+		}
+		elseif ($search->id_user === null && !$is_admin) {
+			throw new UserException('Vous ne pouvez modifier une recherche publique.');
 		}
 	}
 	else {
@@ -56,8 +61,18 @@ elseif (qg('edit') !== null) {
 
 	$search->populate($session);
 
-	$form->runIf('save', function () use ($search) {
+	if (!$is_admin) {
+		$search->set('id_user', $session->user()->id());
+	}
+
+	$form->runIf('save', function () use ($search, $is_admin, $session) {
 		$search->importForm();
+
+		// make sure non-admin user cannot create public search
+		if (!$is_admin) {
+			$search->set('id_user', $session->user()->id());
+		}
+
 		$search->save();
 	}, $csrf_key, Utils::getSelfURI(false));
 

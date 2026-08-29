@@ -29,23 +29,20 @@ class Import
 		$report = ['created' => [], 'modified' => [], 'unchanged' => [], 'errors' => []];
 
 		$logged_user_id = $session ? $session::getUserId() : null;
-		$is_logged = $session ? $session->isLogged() : null;
 		$safe_categories = $session ? array_flip(Categories::listAssocSafe($session, false)) : null;
 
 		if ($logged_user_id) {
 			$report['has_logged_user'] = false;
 		}
 
-		if ($is_logged) {
-			$report['has_admin_users'] = false;
-		}
+		$report['has_admin_users'] = false;
 
 		foreach (self::iterateImport($csv, $mode, $safe_categories, $report['errors']) as $line => $user) {
 			if ($logged_user_id && $user->id == $logged_user_id) {
 				$report['has_logged_user'] = true;
 				continue;
 			}
-			elseif ($is_logged && !$user->canBeModifiedBy($session)) {
+			elseif (!$user->canBeModifiedBy($session)) {
 				$report['has_admin_users'] = true;
 				continue;
 			}
@@ -79,7 +76,6 @@ class Import
 		}
 
 		$logged_user_id = $session ? $session::getUserId() : null;
-		$is_logged = $session ? $session->isLogged() : null;
 		$safe_categories = $session ? array_flip(Categories::listAssocSafe($session, false)) : null;
 
 		$number_field = DynamicFields::getNumberField();
@@ -93,7 +89,7 @@ class Import
 			if ($logged_user_id && $user->id == $logged_user_id) {
 				continue;
 			}
-			elseif ($is_logged && !$user->canBeModifiedBy($session)) {
+			elseif (!$user->canBeModifiedBy($session)) {
 				continue;
 			}
 

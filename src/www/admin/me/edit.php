@@ -15,7 +15,7 @@ if (!$user->canEditOneField()) {
 }
 
 $form->runIf('save', function () use ($user) {
-	$user->importForm();
+	$user->importUserForm();
 	$user->checkLoginFieldForUserEdit();
 	$user->save();
 }, $csrf_key, '!me/?ok');

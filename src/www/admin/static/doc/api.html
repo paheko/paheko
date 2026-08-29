@@ -147,7 +147,7 @@
 <pre><code>curl https://test:abcd@paheko.monasso.tld/api/sql/ -F sql='SELECT * FROM users LIMIT 5;' -F format=csv</code></pre>
 <h2 id="telechargements">Téléchargements</h2>
 <h3 id="download-get">download (GET)</h3>
-<p>Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données.</p>
+<p>Télécharger la base de données complète. Renvoie directement le fichier SQLite de la base de données, comme une sauvegarde. Celui-ci contient <strong>toutes</strong> les données de l'association, y compris les mots de passe chiffrés des membres.</p>
 <p>Exemple :</p>
 <pre><code>curl https://test:abcd@paheko.monasso.tld/api/download -o db.sqlite</code></pre>
 <h3 id="download-files-get">download/files (GET)</h3>

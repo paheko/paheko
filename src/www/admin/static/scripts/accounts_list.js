@@ -1,12 +1,23 @@
 $('button[name*=bookmark]').forEach((b) => {
 	b.onclick = () => {
-		b.value = parseInt(b.value) ? 0 : 1;
-		b.setAttribute('data-icon', b.value == 1 ? '☑' : '☐');
+		var ct = document.querySelector('input[type="hidden"]');
+		var fd = new FormData();
+		fd.set(b.name, parseInt(b.value) ? 0 : 1);
+		fd.set(ct.name, ct.value);
+
 		fetch(document.forms[0].action, {
 			'method': 'POST',
-			'headers': {"Content-Type": "application/x-www-form-urlencoded"},
-			'body': b.name + '=' + b.value
+			'body': new URLSearchParams(fd)
+		}).then(r => {
+			if (!r.ok) {
+				alert(r.status);
+				return;
+			}
+
+			b.value = parseInt(b.value) ? 0 : 1;
+			b.setAttribute('data-icon', b.value == 1 ? '☑' : '☐');
 		});
+
 		return false;
 	};
 });

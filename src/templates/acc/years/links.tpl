@@ -2,6 +2,10 @@
 
 {form_errors}
 
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+	{assign var="is_admin" value=true}
+{/if}
+
 <div class="help block">
 	<p>Pour qu'une écriture puisse être créée lors de l'inscription d'un membre à une activité, un tarif doit être lié à un exercice comptable.</p>
 	<p>Après la clôture d'un exercice, il faudra donc modifier l'exercice lié à chaque tarif pour pouvoir continuer à y inscrire des membres.</p>
@@ -14,7 +18,7 @@
 		<table class="list">
 			<thead>
 				<tr>
-					{if count($years)}
+					{if $is_admin && count($years)}
 						<td class="check"><input type="checkbox" title="Tout cocher / décocher" aria-label="Tout cocher / décocher" id="f_all" /><label for="f_all" title="Tout cocher / décocher"></label></td>
 					{/if}
 					<th scope="col">Tarif</th>
@@ -24,7 +28,7 @@
 			<tbody>
 				{foreach from=$fees item="row"}
 				<tr>
-					{if count($years)}
+					{if $is_admin && count($years)}
 						<td class="check">{input type="checkbox" name="check[]" value=$row.id}</td>
 					{/if}
 					<th scope="row">{$row.service_label} — {$row.fee_label}</th>
@@ -37,7 +41,7 @@
 			</tbody>
 		</table>
 
-	{if count($years)}
+	{if $is_admin && count($years)}
 		<fieldset>
 			<legend>Modifier l'exercice des tarifs cochés</legend>
 			<dl>

@@ -319,7 +319,7 @@ class Search extends Entity
 
 	public function getGroups(): array
 	{
-		if ($this->type != self::TYPE_JSON) {
+		if ($this->type !== self::TYPE_JSON) {
 			throw new \LogicException('Only JSON searches can use this method');
 		}
 
@@ -363,23 +363,16 @@ class Search extends Entity
 		parent::importForm($source);
 	}
 
-	public function populate(Session $session)
+	/**
+	 * Populate object from what was passed in query string / form (POST)
+	 * Return TRUE if no data was passed and the default was loaded instead
+	 * (in that case, the results shouldn't be loaded/displayed, only the search form).
+	 */
+	public function populate(Session $session): ?bool
 	{
-		$access_section = $this->target === self::TARGET_ACCOUNTING ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
-		$session->requireAccess($access_section, Session::ACCESS_READ);
-
-		$is_admin = $session->canAccess($access_section, Session::ACCESS_ADMIN);
-		$can_sql_unprotected = $session->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
-
-		if ($access_section === $session::SECTION_USERS) {
-			// Only admins of user section can do custom SQL queries
-			// to protect access-restricted user fields from being read
-			$can_sql = $is_admin;
-		}
-		else {
-			// anyone can do custom SQL queries in accounting
-			$can_sql = true;
-		}
+		$as = $this->getAdvancedSearch();
+		$as->setSession($session);
+		$as->requireAccess();
 
 		$text_query = trim($_GET['qt'] ?? '');
 		$sql_query = trim($_POST['sql'] ?? '');
@@ -387,10 +380,16 @@ class Search extends Entity
 		$default = false;
 
 		if ($sql_query !== '') {
-			// Only admins can run custom SQL queries, others can only run existing SQL queries
-			$session->requireAccess($access_section, $session::ACCESS_ADMIN);
+			// Only admins can write custom SQL queries
+			if (!$as->isSQLAllowed()) {
+				throw new UserException('Vous n\'avez pas le droit d\'exécuter cette recherche');
+			}
 
-			if ($can_sql_unprotected && !empty($_POST['unprotected'])) {
+			if (!empty($_POST['unprotected'])) {
+				if (!$as->isUnprotectedSQLAllowed()) {
+					throw new UserException('Vous n\'avez pas le droit d\'exécuter cette recherche');
+				}
+
 				$this->type = self::TYPE_SQL_UNPROTECTED;
 			}
 			else {
@@ -400,37 +399,40 @@ class Search extends Entity
 			$this->content = $sql_query;
 		}
 		elseif ($json_query !== null) {
+			if ($as->hasRestrictedColumns($json_query)) {
+				throw new \LogicException('Invalid groups query: trying to access a restricted column');
+			}
+
 			$this->content = json_encode(['groups' => $json_query]);
 			$this->type = self::TYPE_JSON;
 		}
 		elseif ($text_query !== '') {
 			$options = [
-				'id_year' => $_GET['year'] ?? null,
+				'id_year'     => $_GET['year'] ?? null,
 				'id_category' => $_GET['id_category'] ?? null,
 			];
 
 			if ($this->redirect($text_query, $options)) {
-				return;
+				return null;
 			}
 
 			$this->simple($text_query, $options);
 
 			if ($this->redirectIfSingleResult()) {
-				return;
+				return null;
 			}
 		}
 		elseif (!isset($this->content)) {
-			$this->getAdvancedSearch()->setSession($session);
 			$this->content = json_encode($this->getAdvancedSearch()->defaults());
 			$this->type = self::TYPE_JSON;
 			$default = true;
 		}
 
-		if (!empty($_POST['to_sql'])) {
+		if (!empty($_POST['to_sql']) && $as->isSQLAllowed()) {
 			$this->transformToSQL();
 		}
 
-		return compact('can_sql_unprotected', 'can_sql', 'is_admin', 'default');
+		return $default;
 	}
 
 	public function save(bool $selfcheck = true): bool
@@ -440,5 +442,33 @@ class Search extends Entity
 		}
 
 		return parent::save($selfcheck);
+	}
+
+	/**
+	 * Return TRUE if user shouldn't be able to change the search (eg. groups for JSON or query for SQL)
+	 */
+	public function isLocked(): bool
+	{
+		$as = $this->getAdvancedSearch();
+
+		// If SQL query and user cannot do write SQL queries, lock the search
+		if (in_array($this->type, [self::TYPE_SQL, self::TYPE_SQL_UNPROTECTED], true)
+			&& !$as->isSQLAllowed()) {
+			return true;
+		}
+
+		// If user cannot write unprotected SQL queries
+		if ($this->type === self::TYPE_SQL_UNPROTECTED
+			&& !$as->isUnprotectedSQLAllowed()) {
+			return true;
+		}
+
+		// eg. for user search, search can be locked if it contains columns
+		// the user doesn't have access to
+		if ($this->type === self::TYPE_JSON) {
+			return $as->hasRestrictedColumns($this->getGroups());
+		}
+
+		return false;
 	}
 }

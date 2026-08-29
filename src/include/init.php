@@ -58,16 +58,22 @@ function paheko_version()
 	return $version;
 }
 
-function paheko_manifest()
+function paheko_manifest(): ?string
 {
-	$file = __DIR__ . '/../../manifest.uuid';
+	static $id = 'unset';
 
-	if (@file_exists($file))
-	{
-		return substr(trim(file_get_contents($file)), 0, 10);
+	if ($id !== 'unset') {
+		return $id;
 	}
 
-	return false;
+	$file = __DIR__ . '/../../manifest.uuid';
+	$id = null;
+
+	if (@file_exists($file)) {
+		$id = substr(trim(file_get_contents($file)), 0, 10);
+	}
+
+	return $id;
 }
 
 
@@ -228,6 +234,7 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'EXECUTION_JAIL'        => null, // FIXME: set to 'bubblewrap' for 1.4.0
 	'PDF_COMMAND'           => 'auto',
+	'PRINCE_LICENSE_FILE'   => null,
 	'PDF_USAGE_LOG'         => null,
 	'SQL_DEBUG'             => null,
 	'ENABLE_PROFILER'       => false,
@@ -330,6 +337,7 @@ if (ENABLE_PROFILER) {
 
 // Open_basedir hardening, but only in a web context
 if (OPEN_BASEDIR && PHP_SAPI !== 'cli') {
+	paheko_manifest(); // Load manifest version, it won't be available later
 	$paths = explode(':', OPEN_BASEDIR);
 
 	if (isset($paths[0]) && $paths[0] === 'auto') {
@@ -580,6 +588,8 @@ if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 	}
 }
 
-// This is for SQLite, as its localtime modifier is just calling
-// the OS-level localtime function which depends on the TZ env variable.
-putenv('TZ=' . date_default_timezone_get());
+if (function_exists('putenv')) {
+	// This is for SQLite, as its localtime modifier is just calling
+	// the OS-level localtime function which depends on the TZ env variable.
+	@putenv('TZ=' . date_default_timezone_get());
+}

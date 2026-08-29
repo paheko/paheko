@@ -1123,10 +1123,19 @@ namespace Paheko;
 //const PDF_COMMAND = 'auto';
 
 /**
- * PDF_USAGE_LOG
- * Chemin vers le fichier où enregistrer la date de chaque export en PDF
+ * PRINCE_LICENSE_FILE
+ * Chemin vers le fichier de license de Prince (si vous en avez une).
  *
- * Ceci est utilisé notamment pour estimer le prix de la licence PrinceXML.
+ * Défaut : null
+ * @var null|string
+ */
+//const PRINCE_LICENSE_FILE = '/home/paheko/prince_license.dat';
+
+/**
+ * PDF_USAGE_LOG
+ * Chemin vers le fichier où enregistrer la date de chaque export en PDF (une entrée par ligne)
+ *
+ * Ceci est utilisé notamment pour estimer le prix de la licence Prince.
  *
  * Défaut : NULL
  * @var null|string

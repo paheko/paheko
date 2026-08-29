@@ -1,10 +1,13 @@
 <?php
 namespace Paheko;
 
+use Paheko\Users\Session;
 use Paheko\Accounting\Years;
 use Paheko\Services\Fees;
 
 require_once __DIR__ . '/../_inc.php';
+
+$session = Session::getInstance();
 
 $year = Years::get((int)qg('id'));
 
@@ -14,7 +17,9 @@ if (!$year) {
 
 $csrf_key = 'year_links_' . $year->id();
 
-$form->runIf('link', function () use ($year) {
+$form->runIf('link', function () use ($year, $session) {
+	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+
 	$id = intval($_POST['target'] ?? 0);
 	$target = Years::get($id);
 

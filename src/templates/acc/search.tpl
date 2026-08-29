@@ -1,3 +1,7 @@
+<?php
+assert(isset($s));
+$is_admin = $s->getAdvancedSearch()->isAdmin();
+?>
 {include file="_head.tpl" title=$title current="acc"}
 
 <nav class="tabs">

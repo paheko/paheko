@@ -4,6 +4,8 @@
 
 <form method="post" action="all.php?id={$chart.id}">
 
+	{csrf_field key="bookmark"}
+
 	<p class="actions quick-search">
 		<input type="text" placeholder="Recherche rapide…" title="Filtrer la liste" />{button shape="delete" type="reset" title="Effacer la recherche"}
 		{* We can't use input type="search" because Firefox sucks *}
@@ -35,12 +37,14 @@
 			<td>
 				{if $account.archived}
 					Archivé
-				{else}
+				{elseif $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 					<?php
 					$shape = $account->bookmark ? 'check' : 'uncheck';
 					$title = $account->bookmark ? 'Ôter des favoris' : 'Marquer comme favori';
 					?>
 					{button shape=$shape name="bookmark[%d]"|args:$account.id value=$account.bookmark label="Favori" title=$title type="submit"}
+				{elseif $account.bookmark}
+					Favori
 				{/if}
 			</td>
 			<td class="actions">

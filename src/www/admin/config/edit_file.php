@@ -21,18 +21,21 @@ $csrf_key = 'edit_file_' . $key;
 
 $form->runIf('upload', function () use ($key, $config) {
 	$config->setFile($key, 'file', true);
-	$config->save();
+	$config->selfCheckFiles();
+	$config->save(false);
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf('reset', function () use ($key, $config) {
 	$config->setFile($key, null);
-	$config->save();
+	$config->selfCheckFiles();
+	$config->save(false);
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf('save', function () use ($key, $config) {
 	$content = trim((string) f('content'));
 	$config->setFile($key, $content === '' ? null : $content);
-	$config->save();
+	$config->selfCheckFiles();
+	$config->save(false);
 
 	if (qg('js') !== null) {
 		die('{"success":true}');
