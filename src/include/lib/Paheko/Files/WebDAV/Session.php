@@ -11,6 +11,8 @@ use Paheko\Entities\Users\User;
 
 use Paheko\Users\Session as UserSession;
 
+use KD2\WebDAV\Exception;
+
 use const Paheko\{WWW_URL};
 
 class Session extends UserSession
@@ -30,8 +32,10 @@ class Session extends UserSession
 		}
 
 		$name = DynamicFields::getFirstNameField();
+		// Create a fake user object
 		$this->user = (new User)->import([$name => $login . ' (API)']);
 
+		// We need to manually set permissions here
 		$permissions = [];
 
 		foreach (Category::PERMISSIONS as $perm => $data) {
@@ -39,6 +43,53 @@ class Session extends UserSession
 		}
 
 		$this->user->setPermissions($permissions);
+
+		return true;
+	}
+
+	public function loginDAV($login, $password): bool
+	{
+		$db = DB::getInstance();
+		$login_field = DynamicFields::getLoginField();
+		$sql = sprintf('SELECT u.id, u.password, u.otp_secret IS NOT NULL AS otp_secret,
+			c.perm_connect, c.perm_documents
+			FROM users u INNER JOIN users_categories c ON u.id_category = c.id
+			WHERE u.%s = ?;', $db->quoteIdentifier($login_field));
+		$user = $db->first($sql, $login);
+
+		$invalid_exception = new Exception('Identifiant inconnu ou mauvaise mot de passe', 403);
+
+		if (!$user || !$user->password) {
+			throw $invalid_exception;
+		}
+		elseif ($user->perm_connect < Session::ACCESS_READ
+			|| $user->perm_documents < Session::ACCESS_READ) {
+			throw new Exception('Vous n\'avez pas le droit de vous connecter', 403);
+		}
+		elseif ($user->otp_secret) {
+			$user = Users::get($user->id);
+
+			if ($user->useAppPassword($password)) {
+				$this->user = $user;
+				return true;
+			}
+
+			if (password_verify($password, $user->password)) {
+				throw new Exception('Votre compte utilise la double authentification, vous ne pouvez pas utiliser votre mot de passe pour vous connecter à WebDAV. Merci de créer un mot de passe d\'application.', 403);
+			}
+			else {
+				throw $invalid_exception;
+			}
+		}
+
+		$logged = $this->login($login, $password, false);
+
+		if ($logged === self::REQUIRE_OTP) {
+			throw new Exception('Votre compte utilise la double authentification, vous ne pouvez pas utiliser votre mot de passe pour vous connecter à WebDAV.', 403);
+		}
+		elseif ($logged === false) {
+			throw $invalid_exception;
+		}
 
 		return true;
 	}
@@ -119,7 +170,11 @@ class Session extends UserSession
 		return compact('login', 'password');
 	}
 
-
+	/**
+	 * Create longer-lived app sessions (3 months)
+	 * They are used by NextCloud/ownCloud apps
+	 * They are different from app_password which is used for users with TOTP enabled
+	 */
 	public function createAppCredentials(): \stdClass
 	{
 		if (!$this->isLogged()) {
