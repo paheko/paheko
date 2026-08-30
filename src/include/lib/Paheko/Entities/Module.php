@@ -245,7 +245,8 @@ class Module extends Entity
 		$this->set('description', $ini->description ?? null);
 		$this->set('author', $ini->author ?? null);
 		$this->set('author_url', $ini->author_url ?? null);
-		$this->set('web', !empty($ini->web));
+		// Make sure web module is always marked as web, even if someone sets web=false in INI
+		$this->set('web', $this->name === 'web' || !empty($ini->web));
 		$this->set('home_button', !empty($ini->home_button));
 		$this->set('menu', !empty($ini->menu));
 
