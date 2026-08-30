@@ -1105,7 +1105,7 @@ class User extends Entity
 		$this->_permissions = $all_permissions;
 	}
 
-	public function createAppPassword(string $name): string
+	public function createAppPassword(string $name, ?int $id_plugin = null): string
 	{
 		$name = trim($name);
 
@@ -1113,13 +1113,14 @@ class User extends Entity
 			throw new UserException('Le nom de l\'application ne peut rester vide');
 		}
 
-		$password = preg_replace('/[^0-9a-z]/i', '', base64_encode(random_bytes(16)));
+		$password = Security::getRandomPassword(14);
 
 		$db = DB::getInstance();
 		$db->insert('users_app_passwords', [
-			'name'     => $name,
-			'password' => password_hash($password, PASSWORD_DEFAULT),
-			'id_user'  => $this->id(),
+			'name'      => $name,
+			'password'  => password_hash($password, PASSWORD_DEFAULT),
+			'id_user'   => $this->id(),
+			'id_plugin' => $id_plugin,
 		]);
 
 		return $db->lastInsertId() . '.' . $password;
@@ -1132,7 +1133,7 @@ class User extends Entity
 
 	public function listAppPasswords(): array
 	{
-		return DB::getInstance()->get('SELECT id, name FROM users_app_passwords WHERE id_user = ? ORDER BY NAME COLLATE U_NOCASE;', $this->id());
+		return DB::getInstance()->get('SELECT * FROM users_app_passwords WHERE id_user = ? ORDER BY name COLLATE U_NOCASE;', $this->id());
 	}
 
 	public function useAppPassword(string $password): ?int
