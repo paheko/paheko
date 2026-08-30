@@ -49,6 +49,10 @@ class Session extends UserSession
 
 	public function loginDAV($login, $password): bool
 	{
+		if (Log::isLocked()) {
+			throw new Exception(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
+		}
+
 		$db = DB::getInstance();
 		$login_field = DynamicFields::getLoginField();
 		$sql = sprintf('SELECT u.id, u.password, u.otp_secret IS NOT NULL AS otp_secret,
@@ -82,7 +86,7 @@ class Session extends UserSession
 			}
 		}
 
-		$logged = $this->login($login, $password, false);
+		$logged = parent::login($login, $password, false);
 
 		if ($logged === self::REQUIRE_OTP) {
 			throw new Exception('Votre compte utilise la double authentification, vous ne pouvez pas utiliser votre mot de passe pour vous connecter à WebDAV.', 403);
