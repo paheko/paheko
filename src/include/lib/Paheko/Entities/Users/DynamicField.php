@@ -373,6 +373,9 @@ class DynamicField extends Entity
 		if ($this->type === 'virtual') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
+			// Make sure we cannot do multiple requests or other weird stuff
+			$this->assert(!preg_match('/;|\b(?:SELECT|CREATE|DROP|INSERT|DELETE|PRAGMA|ALTER|COMMIT|END|BEGIN|VACUUM|REPLACE|ATTACH)\b/i', $this->sql), 'Code SQL invalide');
+
 			try {
 				$db = DB::getInstance()->getRestrictedConnection(['rules' => ['users' => null]]);
 				$db->firstColumn(sprintf('SELECT (%s) FROM users;', $this->sql));
