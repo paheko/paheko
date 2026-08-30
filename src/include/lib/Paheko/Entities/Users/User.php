@@ -424,6 +424,20 @@ class User extends Entity
 		return (string)$this->$field ?: null;
 	}
 
+	public function importUserForm(?array $source = null)
+	{
+		$source ??= $_POST;
+
+		// Make sure the user cannot modify fields that they don't have access to
+		foreach (DynamicFields::getInstance()->all() as $name => $field) {
+			if ($field->user_access_level < Session::ACCESS_WRITE) {
+				unset($source[$name]);
+			}
+		}
+
+		return $this->importForm($source);
+	}
+
 	public function importForm(?array $source = null)
 	{
 		$source ??= $_POST;

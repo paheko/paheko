@@ -10,6 +10,8 @@ Only the latest stable branch is supported.
 
 Security issues are eligible to our bug bounty program. Please contact us.
 
+Keep in mind that we are not a multi-million dollar company (our total annual budget for paying everything is around €150k), expect a maximum bounty of around €500 to €2000 for a critical vulnerability (for example: RCE, or being able to download the data outside of the organization root).
+
 ## Reporting a Vulnerability
 
 **IMPORTANT: Do not use public websites (eg. GitHub) for reporting security vulnerabilities.**
@@ -26,6 +28,8 @@ By submitting a report to us, you affirm that the report and any attachments do 
 
 We may share vulnerability reports. We will not share the names or contact data of security researchers unless given explicit permission.
 
+Using an AI for finding issues is allowed, but we require that you disclose its use and the name of the AI product used.
+
 ## Scope
 
 Example of security issues that will be inside our scope:
@@ -37,7 +41,7 @@ Example of security issues that will be inside our scope:
 * Remote code execution
 * Directory traversal
 * Ability for a user to get access to stuff only users with more permissions should have access to (eg. deleting an accounting transaction if you only have the "read" permission for accounting)
-* Official plugins ([repo](https://fossil.kd2.org/paheko-plugins/)) and modules ([repo](https://fossil.kd2.org/paheko-modules/))
+* Official [plugins](https://fossil.kd2.org/paheko-plugins/) and [modules](https://fossil.kd2.org/paheko-modules/)
 * KD2 libraries used by the project ([repo](https://fossil.kd2.org/kd2fw/)), but not the ones not used by Paheko (obviously)
 * etc.
 
@@ -57,12 +61,12 @@ Note: users inside Paheko have different permissions, according to the category 
   * this means that accessing the SQL tables in read-only mode inside forms designed to make `SELECT` queries is not a security issue, unless accessing a table/column outside of the authorizer scope is possible
 * Paheko allows users with "admin" permission in "config" to create custom HTML documents in Modules, this is by design
   * an administrator injecting a XSS is not a security issue, as they already have access to everything
-* Paheko allows users with "admin" permission in "config" to restore a SQLite database form their own file. Some integrity checks are performed when doing that, but it is still possible to import a database with a broken schema or data that will trigger bugs.
-  * importing a broken database file is not a security issue
-  * but if importing this broken database may trigger PHP code execution, or opening of database files (eg. on the server filesystem) other than the main database, are security issues.
+* Paheko allows users with "admin" permission in "config" (aka. super-admins) to restore a SQLite database form their own file. Some integrity checks are performed when doing that, but it is still possible to import a database with a broken schema or data that will trigger bugs.
+  * importing a broken database file that will just make the app not working is not a security issue
+  * but importing a broken database that may trigger PHP code execution, or path traversal, or other security issues, will be considered security issues
 * API access with read-only credentials can download all the files and the database, including hashed passwords, this is intentional
 * Ability to bypass URL restriction in HTML-to-PDF generation when a restricting proxy isn't enabled
-* Assisted upgrade of the app code using FossilInstaller doesn't fail (only alerts about lack of verification) if php-gnupg is not installed, or if PGP signature verification fails. This is intentional, as (sadly) the majority of web hosts don't have this extension.
+* Assisted upgrade of the app code using FossilInstaller doesn't fail (only alerts about lack of verification) if `php-gnupg` is not installed, or if PGP signature verification fails. This is intentional, as (sadly) the majority of web hosts don't have the gnupg extension installed.
 * Spam
 * Social engineering techniques
 * Denial-of-service attacks
@@ -75,3 +79,4 @@ Note: users inside Paheko have different permissions, according to the category 
 * Self-injection of code when having root access
 * Unofficial (community) plugins and modules (but please report issues to their authors)
 * Missing HTTP headers on `https://paheko.cloud/`
+* Issues from other software (eg. [CSV Injection](https://bughunters.google.com/learn/invalid-reports/google-products/csv-formula-injection))

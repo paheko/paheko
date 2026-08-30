@@ -82,7 +82,8 @@ verify:
 	@echo "Verifying KD2fw..."
 	@cd ${ROOT}/include/lib/KD2 && bash ${ROOT}/../tools/fossil_verify.sh ${KD2FW_BRANCH} ${KD2FW_URL} src/lib/KD2
 
-release: test-syntax doc minify freeze
+# Build the .tar.gz package for the current version, with the frozen version of dependencies
+package: doc minify
 	$(eval VERSION=$(shell cat VERSION))
 	$(eval KD2FW_VERSION=$(shell cat ../build/kd2fw.version))
 	$(eval MODULES_VERSION=$(shell cat ../build/modules.version))
@@ -128,6 +129,9 @@ release: test-syntax doc minify freeze
 
 	mv /tmp/paheko-build/paheko/src /tmp/paheko-build/paheko-${VERSION}
 	tar czvfh ../build/paheko-${VERSION}.tar.gz --hard-dereference -C /tmp/paheko-build paheko-${VERSION}
+
+# Create the release package, by freezing dependencies first
+release: test-syntax freeze package
 
 deb:
 	cd ../build/debian; ./makedeb.sh

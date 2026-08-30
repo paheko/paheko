@@ -79,7 +79,6 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'pkop';
 	protected $remember_me_expiry = '+3 months';
 
-	protected ?array $_permissions = null;
 	protected ?array $_files_permissions = null;
 
 	static protected $_instance = null;
@@ -380,9 +379,9 @@ class Session extends \KD2\UserSession
 		return isset($this->user) ? true : false;
 	}
 
-	public function login($login, $password, $remember_me = false)
+	public function login($login, $password, bool $remember_me = false, bool $ignore_otp = false)
 	{
-		$success = parent::login($login, $password, $remember_me);
+		$success = parent::login($login, $password, $remember_me, $ignore_otp);
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 150) ?: null;
 
 		if (true === $success) {
@@ -514,7 +513,6 @@ class Session extends \KD2\UserSession
 	public function logout(bool $all = false)
 	{
 		$this->user = null;
-		$this->_permissions = null;
 		$this->_files_permissions = null;
 
 		return parent::logout();

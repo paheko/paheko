@@ -167,6 +167,10 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.3.22', '<')) {
+				require ROOT . '/include/migrations/1.3/1.3.22.php';
+			}
+
 			if (version_compare($v, '1.4.0', '<')) {
 				require ROOT . '/include/migrations/1.4/1.4.0.php';
 			}

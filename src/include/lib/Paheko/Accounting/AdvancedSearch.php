@@ -7,6 +7,7 @@ use Paheko\Users\DynamicFields;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
 use Paheko\Utils;
+use Paheko\Users\Session;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 
@@ -369,5 +370,15 @@ class AdvancedSearch extends A_S
 		}
 
 		return (object) ['groups' => [$group]];
+	}
+
+	public function requireAccess(): void
+	{
+		$this->session->requireAccess(Session::SECTION_ACCOUNTING, Session::ACCESS_READ);
+	}
+
+	public function isAdmin(): bool
+	{
+		return $this->session->canAccess(Session::SECTION_ACCOUNTING, Session::ACCESS_ADMIN);
 	}
 }

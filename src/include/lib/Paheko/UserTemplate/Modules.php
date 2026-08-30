@@ -316,15 +316,24 @@ class Modules
 		$path = null;
 		$has_local_file = null;
 		$has_dist_file = null;
+		$session = Session::getInstance();
 
 		// We are looking for a module
 		if (substr($uri, 0, 2) == 'm/') {
 			$path = substr($uri, 2);
 			$name = strtok($path, '/');
 			$path = strtok('');
+
 			$module = self::get($name);
 
 			if (!$module) {
+				throw new UserException('This page does not exist.', 404);
+			}
+
+			// Disable web module access via /m/web/ if site is disabled and user is not logged-in
+			if ($module->web
+				&& Config::getInstance()->site_disabled
+				&& !$session->isLogged()) {
 				throw new UserException('This page does not exist.', 404);
 			}
 		}
@@ -348,8 +357,6 @@ class Modules
 		if (substr($name, 0, 1) === '_' || $name === Module::META_FILE) {
 			throw new UserException('This address is private', 403);
 		}
-
-		$session = Session::getInstance();
 
 		// Find out web path
 		if ($module->web && $module->enabled && substr($uri, 0, 2) !== 'm/') {
@@ -388,7 +395,7 @@ class Modules
 			}
 		}
 		// 404 if module is not enabled, except for icon
-		elseif (!$module->enabled && !$module->system && $path != Module::ICON_FILE) {
+		elseif (!$module->enabled && !$module->system && $path !== Module::ICON_FILE) {
 			throw new UserException('This page is currently disabled.', 404);
 		}
 

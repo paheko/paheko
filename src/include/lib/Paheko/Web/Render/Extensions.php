@@ -265,6 +265,7 @@ class Extensions
 			$size = File::THUMB_SIZE_TINY;
 		}
 		else {
+			$align = null;
 			$size = null;
 		}
 
@@ -276,7 +277,7 @@ class Extensions
 				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
 			}
 
-			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
+			$out = sprintf('<figure class="image img-%s">%s%s</figure>', htmlspecialchars($align), $out, $caption);
 		}
 
 		return $out;

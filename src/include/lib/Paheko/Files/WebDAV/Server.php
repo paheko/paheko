@@ -2,6 +2,7 @@
 
 namespace Paheko\Files\WebDAV;
 
+use KD2\WebDAV\Exception;
 use KD2\WebDAV\WOPI;
 
 use const Paheko\WOPI_DISCOVERY_URL;
@@ -52,7 +53,6 @@ class Server
 			return true;
 		}
 
-
 		$nc->setServer($dav);
 
 		if ($nc->route($uri)) {
@@ -69,9 +69,13 @@ class Server
 			return false;
 		}
 
-		if (!self::auth()) {
-			http_response_code(401);
-			header('WWW-Authenticate: Basic realm="Please login"');
+		try {
+			if (self::requireAuth()) {
+				return true;
+			}
+		}
+		catch (Exception $e) {
+			$dav->error($e);
 			return true;
 		}
 
@@ -80,27 +84,39 @@ class Server
 		return $dav->route($uri);
 	}
 
-	static public function auth(): bool
+	static public function requireAuth(): bool
 	{
 		$session = Session::getInstance();
 
 		if ($session->isLogged()) {
-			return true;
+			return false;
 		}
 
 		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
 		$password = $_SERVER['PHP_AUTH_PW'] ?? null;
 
-		if (!isset($login, $password)) {
-			return false;
+		if (empty($login) || empty($password)) {
+			// Not logged-in, require login
+			http_response_code(401);
+			header('WWW-Authenticate: Basic realm="Please login"');
+			return true;
 		}
 
 		if ($session->loginAPI($login, $password)) {
-			return true;
+			return false;
 		}
 
-		if ($session->login($login, $password)) {
-			return true;
+		// FIXME/TODO: use app passwords
+		$ignore_otp = true;
+
+		$logged = $session->login($login, $password, false, $ignore_otp);
+
+		if (!$ignore_otp && $logged === $session::REQUIRE_OTP) {
+			throw new Exception('Votre compte utilise la double authentification, vous ne pouvez pas utiliser votre mot de passe pour vous connecter à WebDAV.', 403);
+			return false;
+		}
+		elseif ($logged === false) {
+			throw new Exception('Identifiant inconnu ou mauvaise mot de passe', 403);
 		}
 
 		return false;

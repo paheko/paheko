@@ -50,7 +50,7 @@ class Line extends Entity
 				throw new UserException($e->getMessage(), 0, $e);
 			}
 		}
-		elseif ($key == 'id_project' && $value == 0) {
+		elseif ($key === 'id_project' && $value == 0) {
 			$value = null;
 		}
 

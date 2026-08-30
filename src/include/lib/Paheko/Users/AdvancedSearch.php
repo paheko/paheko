@@ -6,6 +6,7 @@ use Paheko\DynamicList;
 use Paheko\Users\DynamicFields;
 use Paheko\AdvancedSearch as A_S;
 use Paheko\DB;
+use Paheko\Users\Session;
 use Paheko\Utils;
 use Paheko\UserException;
 
@@ -88,12 +89,6 @@ class AdvancedSearch extends A_S
 				continue;
 			}
 
-			// Skip fields where you don't have access
-			// Note that this doesn't block access to fields using existing saved searches
-			if ($this->session && !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
-				continue;
-			}
-
 			$identifier = $db->quoteIdentifier($name);
 
 			$column = [
@@ -103,6 +98,12 @@ class AdvancedSearch extends A_S
 				'select' => sprintf('u.%s', $identifier),
 				'where'  => sprintf('%s.%s %%s', $field->hasSearchCache() ? 'us' : 'u', $identifier),
 			];
+
+			// Mark as restricted if user cannot search on this field
+			if ($this->session
+				&& !$this->session->canAccess($this->session::SECTION_USERS, $field->management_access_level)) {
+				$column['restricted'] = true;
+			}
 
 			if ($fields->isText($name)) {
 				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $identifier);
@@ -375,5 +376,15 @@ class AdvancedSearch extends A_S
 				],
 			],
 		]]];
+	}
+
+	public function requireAccess(): void
+	{
+		$this->session->requireAccess(Session::SECTION_USERS, Session::ACCESS_READ);
+	}
+
+	public function isAdmin(): bool
+	{
+		return $this->session->canAccess(Session::SECTION_USERS, Session::ACCESS_ADMIN);
 	}
 }

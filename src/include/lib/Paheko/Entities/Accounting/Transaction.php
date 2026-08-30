@@ -637,12 +637,13 @@ class Transaction extends Entity
 
 	public function isLocked(): bool
 	{
-		// locking just got set
-		if ($this->hash && array_key_exists('hash', $this->_modified) && $this->_modified['hash'] === null) {
+		// locking just got set: allow save
+		if ($this->isModified('hash')
+			&& $this->getModifiedProperty('hash') === null) {
 			return false;
 		}
 
-		return $this->hash === null ? false : true;
+		return $this->hash !== null ? true : false;
 	}
 
 	public function canSaveChanges(): bool
@@ -651,7 +652,10 @@ class Transaction extends Entity
 			return true;
 		}
 
-		if ($this->isModified('hash')) {
+		// Don't allow to change hash-chain
+		if ($this->isModified('hash')
+			|| $this->isModified('prev_hash')
+			|| $this->isModified('prev_id')) {
 			return false;
 		}
 
@@ -674,8 +678,11 @@ class Transaction extends Entity
 
 	public function assertCanBeModified(): void
 	{
-		// Allow to change the status
-		if (count($this->_modified) === 1 && array_key_exists('status', $this->_modified)) {
+		// Allow to change the status all the time, even when transactions is locked, or year is closed
+		// because the status is not part of the core properties of the transaction
+		// (eg. you might want to mark a transaction as paid even after the year was closed)
+		if (count($this->_modified) === 1
+			&& $this->isModified('status')) {
 			return;
 		}
 
@@ -817,7 +824,7 @@ class Transaction extends Entity
 		foreach ($lines as $line) {
 			$line = $line->line; // Fetch real object
 			$line->id_transaction = $this->id();
-			$line->save(false);
+			$line->save();
 		}
 
 		foreach ($this->_old_lines as $line) {
@@ -1024,8 +1031,13 @@ class Transaction extends Entity
 	{
 		// If set_all is false, then remove id_project from lines where account is not revenue or expense
 		if (!$config->analytical_set_all) {
-			foreach ($this->getLinesWithAccounts() as $line) {
-				if (!in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+			foreach ($this->getLinesWithAccounts() as $i => $line) {
+				if (isset($line->line->id_project)
+					&& !in_array($line->account_position, [Account::REVENUE, Account::EXPENSE], true)) {
+					if ($this->type === self::TYPE_ADVANCED) {
+						throw new UserException(sprintf('Ligne n°%d : seuls les comptes de charge ou de produit peuvent être affectés à un projet analytique.', $i+1));
+					}
+
 					$line->line->set('id_project', null);
 				}
 			}
@@ -1059,6 +1071,9 @@ class Transaction extends Entity
 	{
 		$source ??= $_POST;
 
+		// Make sure user cannot modify internal properties
+		unset($source['hash'], $source['prev_hash'], $source['prev_id']);
+
 		// Transpose lines (HTML transaction forms)
 		if (!empty($source['lines']) && is_array($source['lines']) && is_string(key($source['lines']))) {
 			try {
@@ -1082,7 +1097,9 @@ class Transaction extends Entity
 		}
 
 		// Simple two-lines transaction
-		if (isset($source['amount']) && $this->type != self::TYPE_ADVANCED && isset($this->type)) {
+		if (isset($source['amount'])
+			&& $this->type !== self::TYPE_ADVANCED
+			&& isset($this->type)) {
 			if (empty($source['amount'])) {
 				throw new ValidationException('Montant non précisé');
 			}

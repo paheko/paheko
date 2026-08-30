@@ -593,6 +593,8 @@ curl -u test:abcd https://monpaheko.tld/api/user/import?mode=create&column[0]=no
   -T membres.csv
 ```
 
+**Attention :** pour des raisons de sécurité, les membres faisant partie d'une catégorie ayant accès à la gestion des membres en administration ou à la configuration ne peuvent être modifiés par l'import depuis l'API.
+
 ### POST user/import/preview
 
 Prévisualise un import de membres, sans modifier les membres

@@ -346,7 +346,7 @@ class Functions
 
 		if (!$ut->isTrusted()) {
 			$internal += $internal_count;
-			$external_count += $external_count;
+			$external += $external_count;
 		}
 	}
 

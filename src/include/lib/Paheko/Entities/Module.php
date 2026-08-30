@@ -920,7 +920,8 @@ class Module extends Entity
 				throw new UserException('Invalid path');
 			}
 
-			$file->validateCanRead();
+			// Don't check permissions: module files can always be accessed via /m/MODULE_NAME/FILENAME
+			// but only to logged-in users via /modules/
 			$file->serve();
 		}
 		// Serve a static file from dist path

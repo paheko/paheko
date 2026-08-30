@@ -279,11 +279,24 @@ class Config extends Entity
 		parent::importForm($source);
 	}
 
+	public function selfCheckFiles(): void
+	{
+		// Files
+		$this->assert(count($this->files) == count(self::FILES));
+
+		foreach ($this->files as $key => $value) {
+			$this->assert(array_key_exists($key, self::FILES));
+			$this->assert(is_int($value) || is_null($value));
+		}
+	}
+
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
-		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
-		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
+		$this->assert(trim($this->currency) != '', 'La devise ne peut rester vide.');
+		$this->assert(preg_match('/^[A-Z]{3}$/', $this->currency), 'La devise doit comporter 3 lettres majuscules.');
+		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
+		$this->assert(strlen($this->country) === 2 && Utils::getCountryName($this->country), 'Pays invalide ou inconnu.');
 		$this->assert(!isset($this->org_web) || Utils::validateURL($this->org_web), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
@@ -296,13 +309,7 @@ class Config extends Entity
 			'Fréquence de sauvegarde invalide');
 		$this->assert(is_null($this->backup_limit) || ($this->backup_limit >= 0 && $this->backup_limit <= 50), 'Nombre de sauvegardes invalide. Le maximum est de 50 sauvegardes.');
 
-		// Files
-		$this->assert(count($this->files) == count(self::FILES));
-
-		foreach ($this->files as $key => $value) {
-			$this->assert(array_key_exists($key, self::FILES));
-			$this->assert(is_int($value) || is_null($value));
-		}
+		$this->selfCheckFiles();
 
 		$db = DB::getInstance();
 		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
