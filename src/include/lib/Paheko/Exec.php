@@ -96,11 +96,11 @@ class Exec
 		$this->binds[$path] = $write;
 	}
 
-	public function run(): int
+	public function run(bool $throw_exception = false, bool $unsafe = false): int
 	{
 		$cmd = $this->cmd;
 
-		if (!empty(EXECUTION_JAIL)) {
+		if (!$unsafe && !empty(EXECUTION_JAIL)) {
 			$cmd = $this->getSandboxCommand() . ' ' . $cmd;
 		}
 
@@ -123,7 +123,7 @@ class Exec
 			}
 		);
 
-		if ($code) {
+		if ($code && $throw_exception) {
 			$msg = $this->stderr ?? '';
 			$msg .= "\n" . ($this->stdout ?? '');
 			$msg = trim($msg);
