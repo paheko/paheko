@@ -76,7 +76,7 @@ class Sections
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
 	{
 		// Split string at semicolon, unless in comment or inside balanced quotes
-		$regexp = "/'(?:''|[^'])*'(*SKIP)(*F)|\"(?:\\\"|[^\"])*\"(*SKIP)(*F)|--[^\\r\\n]*(*SKIP)(*F)|;/";
+		$regexp = "/'(?:''|[^'])*'(*SKIP)(*F)|\"(?:\"\"|[^\"])*\"(*SKIP)(*F)|--[^\\r\\n]*(*SKIP)(*F)|;/";
 		$parts = preg_split($regexp, $sql, 2);
 
 		$sql = trim($parts[0] ?? '');
