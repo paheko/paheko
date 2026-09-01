@@ -155,6 +155,7 @@ class File extends Entity
 		'image/svg+xml',
 		'text/plain',
 		'text/html',
+		'text/markdown',
 	];
 
 	const FORBIDDEN_CHARACTERS = [
