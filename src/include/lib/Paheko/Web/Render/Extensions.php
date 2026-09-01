@@ -70,7 +70,7 @@ class Extensions
 			$replace = [];
 
 			foreach ($replace_raw as $r) {
-				$replace[strtok($r, '=')] = strtok('');
+				$replace[strtok($r, '=')] = htmlspecialchars(strtok(''));
 			}
 
 			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
