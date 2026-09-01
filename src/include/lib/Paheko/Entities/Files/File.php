@@ -722,10 +722,9 @@ class File extends Entity
 		}
 
 		// Force empty files as text/plain
-		if ($this->mime == 'application/x-empty' && !$this->size) {
+		if ($this->mime === 'application/x-empty' && !$this->size) {
 			$this->set('mime', 'text/plain');
 		}
-
 		$this->set('image', in_array($this->mime, self::IMAGE_TYPES));
 
 		// File hasn't changed
@@ -733,8 +732,9 @@ class File extends Entity
 			return $this;
 		}
 
-		// Check that it's a real image
-		if ($this->image) {
+		$blob = null;
+
+		if ($this->mime === 'text/html' || $this->image) {
 			if ($path) {
 				$blob = file_get_contents($path, false, null, 0, 1000);
 			}
@@ -745,6 +745,16 @@ class File extends Entity
 			else {
 				$blob = substr($content, 0, 1000);
 			}
+		}
+
+		// In some cases, text files containing HTML may be recognized as HTML
+		// Make sure a HTML files start with a HTML character
+		if ($this->mime === 'text/html'
+			&& substr(ltrim($blob), 0, 1) !== '<') {
+			$this->set('mime', 'text/plain');
+		}
+		// Check that it's a real image
+		if ($this->image) {
 
 			if ($size = Blob::getSize($blob)) {
 				// This is to avoid pixel flood attacks
