@@ -36,7 +36,8 @@ $form->runIf('link', function () use ($year, $session) {
 
 $fees = Fees::listByYearId($year->id());
 $years = Years::listOpenAssocExcept($year->id());
+$is_admin = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
-$tpl->assign(compact('year', 'fees', 'years', 'csrf_key'));
+$tpl->assign(compact('year', 'fees', 'years', 'csrf_key', 'is_admin'));
 
 $tpl->display('acc/years/links.tpl');
