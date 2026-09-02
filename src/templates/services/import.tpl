@@ -1,4 +1,4 @@
-{include file="_head.tpl" title="Importer des inscriptions" current="users"}
+{include file="_head.tpl" title="Importer des inscriptions" current="users/services"}
 
 {include file="services/_nav.tpl" current="import" service=null fee=null}
 
