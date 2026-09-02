@@ -810,12 +810,12 @@ class API
 			throw new APIException('Access to error log is disabled.', 403);
 		}
 
-		if ($uri == 'report') {
+		$this->requireAccess(Session::ACCESS_ADMIN);
+
+		if ($uri === 'report') {
 			if ($this->method != 'POST') {
 				throw new APIException('Wrong request method', 400);
 			}
-
-			$this->requireAccess(Session::ACCESS_ADMIN);
 
 			$body = self::getRequestInput();
 			$report = json_decode($body);

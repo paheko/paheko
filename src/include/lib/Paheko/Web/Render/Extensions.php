@@ -70,13 +70,13 @@ class Extensions
 			$replace = [];
 
 			foreach ($replace_raw as $r) {
-				$replace[strtok($r, '=')] = strtok('');
+				$replace[strtok($r, '=')] = htmlspecialchars(strtok(''));
 			}
 
 			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
 
 			// Replace images
-			$body = preg_replace(';src="(?!https?:|/);', 'src="' . ADMIN_URL . 'static/doc/', $body);
+			$body = preg_replace(';<img src="(?!https?:|/);', '<img src="' . ADMIN_URL . 'static/doc/', $body);
 
 			// Replace links
 			$body = preg_replace_callback('!href="([a-z_-]+)\.html!',
@@ -266,6 +266,7 @@ class Extensions
 			$size = File::THUMB_SIZE_TINY;
 		}
 		else {
+			$align = null;
 			$size = null;
 		}
 
@@ -277,7 +278,7 @@ class Extensions
 				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
 			}
 
-			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
+			$out = sprintf('<figure class="image img-%s">%s%s</figure>', htmlspecialchars($align), $out, $caption);
 		}
 
 		return $out;
