@@ -413,7 +413,7 @@ class Users
 		$ids = array_map('intval', $ids);
 
 		// Don't allow current user ID to change his/her category
-		$logged_user_id = $session->user()->id();
+		$logged_user_id = $session->user()->exists() ? $session->user()->id() : null;
 		$ids = array_filter($ids, fn($a) => $a != $logged_user_id);
 
 		$conditions = [];
