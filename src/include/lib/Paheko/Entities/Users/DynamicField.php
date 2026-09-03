@@ -377,7 +377,7 @@ class DynamicField extends Entity
 			$this->assert(!preg_match('/;|\b(?:SELECT|CREATE|DROP|INSERT|DELETE|PRAGMA|ALTER|COMMIT|BEGIN|VACUUM|REPLACE|ATTACH)\b/i', $this->sql, $match), 'Code SQL invalide : ' . ($match[0] ?? ''));
 
 			try {
-				$db = DB::getInstance()->getRestrictedConnection(['rules' => ['users' => null, 'temp.' => []]]);
+				$db = DB::getInstance()->getRestrictedConnection(['rules' => ['users' => null, 'temp.' => []], 'ignore_is_deny' => true]);
 				$st = $db->prepare(sprintf('SELECT (%s) FROM users;', $this->sql));
 
 				if (!$st->readOnly()) {
