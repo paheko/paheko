@@ -40,7 +40,7 @@ class Storage extends AbstractStorage
 
 		$access = Files::listReadAccessContexts($this->session);
 
-		$this->cache = ['' => Files::get('')];
+		$this->cache = ['' => Files::get(null)];
 
 		foreach ($access as $context => $name) {
 			$this->cache[$context] = Files::get($context);
@@ -52,14 +52,23 @@ class Storage extends AbstractStorage
 	{
 		$this->populateRootCache();
 
-		$uri = $uri ?: null;
+		$uri = $uri ?: '';
 
 		if (!isset($this->cache[$uri])) {
-			$this->cache[$uri] = Files::get($uri);
+			$file = Files::get($uri);
 
-			if (!$this->cache[$uri]) {
+			if (!$file) {
 				return null;
 			}
+
+			// Don't allow access to extensions files from WebDAV,
+			// only extensions can manage them
+			// (TODO: allow access using WebDAV, but only from the extension code)
+			if ($file->context() === $file::CONTEXT_EXTENSIONS) {
+				return null;
+			}
+
+			$this->cache[$uri] = $file;
 		}
 
 		return $this->cache[$uri];
