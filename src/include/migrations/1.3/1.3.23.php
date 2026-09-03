@@ -4,6 +4,7 @@ namespace Paheko;
 
 use Paheko\Files\Files;
 use Paheko\Entities\Files\File;
+use Paheko\UserTemplate\UserTemplate;
 
 $db->beginSchemaUpdate();
 
@@ -29,6 +30,10 @@ if (!empty($config->org_address)
 
 // Update module files
 foreach (Files::listRecursive(File::CONTEXT_MODULES, null, false) as $file) {
+	if ($file->isDir()) {
+		continue;
+	}
+
 	if (!UserTemplate::isTemplate($file->name)) {
 		continue;
 	}
