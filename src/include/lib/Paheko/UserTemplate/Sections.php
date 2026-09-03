@@ -78,7 +78,7 @@ class Sections
 	{
 		// Split string at semicolon, unless in comment or inside balanced quotes
 		$regexp = "/'(?:''|[^'])*'(*SKIP)(*F)|\"(?:\"\"|[^\"])*\"(*SKIP)(*F)|--[^\\r\\n]*(*SKIP)(*F)|;/";
-		$parts = preg_split($regexp, $sql, 2);
+		$parts = preg_split($regexp, $params, 2);
 
 		$sql = trim($parts[0] ?? '');
 		$extra_params = trim($parts[1] ?? '');
