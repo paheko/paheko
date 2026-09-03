@@ -376,6 +376,7 @@ class Modules
 
 				if ($status === Page::STATUS_DRAFT) {
 					$path = '404.html';
+					$page = null;
 				}
 				elseif ($status === Page::STATUS_PRIVATE && !$session->isLogged()) {
 					Utils::redirect('!login.php?p=1&r=' . Utils::getRequestURI());
