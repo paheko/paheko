@@ -10,6 +10,7 @@ use Paheko\ValidationException;
 use Paheko\Utils;
 use Paheko\Services\Fees;
 use Paheko\Services\Services;
+use Paheko\Users\Users;
 use Paheko\Accounting\Transactions;
 use Paheko\Entities\Accounting\Transaction;
 use Paheko\Entities\Accounting\Line;
@@ -187,6 +188,8 @@ class Service_User extends Entity
 		if ($this->fee()->label != $label) {
 			$label .= ' - ' . $this->fee()->label;
 		}
+
+		$label .= sprintf(' (%s)', Users::getName($this->id_user));
 
 		$transaction = Transactions::create(array_merge($source, [
 			'type' => Transaction::TYPE_REVENUE,
