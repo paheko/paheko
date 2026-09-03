@@ -2096,9 +2096,16 @@ class Utils
 
 	static public function random_string(int $length): string
 	{
-		$bytes = ceil($length * 0.7);
-		$str = base_convert(bin2hex(random_bytes($bytes)), 16, 36);
-		return substr($str, 0, $length);
+		$alphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+		$out = '';
+
+		for ($i = 0; $i < (int)$length; $i++) {
+			$pos = random_int(0, strlen($alphabet) - 1);
+			$char = $alphabet[$pos];
+			$out .= $char;
+		}
+
+		return $out;
 	}
 
 	static public function uuid(): string
