@@ -139,22 +139,29 @@ class AdvancedSearch extends A_S
 				'type'   => 'boolean',
 				'label'  => 'Est liée à des écritures',
 				'null'   => false,
-				'select' => '(SELECT 1 FROM acc_transactions_links tl WHERE tl.id_transaction = t.id OR tl.id_related = t.id) IS NOT NULL',
-				'where'  => '(SELECT 1 FROM acc_transactions_links tl WHERE tl.id_transaction = t.id OR tl.id_related = t.id) IS NOT NULL %s',
+				'select' => 'tl.id_transaction IS NOT NULL',
+				'where'  => 'tl.id_transaction IS NOT NULL %s',
 			],
 			'has_linked_users' => [
 				'type'   => 'boolean',
 				'label'  => 'Est liée à des membres',
 				'null'   => false,
-				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id) IS NOT NULL',
-				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id) IS NOT NULL %s',
+				'select' => 'tu.id_transaction IS NOT NULL',
+				'where'  => 'tu.id_transaction IS NOT NULL %s',
+			],
+			'linked_users' => [
+				'type'   => 'text',
+				'label'  => 'Nom des membres liés',
+				'null'   => false,
+				'select' => sprintf('GROUP_CONCAT(%s, \', \')', DynamicFields::getNameFieldsSQL('u')),
+				'where'  => sprintf('%s %%s', DynamicFields::getNameFieldsSQL('us')),
 			],
 			'has_linked_subscriptions' => [
 				'type'   => 'boolean',
 				'label'  => 'Est liée à des inscriptions',
 				'null'   => false,
-				'select' => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_subscription IS NOT NULL) IS NOT NULL',
-				'where'  => '(SELECT 1 FROM acc_transactions_users tu WHERE tu.id_transaction = t.id AND tu.id_subscription IS NOT NULL) IS NOT NULL %s',
+				'select' => 'tu2.id_transaction IS NOT NULL',
+				'where'  => 'tu2.id_transaction IS NOT NULL %s',
 			],
 			'reconciled' => [
 				'type'   => 'boolean',
@@ -306,6 +313,8 @@ class AdvancedSearch extends A_S
 			'acc_transactions_users',
 			'acc_transactions_links',
 			'acc_letters',
+			'users_search',
+			'users',
 		]);
 	}
 
@@ -319,6 +328,27 @@ class AdvancedSearch extends A_S
 			LEFT JOIN acc_letters AS ll ON l.id_letter = ll.id';
 
 		$list = $this->makeList($query, $tables, 'id', true, ['id', 'id_line', 'account_code', 'debit', 'credit']);
+
+		$list->groupBy('l.id');
+
+		if ($list->hasColumn('has_linked_users')
+			|| $list->hasColumn('linked_users')) {
+			$list->addTables('LEFT JOIN acc_transactions_users AS tu ON tu.id_transaction = t.id AND tu.id_user IS NOT NULL');
+		}
+
+		if ($list->hasColumn('has_linked_subscriptions')) {
+			$list->addTables('LEFT JOIN acc_transactions_users AS tu2 ON (tu2.id_transaction = t.id AND tu2.id_subscription IS NOT NULL)');
+		}
+
+		if ($list->hasColumn('linked_users')) {
+			$list->addTables('INNER JOIN users_search AS us ON us.id = tu.id_user');
+			$list->addTables('INNER JOIN users AS u ON u.id = us.id');
+		}
+
+		if ($list->hasColumn('has_linked_transactions')) {
+			$list->addTables('LEFT JOIN acc_transactions_links AS tl ON (t.id = tl.id_transaction OR t.id = tl.id_related)');
+		}
+
 		$list->setExportCallback(function (&$row) {
 			if (isset($row->debit)) {
 				$row->debit = Utils::money_format($row->debit);
