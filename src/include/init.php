@@ -559,6 +559,15 @@ if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) && !empty($_SERVE
 	@list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
 }
 
+// Validate HTTP Host header for local install (against DNS rebinding attack)
+if (DESKTOP_CONFIG_FILE) {
+	$host = $_SERVER['HTTP_HOST'] ?? '??';
+
+	if (!preg_match('/^(?:127\.0\.0\.\d+|::1|(?:[a-z0-9.]+\.)?localhost)(?::\d+)?$/', $host)) {
+		throw new UserException('Votre installation locale n\'utilise pas une adresse locale (127.0.0.1 ou localhost) : ' . $host);
+	}
+}
+
 // Check if we need to redirect to install or upgrade pages
 if (!defined('Paheko\SKIP_STARTUP_CHECK')) {
 	if (!DB::isInstalled()) {
