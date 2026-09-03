@@ -783,6 +783,18 @@ class DB extends SQLite3
 				$rules['users_view'] = $rules['users'];
 			}
 
+			// Transform ignore rules to deny rules
+			if (!empty($options['ignore_is_deny'])) {
+				foreach ($rules as &$table) {
+					foreach ($table as &$column) {
+						if (substr($column, 0, 1) === '~') {
+							$column = '-' . substr($column, 1);
+						}
+					}
+				}
+				unset($column, $table);
+			}
+
 			// Chain safetyAuthorizer and restrictedAuthorizer
 			$db->setAuthorizer(function(int $action, ...$args) use ($rules) {
 				$r = self::safetyAuthorizer($action, ...$args);

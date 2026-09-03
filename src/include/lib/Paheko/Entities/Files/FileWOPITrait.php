@@ -61,6 +61,11 @@ trait FileWOPITrait
 
 	public function getWOPIEditorHTML(?Session $session = null, bool $readonly = false, bool $frame_only = false): ?string
 	{
+		// Never use WOPI editor for internal preview types (eg. text/plain)
+		if (in_array($this->mime, self::PREVIEW_TYPES, true)) {
+			return null;
+		}
+
 		$url = $this->getWopiURL('edit');
 
 		if (!$url) {

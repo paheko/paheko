@@ -373,9 +373,20 @@ class DynamicField extends Entity
 		if ($this->type === 'virtual') {
 			$this->assert(null !== $this->sql && strlen(trim($this->sql)), 'Le code SQL est manquant');
 
+			// Make sure we cannot do multiple requests or other weird stuff
+			$this->assert(!preg_match('/;|\b(?:SELECT|CREATE|DROP|INSERT|DELETE|PRAGMA|ALTER|COMMIT|BEGIN|VACUUM|REPLACE|ATTACH)\b/i', $this->sql, $match), 'Code SQL invalide : ' . ($match[0] ?? ''));
+
 			try {
-				$db = DB::getInstance()->getRestrictedConnection(['rules' => ['users' => null]]);
-				$db->firstColumn(sprintf('SELECT (%s) FROM users;', $this->sql));
+				$db = DB::getInstance()->getRestrictedConnection(['rules' => ['users' => null, 'temp.' => []], 'ignore_is_deny' => true]);
+				$st = $db->prepare(sprintf('SELECT (%s) FROM users;', $this->sql));
+
+				if (!$st->readOnly()) {
+					throw new \LogicException('The statement is not read-only: ' . $this->sql);
+				}
+
+				// Really try to create a view, as some errors may happen when we create the view
+				// (eg. "parameters are not allowed in views" is the field contains $name or :name)
+				$db->exec(sprintf('CREATE TEMP VIEW tmp_users_%s AS SELECT *, (%s) AS new_field FROM users;', bin2hex(random_bytes(10)), $this->sql));
 			}
 			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);

@@ -1865,7 +1865,7 @@ class Utils
 		// Using a proxy is better, see config.dist.php for details
 
 		// Remove <base href="..."> tags to avoid relative URIs
-		$str = preg_replace('/<base[^>]*>/i', '', $str);
+		$str = preg_replace('/<base[^>]*href[^>]*>/i', '', $str);
 
 		// Remove any javascript
 		$str = preg_replace('/<script.*?<\/script[^>]*>/si', '', $str);
@@ -1878,31 +1878,34 @@ class Utils
 		// Remove meta tags: content="0; url=http://evil.com/"
 		$str = preg_replace('!<meta[^>]*url\s*=[^>]*>!i', '', $str);
 
-		// Restrict external URLs in CSS
-		$str = preg_replace_callback('!url\s*\((.+?)\)!im', function (array $match): string {
-			$url = trim(html_entity_decode(trim($match[1], '\'"')));
+		$url_filter = function (array $match): string {
+			$url = trim(html_entity_decode(trim($match[2] ?? $match[1], '\'"')));
 
-			if (0 === strpos($url, 'http')
-				&& (self::isLocalURL($url) || 0 === strpos($url, 'https://paheko.cloud/'))) {
+			if (0 === strpos($url, 'http')) {
+				return $match[0];
+			}
+
+			if (0 === strpos($url, 'https://paheko.cloud/')) {
+				return $match[0];
+			}
+
+			if (0 === strpos($url, 'data:')) {
+				return $match[0];
+			}
+
+			if (self::isLocalURL($url)) {
 				return $match[0];
 			}
 
 			ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in CSS used in PDF: ' . $match[0]));
-			return 'url()';
-		}, $str);
+			return '';
+		};
+
+		// Restrict external URLs in CSS
+		$str = preg_replace_callback('!url\s*\((.+?)\)!im', $url_filter, $str);
 
 		// Restrict external URLs in HTML tags
-		$str = preg_replace_callback('!(?:src|data)\s*=\s*([\'"`])((?:[a-z0-9]+:|//).+?)\1!im', function (array $match): string {
-			$url = trim(html_entity_decode($match[2]));
-
-			if (0 !== strpos($url, 'http')
-				|| !self::isLocalURL($url)) {
-				ErrorManager::reportExceptionSilent(new \LogicException('XSS attempt in HTML used in PDF: ' . $match[0]));
-				return '';
-			}
-
-			return $match[0];
-		}, $str);
+		$str = preg_replace_callback('!(?:src|data)\s*=\s*([\'"`])((?:[a-z0-9]+:|//).+?)\1!im', $url_filter, $str);
 
 		$str = self::appendCookieToURLs($str);
 		$str = preg_replace('!(<html.*?)class="!s', '$1class="pdf ', $str);
@@ -2080,9 +2083,16 @@ class Utils
 
 	static public function random_string(int $length): string
 	{
-		$bytes = ceil($length * 0.7);
-		$str = base_convert(bin2hex(random_bytes($bytes)), 16, 36);
-		return substr($str, 0, $length);
+		$alphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+		$out = '';
+
+		for ($i = 0; $i < (int)$length; $i++) {
+			$pos = random_int(0, strlen($alphabet) - 1);
+			$char = $alphabet[$pos];
+			$out .= $char;
+		}
+
+		return $out;
 	}
 
 	static public function uuid(): string

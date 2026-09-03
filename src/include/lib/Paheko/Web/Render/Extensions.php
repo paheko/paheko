@@ -69,13 +69,13 @@ class Extensions
 			$replace = [];
 
 			foreach ($replace_raw as $r) {
-				$replace[strtok($r, '=')] = strtok('');
+				$replace[strtok($r, '=')] = htmlspecialchars(strtok(''));
 			}
 
 			$body = preg_replace(';<div\s+class="nav">(?:(?!</div>).)*?</div>;s', '', $body);
 
 			// Replace images
-			$body = preg_replace(';src="(?!https?:|/);', 'src="' . ADMIN_URL . 'static/doc/', $body);
+			$body = preg_replace(';<img src="(?!https?:|/);', '<img src="' . ADMIN_URL . 'static/doc/', $body);
 
 			// Replace links
 			$body = preg_replace_callback('!href="([a-z_-]+)\.html!',

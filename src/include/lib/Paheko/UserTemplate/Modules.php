@@ -100,10 +100,6 @@ class Modules
 			}
 		}
 
-		if (!$db->test(Module::TABLE, 'web = 1 AND enabled = 1')) {
-			$db->exec('UPDATE modules SET enabled = 1 WHERE id = (SELECT id FROM modules WHERE web = 1 ORDER BY system DESC LIMIT 1);');
-		}
-
 		$db->commit();
 
 		return $errors;
@@ -280,21 +276,19 @@ class Modules
 	{
 		$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 AND enabled = 1 LIMIT 1;');
 
-		// Just in case
+		// Just in case we have no web module enabled
+		// fallback to default module
 		if (!$module) {
-			$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
+			// Maybe we need to rescan modules?
+			self::refresh();
+			$module = Modules::get('web');
 
 			if (!$module) {
-				// Maybe we need to rescan modules?
-				self::refresh();
-				$module = EM::findOne(Module::class, 'SELECT * FROM @TABLE WHERE web = 1 LIMIT 1;');
-
-				if (!$module) {
-					throw new \LogicException('No web module exists');
-				}
+				throw new \LogicException('No web module exists');
 			}
 
 			$module->set('enabled', true);
+			$module->set('web', true);
 			$module->save();
 		}
 

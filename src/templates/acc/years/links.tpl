@@ -2,10 +2,6 @@
 
 {form_errors}
 
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-	{assign var="is_admin" value=true}
-{/if}
-
 <div class="help block">
 	<p>Pour qu'une écriture puisse être créée lors de l'inscription d'un membre à une activité, un tarif doit être lié à un exercice comptable.</p>
 	<p>Après la clôture d'un exercice, il faudra donc modifier l'exercice lié à chaque tarif pour pouvoir continuer à y inscrire des membres.</p>
