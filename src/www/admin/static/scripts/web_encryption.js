@@ -1,42 +1,236 @@
-(function () {
-	var aes_loaded = false;
-	var iteration = 0;
-	var self_path_match = /static\/scripts\/web_encryption\.js/;
-	var www_url;
+(async function () {
+	let edit = document.getElementById('f_content') ? true : false;
+	var new_content;
 	var encryptPassword = null;
-	var base_url;
 	var init = false;
+	var gibberish_url = g.static_url + 'scripts/lib/gibberish-aes.min.js';
 
-	var scripts = document.getElementsByTagName('script');
-
-	for (var i = 0; i < scripts.length; i++) {
-		if (scripts[i].src.match(self_path_match)) {
-			www_url = scripts[i].src.replace(/\/admin\/.*$/, '/');
-			break;
-		}
-	}
-
-	function load_aes(callback)
-	{
-		if (aes_loaded) {
-			if (callback) {
-				callback();
+	function GibberishDecrypt (content, password) {
+		return new Promise((resolve) => {
+			if (!gibberish_url) {
+				content = GibberishAES.dec(content, password);
+				resolve(content);
+				return;
 			}
+
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = gibberish_url;
+			script.onload = () => {
+				gibberish_url = null;
+				content = GibberishAES.dec(content, password);
+				resolve(content);
+			};
+			document.head.appendChild(script);
+		});
+	};
+
+	let disableEncryption = (reset) => {
+		var c = document.getElementById('f_content');
+
+		if (reset) {
+			c.value = '';
+			document.getElementById('f_format').value = 'markdown';
+		}
+
+		delete c.form.onbeforesubmit;
+		c.disabled = false;
+
+		if (new_content) {
+			c.name = new_content.name;
+			new_content.remove();
+		}
+
+		encryptPassword = null;
+	};
+
+	let enableEncryption = async (form, do_decrypt) => {
+		document.getElementById('f_content').disabled = true;
+
+		// This is nessary to apply disabled styles...
+		await new Promise(r => setTimeout(r, 50));
+
+		askPassword(!do_decrypt);
+		document.getElementById('f_content').disabled = false;
+
+		if (do_decrypt) {
+			decrypt();
+		}
+
+		var content = document.getElementById('f_content');
+
+		new_content = document.createElement('input');
+		new_content.type = 'hidden';
+		new_content.name = content.name;
+		content.name = null;
+		content.parentNode.appendChild(new_content);
+
+		form.addEventListener('beforesubmit', (e) => {
+			if (!encryptPassword) {
+				return;
+			}
+
+			e.preventDefault();
+
+			encryptData(content.value, encryptPassword).then(c => {
+				content.disabled = true;
+				content.value = c;
+				console.log(content.value, c, encryptPassword);
+				console.log('encrypted');
+				//form.submit();
+			});
+
+			return false;
+		});
+	};
+
+	let askPassword = (first) => {
+		encryptPassword = window.prompt(first ? "Le mot de passe n'est ni transmis ni enregistré.\n"
+			+ "Il n'est pas possible de retrouver le contenu si vous perdez le mot de passe.\n"
+			+ "Merci d'indiquer ici le mot de passe :" : "Mot de passe :");
+
+		if (!encryptPassword)
+		{
+			encryptPassword = null;
+
+			if (edit)
+			{
+				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
+				{
+					disableEncryption(true);
+					return;
+				}
+
+				askPassword(first);
+			}
+
+			return;
+		}
+	};
+
+	// Used in _file_render_encrypted.tpl
+	window.pleaseDecrypt = () => {
+		askPassword();
+		decrypt();
+	};
+
+	var decrypt = async function ()	{
+		if (!encryptPassword) {
 			return;
 		}
 
-		var url = www_url + 'admin/static/scripts/lib/gibberish-aes.min.js';
-		var s = document.createElement('script');
-		s.src = url;
-		s.type = 'text/javascript';
-		s.onload = function () {
-			aes_loaded = true;
-			if (callback) {
-				callback();
-			}
-		};
+		if (edit) {
+			var elm = document.getElementById('f_content');
+		}
+		else {
+		 	var elm = document.getElementById('web_encrypted_content');
+		}
 
-		document.head.appendChild(s);
+		var content = elm.value || elm.innerText;
+		content = content.replace(/\s+/g, '');
+
+		try {
+			// Legacy encryption
+			if (content.substr(0, 4) !== '{wc}') {
+				content = await GibberishDecrypt(content, encryptPassword);
+			}
+			else {
+				content = await decryptData(content, encryptPassword);
+			}
+		}
+		catch (e)
+		{
+			encryptPassword = null;
+			window.alert('Impossible de déchiffrer. Mauvais mot de passe ?');
+
+			if (edit)
+			{
+				// Redemander le mot de passe
+				askPassword();
+				decrypt();
+			}
+			return false;
+		}
+
+		if (!edit)
+		{
+			elm.style.display = 'block';
+			document.getElementById('web_encrypted_message').style.display = 'none';
+			base_url = elm.dataset.url.replace(/\/$/, '') + '/';
+			content = formatContent(content);
+			elm.innerHTML = content;
+
+			if (content.match(/<img/) && typeof window.enableImageGallery != 'undefined') {
+				enableImageGallery();
+			}
+		}
+		else
+		{
+			elm.value = content;
+		}
+	};
+
+	window.addEventListener('load', () => {
+		if (init) return;
+		init = true;
+
+		if (e = document.getElementById('f_format')) {
+			edit = true;
+
+			e.addEventListener('change', () => {
+				if (e.value == 'encrypted') {
+					enableEncryption(e.form);
+				}
+				else if (encryptPassword) {
+					disableEncryption(false);
+				}
+			});
+
+			if (e.value == "encrypted") {
+				enableEncryption(e.form, true);
+			}
+		}
+	});
+
+	// Helper to derive a strong AES-GCM key using PBKDF2
+	async function deriveKey(password, salt) {
+		const enc = new TextEncoder();
+		const keyMaterial = await crypto.subtle.importKey(
+			"raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+		);
+		return await crypto.subtle.deriveKey(
+			{ name: "PBKDF2", salt: salt, iterations: 210000, hash: "SHA-256" },
+			keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+		);
+	}
+
+	async function encryptData(text, password) {
+		const salt = crypto.getRandomValues(new Uint8Array(16));
+		const iv = crypto.getRandomValues(new Uint8Array(12));
+		const key = await deriveKey(password, salt);
+		const encoded = new TextEncoder().encode(text);
+
+		const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, encoded);
+
+		// Combine salt, iv, and ciphertext into a single buffer for Base64 storage
+		const payload = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+		payload.set(salt, 0);
+		payload.set(iv, salt.length);
+		payload.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+		return '{wc}' + btoa(String.fromCharCode(...payload));
+	}
+
+	async function decryptData(base64Payload, password) {
+		const raw = Uint8Array.from(atob(base64Payload.substr(5)), c => c.charCodeAt(0));
+		const salt = raw.slice(0, 16);
+		const iv = raw.slice(16, 28);
+		const data = raw.slice(28);
+
+		const key = await deriveKey(password, salt);
+		const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+
+		return new TextDecoder().decode(decrypted);
 	}
 
 	function formatContent(content)
@@ -123,185 +317,4 @@
 
 		return content;
 	}
-
-	let edit = document.getElementById('f_content') ? true : false;
-	var new_content;
-
-	let disableEncryption = (reset) => {
-		var c = document.getElementById('f_content');
-
-		if (reset) {
-			c.value = '';
-			document.getElementById('f_format').value = 'markdown';
-		}
-
-		delete c.form.onbeforesubmit;
-		c.disabled = false;
-
-		if (new_content) {
-			c.name = new_content.name;
-			new_content.remove();
-		}
-
-		encryptPassword = null;
-	};
-
-	let enableEncryption = (form, do_decrypt) => {
-		document.getElementById('f_content').disabled = true;
-
-		load_aes(function () {
-			askPassword(!do_decrypt);
-			document.getElementById('f_content').disabled = false;
-
-			if (do_decrypt) {
-				decrypt();
-			}
-
-			var content = document.getElementById('f_content');
-
-			new_content = document.createElement('input');
-			new_content.type = 'hidden';
-			new_content.name = content.name;
-			content.name = null;
-			content.parentNode.appendChild(new_content);
-
-			form.onbeforesubmit = function () {
-				if (typeof GibberishAES == 'undefined')
-				{
-					alert("Le chargement de la bibliothèque AES n'est pas terminé.\nLe chiffrement est impossible pour le moment, recommencez dans quelques instants ou désactivez le chiffrement.");
-					return false;
-				}
-
-				if (!encryptPassword) {
-					return;
-				}
-
-				new_content.value = GibberishAES.enc(content.value, encryptPassword);
-				content.disabled = true;
-				console.log('encrypted');
-			};
-		});
-	};
-
-	let askPassword = (first) => {
-		encryptPassword = window.prompt(first ? "Le mot de passe n'est ni transmis ni enregistré.\n"
-			+ "Il n'est pas possible de retrouver le contenu si vous perdez le mot de passe.\n"
-			+ "Merci d'indiquer ici le mot de passe :" : "Mot de passe :");
-
-		if (!encryptPassword)
-		{
-			encryptPassword = null;
-
-			if (edit)
-			{
-				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
-				{
-					disableEncryption(true);
-					return;
-				}
-
-				askPassword(first);
-			}
-
-			return;
-		}
-
-		iteration = 0;
-	};
-
-	// Used in _file_render_encrypted.tpl
-	window.pleaseDecrypt = () => {
-		load_aes(() => {
-			askPassword();
-			decrypt();
-		});
-	};
-
-	var decrypt = function ()
-	{
-		if (!encryptPassword) {
-			return;
-		}
-
-		if (typeof GibberishAES == 'undefined')
-		{
-			if (iteration >= 5)
-			{
-				iteration = 0;
-				encryptPassword = null;
-				window.alert("Impossible de charger la bibliothèque AES, empêchant le déchiffrement de la page.\nAttendez quelques instants avant de recommencer ou rechargez la page.");
-				return;
-			}
-
-			iteration++;
-			window.setTimeout(decrypt, 500);
-			return;
-		}
-
-		if (edit) {
-			var elm = document.getElementById('f_content');
-		}
-		else {
-		 	var elm = document.getElementById('web_encrypted_content');
-		}
-
-		var content = elm.value || elm.innerText;
-		content = content.replace(/\s+/g, '');
-
-		try {
-			content = GibberishAES.dec(content, encryptPassword);
-		}
-		catch (e)
-		{
-			encryptPassword = null;
-			window.alert('Impossible de déchiffrer. Mauvais mot de passe ?');
-
-			if (edit)
-			{
-				// Redemander le mot de passe
-				askPassword();
-				decrypt();
-			}
-			return false;
-		}
-
-		if (!edit)
-		{
-			elm.style.display = 'block';
-			document.getElementById('web_encrypted_message').style.display = 'none';
-			base_url = elm.dataset.url.replace(/\/$/, '') + '/';
-			content = formatContent(content);
-			elm.innerHTML = content;
-
-			if (content.match(/<img/) && typeof window.enableImageGallery != 'undefined') {
-				enableImageGallery();
-			}
-		}
-		else
-		{
-			elm.value = content;
-		}
-	};
-
-	document.addEventListener('DOMContentLoaded', () => {
-		if (init) return;
-		init = true;
-
-		if (e = document.getElementById('f_format')) {
-			edit = true;
-
-			e.addEventListener('change', () => {
-				if (e.value == 'encrypted') {
-					enableEncryption(e.form);
-				}
-				else if (encryptPassword) {
-					disableEncryption(false);
-				}
-			});
-
-			if (e.value == "encrypted") {
-				enableEncryption(e.form, true);
-			}
-		}
-	});
 } ());
