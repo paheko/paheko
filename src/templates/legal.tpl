@@ -11,10 +11,10 @@
 	</p>
 	<p>
 		Adresse&nbsp;:<br />
-		{if !$config.org_address}
+		{if !$org_full_address}
 			Non renseignée
 		{else}
-			{$config.org_address|escape|nl2br}
+			{$org_full_address|escape|nl2br}
 		{/if}
 	</p>
 	<p>
@@ -40,7 +40,7 @@
 			<?=LEGAL_HOSTING_DETAILS?>
 		{else}
 			<strong>{$config.org_name}</strong><br />
-			{$config.org_address|escape|nl2br}
+			{$org_full_address|escape|nl2br}
 		{/if}
 	</p>
 </div>

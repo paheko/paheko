@@ -1104,4 +1104,52 @@ class User extends Entity
 
 		$this->_permissions = $all_permissions;
 	}
+
+	public function createAppPassword(string $name, ?int $id_plugin = null): string
+	{
+		$name = trim($name);
+
+		if (!strlen($name)) {
+			throw new UserException('Le nom de l\'application ne peut rester vide');
+		}
+
+		$password = Security::getRandomPassword(14);
+
+		$db = DB::getInstance();
+		$db->insert('users_app_passwords', [
+			'name'      => $name,
+			'password'  => password_hash($password, PASSWORD_DEFAULT),
+			'id_user'   => $this->id(),
+			'id_plugin' => $id_plugin,
+		]);
+
+		return $db->lastInsertId() . '.' . $password;
+	}
+
+	public function deleteAppPassword(int $id): void
+	{
+		DB::getInstance()->delete('users_app_passwords', 'id = ? AND id_user = ?', $id, $this->id());
+	}
+
+	public function listAppPasswords(): array
+	{
+		return DB::getInstance()->get('SELECT * FROM users_app_passwords WHERE id_user = ? ORDER BY name COLLATE U_NOCASE;', $this->id());
+	}
+
+	public function useAppPassword(string $password): ?int
+	{
+		$id = (int) strtok($password, '.');
+		$password = strtok('');
+
+		$db = DB::getInstance();
+		$hashed_password = $db->firstColumn('SELECT password FROM users_app_passwords WHERE id_user = ? AND id = ?;', $this->id(), $id);
+
+		if (!$hashed_password || !password_verify($password, $hashed_password)) {
+			return null;
+		}
+
+		// Update last_seen timestamp
+		$db->preparedQuery('UPDATE users_app_passwords SET last_seen = ? WHERE id = ?;', new \DateTime, $id);
+		return $id;
+	}
 }
