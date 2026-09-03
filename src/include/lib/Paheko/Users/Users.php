@@ -371,7 +371,7 @@ class Users
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ? COLLATE U_NOCASE LIMIT 1;', $login);
 	}
 
-	static public function validateSelectedCanBeModifiedBy(array $ids, ?Session $session): void
+	static public function validateSelectedCanBeDeletedBy(array $ids, ?Session $session): void
 	{
 		if (!$session) {
 			return;
@@ -406,7 +406,7 @@ class Users
 	{
 		$ids = array_map('intval', $ids);
 
-		self::validateSelectedCanBeModifiedBy($ids, $session);
+		self::validateSelectedCanBeDeletedBy($ids, $session);
 
 		foreach ($ids as $id) {
 			Files::delete(File::CONTEXT_USER . '/' . $id);
