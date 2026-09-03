@@ -371,23 +371,48 @@ class Users
 		return EM::findOne(User::class, 'SELECT * FROM @TABLE_view WHERE ' . $field . ' = ? COLLATE U_NOCASE LIMIT 1;', $login);
 	}
 
-	static public function deleteSelected(array $ids): void
+	static public function validateSelectedCanBeModifiedBy(array $ids, ?Session $session): void
+	{
+		if (!$session) {
+			return;
+		}
+
+		$logged_user_id = $session::getUserId();
+
+		if ($logged_user_id && in_array($logged_user_id, $ids, true)) {
+			throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
+		}
+
+		if ($session->user()->isSuperAdmin()) {
+			return;
+		}
+
+		$db = DB::getInstance();
+		$sql = 'SELECT 1 FROM users u INNER JOIN users_categories uc ON uc.id = u.id_category WHERE perm_config = ? LIMIT 1;';
+
+		if ($db->firstColumn($sql, Session::ACCESS_ADMIN)) {
+			throw new UserException('Il n\'est pas possible de supprimer un compte administrateur sans être administrateur.');
+		}
+
+		$sql = 'SELECT 1 FROM users u INNER JOIN users_categories uc ON uc.id = u.id_category WHERE perm_users = ? LIMIT 1;';
+
+		if (!$session->canAccess(Session::SECTION_USERS, Session::ACCESS_ADMIN)
+			&& $db->firstColumn($sql, Session::ACCESS_ADMIN)) {
+			throw new UserException('Il n\'est pas possible de supprimer un compte gestionnaire sans être gestionnaire.');
+		}
+	}
+
+	static public function deleteSelected(array $ids, ?Session $session): void
 	{
 		$ids = array_map('intval', $ids);
 
-		if ($logged_user_id = Session::getUserId()) {
-			if (in_array($logged_user_id, $ids)) {
-				throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
-			}
-		}
+		self::validateSelectedCanBeModifiedBy($ids, $session);
 
 		foreach ($ids as $id) {
 			Files::delete(File::CONTEXT_USER . '/' . $id);
 		}
 
 		$db = DB::getInstance();
-
-		// Suppression du membre
 		$db->delete(User::TABLE, $db->where('id', $ids));
 	}
 
