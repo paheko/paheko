@@ -140,6 +140,7 @@ class Template extends Smartyer
 			$session = Session::getInstance();
 			$config = Config::getInstance();
 			$this->assign('config', $config);
+			$this->assign('org_full_address', $config->getFullAddress());
 			$this->assign('currency_symbol', $config->getCurrencySymbol());
 			$this->assign('site_url', $config->getSiteURL());
 		}

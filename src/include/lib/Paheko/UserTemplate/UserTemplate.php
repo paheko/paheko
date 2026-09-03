@@ -196,11 +196,12 @@ class UserTemplate extends \KD2\Brindille
 
 		$cfg = array_intersect_key($config->asArray(), array_flip($keys));
 		$cfg['files'] = $files;
+		$cfg['org_full_address'] = $config->getFullAddress();
 
 		// @deprecated
 		// FIXME: remove these legacy variables in a future version (1.4?)
 		$cfg['nom_asso'] = $cfg['org_name'];
-		$cfg['adresse_asso'] = $cfg['org_address'];
+		$cfg['adresse_asso'] = $cfg['org_full_address'];
 		$cfg['email_asso'] = $cfg['org_email'];
 		$cfg['telephone_asso'] = $cfg['org_phone'];
 		$cfg['site_asso'] = $cfg['org_web'];

@@ -123,6 +123,8 @@ class Config extends Entity
 	protected string $org_email;
 	protected ?string $org_address = null;
 	protected ?string $org_address_public = null;
+	protected ?string $org_post_code = null;
+	protected ?string $org_city = null;
 	protected ?string $org_phone = null;
 	protected ?string $org_web = null;
 
@@ -503,5 +505,17 @@ class Config extends Entity
 		$this->set('files', $files);
 
 		return $f;
+	}
+
+	public function getFullAddress(): ?string
+	{
+		if (!isset($this->org_address, $this->org_post_code, $this->org_city)) {
+			return null;
+		}
+
+		$out = $this->org_address ?? '';
+		$out .= "\n" . ($this->org_post_code ?? '');
+		$out .= ' ' . ($this->org_city ?? '');
+		return trim($out);
 	}
 }

@@ -172,9 +172,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.3.23', '<')) {
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/migrations/1.3/1.3.23.sql');
-				$db->commitSchemaUpdate();
+				require ROOT . '/include/migrations/1.3/1.3.23.php';
 			}
 
 			Plugins::upgradeAllIfRequired();
