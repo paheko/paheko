@@ -19,6 +19,7 @@ use KD2\ZipWriter;
 
 use Paheko\Entities\Files\File;
 use Paheko\Entities\Users\Category;
+use Paheko\Entities\Web\Page;
 
 use stdClass;
 
@@ -808,6 +809,12 @@ class Module extends Entity
 				// Fallback if 404.html does not exist
 				throw new UserException('Page non trouvée. De plus, le squelette "404.html" n\'existe pas.', 404);
 			}
+		}
+
+		// Don't cache pages that can only be accessed by logged-in users
+		if (isset($params['page'], $params['page']['inherited_status'])
+			&& $params['page']['inherited_status'] === Page::STATUS_PRIVATE) {
+			$params['nocache'] = true;
 		}
 
 		$ut->assignArray($params);
