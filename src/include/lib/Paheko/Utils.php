@@ -1889,7 +1889,7 @@ class Utils
 		$str = preg_replace('!<meta[^>]*url\s*=[^>]*>!i', '', $str);
 
 		$url_filter = function (array $match): string {
-			$url = trim(html_entity_decode(trim($match[1], '\'"')));
+			$url = trim(html_entity_decode(trim($match[2] ?? $match[1], '\'"')));
 
 			if (0 === strpos($url, 'http')) {
 				return $match[0];
