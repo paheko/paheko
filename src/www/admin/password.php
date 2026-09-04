@@ -28,7 +28,7 @@ $form->runIf($code !== null, function () use ($code, $session, $form, $tpl) {
 
 	$csrf_key = 'password_change_' . md5($code);
 
-	$form->runIf('change', function () use ($session) {
+	$form->runIf('change', function () use ($session, $code) {
 		$session->recoverPasswordChange($code, Form::getPostString('password') ?? '', Form::getPostString('password_confirmed') ?? '');
 	}, $csrf_key, '!login.php?changed');
 
