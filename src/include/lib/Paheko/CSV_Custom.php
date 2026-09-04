@@ -821,7 +821,7 @@ class CSV_Custom
 	{
 		$url = Utils::getSelfURI();
 
-		$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () {
+		$form->runIf(!empty($_POST['load']) && isset($_FILES['file']['tmp_name']), function () {
 			$this->upload($_FILES['file']);
 		}, $csrf_key, $url);
 
@@ -833,7 +833,7 @@ class CSV_Custom
 
 		$form->runIf('set_columns', function () {
 			$this->skip(intval($_POST['skip_first_line'] ?? 0));
-			$this->setTranslationTable($_POST['translation_table'] ?? []);
+			$this->setTranslationTable(isset($_POST['translation_table']) && is_array($_POST['translation_table']) ? $_POST['translation_table'] : []);
 		}, $csrf_key, $url);
 	}
 }
