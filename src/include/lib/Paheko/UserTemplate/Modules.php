@@ -306,7 +306,7 @@ class Modules
 		// Just a quick sanity check
 		if (false !== strpos(rawurldecode($uri), '..')
 			|| false !== strpos(rawurldecode($uri), '.php')) {
-			throw new UserException('Invalid path.', 400);
+			throw new UserException('Unknown path.', 404);
 		}
 
 		$page = null;
