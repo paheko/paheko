@@ -30,7 +30,7 @@
 	{else}
 		<figure class="icon">
 		{if $item.icon_url}
-			<a href="{$item.details_url}"><svg role="img" aria-label="{$item.label}"><use xlink:href='{$item.icon_url}#img' href="{$item.icon_url}#img"></use></svg></a>
+			<a href="{$item.details_url}"><img alt="{$item.label}" src="{$item.icon_url}" /></a>
 		{/if}
 		</figure>
 

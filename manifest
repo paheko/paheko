@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Fix\smissing\suse\sstatement
-D 2026-09-04T10:34:57.484
+C Use\sregular\simg\stag,\snot\ssvg\slink
+D 2026-09-04T10:35:14.841
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -181,7 +181,7 @@ F src/include/lib/Paheko/Static_Cache.php 447386e95463f265dc3cf16cbecf76f0580884
 F src/include/lib/Paheko/Template.php 0be00d6eebd887a4b214d0654b23f888f8d770b41d749c310906437758d2b112
 F src/include/lib/Paheko/Upgrade.php 16fc01246b44a502c95f4e10dd8b3f9e629c57d5027351ece732c53e39f6f924
 F src/include/lib/Paheko/UserException.php d1cf6d5aa76d7004f8a663338771044307a0b4e5b419971aa3a78dc283bdd121
-F src/include/lib/Paheko/UserTemplate/CommonFunctions.php ddc2f739a28c7a749584df8b08aeaff90be00ac635573dee2f2196cd325984f9
+F src/include/lib/Paheko/UserTemplate/CommonFunctions.php d6cf6100e42b4fe7bbd718a08ce1a8c6ddf32bc7add2b0a321bce2e0b63c451a
 F src/include/lib/Paheko/UserTemplate/CommonModifiers.php cf59acc6424121ab37d418670771095dbd40459d8b27037c4d44fb451c6b3e43
 F src/include/lib/Paheko/UserTemplate/Functions.php 325bfb2d42958f27e29205e6ce124c2782eaba52c6c7f7f2ebe2ce0031383d80
 F src/include/lib/Paheko/UserTemplate/Modifiers.php 79c2eb08c95b4cbc6a6cbb7d774a7c1cdba1d71a93ab416d060ba472b4e482a0
@@ -374,7 +374,7 @@ F src/templates/config/custom.tpl 1ac5e5afc755fbe4b8bf46d583a0f4b34f69946898de12
 F src/templates/config/desktop.tpl fed58ca206133b823fb34f036df84da51517ffb6b7ab3144e5a67f83821e8057
 F src/templates/config/disk_usage.tpl 41fb60af426697cf57c69b121c6567399fe307e2cbab96176f92037fdc39a639
 F src/templates/config/edit_image.tpl 249062b118e6a849827d2d853cedb5181b16326b95316890c78d63eef34a4a42
-F src/templates/config/ext/_details.tpl 72be820985a3ec916b1546ed4e8cbfce2a3bfbe6505acdcb9d80c6662412a2de
+F src/templates/config/ext/_details.tpl 8e6d150df482288ff6c39589d8be0f3e3dc2658d463d00f6249ef29f41dfeb63
 F src/templates/config/ext/_nav.tpl 88142ccb034bab2e6f932d839ea84a2b84c48454ceb95301d4848ba3f8a1e096
 F src/templates/config/ext/delete.tpl 2afbdcd632838481af753320497689ba9550fdd99e29a7d713743d4924e44f45
 F src/templates/config/ext/details.tpl b4e52997b5043ba2e169fc94a772b51cb1e4eb071ffc1a773318c2b455fa25bd
@@ -781,7 +781,7 @@ F src/www/admin/static/styles/05-navigation.css c65e7078d12c1b1fea6ea7d09b62f148
 F src/www/admin/static/styles/06-tables-common.css 6830241beaf0f96a837611079ace365d4b1830085b1a4aeffc3659ee963d2aed
 F src/www/admin/static/styles/07-tables.css c33f04cf2ddea526e528cf3fce8734c32dff4c318194414277071a9d7649110e
 F src/www/admin/static/styles/10-accounting.css 0550915adcfb728a65e53775d7d67d73a9dbaec82e64dcfe5cbe4780797c33fb
-F src/www/admin/static/styles/config.css d0f72fcc58e3823bf99ea66f4f85730aac941c96d4d4880f7d6e6d0df7226258
+F src/www/admin/static/styles/config.css 34a6adc0fb2898dfd0086b964b1fc138efaf34685167053fc71ccf703f87a740
 F src/www/admin/static/styles/mailing.css 5bc74034c0424cc746aab43b3b4047c6ec5c5554170ca14861274a8a05a162da
 F src/www/admin/static/styles/tables_export.css 57aac7de2e4eb126e5bedb8218fb6af5cf87e6815da076ad41752fbe95c2f876
 F src/www/admin/static/styles/web.css 17406fae8b9fcec082587e076b5dca51a3c4df2e66a285ef495bf1341e8bf01c
@@ -865,24 +865,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 1f6eded1fac70e9dfa4c742a5709b4a1bc8cb6818d7f75c3d11b41442b1ef220
-R 62458f9cb87df4ab2aacdf81703ebcf5
+P b46319f61f74b2db2be4825a356729ff1f51e3db8a55c4ec3ed03bf305c5adfc
+R ffd275483ea2d6603f4a389da37c7b66
 U bohwaz
-Z dabdc12a6c71101d7e7dc01a75479ea6
+Z 213499f26acfc606e2b1a3c91538e4f1
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIyBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqantEACgkQksnacbiI
-6jR+Gw/1HLc63c8eGWhGFWLzgfu5qR9EFPXiSMx4YzTodWL9sALniBEfLrPWCBCv
-q7hWBAa8DDn24XfWgI1MImscWmlRH3TbQgdDzrX7UMNj02MWD1WifRWof7ojfGqP
-23/rMCO34Mx5ERE/4d0d0I1WRGF+r8MxMRLe52Arxal123vwpWsPb1aHwVVIDq4j
-taE5gcb8plh/gdH2ED7XTnZ9dTa2vQ0Nw2+kYe89vE2u0YvL/niw8JXS7Ii0xp/K
-wAlXI02HRHAOBZKMkBb6qDjIraVaqJz5r4M1G6EkCbfMaWPWY63WVXSdiqKVsQti
-/owewg+eMOwuAvL3SVXvzCHFM6dOxFQ4VAF8vh3mnZqsyhYTflbZLc5Vmzq94+xZ
-3eBEaCaHVJfDuEig/wNnqZyWbI5NjGKnBGUzRLYtA3CrRT8nJyXqxhoFHqgT7erc
-V7m0GTxW7+EjqxyD9A7hQTGsp5hzNm6XeN3Jak3GrCP9SGQ46vtz1pNdS7iX6+MH
-Q0j6I69NVPucDGAFTEXal/EnEsWZ4Hg+hoQmdVw7tOVZ8KLRCfI1htocD2Xz+bkH
-RW3afi4qi0Nv1qqW387cNTGy2eMB/BKi7j9pW/KJoCvBkWH0LhTTi4dFtVyRxk3a
-Lytv4Jr7r/wh2nKgh+JMsvmA5oUmgO/LqwGqsrri6nLAEZG9TA==
-=Wqyl
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqanuIACgkQksnacbiI
+6jQWUxAAnbgPDUvpSXwNOVBsSP5cURb52kpc4ppx9Gl08+TV7kUsg4kP32pISKXb
++yvL5nCJpwPeiFZZM5EvNAzLRyPfBNegS0haDbghurvKA6jDix1BLIUMt43J7QFw
+ZyWd/7pIMcI91+198DS0j6OBg6wbRT5I2IVQybC2ey1IzZfmpi8Vr1Aw7dp+rzWp
+FNii9qNVaFBGpB9im3PAb6WVwFmR2aqMVNK23BLrhR3/+Y+oJwzbTw7s3l1Dxwyf
+Kk4v00KMkBCKYGLf0OxdOm0zci2mDx+Irb/CekK/WjSxZU+zMxiPDrCuhfowUipN
+k14m9e5yV3urfczGoS5eioa9ZcLERQTVIDs1UYs/6nYNpExwqQAh7ouoMBwwXIWG
+ML8n/zn2B9lf9918F6/0Ib4jXUp/06dmT+brelwkDAZJpPabs40vuls/ZlysRZhy
++O7h05mnjkoGZETbXTnQLHf6Vd5o6vZPPq4qzX2YiY02mgxY9rGzObkdbx6pbyzU
+GWSt4AyiR4tOlVp/eaHB1eUi9EEFSASzQ0nIc9+zq4uMtonysz8TR25Q0iqEQ4B0
+WHvhmQjiqMdaI3ADkeAedw1DEI51KxaE3kZIqVs1rOQOO/zMnq1MwXYKuKl37diH
+bJW0yFvfoSYB9J3GkedbNHB5AfuFnEv4xPlmqY53lq0fANv3LtI=
+=zEbv
 -----END PGP SIGNATURE-----

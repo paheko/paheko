@@ -689,7 +689,7 @@ class CommonFunctions
 			return '<i class="icon">' . $params['icon_html'] . '</i>';
 		}
 
-		return sprintf('<svg class="icon" aria-hidden="true"><use xlink:href="%s#img" href="%1$s#img"></use></svg> ',
+		return sprintf('<img src="%s" alt="" class="icon" />',
 			htmlspecialchars(Utils::getLocalURL($params['icon']))
 		);
 	}
