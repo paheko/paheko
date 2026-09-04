@@ -253,7 +253,7 @@ strong.ext-tag {
     z-index: 0;
 }
 
-svg path {
+.er-diagram svg path {
     stroke-width: 3px;
 }
 
