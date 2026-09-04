@@ -4,6 +4,8 @@ namespace Paheko;
 use Paheko\Files\WebDAV\Session as AppSession;
 use Paheko\Entities\Files\File;
 
+use KD2\Form;
+
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
@@ -12,7 +14,7 @@ $session = AppSession::getInstance();
 
 $session->requireAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ);
 
-$app_token = $_GET['app'] ?? null;
+$app_token = Form::getQueryString('app');
 
 if (!$app_token) {
 	die("No app token was supplied.");

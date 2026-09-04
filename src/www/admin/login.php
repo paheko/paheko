@@ -1,6 +1,7 @@
 <?php
 namespace Paheko;
 
+use KD2\Form;
 use KD2\HTTP;
 use KD2\Security;
 
@@ -14,7 +15,7 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$app_token = $_GET['app'] ?? null;
+$app_token = Form::getQueryString('app');
 
 if ($app_token) {
 	$session = AppSession::getInstance();
@@ -24,7 +25,7 @@ else {
 }
 
 // Relance session_start et renvoie une image de 1px transparente
-if (qg('keepSessionAlive') !== null)
+if (Form::getQueryString('keepSessionAlive') !== null)
 {
 	$session->keepAlive();
 
@@ -38,10 +39,10 @@ if (qg('keepSessionAlive') !== null)
 }
 
 $args = $app_token ? '?app=' . rawurlencode($app_token) : '';
-$layout = $app_token || qg('p') ? 'public' : null;
+$layout = $app_token || Form::getQueryString('p') ? 'public' : null;
 
-if (qg('r')) {
-	$args .= ($args ? '&' : '?') . 'r=' . rawurlencode(qg('r'));
+if (Form::getQueryString('r')) {
+	$args .= ($args ? '&' : '?') . 'r=' . rawurlencode(Form::getQueryString('r'));
 }
 
 // L'utilisateur est déjà connecté
@@ -64,27 +65,35 @@ $form->runIf(OIDC_CLIENT_URL && (isset($_GET['oidc']) || OIDC_CLIENT_BUTTON === 
 });
 
 $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $app_token) {
+	$captcha_hash = Form::getPostString('c_hash') ?? '';
+	$captcha_answer = Form::getPostString('c_answer', true) ?? '';
+
 	if ($lock === 1) {
 		throw new UserException(sprintf("Vous avez dépassé la limite de tentatives de connexion.\nMerci d'attendre %d minutes avant de ré-essayer de vous connecter.", Log::LOCKOUT_DELAY/60));
 	}
-	elseif ($lock === -1 && empty($_POST['c_answer'])) {
+	elseif ($lock === -1 && !$captcha_answer) {
 		throw new UserException('Merci d\'entrer un code de vérification pour confirmer la connexion.');
 	}
-	elseif ($lock === -1 && !Security::checkCaptcha(LOCAL_SECRET_KEY, $_POST['c_hash'] ?? '', $_POST['c_answer'] ?? '')) {
+	elseif ($lock === -1 && !Security::checkCaptcha(LOCAL_SECRET_KEY, $captcha_hash, $captcha_answer)) {
 		throw new UserException('Le code de vérification entré n\'est pas correct.');
 	}
 
+	// Make sure we don't pre-fill the answer form
 	$_POST['c_answer'] = null;
 
-	if (!trim((string) f('id'))) {
+	$id = Form::getPostString('id', true);
+	$password = Form::getPostString('password', true);
+	$permanent = (bool) Form::getPostBool('permanent');
+
+	if (!$id) {
 		throw new UserException(sprintf('L\'identifiant (%s) n\'a pas été renseigné.', $id_field_name));
 	}
 
-	if (!trim((string) f('password'))) {
+	if (!$password) {
 		throw new UserException('Le mot de passe n\'a pas été renseigné.');
 	}
 
-	$ok = $session->login(f('id'), f('password'), (bool) f('permanent'));
+	$ok = $session->login($id, $password, $permanent);
 
 	if (!$ok) {
 		throw new UserException(sprintf("Connexion impossible.\nVérifiez votre identifiant (%s) et votre mot de passe.", $id_field_name));
@@ -97,7 +106,7 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $
 		Utils::redirect('!login_app.php' . $args);
 	}
 
-	$url = Utils::getTrustedURL(qg('r'));
+	$url = Utils::getTrustedURL(Form::getQueryString('r'));
 	$url ??= ADMIN_URL;
 	Utils::redirect($url);
 }, 'login');
@@ -105,8 +114,8 @@ $form->runIf('login', function () use ($id_field_name, $session, $lock, $args, $
 $captcha = $lock == -1 ? Security::createCaptcha(LOCAL_SECRET_KEY, 'fr_FR') : null;
 
 $ssl_enabled = HTTP::getScheme() == 'https';
-$changed = qg('changed') !== null;
-$redirect = qg('r');
+$changed = Form::getQueryString('changed') !== null;
+$redirect = Form::getQueryString('r');
 $oidc_button = null;
 
 if (OIDC_CLIENT_BUTTON && OIDC_CLIENT_URL) {
