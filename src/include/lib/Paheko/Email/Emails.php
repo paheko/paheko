@@ -802,18 +802,14 @@ class Emails
 			static $smtp = null;
 			static $count = 0;
 
-			// Reset connection when we reach the max number of messages
-			if (null !== $smtp && $count >= SMTP_MAX_MESSAGES_PER_SESSION) {
-				$smtp->disconnect();
-				$smtp = null;
-			}
-
 			// Re-use SMTP connection in queues
 			if (null === $smtp) {
 				$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
 				$secure = constant($const);
 
 				$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure, SMTP_HELO_HOSTNAME);
+				$smtp->setMaxMessagesPerSession(SMTP_MAX_MESSAGES_PER_SESSION);
+				$smtp->setMaxSessionTime(60);
 			}
 
 			try {
