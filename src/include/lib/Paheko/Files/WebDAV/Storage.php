@@ -206,7 +206,7 @@ class Storage extends AbstractStorage
 				return $file->md5 ?? null;
 			// NextCloud stuff
 			case NextCloud::PROP_NC_HAS_PREVIEW:
-				return $file->image ? 'true' : 'false';
+				return $file->hasThumbnail() ? 'true' : 'false';
 			case NextCloud::PROP_NC_IS_ENCRYPTED:
 				return 'false';
 			case NextCloud::PROP_OC_SHARETYPES:
