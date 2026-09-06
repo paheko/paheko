@@ -975,9 +975,14 @@ class Emails
 			return null;
 		}
 
-		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
-
 		$url = 'https://' . $params[2];
+
+		// Legacy: redirect invalid URLs for a few months
+		if (date('Ymd') <= '20261031') {
+			return $url;
+		}
+
+		$hash = hash_hmac('sha1', $params[1] . $params[2], SECRET_KEY);
 
 		if ($hash !== $params[0]) {
 			return null;
