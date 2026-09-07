@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Freeze\sdependencies
-D 2026-09-07T11:47:51.774
+C Update\sdocs
+D 2026-09-07T11:58:37.654
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -706,9 +706,9 @@ F src/www/admin/share.php c40e68565761e9fa5faffbb640f1e6c51dcfe87405e436404d6e29
 F src/www/admin/static/admin.css f9f2e79abecd42af7ad2b43d92533a18a1436c7322427eff42af2c5e0ad2087f
 F src/www/admin/static/bg.png bb11a55a0d2630f7f225e01109c2fc8dddf1e9e6c989ef1d17d18852703f8438
 F src/www/admin/static/bg_dev.png 890be2cba33ae3a2e874ceb33167005cab3474a1e61810baad37ad2b46920dd1
-F src/www/admin/static/doc/api.html bb1debaadfaa1a64690f9e766e5d4176c31c38a685b358b4e97b40471af08f94
-F src/www/admin/static/doc/brindille.html 3ff67cb047789822bdb0234ebdb6d39aa6d5b5219178d5712908c77fba5b5ce5
-F src/www/admin/static/doc/brindille_functions.html 3145d8329eb94af9bceb06dbc91ce650dc888cafd7dfabf1b4e00ba2386e5bac
+F src/www/admin/static/doc/api.html 60220c3a3384b08d5046cbbd9d1eeb3ddd94bb60901c6e2d089c9a2471c8c99a
+F src/www/admin/static/doc/brindille.html e6746001b3aeaf3ee12cb689e8339816261f3957f42a71bb50b50d6e5c65e7d4
+F src/www/admin/static/doc/brindille_functions.html 82c67cea609176866b139a915c1359c4ad5e8fd158985d9da50e859e795a276c
 F src/www/admin/static/doc/brindille_modifiers.html 40f33dd0fafdedc63adf578a3b1fbca2f7b6d2c3823292166d06f67322f03f18
 F src/www/admin/static/doc/brindille_sections.html 3bbb74fca9d8584bbc7fa10c0a44b8938d1f87a98174ce18d5e94887483c8acc
 F src/www/admin/static/doc/keyboard.html 624d3453026251f6ff900bab725d7237124f6bc5bbafab03e39e7b269e7b1470
@@ -865,25 +865,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P ced5cc15c8072008186561d55df3eeec77dd7816dd1887b53fd3c2e209667f9b
-R 5ee9099f0379481246bfcfb042b5ef4b
-T +sym-1.3.23 *
+P b568ac9529fba5a6481bc6dc1a7e5f31e089b42d7feb190885eeb94c5a9126dc
+R 69941b51b5bcfea6bdf93232affd7c49
 U bohwaz
-Z 30e9aacebf07b363fb8743712229f3f8
+Z 42753818c9bafc283f660e042e4938c8
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqepGcACgkQksnacbiI
-6jQeLA//T5fPyQHGZDiltSJQzt2E56PBaWdMnbTF+ZE3kiZ7xhyMf9WlHtOVw7u0
-JBHAZhg6KXnR0G/DXaf8lVZ+4rPAqQSX+cPts/o36bBCqLE6ezA/QVvDxthvyRda
-eMQtKQTUrmHVMAOzAPA4+wWrnDVVTs4KFyffN836RBW4LdeesuR83ItS2jvY74Tr
-UYM7a4Mf++fyqi6t2dLZB9J0i6hujZwruJbNj72rNfBnK03aEgABoWvGOWFfuWmz
-qCWFWtJ6YoVk1g5mGeD7phtjczIUNBQvWPU5IwAjfNot9K6Y08C1y4I+0yxB//aB
-x4mKsyqttp6FrIOtuOrM10NYfvjSHi2Q+wJS4XYxxFTD5ehn8DdQlGMhigjm+Nmp
-5c5XL1ZSHeDv5jgddCT20gT0+ZD9pgffYGbCbOmkxd1cJPzEOKJaDlN4l9lfL9xk
-QS85xW8YXPO6celPc8QqFJuurPf7cF1K/TFI7q15S9jfI/jSkA0wp6ofTdoX/eCF
-WEgcD8kkdAhUkSCvUvHDX40FONJUrE8YKGH78/+RfFMba/wGy2SK8s2FguVxKURc
-tovQPEji2waO8JHdxOB0XabLsLdiZ23bQKnVLQmA/ROVIrMC4xJH1jT03BDzECmv
-6F0Jv4QeS9imFh9pN6tgmDQ/sVJyZRbkG5cUYY+wXQDC9saqujY=
-=v08p
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqepu0ACgkQksnacbiI
+6jShrQ//Y1lwS35vAX1fLVBNVgc5XjFlsuBqVbYf37/ZjT8c3aCcAkqKbhgb1kfy
+AylzLUzNBbbn/uFMz9UBN9x3fRixjN5nSmUqL8jcNSq6tPNxrNZjPj9+pvIraCKB
+1iaVtzC6YBW6Nie5GL1EjxJpY4dyme1HtFjPZq+J7114zTsrptQ2XhYAUJFzIPca
+A9DIKUAV4dirq83U9w2xXqfRnt3YbVQJZGlzJKLnRdAqbArFiBmhNBqBI58EU00m
+LOw4PNBLHvvtZyWmRq7kR7elp00n9TBX+paBCl0eC6K1RBQwNBUSsAS/N8eluNue
+vLPshoByqTR7Xp+DXaecFwNzvbrTL5Ftqz2vr8C5FAvxpO8DEG1arRaEAw1eLHat
+XfznzszRCYUaRS/y48ZzyjOdUsvqZpSKOlxvu2lSZyykNYhvelCvT/zFdRYeNCXb
+rzAUTPYCLkCjjmo9+miMfpLqu235ZBgCKBLVpMuHa0eddvwI3FNnk4iZdQ6rm3z3
+3QEVVfOltZFTob3jPaFCDUon7tbxaNnCKGYHVmMnDcuV/zgG/ELEA8O3vA4aUjRw
+zZfkhnXErUU/FUeK6ERYqnETAkzKIfupkYMHPnR2buzFYQaRhZLEo0wEK02XVdZx
+Cx8ZLpSt8GrlVgEoMjkPRsuws/8cTANJbYNv1Qog1uMVYS+09x0=
+=dU16
 -----END PGP SIGNATURE-----
