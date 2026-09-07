@@ -373,7 +373,13 @@ class Functions
 		}
 
 		$where = implode(' AND ', $where);
-		$db->delete($table, $where, $args);
+
+		try {
+			$db->delete($table, $where, $args);
+		}
+		catch (DB_Exception $e) {
+			throw new TemplateException('SQL error: ' . $e->getMessage(), 0, $e);
+		}
 	}
 
 	static public function captcha(array $params, UserTemplate $tpl, int $line): string
