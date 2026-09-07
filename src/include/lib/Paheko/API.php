@@ -441,6 +441,12 @@ class API
 
 		switch ($fn) {
 			case 'list':
+				$param = is_numeric($param) ? (int) $param : null;
+
+				if (!$param) {
+					throw new APIException('Invalid category ID', 400);
+				}
+
 				return [
 					'categories' => array_map(fn($p) => $p->asArray(true), Web::listCategories($param)),
 					'pages' => array_map(fn($p) => $p->asArray(true), Web::listPages($param)),
