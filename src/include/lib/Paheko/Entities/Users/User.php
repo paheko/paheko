@@ -631,10 +631,10 @@ class User extends Entity
 		$source ??= $_POST;
 
 		if ($require_password_confirmation) {
-			$this->verifyPassword($source['password_check']);
+			$this->verifyPassword($source['password_check'] ?? '');
 		}
 
-		$source['password'] = trim($source['password']);
+		$source['password'] = trim($source['password'] ?? '');
 		$session = Session::getInstance();
 
 		// Maximum bcrypt password length
