@@ -500,6 +500,18 @@ class CSV_Custom
 		$this->setTranslationTable($sel);
 	}
 
+	/**
+	 * Set translation table from form values
+	 */
+	public function setTranslationTableFrom(?array $source): void
+	{
+		$source ??= $_POST;
+		$this->skip((int)($source['skip_first_line'] ?? 0));
+
+		$sel = $this->getSelectedTable($source['translation_table'] ?? []);
+		$this->setTranslationTable($sel);
+	}
+
 	public function resetTranslationTable(): void
 	{
 		$this->translation = null;
@@ -566,6 +578,7 @@ class CSV_Custom
 						break;
 					}
 
+					$c = array_map(fn($n) => $this->columns[$n], $c);
 					$names[] = implode(' et ', $c);
 				}
 
