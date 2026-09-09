@@ -1,4 +1,6 @@
-# Utilisation d'IA générative
+# Charte de contribution à Paheko
+
+## Utilisation d'IA générative
 
 * Le développement de Paheko est entièrement effectué par des humain⋅e⋅s. Aucun code généré par IA ne se trouve dans Paheko.
 * Nous n’acceptons pas de code généré par IA dans Paheko : aucun module, aucun plugin, aucune contribution générée par IA ne sera intégré.
