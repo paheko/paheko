@@ -262,6 +262,7 @@ class AdvancedSearch extends A_S
 			'user_files',
 			'users_view',
 			'users_files',
+			'files',
 		]);
 	}
 
