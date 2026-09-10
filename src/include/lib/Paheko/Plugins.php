@@ -62,6 +62,11 @@ class Plugins
 		return File::CONTEXT_EXTENSIONS . '/p/' . $id;
 	}
 
+	static public function getStorageURL(string $id, string $path = ''): string
+	{
+		return WWW_URL . File::CONTEXT_EXTENSIONS . '/p/' . $id . '/' . $path;
+	}
+
 	static public function toggleSignals(bool $enabled)
 	{
 		self::$signals = $enabled;
