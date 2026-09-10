@@ -1,5 +1,49 @@
 # Charte de contribution à Paheko
 
+**[Plus d'infos dans la documentation développeur⋅se.](https://fossil.kd2.org/paheko/wiki?name=Documentation%20d%C3%A9veloppeur)**
+
+Paheko est un logiciel libre sous licence AGPLv3.
+
+L'intégralité du code de Paheko est originale, nous n'utilisons pas de bibliothèques externes.
+
+## Informations techniques
+
+* Langage utilisé : PHP
+* Versions supportées : 7.4 et supérieur
+* Base de donnée utilisée : SQLite 3 (3.25 et supérieur)
+* Contact développeureuses : voir la page [Entraide](https://fossil.kd2.org/paheko/wiki?name=Entraide) pour les listes de discussion et le chat IRC
+* On utilise SQLite3 comme base de données qui stocke tout : compta, membres, configuration, fichiers, wiki... Ainsi un seul fichier à sauvegarder et à gérer.
+* On suit PSR-4 pour le nommage des classes et namespaces etc.
+* Convention de code : principalement PSR-1 et PSR-2, enfin pas à la lettre mais globalement. Voir la [Convention de code complète pour plus d'infos](https://fossil.kd2.org/paheko/wiki?name=Guide+de+style+du+code).
+
+## Logiciel libre, mais pas ouvert à toutes les contributions
+
+Contrairement à de nombreux logiciels, nous n'acceptons pas n'importe quelle contribution de n'importe qui.
+
+Il y a un processus à suivre pour qu'un patch soit accepté.
+
+* Petit correctif de bug ou de faille : envoyez un patch en décrivant bien le problème. 
+* Ajout de tests unitaires / fonctionnels : idem
+* Autre contribution : **seulement après discussion sur la liste [dev@](https://fossil.kd2.org/paheko/wiki?name=Entraide)**
+
+Les contributions importantes ou de nouvelles fonctionnalités demande une discussion en amont sur la liste dev@. Si vous ne suivez pas ce conseil, nous ne pouvons pas garantir que nous aurons le temps ou l'énergie pour lire votre contribution.
+
+Ne soyez pas vexés si le code exact n'est pas utilisé car nous ré-écrivons intégralement la plupart des patchs.
+
+## Comment proposer du code ?
+
+On utilise Fossil qui sert de gestionnaire de versions, wiki, gestionnaire de tickets, distribution de package, etc. Nous avons aussi un miroir Git si vous préférez Git.
+
+Vous pouvez :
+
+* envoyer un fichier .patch par e-mail (de préférence) sur la liste de développement
+* envoyer un bundle Fossil par e-mail
+* envoyer une PR/MR sur un des miroirs Git officiel de Paheko
+
+Nous n'utilisons pas Git, donc les PR/MR n'apparaissent jamais comme fusionnées, mais cela ne veut pas dire que le patch n'a pas été accepté.
+
+Rappel : si c'est autre chose qu'un correctif de bug de quelques lignes, merci de discuter votre projet sur la liste de discussion en amont.
+
 ## Utilisation d'IA générative
 
 * Le développement de Paheko est entièrement effectué par des humain⋅e⋅s. Aucun code généré par IA ne se trouve dans Paheko.
