@@ -17,10 +17,10 @@
 	<dt>Double authentification (2FA)</dt>
 	<dd>
 		{if $user.otp_secret}
-			{tag color="darkgreen" label="Activée"}
+			{tag status="green" label="Activée"}
 			{linkbutton href="security_otp.php" label="Désactiver" shape="delete"}
 		{else}
-			{tag color="darkred" label="Désactivée"}
+			{tag status="orange" label="Désactivée"}
 			{linkbutton href="security_otp.php" label="Activer" shape="check"}
 		{/if}
 	</dd>
@@ -29,10 +29,10 @@
 		<dt>Codes de secours</dt>
 		<dd>
 			{if $user.otp_recovery_codes}
-				{tag color="darkgreen" label="Oui"}
+				{tag status="green" label="Oui"}
 				{linkbutton href="security_otp_recovery.php" label="Voir les codes" shape="eye"}
 			{else}
-				{tag color="darkred" label="Désactivé"}
+				{tag status="orange" label="Désactivé"}
 				{linkbutton href="security_otp_recovery.php?generate" label="Générer les codes" shape="reload"}
 			{/if}
 		</dd>
@@ -42,10 +42,10 @@
 		<dt>Chiffrer les e-mails qui me sont envoyés avec PGP</dt>
 		<dd>
 			{if $user.pgp_key}
-				{tag color="darkgreen" label="Activé"}
+				{tag status="green" label="Activé"}
 				{linkbutton href="security_pgp.php" label="Désactiver" shape="edit"}
 			{else}
-				{tag color="darkred" label="Désactivé"}
+				{tag status="orange" label="Désactivé"}
 				{linkbutton href="security_pgp.php" label="Configurer" shape="edit"}
 			{/if}
 		</dd>
@@ -57,9 +57,9 @@
 	<dt>Déconnecter toutes mes sessions</dt>
 	<dd>
 		{if $sessions_count === 1}
-			{tag color="darkgreen" label="Une session en cours"}
+			{tag status="green" label="Une session en cours"}
 		{else}
-			{tag color="darkorange" label="%d sessions en cours"|args:$sessions_count}
+			{tag status="orange" label="%d sessions en cours"|args:$sessions_count}
 		{/if}
 	<dd>{linkbutton href="!logout.php?all" label="Me déconnecter de toutes les sessions" shape="logout"}</dd>
 	<dt>Journal de connexion</dt>
