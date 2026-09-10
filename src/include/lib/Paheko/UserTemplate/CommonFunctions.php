@@ -114,9 +114,14 @@ class CommonFunctions
 					$attributes['accept'] .= ',.xls,.XLS,application/vnd.ms-excel';
 				}
 			}
-			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
+			elseif ($accept === 'image' || $accept === 'image+svg') {
 				$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
 				$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
+
+				if ($accept === 'image+svg') {
+					$attributes['accept'] .= ',.svg,.SVG,image/svg+xml';
+					$help .= ' et SVG';
+				}
 			}
 		}
 
