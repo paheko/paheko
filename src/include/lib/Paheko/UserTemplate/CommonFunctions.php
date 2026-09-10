@@ -1067,10 +1067,24 @@ class CommonFunctions
 			throw new TemplateException('Missing parameter for "dropdown"');
 		}
 
+		if (isset($params['default_empty'])) {
+			$params['options'] = array_merge(['' => $params['default_empty']], $params['options']);
+		}
+
+		$params['value'] ??= '';
+
 		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
 			htmlspecialchars($params['title']));
 
-		foreach ($params['options'] as $option) {
+		foreach ($params['options'] as $key => $option) {
+			if (is_string($option) && is_string($key)) {
+				$option = [
+					'label' => $option,
+					'href'  => isset($params['href']) ? sprintf($params['href'], $key) : $key,
+					'value' => $key,
+				];
+			}
+
 			$selected = '';
 			$link = '';
 			$aside = '';
