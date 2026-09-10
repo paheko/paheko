@@ -960,6 +960,7 @@ span.tag.small {
 span.tag.has-status {
     text-shadow: none;
     color: unset;
+    color: #000;
 }
 
 span.tag.status-green { background-color: hsl(120deg 22.63% 71.39%); }
@@ -970,3 +971,4 @@ span.tag.status-tan { background-color: hsl(34.29deg 43.75% 78.63%); }
 span.tag.status-greyblue { background-color: lightsteelblue; }
 span.tag.status-purple { background-color: #d4badb; }
 span.tag.status-salmon { background-color: #ffa07a; }
+span.tag.status-yellow { background-color: #fffde7; }

@@ -1153,6 +1153,7 @@ class CommonFunctions
 		'tan',
 		'purple',
 		'salmon',
+		'yellow',
 	];
 
 	static public function tag(array $params): string

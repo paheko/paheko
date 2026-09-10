@@ -19,7 +19,7 @@
 				<td>{$row.user_name}</td>
 				<td>{$sharing_options[$row.option]}</td>
 				<td>{if !$row.expiry}jamais{else}{$row.expiry|relative_date:true}{/if}</td>
-				<td>{if $row.password}{tag label="Oui" color="indianred"}{/if}</td>
+				<td>{if $row.password}{tag label="Oui" status="orange"}{/if}</td>
 				<td>{$row.created|relative_date:true}</td>
 				<td class="actions">
 					{button shape="delete" name="delete" type="submit" value=$row.hash_id label="Supprimer"}

@@ -57,9 +57,9 @@
 				{if property_exists($line, 'status_label')}
 				<td>
 					{if $line.status & Entities\Accounting\Transaction::STATUS_WAITING && $line.status_label}
-						{tag color="darkred" label=$line.status_label}
+						{tag status="red" label=$line.status_label}
 					{elseif $line.status_label}
-						{tag color="DarkSeaGreen" label=$line.status_label}
+						{tag status="green" label=$line.status_label}
 					{/if}
 				</td>
 				{/if}

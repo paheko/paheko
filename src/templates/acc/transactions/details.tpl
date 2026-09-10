@@ -187,7 +187,7 @@
 						<td>{$line.letter}</td>
 						<td>
 							{if $line.is_deposited}
-								{tag label="Déposé" color="lightseagreen"}
+								{tag label="Déposé" status="green"}
 							{/if}
 						</td>
 					</tr>
