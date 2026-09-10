@@ -1133,15 +1133,26 @@ class CommonFunctions
 	}
 
 	const TAG_PRESETS = [
-		'debt' => ['Dette', 'DarkSalmon'],
-		'credit' => ['Créance', 'DarkKhaki'],
-		'overdraft' => ['Découvert', 'darkred'],
-		'anomaly' => ['Anomalie', 'darkred'],
-		'reconciliation_required' => ['À rapprocher', 'indianred'],
-		'reconciled' => ['Rapproché', '#999'],
-		'closed' => ['Clôturé', '#999'],
-		'locked' => ['Verrouillé', 'indianred'],
-		'open' => ['En cours', 'darkgreen'],
+		'debt' => ['Dette', 'salmon'],
+		'credit' => ['Créance', 'tan'],
+		'overdraft' => ['Découvert', 'red'],
+		'anomaly' => ['Anomalie', 'red'],
+		'reconciliation_required' => ['À rapprocher', 'red'],
+		'reconciled' => ['Rapproché', 'grey'],
+		'closed' => ['Clôturé', 'grey'],
+		'locked' => ['Verrouillé', 'red'],
+		'open' => ['En cours', 'green'],
+	];
+
+	const TAG_STATUSES = [
+		'green',
+		'orange',
+		'red',
+		'grey',
+		'greyblue',
+		'tan',
+		'purple',
+		'salmon',
 	];
 
 	static public function tag(array $params): string
@@ -1149,14 +1160,36 @@ class CommonFunctions
 		if (!empty($params['preset'])) {
 			$p = $params['preset'];
 			$params['label'] = self::TAG_PRESETS[$p][0];
-			$params['color'] = self::TAG_PRESETS[$p][1];
+			$params['status'] = self::TAG_PRESETS[$p][1];
 		}
 
 		$label = htmlspecialchars($params['label'] ?? '');
+		$class = 'tag';
+		$attributes = '';
 
-		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
-			!empty($params['small']) ? ' small' : '',
-			htmlspecialchars($params['color'] ?? '#999'),
+		if (!empty($params['small'])) {
+			$class .= ' small';
+		}
+
+		if (!isset($params['status']) && !isset($params['color'])) {
+			$params['status'] = 'grey';
+		}
+
+		if (isset($params['status'])) {
+			if (!in_array($params['status'], self::TAG_STATUSES, true)) {
+				throw new TemplateException('Unknown tag status: ' . $params['status']);
+			}
+
+			$class .= ' has-status status-' . $params['status'];
+		}
+		else {
+			$color = strtolower($params['color'] ?? 'grey');
+			$attributes = sprintf(' style="--tag-color: %s;"', htmlspecialchars($color));
+		}
+
+		return sprintf('<span class="%s"%s>%s</span>',
+			$class,
+			$attributes,
 			$label
 		);
 	}
