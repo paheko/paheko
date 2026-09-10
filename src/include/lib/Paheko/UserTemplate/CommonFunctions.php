@@ -360,13 +360,13 @@ class CommonFunctions
 			}
 
 			foreach ($options as $_key => $_value) {
-				if (!is_scalar($_value)) {
-					throw new TemplateException(sprintf('Item "%s" in "options" parameter is not a scalar value', $_key));
-				}
-
 				$selected = null !== $current_value && ($current_value == $_key);
 				if (is_array($_value) && array_key_exists('label', $_value)) {
 					$_value = $_value['label'];
+				}
+
+				if (!is_scalar($_value)) {
+					throw new TemplateException(sprintf('Item "%s" in "options" parameter is not a scalar value', $_key));
 				}
 
 				$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
