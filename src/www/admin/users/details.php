@@ -60,7 +60,7 @@ $form->runIf('login_as', function () use ($user, $session, $can_login) {
 		throw new UserException('Accès interdit');
 	}
 
-	Log::add(Log::LOGIN_AS, ['admin' => $session->user()->name()]);
+	Log::add(Log::LOGIN_AS, ['admin' => $session->user()->name()], $user->id());
 	$session->logout();
 	$session->forceLogin($user->id);
 }, $csrf_key, '!?login_as=1');
