@@ -400,7 +400,7 @@ class CommonFunctions
 					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$suboptions['label']));
 
 					foreach ($suboptions['options'] as $_key => $_value) {
-						$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+						$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 					}
 
 					$input .= '</optgroup>';
@@ -410,14 +410,14 @@ class CommonFunctions
 					$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$optgroup));
 
 					foreach ($suboptions as $_key => $_value) {
-						$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
+						$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 					}
 
 					$input .= '</optgroup>';
 				}
 				// Accept ['key1' => 'option 1']
 				else {
-					$input .= sprintf('<option value="%s"%s>%s</option>', $optgroup, $current_value == $optgroup ? ' selected="selected"' : '', htmlspecialchars((string)$suboptions));
+					$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($optgroup), $current_value == $optgroup ? ' selected="selected"' : '', htmlspecialchars((string)$suboptions));
 				}
 			}
 
