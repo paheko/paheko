@@ -3,6 +3,8 @@
 {include file="config/_menu.tpl" current="ext"}
 {include file="./_nav.tpl" current="details" ext=$ext}
 
+{form_errors}
+
 {if !$ext.enabled}
 	<p class="block alert">Cette extension est désactivée.</p>
 {/if}
