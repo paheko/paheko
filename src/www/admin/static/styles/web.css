@@ -268,24 +268,37 @@ form#f_upload fieldset {
 
 .web.preview .describe {
     margin: 1em 0;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
 }
 
-.web.preview .describe > * {
+.web.preview .describe li {
     padding: .2em .4em;
-    display: inline-block;
     background: var(--gLightBackgroundColor);
     border-radius: .3em;
     margin: .2em .5em;
 }
 
-.web.preview .describe > * > span {
+.web.preview .describe li.status, .web.preview .describe li.url {
+    background: unset;
+}
+
+.web.preview .describe > li > span[data-icon] {
     color: rgba(var(--gMainColor), 0.9);
     margin-right: .3em;
 }
 
-.web.preview .describe > tt a span {
+.web.preview .describe li tt a {
     font-size: .9em;
+    padding: .2em .4em;
+    background: var(--gLightBackgroundColor);
+    border-radius: .3em;
+}
+
+.web.preview .describe li.url {
+    flex-basis: 100%;
 }
 
 .web.preview > article {

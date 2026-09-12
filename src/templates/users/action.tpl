@@ -1,7 +1,5 @@
 {include file="_head.tpl" title="Action collective sur les membres" current="membres"}
 
-{form_errors}
-
 {if $action == 'delete'}
 	{include file="common/delete_form.tpl"
 		legend="Supprimer %d membres ?"|args:$count
@@ -16,6 +14,8 @@
 		alert="Cette action est irréversible."
 		extra=$extra}
 {else}
+	{form_errors}
+
 	<form method="post" action="{$self_url}">
 		{foreach from=$list item="id"}
 			<input type="hidden" name="selected[]" value="{$id}" />

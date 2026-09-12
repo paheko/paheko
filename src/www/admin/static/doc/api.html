@@ -308,6 +308,7 @@
 <pre><code>echo 'numero,nom' &gt; membres.csv
 echo '42,"Nouveau nom"' &gt;&gt; membres.csv
 curl https://test:abcd@monpaheko.tld/api/user/import -T membres.csv</code></pre>
+<p><strong>Attention :</strong> pour des raisons de sécurité, les membres faisant partie d'une catégorie ayant accès à la gestion des membres en administration ou à la configuration ne peuvent être modifiés par l'import depuis l'API.</p>
 <h4 id="parametres">Paramètres</h4>
 <p>Les paramètres sont à spécifier dans l'URL, dans la query string.</p>
 <p>Depuis la version 1.2.8 il est possible d'utiliser un paramètre supplémentaire <code>mode</code> contenant une de ces options pour spécifier le mode d'import :</p>

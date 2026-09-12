@@ -334,6 +334,12 @@ trait FileThumbnailTrait
 			$type = 'image/webp';
 		}
 
+		// Make sure any SVG thumbnail is safe
+		header('Content-Security-Policy: default-src \'none\' ; frame-ancestors \'self\'; base-uri \'none\'; sandbox');
+		header('X-Content-Type-Options: nosniff');
+		header('Referrer-Policy: no-referrer');
+		header('X-Frame-Options: SAMEORIGIN');
+
 		header('Content-Type: ' . $type, true);
 		$this->_serve($destination, false);
 

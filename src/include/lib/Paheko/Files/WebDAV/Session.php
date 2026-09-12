@@ -4,6 +4,7 @@ namespace Paheko\Files\WebDAV;
 
 use Paheko\API_Credentials;
 use Paheko\DB;
+use Paheko\Log;
 use Paheko\Users\DynamicFields;
 use Paheko\Users\Users;
 use Paheko\Entities\Users\Category;

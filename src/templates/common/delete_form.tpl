@@ -1,3 +1,4 @@
+<?php $button_label ??= 'Supprimer'; ?>
 {form_errors}
 
 <form method="post" action="{$self_url}" data-focus="1">
@@ -39,7 +40,7 @@
 		{if !isset($shape)}
 			{assign var="shape" value="delete"}
 		{/if}
-		{button type="submit" name="delete" label="Supprimer" shape=$shape class="main"}
+		{button type="submit" name="delete" label=$button_label shape=$shape class="main"}
 		{if isset($extra)}
 			{foreach from=$extra key="key" item="value"}
 				{if is_array($value)}

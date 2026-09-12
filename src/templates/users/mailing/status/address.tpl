@@ -6,13 +6,13 @@
 	<dt>Statut</dt>
 	<dd>
 		{if $email.invalid}
-			{tag label="Adresse invalide" color="darkred"}<br />
+			{tag label="Adresse invalide" status="red"}<br />
 			<span class="help">L'adresse n'existe pas ou plus. Il n'est pas possible de lui envoyer des messages.</span>
 		{elseif $email->hasReachedFailLimit()}
-			{tag label="Adresse bloquée" color="darkorange"}<br />
+			{tag label="Adresse bloquée" status="orange"}<br />
 			<span class="help">Le fournisseur du destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois. Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</span>
 		{elseif $email.verified}
-			{tag label="Adressee vérifiée" color="darkgreen"}<br />
+			{tag label="Adressee vérifiée" status="green"}<br />
 			<span class="help">Cette adresse a été vérifiée par l'envoi d'un message au destinataire contenant un lien à cliquer.</span>
 		{else}
 			{*tag label="Adresse non vérifiée"*}

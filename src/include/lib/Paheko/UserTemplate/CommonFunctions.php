@@ -114,9 +114,14 @@ class CommonFunctions
 					$attributes['accept'] .= ',.xls,.XLS,application/vnd.ms-excel';
 				}
 			}
-			elseif (isset($attributes['accept']) && $attributes['accept'] === 'image') {
+			elseif ($accept === 'image' || $accept === 'image+svg') {
 				$attributes['accept'] = '.jpg,.JPG,.JPEG,.jpeg,.webp,.WEBP,.gif,.GIF,.png,.PNG,.svg,image/svg+xml,image/png,image/gif,image/jpeg,image/webp';
 				$help = ($help ?? '') . PHP_EOL . 'Format accepté : images';
+
+				if ($accept === 'image+svg') {
+					$attributes['accept'] .= ',.svg,.SVG,image/svg+xml';
+					$help .= ' et SVG';
+				}
 			}
 		}
 
@@ -363,6 +368,10 @@ class CommonFunctions
 				$selected = null !== $current_value && ($current_value == $_key);
 				if (is_array($_value) && array_key_exists('label', $_value)) {
 					$_value = $_value['label'];
+				}
+
+				if (!is_scalar($_value)) {
+					throw new TemplateException(sprintf('Item "%s" in "options" parameter is not a scalar value', $_key));
 				}
 
 				$input .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars($_key), $selected ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
@@ -689,7 +698,7 @@ class CommonFunctions
 			return '<i class="icon">' . $params['icon_html'] . '</i>';
 		}
 
-		return sprintf('<svg class="icon" aria-hidden="true"><use xlink:href="%s#img" href="%1$s#img"></use></svg> ',
+		return sprintf('<img src="%s" alt="" class="icon" />',
 			htmlspecialchars(Utils::getLocalURL($params['icon']))
 		);
 	}
@@ -1063,10 +1072,24 @@ class CommonFunctions
 			throw new TemplateException('Missing parameter for "dropdown"');
 		}
 
+		if (isset($params['default_empty'])) {
+			$params['options'] = array_merge(['' => $params['default_empty']], $params['options']);
+		}
+
+		$params['value'] ??= '';
+
 		$out = sprintf('<nav class="dropdown" aria-role="listbox" aria-expanded="false" tabindex="0" title="%s"><ul>',
 			htmlspecialchars($params['title']));
 
-		foreach ($params['options'] as $option) {
+		foreach ($params['options'] as $key => $option) {
+			if (is_string($option) && is_string($key)) {
+				$option = [
+					'label' => $option,
+					'href'  => isset($params['href']) ? sprintf($params['href'], $key) : $key,
+					'value' => $key,
+				];
+			}
+
 			$selected = '';
 			$link = '';
 			$aside = '';
@@ -1115,15 +1138,28 @@ class CommonFunctions
 	}
 
 	const TAG_PRESETS = [
-		'debt' => ['Dette', 'DarkSalmon'],
-		'credit' => ['Créance', 'DarkKhaki'],
-		'overdraft' => ['Découvert', 'darkred'],
-		'anomaly' => ['Anomalie', 'darkred'],
-		'reconciliation_required' => ['À rapprocher', 'indianred'],
-		'reconciled' => ['Rapproché', '#999'],
-		'closed' => ['Clôturé', '#999'],
-		'locked' => ['Verrouillé', 'indianred'],
-		'open' => ['En cours', 'darkgreen'],
+		'debt' => ['Dette', 'salmon'],
+		'credit' => ['Créance', 'tan'],
+		'overdraft' => ['Découvert', 'red'],
+		'anomaly' => ['Anomalie', 'red'],
+		'reconciliation_required' => ['À rapprocher', 'red'],
+		'reconciled' => ['Rapproché', 'grey'],
+		'closed' => ['Clôturé', 'grey'],
+		'locked' => ['Verrouillé', 'red'],
+		'open' => ['En cours', 'green'],
+	];
+
+	const TAG_STATUSES = [
+		'green',
+		'orange',
+		'red',
+		'grey',
+		'greyblue',
+		'tan',
+		'purple',
+		'salmon',
+		'yellow',
+		'white',
 	];
 
 	static public function tag(array $params): string
@@ -1131,14 +1167,36 @@ class CommonFunctions
 		if (!empty($params['preset'])) {
 			$p = $params['preset'];
 			$params['label'] = self::TAG_PRESETS[$p][0];
-			$params['color'] = self::TAG_PRESETS[$p][1];
+			$params['status'] = self::TAG_PRESETS[$p][1];
 		}
 
 		$label = htmlspecialchars($params['label'] ?? '');
+		$class = 'tag';
+		$attributes = '';
 
-		return sprintf('<span class="tag%s" style="--tag-color: %s;">%s</span>',
-			!empty($params['small']) ? ' small' : '',
-			htmlspecialchars($params['color'] ?? '#999'),
+		if (!empty($params['small'])) {
+			$class .= ' small';
+		}
+
+		if (!isset($params['status']) && !isset($params['color'])) {
+			$params['status'] = 'grey';
+		}
+
+		if (isset($params['status'])) {
+			if (!in_array($params['status'], self::TAG_STATUSES, true)) {
+				throw new TemplateException('Unknown tag status: ' . $params['status']);
+			}
+
+			$class .= ' has-status status-' . $params['status'];
+		}
+		else {
+			$color = strtolower($params['color'] ?? 'grey');
+			$attributes = sprintf(' style="--tag-color: %s;"', htmlspecialchars($color));
+		}
+
+		return sprintf('<span class="%s"%s>%s</span>',
+			$class,
+			$attributes,
 			$label
 		);
 	}

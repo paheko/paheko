@@ -438,6 +438,7 @@ Par défaut, les requêtes sont réalisées sur la base de données locale, dans
 | :- | :- | :- |
 | `access` | optionnel | Niveau d'autorisation de l'API (défaut : `admin`). |
 
+Attention à bien vérifier les données passées à cette fonction, notamment les variables `$_GET` et `$_POST` doivent être vérifiées et filtrées, au risque de permettre à un attaquant de modifier votre base de données de manière non prévue.
 
 ```
 {{:assign var="users." value=42}}

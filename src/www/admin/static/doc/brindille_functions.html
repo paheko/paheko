@@ -628,6 +628,7 @@
 </tr>
 </tbody>
 </table>
+<p>Attention à bien vérifier les données passées à cette fonction, notamment les variables <code>$_GET</code> et <code>$_POST</code> doivent être vérifiées et filtrées, au risque de permettre à un attaquant de modifier votre base de données de manière non prévue.</p>
 <pre><code>{{:assign var="users." value=42}}
 {{:api
   method="POST"

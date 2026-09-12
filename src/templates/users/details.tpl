@@ -72,7 +72,7 @@
 		<dt>Catégorie</dt>
 		<dd>{$category.name}</dd>
 		{if $user->isHidden()}
-			<dd>{tag color="darkred" label="Catégorie cachée"}</dd>
+			<dd>{tag status="red" label="Catégorie cachée"}</dd>
 		{/if}
 		{if ENABLE_PERMISSIONS}
 			<dt>Droits</dt>
@@ -88,14 +88,14 @@
 		<dt>Connexion</dt>
 		<dd>
 			{if empty($user.password)}
-				{tag color="darkgrey" label="Pas de mot de passe"}
+				{tag status="grey" label="Pas de mot de passe"}
 			{else}
-				{tag color="darksalmon" label="Mot de passe configuré"}
+				{tag status="orange" label="Mot de passe configuré"}
 				{if $user.otp_secret}
-					{tag color="darkgreen" label="2FA"}
+					{tag status="green" label="2FA"}
 				{/if}
 				{if $user.pgp_key}
-					{tag color="olive" label="PGP"}
+					{tag status="greyblue" label="PGP"}
 				{/if}
 			{/if}
 		</dd>

@@ -55,6 +55,7 @@ class CommonModifiers
 		'money_currency_html' => ['?numeric', 'bool', 'bool'],
 		'relative_date' => ['?DateTimeInterface|string|int', 'bool'],
 		'relative_date_short' => ['?DateTimeInterface|string|int', 'bool'],
+		'relative_date_count' => ['?DateTimeInterface|string|int'],
 		'date_short' => ['?DateTimeInterface|string|int', 'bool'],
 		'date_long' => ['?DateTimeInterface|string|int', 'bool'],
 		'date_hour' => ['?DateTimeInterface|string|int', 'bool'],
@@ -317,6 +318,33 @@ class CommonModifiers
 		}
 
 		return $day;
+	}
+
+	static public function relative_date_count($ts): string
+	{
+		if (null === $ts) {
+			return '';
+		}
+
+		$date = Utils::parseDateTime($ts);
+
+		$diff = (new \DateTime)->diff($date);
+
+		if ($diff->y) {
+			return $diff->y === 1 ? 'une année' : sprintf('%d années', $diff->y);
+		}
+		elseif ($diff->m) {
+			return $diff->m === 1 ? 'un mois' : sprintf('%d mois', $diff->m);
+		}
+		elseif ($diff->d) {
+			return $diff->d === 1 ? 'un jour' : sprintf('%d jours', $diff->d);
+		}
+		elseif ($diff->h) {
+			return $diff->h === 1 ? 'une heure' : sprintf('%d heures', $diff->h);
+		}
+		else {
+			return '< 1 heure';
+		}
 	}
 
 	static public function typo($str, $locale = 'fr')

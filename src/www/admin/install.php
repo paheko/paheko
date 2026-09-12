@@ -27,11 +27,6 @@ if (DISABLE_INSTALL_FORM) {
 	throw new \RuntimeException('Install form has been disabled');
 }
 
-function f($key)
-{
-	return \KD2\Form::get($key);
-}
-
 $tpl = Template::getInstance();
 $tpl->assign('admin_url', ADMIN_URL);
 

@@ -946,12 +946,30 @@ span.tag {
     display: inline-block;
     color: #fff;
     text-shadow: 0px 0px 5px #000;
-    padding: .2rem .4rem;
+    padding: .3rem .8rem;
+    border-radius: 1rem;
+    font-size: .95em;
     background: #666;
     background: var(--tag-color);
-    border-radius: .3rem;
 }
 
 span.tag.small {
     font-size: .85em;
 }
+
+span.tag.has-status {
+    text-shadow: none;
+    color: unset;
+    color: #000;
+}
+
+span.tag.status-green { background-color: hsl(120deg 22.63% 71.39%); }
+span.tag.status-orange { background-color: hsl(38.82deg 90% 55%); }
+span.tag.status-red { background-color: hsl(0deg 70.99% 79.37%); }
+span.tag.status-grey { background-color: #ccc; }
+span.tag.status-tan { background-color: hsl(34.29deg 43.75% 78.63%); }
+span.tag.status-greyblue { background-color: lightsteelblue; }
+span.tag.status-purple { background-color: #d4badb; }
+span.tag.status-salmon { background-color: #ffa07a; }
+span.tag.status-yellow { background-color: #fffde7; }
+span.tag.status-white { background-color: #fff; outline: 1px solid #999; }

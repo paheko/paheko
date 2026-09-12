@@ -48,7 +48,7 @@ if ($action == 'move') {
 }
 elseif ($action == 'delete') {
 	$form->runIf('delete', function () use ($list) {
-		Users::deleteSelected($list);
+		Users::deleteSelected($list, Session::getInstance());
 	}, $csrf_key, '!users/?msg=DELETE_MULTI');
 
 	$tpl->assign('extra', ['selected' => $list, 'action' => $action]);

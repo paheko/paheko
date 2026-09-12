@@ -500,6 +500,18 @@ class CSV_Custom
 		$this->setTranslationTable($sel);
 	}
 
+	/**
+	 * Set translation table from form values
+	 */
+	public function setTranslationTableFrom(?array $source): void
+	{
+		$source ??= $_POST;
+		$this->skip((int)($source['skip_first_line'] ?? 0));
+
+		$sel = $this->getSelectedTable($source['translation_table'] ?? []);
+		$this->setTranslationTable($sel);
+	}
+
 	public function resetTranslationTable(): void
 	{
 		$this->translation = null;
@@ -566,6 +578,7 @@ class CSV_Custom
 						break;
 					}
 
+					$c = array_map(fn($n) => $this->columns[$n], $c);
 					$names[] = implode(' et ', $c);
 				}
 
@@ -821,7 +834,7 @@ class CSV_Custom
 	{
 		$url = Utils::getSelfURI();
 
-		$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () {
+		$form->runIf(!empty($_POST['load']) && isset($_FILES['file']['tmp_name']), function () {
 			$this->upload($_FILES['file']);
 		}, $csrf_key, $url);
 
@@ -833,7 +846,7 @@ class CSV_Custom
 
 		$form->runIf('set_columns', function () {
 			$this->skip(intval($_POST['skip_first_line'] ?? 0));
-			$this->setTranslationTable($_POST['translation_table'] ?? []);
+			$this->setTranslationTable(isset($_POST['translation_table']) && is_array($_POST['translation_table']) ? $_POST['translation_table'] : []);
 		}, $csrf_key, $url);
 	}
 }

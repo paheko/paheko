@@ -67,7 +67,7 @@ class Router
 
 		// Just a quick sanity check
 		if (false !== strpos(rawurldecode($uri), '..')) {
-			throw new UserException('Invalid path.', 400);
+			throw new UserException('Unknown path.', 404);
 		}
 
 		// Redirect if there is a double slash

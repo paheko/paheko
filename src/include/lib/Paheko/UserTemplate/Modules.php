@@ -306,7 +306,7 @@ class Modules
 		// Just a quick sanity check
 		if (false !== strpos(rawurldecode($uri), '..')
 			|| false !== strpos(rawurldecode($uri), '.php')) {
-			throw new UserException('Invalid path.', 400);
+			throw new UserException('Unknown path.', 404);
 		}
 
 		$page = null;
@@ -376,6 +376,7 @@ class Modules
 
 				if ($status === Page::STATUS_DRAFT) {
 					$path = '404.html';
+					$page = null;
 				}
 				elseif ($status === Page::STATUS_PRIVATE && !$session->isLogged()) {
 					Utils::redirect('!login.php?p=1&r=' . Utils::getRequestURI());
@@ -396,8 +397,9 @@ class Modules
 			throw new UserException('This page is currently disabled.', 404);
 		}
 
-		// Restrict access
-		if (isset($module->restrict_section, $module->restrict_level)) {
+		// Restrict access (other than to icon)
+		if ($path !== Module::ICON_FILE
+			&& isset($module->restrict_section, $module->restrict_level)) {
 			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
 			}

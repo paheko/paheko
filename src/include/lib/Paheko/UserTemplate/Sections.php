@@ -1427,7 +1427,7 @@ class Sections
 
 		$path = $ut->module->storage_root();
 
-		if (isset($params['path'])) {
+		if (isset($params['path']) && is_string($path)) {
 			if (preg_match('!/\.|\.\.|//|\\\\!', $path)) {
 				throw new TemplateException(sprintf('"path" parameter is invalid: "%s"', $params['path']));
 			}
