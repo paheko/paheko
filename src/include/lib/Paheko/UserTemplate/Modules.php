@@ -397,8 +397,9 @@ class Modules
 			throw new UserException('This page is currently disabled.', 404);
 		}
 
-		// Restrict access
-		if (isset($module->restrict_section, $module->restrict_level)) {
+		// Restrict access (other than to icon)
+		if ($path !== Module::ICON_FILE
+			&& isset($module->restrict_section, $module->restrict_level)) {
 			if (!$session->isLogged()) {
 				Utils::redirect('!login.php');
 			}
