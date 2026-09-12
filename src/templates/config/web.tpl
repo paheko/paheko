@@ -36,7 +36,7 @@
 <fieldset>
 	<legend>Site web externe</legend>
 	<dl>
-		{input type="url" name="org_web" source=$config label="Adresse du site web externe" help="Si votre association dispose d'un site web, cette sera utilisée dans les messages collectifs ou les reçus à la place du site intégré à Paheko."}
+		{input type="url" name="org_web" source=$config label="Adresse du site web externe" help="Si votre association dispose d'un site web, cette adresse sera utilisée dans les messages collectifs ou les reçus à la place du site intégré à Paheko."}
 	</dl>
 </fieldset>
 <p>
