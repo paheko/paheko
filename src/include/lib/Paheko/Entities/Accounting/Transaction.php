@@ -1070,7 +1070,7 @@ class Transaction extends Entity
 		$source ??= $_POST;
 
 		// Make sure user cannot modify internal properties
-		unset($source['hash'], $source['prev_hash'], $source['prev_id']);
+		unset($source['hash'], $source['prev_hash'], $source['prev_id'], $source['id_year']);
 
 		// Transpose lines (HTML transaction forms)
 		if (!empty($source['lines']) && is_array($source['lines']) && is_string(key($source['lines']))) {
