@@ -511,10 +511,43 @@ class Utils
 	}
 
 	/**
+	 * Validate URL, allowing IDN domain names
+	 */
+	static public function isValidURL(string $url): bool
+	{
+		$url = parse_url($url);
+
+		if (empty($url['host']) || empty($url['scheme'])) {
+			return false;
+		}
+
+		if (!in_array($url['scheme'], ['http', 'https'], true)) {
+			return false;
+		}
+
+		$url['host'] = idn_to_ascii($url['host']);
+		$n = $url['scheme'] . '://' . $url['host'];
+
+		if (!empty($url['port'])
+			&& !($url['port'] == 80 && $url['scheme'] === 'http')
+			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
+			$n .= ':' . $url['port'];
+		}
+
+		$n .= $url['path'] ?? '/';
+
+		if (!empty($url['query'])) {
+			$n .= '?' . $url['query'];
+		}
+
+		return filter_var($n, FILTER_VALIDATE_URL) !== false;
+	}
+
+	/**
 	 * Validates that a URL is valid and is not an IP address or some kind of DNS poisoning
 	 * (eg. http://localhost.mydomain.com/ points to 127.0.0.1)
 	 */
-	static public function validateURL2(string $url, ?string $allowed_path = null): array
+	static public function validateExternalURL(string $url, ?string $allowed_path = null): array
 	{
 		$parts = parse_url($params['url']);
 		$parts['scheme'] ??= '';
@@ -537,6 +570,8 @@ class Utils
 		if (!trim($parts['host']) || preg_match('/^[\d.]+$|\[/', $parts['host'])) {
 			throw new \InvalidArgumentException(sprintf('Unauthorized host "%s" in URL', $parts['host']));
 		}
+
+		$parts['host'] = idn_to_ascii($parts['host']);
 
 		static $host_to_ip = [];
 
@@ -968,39 +1003,6 @@ class Utils
 	static public function getRandomTextFilePath(string $lang = 'fr'): string
 	{
 		return sprintf('%s/include/data/locales/%s/random.txt', ROOT, $lang);
-	}
-
-	/**
-	 * Validate URL, allowing IDN domain names
-	 */
-	static public function validateURL(string $url): bool
-	{
-		$url = parse_url($url);
-
-		if (empty($url['host']) || empty($url['scheme'])) {
-			return false;
-		}
-
-		if (!in_array($url['scheme'], ['http', 'https'], true)) {
-			return false;
-		}
-
-		$url['host'] = idn_to_ascii($url['host']);
-		$n = $url['scheme'] . '://' . $url['host'];
-
-		if (!empty($url['port'])
-			&& !($url['port'] == 80 && $url['scheme'] === 'http')
-			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
-			$n .= ':' . $url['port'];
-		}
-
-		$n .= $url['path'] ?? '/';
-
-		if (!empty($url['query'])) {
-			$n .= '?' . $url['query'];
-		}
-
-		return filter_var($n, FILTER_VALIDATE_URL) !== false;
 	}
 
 	static public function normalizePhoneNumber(string $n): string

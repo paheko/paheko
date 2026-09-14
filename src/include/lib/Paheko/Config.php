@@ -297,7 +297,7 @@ class Config extends Entity
 		$this->assert(preg_match('/^[A-Z]{3}$/', $this->currency), 'La devise doit comporter 3 lettres majuscules.');
 		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
 		$this->assert(strlen($this->country) === 2 && Utils::getCountryName($this->country), 'Pays invalide ou inconnu.');
-		$this->assert(!isset($this->org_web) || Utils::validateURL($this->org_web), 'L\'adresse URL du site web est invalide.');
+		$this->assert(!isset($this->org_web) || Utils::isValidURL($this->org_web), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
