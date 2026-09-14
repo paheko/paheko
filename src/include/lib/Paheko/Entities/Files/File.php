@@ -69,7 +69,7 @@ class File extends Entity
 	protected ?string $mime = null;
 	protected ?int $size = null;
 	protected \DateTime $modified;
-	protected bool $image;
+	protected bool $image = false;
 	protected ?string $md5;
 	protected ?\DateTime $trash = null;
 
