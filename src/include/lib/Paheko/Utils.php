@@ -549,7 +549,7 @@ class Utils
 	 */
 	static public function validateExternalURL(string $url, ?string $allowed_path = null): array
 	{
-		$parts = parse_url($params['url']);
+		$parts = parse_url($url);
 		$parts['scheme'] ??= '';
 		$parts['host'] ??= '';
 
