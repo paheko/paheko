@@ -21,7 +21,7 @@
 						<td class="help">{icon shape="right"}</td>
 						<td>
 							<select name="translation_table[{$index}]">
-								<option value="">-- Ne pas importer cette colonne</option>
+								<option value="">— Ne pas importer cette colonne</option>
 								{foreach from=$csv->getColumnsWithDefaults() item="column"}
 									<option value="{$column.key}" {if $selected[$index] == $column.key}selected="selected"{/if}>{$column.label}</option>
 								{/foreach}
