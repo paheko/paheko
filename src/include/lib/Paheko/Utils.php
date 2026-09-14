@@ -510,6 +510,48 @@ class Utils
 		}
 	}
 
+	/**
+	 * Validates that a URL is valid and is not an IP address or some kind of DNS poisoning
+	 * (eg. http://localhost.mydomain.com/ points to 127.0.0.1)
+	 */
+	static public function validateURL(string $url, ?string $allowed_path = null): array
+	{
+		$parts = parse_url($params['url']);
+		$parts['scheme'] ??= '';
+		$parts['host'] ??= '';
+
+		if (null !== $allowed_path
+			&& !empty($parts['path'])
+			&& $parts['path'] !== $allowed_path) {
+			throw new \InvalidArgumentException(sprintf('Unexpected path "%s" in URL (only path allowed is "%s")', $parts['path'], $allowed_path));
+		}
+
+		if (!in_array($parts['scheme'], ['http', 'https'])) {
+			throw new \InvalidArgumentException(sprintf('Invalid scheme "%s" in URL', $parts['scheme']));
+		}
+
+		if (!empty($parts['port'])) {
+			throw new \InvalidArgumentException('Unauthorized port in URL');
+		}
+
+		if (!trim($parts['host']) || preg_match('/^[\d.]+$|\[/', $parts['host'])) {
+			throw new \InvalidArgumentException(sprintf('Unauthorized host "%s" in URL', $parts['host']));
+		}
+
+		static $host_to_ip = [];
+
+		// This only returns IPv4 addresses, making IPv6 only hosts unreachable
+		$host_to_ip[$parts['host']] ??= gethostbyname($parts['host']);
+		$ip = $host_to_ip[$parts['host']];
+
+		// Don't allow to make requests to localhost or internal networks
+		if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+			throw new \InvalidArgumentException(sprintf('Unauthorized resolved IP "%s" for host "%s" in URL', $ip, $parts['host']));
+		}
+
+		return $parts;
+	}
+
 	static public function isLocalURL(string $url): bool
 	{
 		if (substr($url, 0, 1) === '/'

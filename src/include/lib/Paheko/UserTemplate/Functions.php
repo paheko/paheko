@@ -868,34 +868,11 @@ class Functions
 		unset($params['method'], $params['path'], $params['assign'], $params['assign_code'], $params['fail']);
 
 		if (isset($params['url'])) {
-			$url = parse_url($params['url']);
-			$url['scheme'] ??= '';
-			$url['host'] ??= '';
-
-			if (!empty($url['path']) && $url['path'] !== '/') {
-				throw new TemplateException('Unexpected path in "url" parameter: ' . $params['url']);
+			try {
+				$url = Utils::validateURL($params['url']);
 			}
-
-			if (!in_array($url['scheme'], ['http', 'https'])) {
-				throw new TemplateException('Invalid scheme in "url" parameter: ' . $params['url']);
-			}
-
-			if (!empty($url['port'])) {
-				throw new TemplateException('Unauthorized port in "url" parameter: ' . $params['url']);
-			}
-
-			if (!trim($url['host']) || preg_match('/^[\d.]+$|\[/', $url['host'])) {
-				throw new TemplateException('Unauthorized host in "url" parameter: ' . $url['host']);
-			}
-
-			static $host_to_ip = [];
-			// This only returns IPv4 addresses, making IPv6 only hosts unreachable
-			$host_to_ip[$url['host']] ??= gethostbyname($url['host']);
-			$ip = $host_to_ip[$url['host']];
-
-			// Don't allow to make requests to localhost or internal networks
-			if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-				throw new TemplateException('Unauthorized resolved IP in "url" parameter: ' . $ip);
+			catch (\InvalidArgumentException $e) {
+				throw new TemplateException('Invalid "url" parameter: ' . $e->getMessage(), 0, $e);
 			}
 
 			if (empty($params['user'])) {
