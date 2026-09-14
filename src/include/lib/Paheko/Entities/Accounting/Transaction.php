@@ -1251,7 +1251,11 @@ class Transaction extends Entity
 			if (!$source['id_year']) {
 				throw new UserException(sprintf('Cannot find a valid open year matching "%s"', $y));
 			}
+
+			// Required, as importForm drops id_year
+			$this->set('id_year', $source['id_year']);
 		}
+
 
 		if (isset($source['date']) && !is_string($source['date'])) {
 			throw new UserException('Invalid date object');
