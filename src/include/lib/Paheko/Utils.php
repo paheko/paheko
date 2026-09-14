@@ -2380,6 +2380,10 @@ class Utils
 			return;
 		}
 
+		if (preg_match('/curl|wget/', $_SERVER['HTTP_USER_AGENT'] ?? '')) {
+			return;
+		}
+
 		$is_html = false;
 
 		foreach (headers_list() as $header) {
