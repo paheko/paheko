@@ -869,7 +869,7 @@ class Functions
 
 		if (isset($params['url'])) {
 			try {
-				$url = Utils::validateURL($params['url']);
+				$url = Utils::validateURL2($params['url']);
 			}
 			catch (\InvalidArgumentException $e) {
 				throw new TemplateException('Invalid "url" parameter: ' . $e->getMessage(), 0, $e);

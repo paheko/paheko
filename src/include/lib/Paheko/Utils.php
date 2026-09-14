@@ -514,7 +514,7 @@ class Utils
 	 * Validates that a URL is valid and is not an IP address or some kind of DNS poisoning
 	 * (eg. http://localhost.mydomain.com/ points to 127.0.0.1)
 	 */
-	static public function validateURL(string $url, ?string $allowed_path = null): array
+	static public function validateURL2(string $url, ?string $allowed_path = null): array
 	{
 		$parts = parse_url($params['url']);
 		$parts['scheme'] ??= '';
