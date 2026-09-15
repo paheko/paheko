@@ -33,8 +33,12 @@ class Shares
 		return EM::findOne(Share::class, 'SELECT * FROM @TABLE WHERE hash_id = ? AND (expiry IS NULL OR expiry > ?) LIMIT 1;', $hash_id, new DateTime);
 	}
 
-	static public function create(File $file, ?Session $session, int $option, int $ttl, ?string $password = null): Share
+	static public function create(File $file, ?Session $session, int $option, ?int $ttl = null, ?string $password = null): Share
 	{
+		if ($file->isDir()) {
+			throw new \LogicException('Cannot create share for directory so far');
+		}
+
 		$share = new Share;
 		$share->set('hash_id', Utils::random_string(12));
 		$share->set('id_user', $session ? $session::getUserId() : null);

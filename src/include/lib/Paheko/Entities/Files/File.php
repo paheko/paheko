@@ -1021,6 +1021,14 @@ class File extends Entity
 		return $this->editorType() === 'wopi';
 	}
 
+	public function isShared(): bool
+	{
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM files_shares
+			WHERE id_file = ? AND (expiry IS NULL OR expiry > ?) LIMIT 1;',
+			$this->id,
+			new \DateTime);
+	}
+
 	public function getPreviewURL(): string
 	{
 		return $this->isImage() ? $this->url() : Utils::getLocalURL('!common/files/preview.php?p=') . rawurlencode($this->path);

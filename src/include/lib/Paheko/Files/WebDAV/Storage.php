@@ -237,8 +237,15 @@ class Storage extends AbstractStorage
 					NextCloud::PERM_RENAME => $file->canRename($this->session),
 					NextCloud::PERM_MOVE => $file->canRename($this->session),
 					NextCloud::PERM_CREATE_FILES_DIRS => $file->canCreateHere($this->session),
+					NextCloud::PERM_SHARE => $file->canShare($this->session),
 				];
 
+				if (array_key_exists(NextCloud::PERM_SHARE, $permissions)
+					&& $file->isShared()) {
+					$permissions[NextCloud::PERM_SHARED] = true;
+				}
+
+				// Remove falsy values
 				$permissions = array_filter($permissions, fn($a) => $a);
 				return implode('', array_keys($permissions));
 			case 'DAV::quota-available-bytes':
