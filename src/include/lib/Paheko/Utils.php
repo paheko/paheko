@@ -2097,7 +2097,7 @@ class Utils
 		}
 
 		if (!file_exists($target)) {
-			throw new \RuntimeException('PDF command failed: ' . $output);
+			throw new \RuntimeException(sprintf('PDF command "%s" failed: %s', $cmd, $output));
 		}
 
 		if (PDF_USAGE_LOG) {
