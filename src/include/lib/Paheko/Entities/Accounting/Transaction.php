@@ -1253,7 +1253,7 @@ class Transaction extends Entity
 			}
 
 			// Required, as importForm drops id_year
-			$this->set('id_year', $source['id_year']);
+			$this->set('id_year', (int)$source['id_year']);
 		}
 
 
