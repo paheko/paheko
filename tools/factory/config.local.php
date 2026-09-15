@@ -62,6 +62,9 @@ const SHARED_CACHE_ROOT = __DIR__ . '/cache/shared';
 // Cache web partagé
 const WEB_CACHE_ROOT = __DIR__ . '/cache/web/%host%';
 
+// Forcer le chemin des plugins (à supprimer pour Paheko 1.4.0+)
+const PLUGINS_ROOT = __DIR__ . '/data/plugins';
+
 // Désactiver le log des erreurs PHP visible dans l'interface (sécurité)
 const ENABLE_TECH_DETAILS = false;
 
