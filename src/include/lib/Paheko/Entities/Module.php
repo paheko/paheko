@@ -884,6 +884,11 @@ class Module extends Entity
 			throw new UserException('Unknown path', 404);
 		}
 
+		// api.tpl can only be called by the API
+		if ($path === self::API_FILE) {
+			throw new UserException('This template cannot be accessed this way', 404);
+		}
+
 		if (UserTemplate::isTemplate($path)) {
 			// Only upgrade for templates, not static files
 			$this->upgradeIfRequired();
@@ -952,6 +957,11 @@ class Module extends Entity
 	public function serveWeb(string $path, array $params): void
 	{
 		$uri = $params['uri'] ?? null;
+
+		// api.tpl can only be called by the API
+		if ($path === self::API_FILE) {
+			throw new UserException('This template cannot be accessed this way', 404);
+		}
 
 		// Make sure config.html can only be accessed by admins
 		if ($path === self::CONFIG_FILE) {
