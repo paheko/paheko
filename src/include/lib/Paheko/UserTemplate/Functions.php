@@ -506,12 +506,18 @@ class Functions
 
 		unset($to);
 
-		// Restrict sending recipients
+		// Restrict recipients count
 		if (!$ut->isTrusted()) {
 			$db = DB::getInstance();
+			$config = Config::getInstance();
 			$email_field = DynamicFields::getFirstEmailField();
-			$internal_count = (int) $db->count('users', $db->where($email_field, 'IN', $params['to']));
-			$external_count = intval(count($params['to']) - $internal_count);
+
+			// Remove organization email address from addresses we need to check
+			$emails = array_filter($params['to'], fn($e) => $e !== $config->org_email);
+
+			// Count number of internal email addresses
+			$internal_count = (int) $db->count('users', $db->where($email_field, 'IN', $emails));
+			$external_count = intval(count($emails) - $internal_count);
 
 			if (($external_count + $external) > 1) {
 				throw new TemplateException(sprintf('Ligne %d: l\'envoi d\'email à une adresse externe est limité à un envoi par page', $line));
