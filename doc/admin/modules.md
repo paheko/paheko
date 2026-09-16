@@ -64,7 +64,7 @@ Chaque module a un nom unique (composé uniquement de lettres minuscules, de tir
 Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais certains fichiers ont une fonction spéciale :
 
 * `module.ini` : contient les informations sur le module, voir ci-dessous pour les détails
-* `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue
+* `config.html` : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -> Modules) et affichera ce squelette dans un dialogue. L'accès à cette page est restreint aux membres ayant accès à la configuration.
 * `icon.svg` : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (`<svg …>`) doit comporter les attributs suivants : `id="img" width="100%" height="100%"`.
 * `migration.tpl` : code Brindille permettant la création et la mise à jour du schéma de base de données SQL du module, si nécessaire
 
@@ -188,6 +188,8 @@ On pourra retrouver ces valeurs dans la variable `$module.config` :
 
 ## Tables SQL
 
+*(Depuis Paheko 1.4.0)*
+
 Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.
 
 Pour cela il convient de définir une version dans le fichier `module.ini` :
@@ -233,6 +235,70 @@ De la même manière il est possible d'importer un module à partir d'un fichier
 
 * Il n'est pas possible de télécharger ou envoyer des données depuis un autre serveur
 * Il n'est pas possible d'écrire un fichier local
+
+# API
+
+*(Depuis Paheko 1.4.0)*
+
+Les modules peuvent exposer une API via le squelette `api.tpl`. Ce squelette n'est pas accessible autrement que par l'API.
+
+Les requêtes doivent se faire sur le chemin `/api/modules/{NOM_MODULE}/{CHEMIN}`.
+
+L'API d'un module peut être appelée en HTTP, (voir la documentation de l'API pour les détails), ou via la fonction `{{:api}}` d'un autre module.
+
+Le squelette recevra les variables suivantes :
+
+* `$path` : chemin passé dans l'adresse URL (exemple : `/api/modules/recus_fiscaux/create` renverra `create`)
+* `$method` : méthode HTTP pour le requête : POST, GET, PUT, etc.
+* `$params` : paramètres passés en POST, GET, etc.
+* `$body` : contenu du corps de la requête (pour les requêtes `PUT` uniquement)
+
+Le squelette doit renvoyer les données via la fonction `{{:return}}`. Tous les paramètres passés à cette fonction seront renvoyés sous forme de tableau (si l'API est appelée depuis un autre module avec la fonction `{{:api}}`) ou de JSON (en HTTP).
+
+Le paramètre `code` de `{{:return}}` sera utilisé comme code HTTP de retour.
+
+
+
+## Exemple
+
+Par exemple si le squelette `api.tpl` de l'extensions `mes_recus` contient :
+
+```
+{{if $method === 'POST'}}
+  {{if $nom|trim|strlen === 0}}
+    {{:error message="Le nom est obligatoire" code=400}}
+  {{/if}}
+
+  {{:save nom=$params.nom assign_new_id="id"}}
+  {{:return id=$id message="ok" code=200}}
+{{else}}
+  {{:error code=404 message="Chemin API inconnu"}}
+{{/if}}
+```
+
+Exemple de requête en HTTP avec curl :
+
+```
+curl -v https://monasso.example.org/api/module/mes_recus/create -F nom="Karim Delilah"
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id": 42, "message": "ok", "code": 200}
+```
+
+Et depuis un autre module :
+
+```
+{{:api
+	method="POST"
+	path="module/mes_recus/create"
+	assign="result"
+	nom="Carma Delapoisse"
+}}
+{{if $result.status === 'ok'}}
+	Nouveau reçu n°{{$result.id}}
+{{/if}}
+```
 
 ## Envoi d'e-mail
 

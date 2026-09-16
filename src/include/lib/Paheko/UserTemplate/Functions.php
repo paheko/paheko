@@ -58,9 +58,18 @@ class Functions
 		':redirect' => 'compile_redirect',
 	];
 
-	static public function compile_return(): string
+	static public function compile_return(string $name, string $params, UserTemplate $tpl, int $line): string
 	{
-		return '<?php return; ?>';
+		$params = $tpl->_parseArguments($params, $line);
+
+		if (count($params)) {
+			$params = ' ' . $tpl->_exportArguments($params);
+		}
+		else {
+			$params = '';
+		}
+
+		return sprintf('<?php return%s; ?>', $params);
 	}
 
 	/**

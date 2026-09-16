@@ -7,6 +7,7 @@ use Paheko\Users\Session;
 use Paheko\Search;
 use Paheko\Services\Subscriptions;
 use Paheko\Files\Files;
+use Paheko\Modules\Modules;
 
 use KD2\ErrorManager;
 use KD2\DB\DB_Exception;
@@ -17,6 +18,7 @@ class API
 	use API\User;
 	use API\Web;
 
+	protected int $code = 200;
 	protected string $path;
 	protected array $params;
 	protected bool $is_http_client = false;
@@ -233,7 +235,7 @@ class API
 		flush();
 	}
 
-	public function export($in): ?array
+	public function export(mixed $in): ?array
 	{
 		if (null === $in) {
 			return null;
@@ -249,7 +251,7 @@ class API
 		return null;
 	}
 
-	protected function download(string $uri)
+	protected function download(string $uri): null
 	{
 		if ($this->method != 'GET') {
 			throw new APIException('Wrong request method', 400);
@@ -268,7 +270,7 @@ class API
 		return null;
 	}
 
-	protected function sql(string $format)
+	protected function sql(string $format): ?array
 	{
 		if ($this->method !== 'POST' && $this->method !== 'GET') {
 			throw new APIException('Wrong request method', 405);
@@ -299,7 +301,7 @@ class API
 				return null;
 			}
 			elseif (!$this->is_http_client) {
-				return $this->export(['count' => $s->countResults(), 'results' => $result]);
+				return ['count' => $s->countResults(), 'results' => $result];
 			}
 			else {
 				// Stream results to client, in case request is slow
@@ -407,7 +409,41 @@ class API
 			}
 		}
 		else {
-			throw new APIException('Unknown user action', 404);
+			throw new APIException('Unknown services action', 404);
+		}
+	}
+
+	public function module(string $uri): null
+	{
+		$name = strtok($uri, '/');
+		$uri = strtok('');
+
+		$module = Modules::get($name);
+
+		if (!$module) {
+			throw new APIException('Unknown module', 404);
+		}
+
+		if (!$module->hasFile($module::API_FILE)) {
+			throw new APIException('This module does not have an API', 404);
+		}
+
+		$tpl = $module->template($module::API_FILE);
+		$tpl->assignArray([
+			'method' => $this->method,
+			'path'   => trim($uri, '/'),
+			'params' => $this->params,
+			'body'   => $this->getInput(),
+		]);
+
+		try {
+			$r = null;
+			$this->fetchAndCatchErrors($r); // Ignore template output
+			$this->code = !empty($r->code) ? intval($r->code) : $tpl->getStatusCode();
+			return $r;
+		}
+		catch (UserException $e) {
+			throw new APIException($e->getMessage(), $e->getCode() ?: 500);
 		}
 	}
 
@@ -479,7 +515,7 @@ class API
 		$this->access = $access;
 	}
 
-	public function route()
+	public function route(): mixed
 	{
 		$uri = $this->path;
 
@@ -503,6 +539,8 @@ class API
 				return $this->accounting($uri);
 			case 'services':
 				return $this->services($uri);
+			case 'module':
+				return $this->module($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
@@ -567,6 +605,7 @@ class API
 				throw new APIException($e->getMessage(), 400, $e);
 			}
 
+			http_response_code($this->code);
 			return $api->export($return);
 		}
 		catch (APIException $e) {

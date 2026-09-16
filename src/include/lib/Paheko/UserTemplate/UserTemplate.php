@@ -468,10 +468,10 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function fetchAndCatchErrors(): string
+	public function fetchAndCatchErrors(mixed &$return = null): string
 	{
 		try {
-			return $this->fetch();
+			return $this->fetch($return);
 		}
 		catch (TemplateException $e) {
 			// Always throw error for code outside of templates (eg. mailing body)
@@ -501,7 +501,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function display(): void
+	public function display(mixed &$return = null): void
 	{
 		$compiled_path = $this->_getCachePath();
 
@@ -515,12 +515,12 @@ class UserTemplate extends \KD2\Brindille
 		}
 	}
 
-	public function fetch(): string
+	public function fetch(mixed &$return = null): string
 	{
 		ob_start();
 
 		try {
-			$this->display();
+			$this->display($return);
 		}
 		catch (\Throwable $e) {
 			ob_end_clean();
@@ -668,7 +668,7 @@ class UserTemplate extends \KD2\Brindille
 	 * Will serve the current template file, as if requested
 	 * from a HTTP request.
 	 */
-	public function serve(): void
+	public function serve(mixed &$return = null): void
 	{
 		$path = $this->path ?? $this->file->path;
 
@@ -676,7 +676,7 @@ class UserTemplate extends \KD2\Brindille
 			throw new \InvalidArgumentException('Not a valid template file extension: ' . $this->path);
 		}
 
-		$content = $this->fetchAndCatchErrors();
+		$content = $this->fetchAndCatchErrors($return);
 
 		$this->dumpHeaders();
 

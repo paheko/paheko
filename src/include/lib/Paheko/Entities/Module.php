@@ -37,6 +37,7 @@ class Module extends Entity
 	const CONFIG_FILE = 'config.html';
 	const INDEX_FILE = 'index.html';
 	const MIGRATION_FILE = 'migration.tpl';
+	const API_FILE = 'api.tpl';
 
 	// Snippets, don't forget to create alias constant in UserTemplate\Modules class
 	const SNIPPET_TRANSACTION = 'snippets/transaction_details.html';
@@ -862,10 +863,6 @@ class Module extends Entity
 
 	public function template(string $file)
 	{
-		if ($file === self::CONFIG_FILE) {
-			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
-		}
-
 		$this->validatePath($file);
 
 		$ut = new UserTemplate($this->name . '/' . $file);
@@ -900,6 +897,11 @@ class Module extends Entity
 				else {
 					throw new UserException('This address is invalid.', 404);
 				}
+			}
+
+			// Make sure config.html can only be accessed by admins
+			if ($path === self::CONFIG_FILE) {
+				Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
 			}
 
 			if ($this->web) {
@@ -950,6 +952,11 @@ class Module extends Entity
 	public function serveWeb(string $path, array $params): void
 	{
 		$uri = $params['uri'] ?? null;
+
+		// Make sure config.html can only be accessed by admins
+		if ($path === self::CONFIG_FILE) {
+			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
+		}
 
 		// Fire signal before display of a web page
 		$module = $this;
