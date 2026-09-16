@@ -19,6 +19,8 @@ use Paheko\Entities\Files\File;
 use Paheko\Entities\Accounting\Year;
 use Paheko\Users\DynamicFields;
 
+use const Paheko\SQLITE_JOURNAL_MODE;
+
 class Sections
 {
 	const SECTIONS_LIST = [
