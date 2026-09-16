@@ -1174,6 +1174,10 @@ class CommonFunctions
 		$class = 'tag';
 		$attributes = '';
 
+		if (!empty($params['shape'])) {
+			$label = self::icon(['shape' => $params['shape']]) . ' ' . $label;
+		}
+
 		if (!empty($params['small'])) {
 			$class .= ' small';
 		}
