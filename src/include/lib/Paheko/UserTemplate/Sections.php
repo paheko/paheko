@@ -71,7 +71,8 @@ class Sections
 		'count',
 	];
 
-	static protected $_cache = [];
+	static protected array $_cache = [];
+	static protected int $read_transaction = 0;
 
 	static public function selectStart(string $name, string $sql, UserTemplate $tpl, int $line): string
 	{
@@ -98,7 +99,7 @@ class Sections
 		}, $sql);
 
 		$sql = 'SELECT ' . $sql;
-		$sql = var_export($sql, true);
+		$sql = $tpl->_exportArgument($sql);
 
 		$params .= ' sql=' . $sql . ' ' . $extra_params;
 
@@ -263,6 +264,14 @@ class Sections
 	 */
 	static protected function _createModuleIndexes(string $table, string $where): void
 	{
+		// Disable writing to database when a read is currently open
+		// this is because a write requires an EXCLUSIVE lock which cannot be
+		// acquired because a read has a SHARED lock (when journal_mode is not WAL)
+		if (self::$read_transaction
+			&& SQLITE_JOURNAL_MODE !== 'WAL') {
+			return;
+		}
+
 		preg_match_all('/json_extract\s*\(\s*document\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
 
 		if (!count($match)) {
@@ -412,6 +421,8 @@ class Sections
 
 		$query = self::sql($params, $tpl, $line);
 
+		self::$read_transaction++;
+
 		foreach ($query as $row) {
 			if (isset($row['json'])) {
 				$json = json_decode($row['json'], true);
@@ -428,6 +439,8 @@ class Sections
 
 			yield $row;
 		}
+
+		self::$read_transaction--;
 	}
 
 	static protected function _getModuleColumnsFromSchema(string $schema, ?string $columns, UserTemplate $tpl, int $line): array
@@ -670,7 +683,11 @@ class Sections
 		$tpl->assign('disable_user_sort', boolval($params['disable_user_sort'] ?? ($params['disable_user_ordering'] ?? false)));
 		$tpl->display();
 
+		self::$read_transaction++;
+
 		yield from $i;
+
+		self::$read_transaction--;
 
 		echo '</tbody>';
 		echo '</table>';
@@ -1586,6 +1603,8 @@ class Sections
 			throw new TemplateException(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
+		self::$read_transaction++;
+
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
@@ -1594,5 +1613,7 @@ class Sections
 
 			yield $row;
 		}
+
+		self::$read_transaction--;
 	}
 }

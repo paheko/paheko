@@ -288,6 +288,7 @@ class DB extends SQLite3
 			// WAL = performance enhancement
 			// see https://www.cs.utexas.edu/~jaya/slides/apsys17-sqlite-slides.pdf
 			// https://ericdraken.com/sqlite-performance-testing/
+			// https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
 			$this->exec(sprintf(
 				'PRAGMA journal_mode = %s; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;',
 				$mode,
