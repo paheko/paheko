@@ -242,13 +242,13 @@ De la même manière il est possible d'importer un module à partir d'un fichier
 
 Les modules peuvent exposer une API via le squelette `api.tpl`. Ce squelette n'est pas accessible autrement que par l'API.
 
-Les requêtes doivent se faire sur le chemin `/api/modules/{NOM_MODULE}/{CHEMIN}`.
+Les requêtes doivent se faire sur le chemin `/api/module/{NOM_MODULE}/{CHEMIN}`.
 
 L'API d'un module peut être appelée en HTTP, (voir la documentation de l'API pour les détails), ou via la fonction `{{:api}}` d'un autre module.
 
 Le squelette recevra les variables suivantes :
 
-* `$path` : chemin passé dans l'adresse URL (exemple : `/api/modules/recus_fiscaux/create` renverra `create`)
+* `$path` : chemin passé dans l'adresse URL (exemple : `/api/module/recus_fiscaux/create` renverra `create`)
 * `$method` : méthode HTTP pour le requête : POST, GET, PUT, etc.
 * `$params` : paramètres passés en POST, GET, etc.
 * `$body` : contenu du corps de la requête (pour les requêtes `PUT` uniquement)
@@ -256,8 +256,6 @@ Le squelette recevra les variables suivantes :
 Le squelette doit renvoyer les données via la fonction `{{:return}}`. Tous les paramètres passés à cette fonction seront renvoyés sous forme de tableau (si l'API est appelée depuis un autre module avec la fonction `{{:api}}`) ou de JSON (en HTTP).
 
 Le paramètre `code` de `{{:return}}` sera utilisé comme code HTTP de retour.
-
-
 
 ## Exemple
 
