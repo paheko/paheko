@@ -472,10 +472,10 @@ class CSV_Custom
 				// $v is already good, do nothing
 			}
 			// Match by label: Code postal === Code postal
-			elseif ($found = $this->searchColumn($v, $this->columns)) {
+			elseif ($v !== null && ($found = $this->searchColumn($v, $this->columns))) {
 				$v = $found;
 			}
-			elseif ($found = $this->searchColumn($v, $this->columns_defaults)) {
+			elseif ($v !== null && ($found = $this->searchColumn($v, $this->columns_defaults))) {
 				$v = $found;
 			}
 			else {
