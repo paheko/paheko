@@ -441,7 +441,7 @@ Ces variables sont définies tout le temps :
 | `$config.org_name` | Nom de l'association |
 | `$config.org_email` | Adresse e-mail de l'association |
 | `$config.org_phone` | Numéro de téléphone de l'association |
-| `$config.org_address` | Adresse postale de l'association |
+| `$config.org_full_address` | Adresse postale de l'association |
 | `$config.org_web` | Adresse du site web de l'association |
 | `$config.files.logo` | Adresse du logo de l'association, si définit dans la personnalisation |
 | `$config.files.favicon` | Adresse de l'icône de favoris de l'association, si défini dans la personnalisation |

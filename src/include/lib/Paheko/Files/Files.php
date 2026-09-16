@@ -230,6 +230,18 @@ class Files
 			'trash'  => false,
 		];
 
+		// Attachments access is not allowed directly
+		$p[File::CONTEXT_ATTACHMENTS] = [
+			'mkdir'  => false,
+			'move'   => false,
+			'write'  => false,
+			'create' => false,
+			'delete' => false,
+			'read'   => false,
+			'share'  => false,
+			'trash'  => false,
+		];
+
 		$p[''] = [
 			'mkdir'  => false,
 			'move'   => false,

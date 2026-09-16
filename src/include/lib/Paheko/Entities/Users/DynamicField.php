@@ -384,9 +384,16 @@ class DynamicField extends Entity
 					throw new \LogicException('The statement is not read-only: ' . $this->sql);
 				}
 
+				$st->execute();
+
+				$view_name = 'tmp_users_' . bin2hex(random_bytes(10));
+
 				// Really try to create a view, as some errors may happen when we create the view
 				// (eg. "parameters are not allowed in views" is the field contains $name or :name)
-				$db->exec(sprintf('CREATE TEMP VIEW tmp_users_%s AS SELECT *, (%s) AS new_field FROM users;', bin2hex(random_bytes(10)), $this->sql));
+				$db->exec(sprintf('CREATE TEMP VIEW %s AS SELECT *, (%s) AS new_field FROM users;', $view_name, $this->sql));
+
+				// Just to be super-sure
+				$db->firstColumn(sprintf('SELECT * FROM %s;', $view_name));
 			}
 			catch (\KD2\DB\DB_Exception $e) {
 				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);

@@ -20,6 +20,8 @@ use Paheko\Entities\Accounting\Year;
 use Paheko\Users\DynamicFields;
 use Paheko\UserTemplate\Modules\LegacySections;
 
+use const Paheko\SQLITE_JOURNAL_MODE;
+
 class Sections
 {
 	const SECTIONS_LIST = [
@@ -72,7 +74,8 @@ class Sections
 		'count',
 	];
 
-	static protected $_cache = [];
+	static protected array $_cache = [];
+	static public int $read_transaction = 0;
 
 	static public function _replaceVariablesInSQL(string $params, string $prefix): string
 	{
@@ -99,7 +102,7 @@ class Sections
 		}, $sql);
 
 		$sql = $prefix . $sql;
-		$sql = var_export($sql, true);
+		$sql = $tpl->_exportArgument($sql);
 		$params .= ' sql=' . $sql . ' ' . $extra_params;
 
 		return $params;
@@ -382,9 +385,13 @@ class Sections
 		$tpl->assign('disable_user_sort', boolval($params['user_sorting'] ?? false));
 		$tpl->display();
 
+		self::$read_transaction++;
+
 		foreach ($i as $row) {
 			yield (array) $row;
 		}
+
+		self::$read_transaction--;
 
 		echo '</tbody>';
 		echo '</table>';
@@ -1130,7 +1137,7 @@ class Sections
 
 		$path = $ut->module->storage_root();
 
-		if (isset($params['path'])) {
+		if (isset($params['path']) && is_string($path)) {
 			if (preg_match('!/\.|\.\.|//|\\\\!', $path)) {
 				throw new TemplateException(sprintf('"path" parameter is invalid: "%s"', $params['path']));
 			}
@@ -1289,6 +1296,8 @@ class Sections
 			throw new TemplateException(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $e->getMessage(), $sql));
 		}
 
+		self::$read_transaction++;
+
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
 			if (isset($params['assign'])) {
@@ -1297,5 +1306,7 @@ class Sections
 
 			yield $row;
 		}
+
+		self::$read_transaction--;
 	}
 }

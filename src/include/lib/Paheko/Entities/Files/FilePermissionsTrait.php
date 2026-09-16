@@ -30,6 +30,10 @@ trait FilePermissionsTrait
 
 	public function canShare(?Session $session = null): bool
 	{
+		if ($this->isDir()) {
+			return false; // TODO: allow to share folders
+		}
+
 		$session ??= Session::getInstance();
 
 		if (!$session->isLogged()) {

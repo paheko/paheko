@@ -207,7 +207,7 @@ class Install
 		}
 
 		try {
-			self::install($source['country'], $source['name'], $source['user_name'], $source['user_email'], $source['password']);
+			self::install($source['country'] ?? 'FR', $source['name'], $source['user_name'], $source['user_email'], $source['password']);
 			self::ping();
 		}
 		catch (\Exception $e) {

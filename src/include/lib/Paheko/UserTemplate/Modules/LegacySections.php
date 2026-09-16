@@ -151,6 +151,14 @@ class LegacySections
 	 */
 	static protected function _createModuleIndexes(string $table, string $where): void
 	{
+		// Disable writing to database when a read is currently open
+		// this is because a write requires an EXCLUSIVE lock which cannot be
+		// acquired because a read has a SHARED lock (when journal_mode is not WAL)
+		if (Sections::$read_transaction
+			&& SQLITE_JOURNAL_MODE !== 'WAL') {
+			return;
+		}
+
 		preg_match_all('/json_extract\s*\(\s*document\s*,\s*(?:\'(.*?)\'|\"(.*?)\")\s*\)/', $where, $match, PREG_SET_ORDER);
 
 		if (!count($match)) {

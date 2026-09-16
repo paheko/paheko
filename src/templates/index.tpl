@@ -29,9 +29,9 @@
 
 <aside class="describe">
 	<h3>{$config.org_name}</h3>
-	{if !empty($config.org_address)}
+	{if !empty($org_full_address)}
 	<p>
-		{$config.org_address|escape|nl2br}
+		{$org_full_address|escape|nl2br}
 	</p>
 	{/if}
 	{if !empty($config.org_phone)}

@@ -69,7 +69,7 @@ class File extends Entity
 	protected ?string $mime = null;
 	protected ?int $size = null;
 	protected \DateTime $modified;
-	protected bool $image;
+	protected bool $image = false;
 	protected ?string $md5;
 	protected ?\DateTime $trash = null;
 
@@ -1019,6 +1019,14 @@ class File extends Entity
 	public function canEditInShare(): bool
 	{
 		return $this->editorType() === 'wopi';
+	}
+
+	public function isShared(): bool
+	{
+		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM files_shares
+			WHERE id_file = ? AND (expiry IS NULL OR expiry > ?) LIMIT 1;',
+			$this->id,
+			new \DateTime);
 	}
 
 	public function getPreviewURL(): string

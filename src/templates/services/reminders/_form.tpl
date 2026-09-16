@@ -89,7 +89,7 @@
 						<td>Nom de l'association</td>
 					</tr>
 					<tr>
-						<th scope="row">{{$config.org_address}}</th>
+						<th scope="row">{{$config.org_full_address}}</th>
 						<td>Adresse postale de l'association</td>
 					</tr>
 					<tr>

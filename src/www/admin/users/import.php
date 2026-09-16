@@ -45,8 +45,7 @@ $form->runIf('load', function () use ($csv, $params) {
 }, $csrf_key);
 
 $form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
-	$csv->skip((int)f('skip_first_line'));
-	$csv->setTranslationTable(f('translation_table'));
+	$csv->setTranslationTableFrom(null);
 }, $csrf_key);
 
 if (!f('import') && $csv->ready()) {

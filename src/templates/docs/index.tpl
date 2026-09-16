@@ -265,16 +265,10 @@ $upload_here = $context_specific_root ? null : $dir->path;
 	<p class="alert block">Il n'y a aucun fichier dans ce dossier.</p>
 {/if}
 
-{if $dir->path == $dir->context()}
-<div class="help flex">
-	<p>
-		Adresse WebDAV&nbsp;:
-		{copy_button label=$dir->webdav_root_url()}
+{if $dir->path === $dir->context()}
+	<p class="actions">
+		{linkbutton shape="help" href="./webdav.php" label="Accès avec une application" target="_dialog"}
 	</p>
-	<p>
-		{linkbutton shape="help" href=HELP_PATTERN_URL|args:"webdav" label="Accéder aux documents avec WebDAV" target="_dialog"}
-	</p>
-</div>
 {/if}
 
 {include file="_foot.tpl"}

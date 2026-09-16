@@ -10,6 +10,8 @@ use Paheko\Users\Session;
 use Paheko\DB;
 use Paheko\UserTemplate\Modules;
 
+use Paheko\Entities\Files\File;
+
 use KD2\DB\EntityManager as EM;
 use KD2\ErrorManager;
 
@@ -53,6 +55,16 @@ class Plugins
 	static public function getCurrent(): ?Plugin
 	{
 		return self::$current;
+	}
+
+	static public function getStorageRoot(string $id): string
+	{
+		return File::CONTEXT_EXTENSIONS . '/p/' . $id;
+	}
+
+	static public function getStorageURL(string $id, string $path = ''): string
+	{
+		return WWW_URL . File::CONTEXT_EXTENSIONS . '/p/' . $id . '/' . $path;
 	}
 
 	static public function toggleSignals(bool $enabled)

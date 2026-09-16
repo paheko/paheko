@@ -390,7 +390,7 @@
 		{
 			var option = document.createElement('option');
 			option.value = i;
-			option.innerHTML = options[i];
+			option.innerText = options[i];
 			select.appendChild(option);
 		}
 

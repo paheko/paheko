@@ -80,9 +80,11 @@
 			<li><a href="#tables-sql">Tables SQL</a>
 		</ol></li>
 		<li><a href="#export-et-import-de-modules">Export et import de modules</a></li>
-		<li><a href="#restrictions">Restrictions</a>
+		<li><a href="#restrictions">Restrictions</a></li>
+		<li><a href="#api">API</a>
 		<ol>
-			<li><a href="#envoi-d-e-mail">Envoi d'e-mail</a></li>
+			<li><a href="#exemple"> Exemple</a></li>
+			<li><a href="#envoi-d-e-mail">Envoi d&#039;e-mail</a></li>
 			<li><a href="#tables-et-colonnes-de-la-base-de-donnees">Tables et colonnes de la base de données</a>
 </li></ol></li></ol></aside><h1 id="introduction">Introduction</h1>
 <p>Depuis la version 1.3, Paheko dispose d'extensions modifiables, nommées <strong>Modules</strong>.</p>
@@ -126,7 +128,7 @@
 <p>Dans ce répertoire le module peut avoir autant de fichiers qu'il veut, mais certains fichiers ont une fonction spéciale :</p>
 <ul>
 <li><code>module.ini</code> : contient les informations sur le module, voir ci-dessous pour les détails</li>
-<li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue</li>
+<li><code>config.html</code> : si ce squelette existe, un bouton "Configurer" apparaîtra dans la liste des modules (Configuration -&gt; Modules) et affichera ce squelette dans un dialogue. L'accès à cette page est restreint aux membres ayant accès à la configuration.</li>
 <li><code>icon.svg</code> : icône du module, qui sera utilisée sur la page d'accueil, si le bouton est activé, et dans la liste des modules. L'élément racine du fichier SVG (<code>&lt;svg …&gt;</code>) doit comporter les attributs suivants : <code>id="img" width="100%" height="100%"</code>.</li>
 <li><code>migration.tpl</code> : code Brindille permettant la création et la mise à jour du schéma de base de données SQL du module, si nécessaire</li>
 </ul>
@@ -214,6 +216,7 @@ min_version="1.4.0"</code></pre>
   {{$module.config.account}}
 {{/if}}</code></pre>
 <h2 id="tables-sql">Tables SQL</h2>
+<p><em>(Depuis Paheko 1.4.0)</em></p>
 <p>Pour des besoins plus avancés il est possible pour un module de créer des tables SQL dans la base de données de Paheko.</p>
 <p>Pour cela il convient de définir une version dans le fichier <code>module.ini</code> :</p>
 <pre><code>version = "1.0.0"</code></pre>
@@ -242,6 +245,48 @@ min_version="1.4.0"</code></pre>
 <li>Il n'est pas possible de télécharger ou envoyer des données depuis un autre serveur</li>
 <li>Il n'est pas possible d'écrire un fichier local</li>
 </ul>
+<h1 id="api">API</h1>
+<p><em>(Depuis Paheko 1.4.0)</em></p>
+<p>Les modules peuvent exposer une API via le squelette <code>api.tpl</code>. Ce squelette n'est pas accessible autrement que par l'API.</p>
+<p>Les requêtes doivent se faire sur le chemin <code>/api/module/{NOM_MODULE}/{CHEMIN}</code>.</p>
+<p>L'API d'un module peut être appelée en HTTP, (voir la documentation de l'API pour les détails), ou via la fonction <code>{{:api}}</code> d'un autre module.</p>
+<p>Le squelette recevra les variables suivantes :</p>
+<ul>
+<li><code>$path</code> : chemin passé dans l'adresse URL (exemple : <code>/api/module/recus_fiscaux/create</code> renverra <code>create</code>)</li>
+<li><code>$method</code> : méthode HTTP pour le requête : POST, GET, PUT, etc.</li>
+<li><code>$params</code> : paramètres passés en POST, GET, etc.</li>
+<li><code>$body</code> : contenu du corps de la requête (pour les requêtes <code>PUT</code> uniquement)</li>
+</ul>
+<p>Le squelette doit renvoyer les données via la fonction <code>{{:return}}</code>. Tous les paramètres passés à cette fonction seront renvoyés sous forme de tableau (si l'API est appelée depuis un autre module avec la fonction <code>{{:api}}</code>) ou de JSON (en HTTP).</p>
+<p>Le paramètre <code>code</code> de <code>{{:return}}</code> sera utilisé comme code HTTP de retour.</p>
+<h2 id="exemple"> Exemple</h2>
+<p>Par exemple si le squelette <code>api.tpl</code> de l'extensions <code>mes_recus</code> contient :</p>
+<pre><code>{{if $method === 'POST'}}
+  {{if $nom|trim|strlen === 0}}
+    {{:error message="Le nom est obligatoire" code=400}}
+  {{/if}}
+
+  {{:save nom=$params.nom assign_new_id="id"}}
+  {{:return id=$id message="ok" code=200}}
+{{else}}
+  {{:error code=404 message="Chemin API inconnu"}}
+{{/if}}</code></pre>
+<p>Exemple de requête en HTTP avec curl :</p>
+<pre><code>curl -v https://monasso.example.org/api/module/mes_recus/create -F nom="Karim Delilah"
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id": 42, "message": "ok", "code": 200}</code></pre>
+<p>Et depuis un autre module :</p>
+<pre><code>{{:api
+    method="POST"
+    path="module/mes_recus/create"
+    assign="result"
+    nom="Carma Delapoisse"
+}}
+{{if $result.status === 'ok'}}
+    Nouveau reçu n°{{$result.id}}
+{{/if}}</code></pre>
 <h2 id="envoi-d-e-mail">Envoi d'e-mail</h2>
 <p>Voir <a href="brindille_functions.html#mail">la documentation de la fonction <code>{{:mail}}</code></a></p>
 <h2 id="tables-et-colonnes-de-la-base-de-donnees">Tables et colonnes de la base de données</h2>

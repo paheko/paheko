@@ -191,7 +191,7 @@ class Log
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, $days_delete));
 
 		// Delete failed login attempts and reminders after 30 days
-		$db->exec(sprintf('DELETE FROM logs WHERE action = %d OR action = %d AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
+		$db->exec(sprintf('DELETE FROM logs WHERE (action = %d OR action = %d) AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
 			self::LOGIN_FAIL, self::LOGIN_RECOVER, 30));
 	}
 

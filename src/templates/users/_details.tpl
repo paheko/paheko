@@ -79,14 +79,14 @@ $fields = DF::getInstance()->all();
 			{/if}
 			<br />
 			{if $email.invalid}
-				{tag label="Adresse invalide" color="darkred"}
+				{tag label="Adresse invalide" status="red"}
 			{elseif $email && $email->hasReachedFailLimit()}
-				{tag label="Adresse bloquée" color="darkorange"}
+				{tag label="Adresse bloquée" status="orange"}
 			{elseif $email.verified}
-				{tag label="Adresse vérifiée" color="darkgreen"}
+				{tag label="Adresse vérifiée" status="green"}
 			{*
 			{else}
-				{tag label="Adresse non vérifiée" color="darkgrey"}
+				{tag label="Adresse non vérifiée" status="grey"}
 			*}
 			{/if}
 			{linkbutton href="!users/mailing/status/address.php?address=%s"|args:$address label="Détails de l'adresse e-mail" shape="history" target="_dialog"}

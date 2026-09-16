@@ -624,6 +624,25 @@ nav.actions {
     align-items: center;
 }
 
+nav.actions .filter {
+    margin: .3em;
+}
+
+nav.actions .filter, nav.actions .filter ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3em;
+    justify-content: left;
+    align-items: center;
+}
+
+nav.actions .filter ul .selected {
+}
+
+nav.actions  .filter ul .selected .tag {
+    outline: 2px solid #000;
+}
+
 .actions-center {
     text-align: center;
 }

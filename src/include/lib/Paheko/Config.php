@@ -125,6 +125,8 @@ class Config extends Entity
 	protected string $org_email;
 	protected ?string $org_address = null;
 	protected ?string $org_address_public = null;
+	protected ?string $org_post_code = null;
+	protected ?string $org_city = null;
 	protected ?string $org_phone = null;
 	protected ?string $org_web = null;
 
@@ -297,7 +299,7 @@ class Config extends Entity
 		$this->assert(preg_match('/^[A-Z]{3}$/', $this->currency), 'La devise doit comporter 3 lettres majuscules.');
 		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
 		$this->assert(strlen($this->country) === 2 && Utils::getCountryName($this->country), 'Pays invalide ou inconnu.');
-		$this->assert(!isset($this->org_web) || Utils::validateURL($this->org_web), 'L\'adresse URL du site web est invalide.');
+		$this->assert(!isset($this->org_web) || Utils::isValidURL($this->org_web), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		$this->assert($this->log_retention >= 0, 'La durée de rétention doit être égale ou supérieur à zéro.');
@@ -525,5 +527,17 @@ class Config extends Entity
 		$html = Render::render(Render::FORMAT_MARKDOWN, null, $text);
 
 		return $html;
+	}
+
+	public function getFullAddress(): ?string
+	{
+		if (!isset($this->org_address, $this->org_post_code, $this->org_city)) {
+			return null;
+		}
+
+		$out = $this->org_address ?? '';
+		$out .= "\n" . ($this->org_post_code ?? '');
+		$out .= ' ' . ($this->org_city ?? '');
+		return trim($out);
 	}
 }

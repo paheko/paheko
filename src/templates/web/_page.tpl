@@ -17,27 +17,29 @@
 		</p>
 		{/if}
 
-		<p class="describe">
-			<span>
+		<ul class="describe">
+			<li>
 				{if $page->isCategory()}
 					{icon shape="folder"} Catégorie
 				{else}
 					{icon shape="document"} Page
 				{/if}
-			</span>
-			{if $page.status === $page::STATUS_DRAFT}
-				<em>{icon shape="eye-off"} Brouillon</em>
-			{elseif $page.status === $page::STATUS_PRIVATE}
-				<strong>{icon shape="user"} Réservée aux membres</strong>
-			{else}
-				<strong>{icon shape="eye"} En ligne</strong>
-			{/if}
-			<span>Publié&nbsp;: {$page.published|relative_date:true}</span>
-			<span>Modifié&nbsp;: {$page.modified|relative_date:true}</span>
+			</li>
+			<li class="status">
+				{if $page.status === $page::STATUS_DRAFT}
+					{tag status="tan" label="Brouillon"}
+				{elseif $page.status === $page::STATUS_PRIVATE}
+					{tag status="greyblue" label="Réservée aux membres"}
+				{else}
+					{tag status="green" label="En ligne"}
+				{/if}
+			</li>
+			<li>Publié&nbsp;: {$page.published|relative_date:true}</li>
+			<li>Modifié&nbsp;: {$page.modified|relative_date:true}</li>
 			{if $page->isOnline()}
-			<br /><tt>{link href=$page->url() label=$page->url() target="_blank"}</tt>
+				<li class="url"><tt>{link href=$page->url() label=$page->url() target="_blank"}</tt></li>
 			{/if}
-		</p>
+		</ul>
 
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		<p class="actions">

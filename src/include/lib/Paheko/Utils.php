@@ -510,6 +510,83 @@ class Utils
 		}
 	}
 
+	/**
+	 * Validate URL, allowing IDN domain names
+	 */
+	static public function isValidURL(string $url): bool
+	{
+		$url = parse_url($url);
+
+		if (empty($url['host']) || empty($url['scheme'])) {
+			return false;
+		}
+
+		if (!in_array($url['scheme'], ['http', 'https'], true)) {
+			return false;
+		}
+
+		$url['host'] = idn_to_ascii($url['host']);
+		$n = $url['scheme'] . '://' . $url['host'];
+
+		if (!empty($url['port'])
+			&& !($url['port'] == 80 && $url['scheme'] === 'http')
+			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
+			$n .= ':' . $url['port'];
+		}
+
+		$n .= $url['path'] ?? '/';
+
+		if (!empty($url['query'])) {
+			$n .= '?' . $url['query'];
+		}
+
+		return filter_var($n, FILTER_VALIDATE_URL) !== false;
+	}
+
+	/**
+	 * Validates that a URL is valid and is not an IP address or some kind of DNS poisoning
+	 * (eg. http://localhost.mydomain.com/ points to 127.0.0.1)
+	 */
+	static public function validateExternalURL(string $url, ?string $allowed_path = null): array
+	{
+		$parts = parse_url($url);
+		$parts['scheme'] ??= '';
+		$parts['host'] ??= '';
+
+		if (null !== $allowed_path
+			&& !empty($parts['path'])
+			&& $parts['path'] !== $allowed_path) {
+			throw new \InvalidArgumentException(sprintf('Unexpected path "%s" in URL (only path allowed is "%s")', $parts['path'], $allowed_path));
+		}
+
+		if (!in_array($parts['scheme'], ['http', 'https'])) {
+			throw new \InvalidArgumentException(sprintf('Invalid scheme "%s" in URL', $parts['scheme']));
+		}
+
+		if (!empty($parts['port'])) {
+			throw new \InvalidArgumentException('Unauthorized port in URL');
+		}
+
+		if (!trim($parts['host']) || preg_match('/^[\d.]+$|\[/', $parts['host'])) {
+			throw new \InvalidArgumentException(sprintf('Unauthorized host "%s" in URL', $parts['host']));
+		}
+
+		$parts['host'] = idn_to_ascii($parts['host']);
+
+		static $host_to_ip = [];
+
+		// This only returns IPv4 addresses, making IPv6 only hosts unreachable
+		$host_to_ip[$parts['host']] ??= gethostbyname($parts['host']);
+		$ip = $host_to_ip[$parts['host']];
+
+		// Don't allow to make requests to localhost or internal networks
+		if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+			throw new \InvalidArgumentException(sprintf('Unauthorized resolved IP "%s" for host "%s" in URL', $ip, $parts['host']));
+		}
+
+		return $parts;
+	}
+
 	static public function isLocalURL(string $url): bool
 	{
 		if (substr($url, 0, 1) === '/'
@@ -926,39 +1003,6 @@ class Utils
 	static public function getRandomTextFilePath(string $lang = 'fr'): string
 	{
 		return sprintf('%s/include/data/locales/%s/random.txt', ROOT, $lang);
-	}
-
-	/**
-	 * Validate URL, allowing IDN domain names
-	 */
-	static public function validateURL(string $url): bool
-	{
-		$url = parse_url($url);
-
-		if (empty($url['host']) || empty($url['scheme'])) {
-			return false;
-		}
-
-		if (!in_array($url['scheme'], ['http', 'https'], true)) {
-			return false;
-		}
-
-		$url['host'] = idn_to_ascii($url['host']);
-		$n = $url['scheme'] . '://' . $url['host'];
-
-		if (!empty($url['port'])
-			&& !($url['port'] == 80 && $url['scheme'] === 'http')
-			&& !($url['port'] == 443 && $url['scheme'] === 'https')) {
-			$n .= ':' . $url['port'];
-		}
-
-		$n .= $url['path'] ?? '/';
-
-		if (!empty($url['query'])) {
-			$n .= '?' . $url['query'];
-		}
-
-		return filter_var($n, FILTER_VALIDATE_URL) !== false;
 	}
 
 	static public function normalizePhoneNumber(string $n): string
@@ -2040,7 +2084,7 @@ class Utils
 		}
 
 		if (!file_exists($target)) {
-			throw new \RuntimeException('PDF command failed: ' . $output);
+			throw new \RuntimeException(sprintf('PDF command "%s" failed: %s', $cmd, $output));
 		}
 
 		if (PDF_USAGE_LOG) {
@@ -2347,6 +2391,10 @@ class Utils
 	static public function showProfiler(): void
 	{
 		if (!defined('Paheko\PROFILER_START_TIME')) {
+			return;
+		}
+
+		if (preg_match('/curl|wget/', $_SERVER['HTTP_USER_AGENT'] ?? '')) {
 			return;
 		}
 

@@ -70,7 +70,8 @@ class Server
 		}
 
 		try {
-			if (self::requireAuth()) {
+			// Stop here if auth didn't suceed
+			if (!self::requireAuth()) {
 				return true;
 			}
 		}
@@ -89,7 +90,7 @@ class Server
 		$session = Session::getInstance();
 
 		if ($session->isLogged()) {
-			return false;
+			return true;
 		}
 
 		$login = $_SERVER['PHP_AUTH_USER'] ?? null;
@@ -99,26 +100,13 @@ class Server
 			// Not logged-in, require login
 			http_response_code(401);
 			header('WWW-Authenticate: Basic realm="Please login"');
-			return true;
+			return false;
 		}
 
 		if ($session->loginAPI($login, $password)) {
-			return false;
+			return true;
 		}
 
-		// FIXME/TODO: use app passwords
-		$ignore_otp = true;
-
-		$logged = $session->login($login, $password, false, $ignore_otp);
-
-		if (!$ignore_otp && $logged === $session::REQUIRE_OTP) {
-			throw new Exception('Votre compte utilise la double authentification, vous ne pouvez pas utiliser votre mot de passe pour vous connecter à WebDAV.', 403);
-			return false;
-		}
-		elseif ($logged === false) {
-			throw new Exception('Identifiant inconnu ou mauvaise mot de passe', 403);
-		}
-
-		return false;
+		return $session->loginDAV($login, $password);
 	}
 }

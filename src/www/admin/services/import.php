@@ -27,8 +27,7 @@ $form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf(f('import') && $csv->loaded(), function () use (&$csv) {
-	$csv->skip((int)f('skip_first_line'));
-	$csv->setTranslationTable(f('translation_table'));
+	$csv->setTranslationTableFrom(null);
 
 	try {
 		if (!$csv->ready()) {

@@ -11,6 +11,8 @@ use Paheko\Users\Session;
 use Paheko\Accounting\Years;
 use Paheko\Entities\Accounting\Transaction;
 
+use KD2\Form;
+
 use function Paheko\qg;
 
 class AdvancedSearch extends A_S
@@ -363,7 +365,7 @@ class AdvancedSearch extends A_S
 
 	public function defaults(): \stdClass
 	{
-		$id_year = intval(qg('year')) ?: null;
+		$id_year = Form::getQueryInt('year') ?: null;
 		$id_year ??= Years::getUserSelectedYearId();
 		$id_year ??= Years::getCurrentOpenYearId();
 
@@ -383,19 +385,19 @@ class AdvancedSearch extends A_S
 			],
 		];
 
-		if (null !== qg('type')) {
+		if (null !== Form::getQueryString('type')) {
 			$group['conditions'][] = [
 				'column' => 'type',
 				'operator' => '= ?',
-				'values' => [(int)qg('type')],
+				'values' => [(int)Form::getQueryString('type')],
 			];
 		}
 
-		if (null !== qg('account')) {
+		if (null !== Form::getQueryString('account')) {
 			$group['conditions'][] = [
 				'column' => 'account_code',
 				'operator' => '= ?',
-				'values' => [qg('account')],
+				'values' => [(string)Form::getQueryString('account')],
 			];
 		}
 

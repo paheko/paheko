@@ -40,7 +40,7 @@ class Storage extends AbstractStorage
 
 		$access = Files::listReadAccessContexts($this->session);
 
-		$this->cache = ['' => Files::get('')];
+		$this->cache = ['' => Files::get(null)];
 
 		foreach ($access as $context => $name) {
 			$this->cache[$context] = Files::get($context);
@@ -52,14 +52,23 @@ class Storage extends AbstractStorage
 	{
 		$this->populateRootCache();
 
-		$uri = $uri ?: null;
+		$uri = $uri ?: '';
 
 		if (!isset($this->cache[$uri])) {
-			$this->cache[$uri] = Files::get($uri);
+			$file = Files::get($uri);
 
-			if (!$this->cache[$uri]) {
+			if (!$file) {
 				return null;
 			}
+
+			// Don't allow access to extensions files from WebDAV,
+			// only extensions can manage them
+			// (TODO: allow access using WebDAV, but only from the extension code)
+			if ($file->context() === $file::CONTEXT_EXTENSIONS) {
+				return null;
+			}
+
+			$this->cache[$uri] = $file;
 		}
 
 		return $this->cache[$uri];
@@ -197,7 +206,7 @@ class Storage extends AbstractStorage
 				return $file->md5 ?? null;
 			// NextCloud stuff
 			case NextCloud::PROP_NC_HAS_PREVIEW:
-				return $file->image ? 'true' : 'false';
+				return $file->hasThumbnail() ? 'true' : 'false';
 			case NextCloud::PROP_NC_IS_ENCRYPTED:
 				return 'false';
 			case NextCloud::PROP_OC_SHARETYPES:
@@ -228,8 +237,15 @@ class Storage extends AbstractStorage
 					NextCloud::PERM_RENAME => $file->canRename($this->session),
 					NextCloud::PERM_MOVE => $file->canRename($this->session),
 					NextCloud::PERM_CREATE_FILES_DIRS => $file->canCreateHere($this->session),
+					NextCloud::PERM_SHARE => $file->canShare($this->session),
 				];
 
+				if (array_key_exists(NextCloud::PERM_SHARE, $permissions)
+					&& $file->isShared()) {
+					$permissions[NextCloud::PERM_SHARED] = true;
+				}
+
+				// Remove falsy values
 				$permissions = array_filter($permissions, fn($a) => $a);
 				return implode('', array_keys($permissions));
 			case 'DAV::quota-available-bytes':

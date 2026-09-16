@@ -3,6 +3,7 @@
 namespace Paheko\Files\WebDAV;
 
 use KD2\WebDAV\NextCloud as WebDAV_NextCloud;
+use KD2\WebDAV\NextCloud\SharesInterface;
 use KD2\WebDAV\Exception as WebDAV_Exception;
 
 use Paheko\Config;
@@ -10,11 +11,15 @@ use Paheko\Utils;
 use Paheko\UserException;
 use Paheko\Users\Users;
 use Paheko\Files\Files;
+use Paheko\Files\Shares;
 use Paheko\Entities\Files\File;
+use Paheko\Entities\Files\Share;
 
 use const Paheko\{LOCAL_SECRET_KEY, ADMIN_URL, CACHE_ROOT, WWW_URL, ROOT};
 
-class NextCloud extends WebDAV_NextCloud
+use DateTimeInterface;
+
+class NextCloud extends WebDAV_NextCloud implements SharesInterface
 {
 	protected string $temporary_chunks_path;
 	protected string $prefix = File::CONTEXT_DOCUMENTS . '/';
@@ -251,5 +256,21 @@ class NextCloud extends WebDAV_NextCloud
 	protected function nc_avatar(): void
 	{
 		Users::serveAvatar($_SERVER['REQUEST_URI'] ?? '');
+	}
+
+	public function createShareLink(string $uri, array $permissions, ?DateTimeInterface $expiry, ?string $password): string
+	{
+		$option = in_array(self::PERM_WRITE, $permissions) ? Share::EDIT : Share::VIEW;
+
+		$file = Files::get($uri);
+
+		if (!$file) {
+			throw new WebDAV_Exception('Unknown file path', 404);
+		}
+
+		$share = Shares::create($file, Session::getInstance(), $option, null, $password);
+		$share->set('expiry', $expiry);
+		$share->save();
+		return $share->url();
 	}
 }

@@ -200,7 +200,7 @@ class User extends Entity
 				$this->assert(preg_match('/^\d{4}-\d{2}$/', $value), sprintf('"%s" : le format attendu est de la forme AAAA-MM', $field->label));
 			}
 			elseif ($field->type === 'url') {
-				$this->assert(Utils::validateURL($value), sprintf('"%s" : adresse invalide', $field->label));
+				$this->assert(Utils::isValidURL($value), sprintf('"%s" : adresse invalide', $field->label));
 			}
 		}
 
@@ -631,10 +631,10 @@ class User extends Entity
 		$source ??= $_POST;
 
 		if ($require_password_confirmation) {
-			$this->verifyPassword($source['password_check']);
+			$this->verifyPassword($source['password_check'] ?? '');
 		}
 
-		$source['password'] = trim($source['password']);
+		$source['password'] = trim($source['password'] ?? '');
 		$session = Session::getInstance();
 
 		// Maximum bcrypt password length
@@ -1103,5 +1103,53 @@ class User extends Entity
 		}
 
 		$this->_permissions = $all_permissions;
+	}
+
+	public function createAppPassword(string $name, ?int $id_plugin = null): string
+	{
+		$name = trim($name);
+
+		if (!strlen($name)) {
+			throw new UserException('Le nom de l\'application ne peut rester vide');
+		}
+
+		$password = Security::getRandomPassword(14);
+
+		$db = DB::getInstance();
+		$db->insert('users_app_passwords', [
+			'name'      => $name,
+			'password'  => password_hash($password, PASSWORD_DEFAULT),
+			'id_user'   => $this->id(),
+			'id_plugin' => $id_plugin,
+		]);
+
+		return $db->lastInsertId() . '.' . $password;
+	}
+
+	public function deleteAppPassword(int $id): void
+	{
+		DB::getInstance()->delete('users_app_passwords', 'id = ? AND id_user = ?', $id, $this->id());
+	}
+
+	public function listAppPasswords(): array
+	{
+		return DB::getInstance()->get('SELECT * FROM users_app_passwords WHERE id_user = ? ORDER BY name COLLATE U_NOCASE;', $this->id());
+	}
+
+	public function useAppPassword(string $password): ?int
+	{
+		$id = (int) strtok($password, '.');
+		$password = strtok('');
+
+		$db = DB::getInstance();
+		$hashed_password = $db->firstColumn('SELECT password FROM users_app_passwords WHERE id_user = ? AND id = ?;', $this->id(), $id);
+
+		if (!$hashed_password || !password_verify($password, $hashed_password)) {
+			return null;
+		}
+
+		// Update last_seen timestamp
+		$db->preparedQuery('UPDATE users_app_passwords SET last_seen = ? WHERE id = ?;', new \DateTime, $id);
+		return $id;
 	}
 }
