@@ -208,7 +208,7 @@ class DynamicField extends Entity
 		'preferences TEXT NULL,'
 	];
 
-	const PROTECTED_SYSTEM_FIELDS = [
+	const PROTECTED_FIELDS = [
 		'password',
 		'otp_secret',
 		'otp_recovery_codes',

@@ -770,12 +770,10 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 		$columns = array_keys(DynamicField::SYSTEM_FIELDS);
-		$columns = array_diff($columns, DynamicField::PROTECTED_SYSTEM_FIELDS);
 
 		foreach ($this->_fields as $field) {
-			// Omit protected fields from view
 			if ($field->isPassword()) {
-				continue;
+				$columns[] = $field->name;
 			}
 			elseif ($field->type === 'virtual') {
 				$columns[] = sprintf('(%s) AS %s', $field->sql, $db->quoteIdentifier($field->name));
@@ -784,6 +782,15 @@ class DynamicFields
 				$columns[] = $db->quoteIdentifier($field->name);
 			}
 		}
+
+		foreach ($columns as &$column) {
+			// Omit protected fields from view
+			if (in_array($column, DynamicField::PROTECTED_FIELDS)) {
+				$column = sprintf('NULL AS %s', $column);
+			}
+		}
+
+		unset($column);
 
 		$columns = implode(', ', $columns);
 
