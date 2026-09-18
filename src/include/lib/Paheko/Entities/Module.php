@@ -172,6 +172,11 @@ class Module extends Entity
 		}
 
 		if ($use_local && ($file = Files::get($this->path(self::META_FILE)))) {
+			// Don't try to fetch if user has created a module.ini directory instead of file
+			if ($file->isDir()) {
+				return null;
+			}
+
 			$ini = $file->fetch();
 			$from_dist = false;
 		}
