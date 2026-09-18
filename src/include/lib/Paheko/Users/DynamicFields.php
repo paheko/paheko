@@ -769,11 +769,12 @@ class DynamicFields
 	public function getViewStatement(string $table_name, string $view_name, bool $temp = false): string
 	{
 		$db = DB::getInstance();
-		$columns = ['id'];
+		$columns = array_keys(DynamicField::SYSTEM_FIELDS);
+		$columns = array_diff($columns, DynamicField::PROTECTED_SYSTEM_FIELDS);
 
 		foreach ($this->_fields as $field) {
-			if ($field->isProtected()) {
-				// Omit protected fields from view
+			// Omit protected fields from view
+			if ($field->isPassword()) {
 				continue;
 			}
 			elseif ($field->type === 'virtual') {

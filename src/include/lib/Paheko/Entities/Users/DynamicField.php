@@ -208,7 +208,7 @@ class DynamicField extends Entity
 		'preferences TEXT NULL,'
 	];
 
-	const PROTECTED_FIELDS = [
+	const PROTECTED_SYSTEM_FIELDS = [
 		'password',
 		'otp_secret',
 		'otp_recovery_codes',
@@ -259,11 +259,6 @@ class DynamicField extends Entity
 	public function canSetDefaultValue(): bool
 	{
 		return in_array($this->type ?? null, ['text', 'textarea', 'number', 'select', 'multiple']);
-	}
-
-	public function isProtected(): bool
-	{
-		return in_array($this->name, self::PROTECTED_FIELDS, true);
 	}
 
 	public function isPreset(): bool
