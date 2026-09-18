@@ -208,6 +208,13 @@ class DynamicField extends Entity
 		'preferences TEXT NULL,'
 	];
 
+	const PROTECTED_FIELDS = [
+		'password',
+		'otp_secret',
+		'otp_recovery_codes',
+		'pgp_key',
+	];
+
 	public function sql_type(): string
 	{
 		if ($this->type === 'checkbox') {
@@ -252,6 +259,11 @@ class DynamicField extends Entity
 	public function canSetDefaultValue(): bool
 	{
 		return in_array($this->type ?? null, ['text', 'textarea', 'number', 'select', 'multiple']);
+	}
+
+	public function isProtected(): bool
+	{
+		return in_array($this->name, self::PROTECTED_FIELDS, true);
 	}
 
 	public function isPreset(): bool
@@ -390,7 +402,7 @@ class DynamicField extends Entity
 
 				// Really try to create a view, as some errors may happen when we create the view
 				// (eg. "parameters are not allowed in views" is the field contains $name or :name)
-				$db->exec(sprintf('CREATE TEMP VIEW %s AS SELECT *, (%s) AS new_field FROM users;', $view_name, $this->sql));
+				$db->exec(DynamicFields::getInstance()->getViewStatement(User::TABLE, $view_name, true));
 
 				// Just to be super-sure
 				$db->firstColumn(sprintf('SELECT * FROM %s;', $view_name));

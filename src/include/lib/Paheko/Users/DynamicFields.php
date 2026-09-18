@@ -762,26 +762,37 @@ class DynamicFields
 	public function rebuildView(string $table_name = User::TABLE): void
 	{
 		$db = DB::getInstance();
-		$virtual_fields = [];
+		$view_name = $table_name . '_view';
+		$db->exec($this->getViewStatement($table_name, $view_name));
+	}
 
-		foreach ($this->fieldsByType('virtual') as $field) {
-			$virtual_fields[] = sprintf('(%s) AS %s', $field->sql, $field->name);
+	public function getViewStatement(string $table_name, string $view_name, bool $temp = false): string
+	{
+		$db = DB::getInstance();
+		$columns = ['id'];
+
+		foreach ($this->_fields as $field) {
+			if ($field->isProtected()) {
+				// Omit protected fields from view
+				continue;
+			}
+			elseif ($field->type === 'virtual') {
+				$columns[] = sprintf('(%s) AS %s', $field->sql, $db->quoteIdentifier($field->name));
+			}
+			else {
+				$columns[] = $db->quoteIdentifier($field->name);
+			}
 		}
 
-		$virtual_fields = implode(', ', $virtual_fields);
+		$columns = implode(', ', $columns);
 
-		if (strlen($virtual_fields)) {
-			$virtual_fields = ', ' . $virtual_fields;
-		}
-
-		$sql = sprintf('
-			DROP VIEW IF EXISTS %s_view;
-			CREATE VIEW IF NOT EXISTS %1$s_view
-			AS
-				SELECT * %s
-				FROM %1$s;
-			', $table_name, $virtual_fields);
-		$db->exec($sql);
+		return sprintf('DROP VIEW IF EXISTS %s; '
+			. 'CREATE %s VIEW IF NOT EXISTS %1$s AS SELECT %s FROM %s;',
+			$view_name,
+			$temp ? 'TEMP' : '',
+			$columns,
+			$table_name
+		);
 	}
 
 	/**
