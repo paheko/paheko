@@ -123,6 +123,13 @@ class AdvancedSearch extends A_S
 				'select'   => 'y.label',
 				'where'    => 't.id_year %s',
 			],
+			'has_project' => [
+				'textMatch'=> true,
+				'label'    => 'Projet analytique',
+				'type'     => 'boolean',
+				'null'     => false,
+				'select'   => 'p.id IS NOT NULL',
+			],
 			'project_code' => [
 				'textMatch'=> true,
 				'label'    => 'Code projet',
