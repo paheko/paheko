@@ -773,6 +773,7 @@ class DynamicFields
 
 		foreach ($this->_fields as $field) {
 			if ($field->isPassword()) {
+				// Don't escape, or column filtering for TEMP view won't work
 				$columns[] = $field->name;
 			}
 			elseif ($field->type === 'virtual') {
@@ -783,14 +784,16 @@ class DynamicFields
 			}
 		}
 
-		foreach ($columns as &$column) {
-			// Omit protected fields from view
-			if (in_array($column, DynamicField::PROTECTED_FIELDS)) {
-				$column = sprintf('NULL AS %s', $column);
+		if ($temp) {
+			foreach ($columns as &$column) {
+				// Omit protected fields from TEMP view
+				if (in_array($column, DynamicField::PROTECTED_FIELDS)) {
+					$column = sprintf('NULL AS %s', $column);
+				}
 			}
-		}
 
-		unset($column);
+			unset($column);
+		}
 
 		$columns = implode(', ', $columns);
 
