@@ -437,6 +437,7 @@ code,label,description,position,bookmark
 7073,Ventes de dons en nature,"Ventes d’objets donnés, sans être transformés (exemple : vêtements dans une ressourcerie).",Produit,
 708,Produits des activités annexes,,Produit,
 7081,Produits des services exploités dans l'intérêt du personnel,,Produit,
+7082,Commissions et courtages,"Par exemple commissions sur les ventes d'une bourse aux vélos",Produit,
 7083,Locations diverses,,Produit,
 7084,Mise à disposition de personnel facturée,"Par exemple via un groupement d’employeur, du portage salarial, etc.",Produit,Favori
 7085,Ports et frais accessoires facturés,,Produit,
