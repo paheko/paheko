@@ -2081,7 +2081,7 @@ class Utils
 		}
 		elseif ($name === 'weasyprint') {
 			$timeout = 60;
-			$cmd .= ' %1$s %2$s';
+			$cmd .= ' --encoding utf-8 %1$s %2$s';
 		}
 
 		$cmd = sprintf($cmd, self::escapeshellarg($source), self::escapeshellarg($target));
