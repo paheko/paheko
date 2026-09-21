@@ -269,7 +269,13 @@ class NextCloud extends WebDAV_NextCloud implements SharesInterface
 			throw new WebDAV_Exception('Unknown file path', 404);
 		}
 
-		$share = Shares::create($file, Session::getInstance(), $option, null, $password);
+		$session = Session::getInstance();
+
+		if (!$file->canShare($session)) {
+			throw new WebDAV_Exception('You don\'t have the permission to share this file', 403);
+		}
+
+		$share = Shares::create($file, $session, $option, null, $password);
 		$share->set('expiry', $expiry);
 		$share->save();
 		return $share->url();
