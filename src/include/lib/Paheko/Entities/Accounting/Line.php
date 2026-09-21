@@ -2,6 +2,7 @@
 
 namespace Paheko\Entities\Accounting;
 
+use Paheko\Config;
 use Paheko\DB;
 use Paheko\Entity;
 use Paheko\ValidationException;
@@ -107,5 +108,33 @@ class Line extends Entity
 	public function isDeposited(): bool
 	{
 		return $this->hasStatus(self::STATUS_DEPOSITED);
+	}
+
+	/**
+	 * Only set id_project if Config::$analytical_mandatory allows it
+	 */
+	public function setProjectId(?int $id, ?bool $is_charge_or_product = null): void
+	{
+		static $charge_product_accounts = [];
+
+		if (null === $id) {
+			$this->set('id_project', null);
+			return;
+		}
+
+		$config = Config::getInstance();
+
+		if (!$config->analytical_mandatory) {
+			if (null === $is_charge_or_product) {
+				$charge_product_accounts[$this->id_account] ??= DB::getInstance()->test('acc_accounts', 'id = ? AND (position = ? OR position = ?)', $this->id_account, Account::EXPENSE, Account::REVENUE);
+				$is_charge_or_product = $charge_product_accounts[$this->id_account];
+			}
+
+			if (!$is_charge_or_product) {
+				return;
+			}
+		}
+
+		$this->set('id_project', $id);
 	}
 }
