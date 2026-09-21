@@ -260,6 +260,7 @@ class NextCloud extends WebDAV_NextCloud implements SharesInterface
 
 	public function createShareLink(string $uri, array $permissions, ?DateTimeInterface $expiry, ?string $password): string
 	{
+		$this->requireAuth();
 		$option = in_array(self::PERM_WRITE, $permissions) ? Share::EDIT : Share::VIEW;
 
 		$file = Files::get($uri);
