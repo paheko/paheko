@@ -51,6 +51,13 @@ if (!$current) {
 
 	$current = $first_file->parent;
 }
+else {
+	$file = Files::get($current);
+
+	if (!$file || !$file->canRead($session)) {
+		throw new UserException('Fichier introuvable');
+	}
+}
 
 $parent = Utils::dirname($current);
 
