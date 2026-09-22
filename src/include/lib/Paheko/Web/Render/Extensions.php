@@ -6,7 +6,7 @@ use Paheko\Entities\Files\File;
 
 use Paheko\Plugins;
 use Paheko\Utils;
-use KD2\SkrivLite;
+use KD2\HTML\Markdown;
 
 use const Paheko\{ADMIN_URL, ROOT};
 
@@ -295,6 +295,7 @@ class Extensions
 		$svg = substr($name, -4) == '.svg';
 		$file_url = $file->url();
 		$href = $url ?? $file_url;
+		$href = Markdown::filterURL($href);
 
 		if ($svg || !$thumb_size) {
 			$thumb_url = $file_url;
