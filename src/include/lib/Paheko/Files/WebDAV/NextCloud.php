@@ -128,7 +128,7 @@ class NextCloud extends WebDAV_NextCloud implements SharesInterface
 
 		while (!feof($pointer)) {
 			$data = fread($pointer, 8192);
-			$used += strlen($used);
+			$used += strlen($data);
 
 			if ($used > $quota['total']) {
 				$this->deleteChunks($login, $name);
