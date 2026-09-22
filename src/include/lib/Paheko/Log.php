@@ -103,7 +103,8 @@ class Log
 			return;
 		}
 
-		if ($type !== self::LOGIN_FAIL) {
+		if ($type !== self::LOGIN_FAIL
+			&& $type !== self::LOGIN_FAIL_OTP) {
 			$keep = Config::getInstance()->log_retention;
 
 			// Don't log anything
@@ -130,14 +131,26 @@ class Log
 
 		$days_delete = $config->log_retention;
 
+		$except = [
+			self::LOGIN_RECOVER,
+			self::LOGIN_FAIL,
+			self::LOGIN_FAIL_OTP,
+		];
+
+		$except = $db->where('type', 'NOT IN', $except);
+
 		// Delete old logs according to configuration
 		$db->exec(sprintf('DELETE FROM logs
-			WHERE type != %d AND type != %d AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
-			self::LOGIN_FAIL, self::LOGIN_RECOVER, $days_delete));
+			WHERE %s AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
+			$db->where('type', 'NOT IN', $except),
+			$days_delete
+		));
 
 		// Delete failed login attempts and reminders after 30 days
-		$db->exec(sprintf('DELETE FROM logs WHERE (type = %d OR type = %d) AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
-			self::LOGIN_FAIL, self::LOGIN_RECOVER, 30));
+		$db->exec(sprintf('DELETE FROM logs WHERE %s AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
+			$db->where('type', 'IN', $except),
+			30
+		));
 	}
 
 	/**
