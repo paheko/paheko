@@ -137,8 +137,6 @@ class Log
 			self::LOGIN_FAIL_OTP,
 		];
 
-		$except = $db->where('type', 'NOT IN', $except);
-
 		// Delete old logs according to configuration
 		$db->exec(sprintf('DELETE FROM logs
 			WHERE %s AND created < datetime(\'now\', \'localtime\', \'-%d days\');',
