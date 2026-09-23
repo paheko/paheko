@@ -214,21 +214,22 @@ class NextCloud extends WebDAV_NextCloud implements SharesInterface
 
 	public function serveThumbnail(string $uri, int $width, int $height, bool $crop = false, bool $preview = false): void
 	{
-		if (!preg_match('/\.(?:jpe?g|gif|png|webp)$/', $uri)) {
-			http_response_code(404);
-			return;
-		}
-
 		$this->requireAuth();
 		$uri = preg_replace(self::WEBDAV_BASE_REGEXP, '', $uri);
-		$file = Files::get(File::CONTEXT_DOCUMENTS . '/' . $uri);
+
+		// Add prefix for nextcloud/owncloud clients, but not for HTTP DAV client
+		if (preg_match('/mirall|ownCloud|opencloud|nextcloud/i', $_SERVER['HTTP_USER_AGENT'] ?? '')) {
+			$uri = $this->prefix . $uri;
+		}
+
+		$file = Files::get($uri);
 
 		if (!$file) {
 			throw new WebDAV_Exception('Not found', 404);
 		}
 
-		if (!$file->image) {
-			throw new WebDAV_Exception('Not an image', 404);
+		if (!$file->hasThumbnail()) {
+			throw new WebDAV_Exception('No thumbnail', 404);
 		}
 
 		if ($crop) {
@@ -241,7 +242,7 @@ class NextCloud extends WebDAV_NextCloud implements SharesInterface
 			$size = '150px';
 		}
 
-		$file->validateCanRead();
+		$file->validateCanRead(Session::getInstance());
 
 		$this->server->log('Serving thumbnail for: %s - size: %s', $uri, $size);
 
