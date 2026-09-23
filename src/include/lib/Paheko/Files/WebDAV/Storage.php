@@ -254,6 +254,12 @@ class Storage extends AbstractStorage
 				return Files::getUsedQuota();
 			case NextCloud::PROP_OC_SIZE:
 				return $file->getRecursiveSize();
+			case WOPI::PROP_FILE_URI:
+				return $file->getWOPIFileURL();
+			case WOPI::PROP_TOKEN_TTL:
+				return $file->getWOPITokenTTL();
+			case WOPI::PROP_TOKEN:
+				return $file->createWopiToken(!$file->canWrite($this->session), $this->session::getUserId());
 			default:
 				break;
 		}

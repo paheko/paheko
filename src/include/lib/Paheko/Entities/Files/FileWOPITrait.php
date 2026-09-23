@@ -3,41 +3,23 @@ declare(strict_types=1);
 
 namespace Paheko\Entities\Files;
 
+use Paheko\Files\Files;
 use Paheko\Files\WebDAV\WebDAV;
 use Paheko\Users\Session;
 use Paheko\Utils;
 
 use KD2\WebDAV\WOPI;
 
-use const Paheko\{WOPI_DISCOVERY_URL, SHARED_CACHE_ROOT, BASE_URL, LOCAL_SECRET_KEY};
+use const Paheko\{BASE_URL, LOCAL_SECRET_KEY};
 
 trait FileWOPITrait
 {
 	public function getWopiURL(?string $action = null): ?string
 	{
-		if (!WOPI_DISCOVERY_URL) {
-			return null;
-		}
-
-		Utils::safe_mkdir(SHARED_CACHE_ROOT, null, true);
-		$cache_file = sprintf('%s/wopi_%s.json', SHARED_CACHE_ROOT, md5(WOPI_DISCOVERY_URL));
-		static $data = null;
+		$data = Files::getWOPIDiscovery();
 
 		if (null === $data) {
-			// We are caching discovery for 15 days, there is no need to request the server all the time
-			if (file_exists($cache_file) && filemtime($cache_file) >= 3600*24*15) {
-				$data = json_decode(file_get_contents($cache_file), true);
-			}
-
-			if (!$data) {
-				try {
-					$data = WOPI::discover(WOPI_DISCOVERY_URL);
-					file_put_contents($cache_file, json_encode($data));
-				}
-				catch (\RuntimeException $e) {
-					return null;
-				}
-			}
+			return null;
 		}
 
 		$ext = $this->extension();
@@ -83,9 +65,9 @@ trait FileWOPITrait
 			'permission' => $readonly ? 'readonly' : '',
 		]);
 
-		$src = BASE_URL . 'wopi/files/' . $this->hash_id;
-		$ttl = time()+(3600*10);
-		$token = $this->createWopiToken($ttl, $readonly, $session ? $session::getUserId() : null);
+		$src = $this->getWOPIFileURL();
+		$ttl = $this->getWOPITokenTTL();
+		$token = $this->createWopiToken($readonly, $session ? $session::getUserId() : null);
 
 		if ($frame_only) {
 			return $wopi->getEditorFrameHTML($url, $src, $token, $ttl);
@@ -95,8 +77,20 @@ trait FileWOPITrait
 		}
 	}
 
-	protected function createWopiToken(int $ttl, bool $readonly, ?int $user_id): string
+	public function getWOPIFileURL(): string
 	{
+		return BASE_URL . 'wopi/files/' . $this->hash_id;
+	}
+
+	public function getWOPITokenTTL(): int
+	{
+		// Tokens are valid for 10 hours
+		return time() + (3600*10);
+	}
+
+	public function createWopiToken(bool $readonly, ?int $user_id): string
+	{
+		$ttl = $this->getWOPITokenTTL();
 		$random = substr(sha1(random_bytes(10)), 0, 10);
 		$hash_id = $this->hash_id;
 		$user_id = (int) $user_id;

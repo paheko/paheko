@@ -2,6 +2,9 @@
 
 namespace Paheko\Files\WebDAV;
 
+use Paheko\Files\Files;
+use Paheko\Utils;
+
 use KD2\WebDAV\Exception;
 use KD2\WebDAV\WOPI;
 
@@ -21,6 +24,29 @@ class Server
 
 		if (0 !== strpos($uri, '/wopi/')) {
 			return false;
+		}
+
+		// Serve cache of discovery
+		if ($uri === '/wopi/discovery.json') {
+			if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+				http_response_code(405);
+				return true;
+			}
+
+			$path = Files::getWOPIDiscoveryCachePath();
+
+			if (!$path) {
+				throw new Exception('WOPI support is unavailable', 404);
+			}
+
+			$modified = filemtime($path);
+			$max_age = time() - $modified;
+			Utils::HTTPCache(md5($path), $modified, $max_age, false);
+
+			http_response_code(200);
+			header('Content-Type: application/json');
+			readfile($path);
+			return true;
 		}
 
 		$wopi = new WOPI;

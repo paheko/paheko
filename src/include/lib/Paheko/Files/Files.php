@@ -18,8 +18,16 @@ use Paheko\Entities\Web\Page;
 use KD2\DB\EntityManager as EM;
 use KD2\DB\DB_Exception;
 use KD2\ZipWriter;
+use KD2\WebDAV\WOPI;
 
-use const Paheko\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG, FILE_VERSIONING_POLICY};
+use const Paheko\{
+	WOPI_DISCOVERY_URL,
+	SHARED_CACHE_ROOT,
+	FILE_STORAGE_BACKEND,
+	FILE_STORAGE_QUOTA,
+	FILE_STORAGE_CONFIG,
+	FILE_VERSIONING_POLICY
+};
 
 class Files
 {
@@ -1184,5 +1192,53 @@ class Files
 		}
 
 		return 'document';
+	}
+
+	static public function getWOPIDiscoveryCachePath(): ?string
+	{
+		if (!WOPI_DISCOVERY_URL) {
+			return null;
+		}
+
+		Utils::safe_mkdir(SHARED_CACHE_ROOT, null, true);
+		$path = sprintf('%s/wopi_%s.json', SHARED_CACHE_ROOT, md5(WOPI_DISCOVERY_URL));
+
+		// We are caching discovery for 15 days, there is no need to request the server all the time
+		if (file_exists($path) && filemtime($path) >= 3600*24*15) {
+			return $path;
+		}
+
+		try {
+			$data = WOPI::discover(WOPI_DISCOVERY_URL);
+		}
+		catch (\RuntimeException $e) {
+			return null;
+		}
+
+		if (!isset($data['extensions'], $data['mimetypes'])
+			|| !is_array($data['extensions'])
+			|| !is_array($data['mimetypes'])) {
+			throw new \LogicException('Malformed WOPI cache');
+		}
+
+		file_put_contents($path, json_encode($data));
+		return $path;
+	}
+
+	static public function getWOPIDiscovery(): ?array
+	{
+		static $data = null;
+
+		if (null === $data) {
+			$path = self::getWOPIDiscoveryCachePath();
+
+			if (null === $path) {
+				return null;
+			}
+
+			$data = json_decode(file_get_contents($path), true);
+		}
+
+		return $data;
 	}
 }

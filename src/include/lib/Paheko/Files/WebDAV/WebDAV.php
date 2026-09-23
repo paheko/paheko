@@ -18,12 +18,12 @@ class WebDAV extends KD2_WebDAV
 
 		if (null !== $out) {
 			$options = [
-				'wopi_discovery_url' => WOPI_DISCOVERY_URL,
-				'server_url'         => WWW_URL,
-				'webdav_url'         => WWW_URL . 'dav/',
-				'autosave'           => true,
-				'lang'               => 'fr',
-				'has_trash'          => true,
+				'wopi_discovery_cache_url' => WWW_URL . 'wopi/discovery.json',
+				'server_url' => WWW_URL,
+				'webdav_url' => WWW_URL . 'dav/',
+				'autosave'   => true,
+				'lang'       => 'fr',
+				'has_trash'  => true,
 			];
 
 			if (Session::getInstance()->canAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN)) {
@@ -36,7 +36,6 @@ class WebDAV extends KD2_WebDAV
 
 			$out = str_replace('</head>', sprintf('<script type="text/javascript" src="%s"></script>
 				<script type="text/javascript">
-				browser.getThumbnailURL = (path, size=150, etag) => `${browser.server_url}${path}.${size}px.webp?h=${etag}`;
 				window.onload = () => browser.init(%s, %s);</script>', $js, json_encode($uri), json_encode($options)), $out);
 			$out = str_replace('<body>', '<body><noscript>Please enable javascript</noscript><div style="opacity:0">', $out);
 		}

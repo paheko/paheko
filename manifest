@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Replace\swebdav\sbrowser
-D 2026-09-23T12:25:25.870
+C Implement\snew\sWOPI\sdiscovery\scache\sendpoint
+D 2026-09-23T12:25:53.674
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -136,7 +136,7 @@ F src/include/lib/Paheko/Entities/Files/File.php 94cbceb33df06d6e8e54fb2418cfc96
 F src/include/lib/Paheko/Entities/Files/FilePermissionsTrait.php d65ca27b2b9016b92ab8803c1cedaee5ee77851dbece306896375a1aeb417dc8
 F src/include/lib/Paheko/Entities/Files/FileThumbnailTrait.php bceb6d9f9e170acba056a519296a5cbf3e1f3b07c3246ce2084f5729dc32dbaf
 F src/include/lib/Paheko/Entities/Files/FileVersionsTrait.php fc54a29afb134b5d42f7b4783e8712ec8d03c71c3604a7df3d591fd5eab66a4e
-F src/include/lib/Paheko/Entities/Files/FileWOPITrait.php 9a6efb5aae11b4b0132cd97a8de517c6b5c8856a6acd84e2e1bbadf7ea54200d
+F src/include/lib/Paheko/Entities/Files/FileWOPITrait.php 03778a4f6a28b7d7cd17be85f30b2d220c10617a332dc240e72a2c33902e714b
 F src/include/lib/Paheko/Entities/Files/Share.php 8812be81f0e699af672fed2501ee3ee79a80acf9e96f22eb1a39ac7efbeda573
 F src/include/lib/Paheko/Entities/Module.php ebdaf6e9a9dbb8667cc281c2cafb3482e139946e83b5ba723c3ba504532184ce
 F src/include/lib/Paheko/Entities/Plugin.php d9398c62c19f99b6fcbc450b21d5af3447ea77d795578a78e99ca218cd1cf046
@@ -155,7 +155,7 @@ F src/include/lib/Paheko/Entity.php 87e238dee8a82f1c6a7ca3c702920f0a6536623621f7
 F src/include/lib/Paheko/Exec.php 647dc7940c6a47cab5a0c1680b95df43d1f0a00d0dd08b1093203e4d39bafe63
 F src/include/lib/Paheko/Extensions.php 4b0b592b666a5d93fb4c0eede1ae3149d896c7d109831dd4b19f7073b530a9ad
 F src/include/lib/Paheko/Files/Conversion.php 4cdb466a3ec82fbfbee2a0b90f0cf607b7e8867ef47705144db77c55889a04d9
-F src/include/lib/Paheko/Files/Files.php 87cfa5e0f7d10e7231274b7cc5eadd75b8b1e17f85f58eef5a713d8f7c64a66c
+F src/include/lib/Paheko/Files/Files.php e956261fe523662ef360c76fc32f2ee6e08b3a365781ca395bfba441395f23cf
 F src/include/lib/Paheko/Files/Shares.php aebd56add96357869d14036e94981595bd179b7110d5423a6f113a36e059159b
 F src/include/lib/Paheko/Files/Storage.php c93ecb63d50750ff3b0b4559e4a81a1535157c9b77fbbf420489ebdc9501ea0c
 F src/include/lib/Paheko/Files/Storage/FileSystem.php 14ce26f9983e86290213a812f2e3683ade9788a606c3c28e12455863345ba99b
@@ -165,10 +165,10 @@ F src/include/lib/Paheko/Files/Transactions.php e7841fe55824527ce9b0499207770688
 F src/include/lib/Paheko/Files/Trash.php c1a017aeb2879af106bf0cf5a2d2ab6874ccab1b6321a49303713be3fcceee0a
 F src/include/lib/Paheko/Files/Users.php 85236e89f6ac49afdec8176e5cb13371eae0b51d5e44e8b0ab12a90ff8623a51
 F src/include/lib/Paheko/Files/WebDAV/NextCloud.php 8dfe776c0d08875f10140e2ca423b20200e08807dfb632d65725ec730c80497e
-F src/include/lib/Paheko/Files/WebDAV/Server.php 79dacabdbc870b57378e98d0fee36a403214d03e50e42a10e60fdbb545c23f2c
+F src/include/lib/Paheko/Files/WebDAV/Server.php 9715b3d91c6ceeab2fe3909c61e9f801a0aa067fc7d64404337f007a29c83918
 F src/include/lib/Paheko/Files/WebDAV/Session.php d23fa06d8a0b50422e978360d6d9d8cbd58ffdfcf8cd00f2960abf3bce981d17
-F src/include/lib/Paheko/Files/WebDAV/Storage.php 2a19c2f985c3ced31eebde92dcc6fef4a7e4cffcf2eb132e0ac4d9eb00cd7040
-F src/include/lib/Paheko/Files/WebDAV/WebDAV.php c52467afa7abac00f8be1b1501dfa250386621c1a7a23abbd8ae6ca03b25f38a
+F src/include/lib/Paheko/Files/WebDAV/Storage.php d19b8e20b33247f899477f6535a25645d723017986d3f29f8c133e2e649de440
+F src/include/lib/Paheko/Files/WebDAV/WebDAV.php de9213e43153451be44aa4252e3dbf89e15b9f3475141a7553eaef9afbd537bd
 F src/include/lib/Paheko/Form.php eb177f8ebbf1ef8a3af098b674b4ac1926d007bf1166090b9c8302f7af0e4367
 F src/include/lib/Paheko/Install.php ed6a0f9cea944870c679e49f9630a2b57514335d30d132e357dc059fc05d2789
 F src/include/lib/Paheko/Log.php 7d03b322ff07dd2cefdd9865357dff43ad9e7edfba7fe97712e32ae3c2fe5f69
@@ -865,24 +865,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 8f89aca046c85beabc6628e9e3cf78762d1fb61de1d82120e58f6c703c9dd629
-R 1864cb497ffd1d03714949225fbb92cb
+P 7571d0f6fa518e8a0f8f06e12713ad0b6b1f518fa69398192078ae5cfb4ab4da
+R 9c9acfba0f4a109a7d291b0461dfc69c
 U bohwaz
-Z 929bc55e759c8dc4550906ec940d97a6
+Z 4c3ed9e34ab157f3f9c4ca29cbfd3345
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqzxTUACgkQksnacbiI
-6jQ00w//bfaNH5Z2AOOmRaNtdWsoRdEeEW/ck8CKIyq6j36ntJY18xcsacfs5K6f
-n8YCs4vxNupDAY8yS+ZPXvox0Ui/VAZoxIW9iMFLpCsLyEXFnGEaur1n9PbI7EdR
-bKF8vfGv0yg301IWlk/3hlBeS549nJR2hhMJ4i1CoGL5JlRHmDiuVTbCp2vnafJ6
-htZCPleHE+uFRdiPITJSWG/wwmXEhn4G95so2IPSrqbuy2CNRd/QMHRjSdJglcLp
-OWRkJ5Rz5e1QrYwTradVCOUDkdawHj+lJhaUGs4NeLULqFTv1///3xHANYd/f1Ze
-DP/l8/aCQeHlG1UwNtOvzYrcck0axEuLQ6H0lVp1HVVe8zUPVoWUiYrdqR8p5z16
-uGMtjK1Nuw1MFuFUSM2PwbZHFJjT1iT5Pj1Vjwa/91+H2KNwYmIfuQOTOgxwmE/5
-7Vs7n6s/OgKxZG5gHM2cGkWgc+H+ehRf7VRFVWFraWdGcm/NV/ZIHr9ILJITJ4+I
-l7hSCsIzNXUamg5C4BVi/oJhTdpPYFoeW2ysLFPoir1Kqjvz03q/NynvmSCkvfEm
-KPfPfchJbiYHL0pRq8H2LnZG9sSIQ3aFEm6adVfX8s8jst4WKEAJnTqIZDCNDuGK
-GtppzTgq0U/dF4fv17YAZvX2ORPMDGbKNbwHcFcyDMNz48nKHLI=
-=51ns
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqzxVEACgkQksnacbiI
+6jROaw//bQaVambpCpJ31f9aStjxGPpq2RLPwxz/LGtxs4UNMBUg6SLoD5vf3Lv0
+ENnbJsRAshv2X60kb7GhXBw4Ye6kvnU6C5EdPzoqE2OQb5lMBAWGuJluD2fMCn4h
+F0Ram5/3J6UttPsOsHTqBlKeDh0pipV8rjMvux7n1A6/cVQlzmpYJla9rWEPAZig
+02GClgWPy7A4CkUfrMvVY4xnfZ3oZ6cYJyX8awTcMUVGDNgOb8Z010H7uXLIr52n
+BXUJdsm/5A0S0alcozj6cUp3mQ57aeS658U/Yo8uK5uvMJZlQVVhfgOldQz6xIqE
+/jdj+5yq8Rb99+FejwMJZRAnwwV+iVroTgCVXg4MfI5xRzEMCqMEVYxuWU2dKgNR
+em3IJqco1yNp1s7il/Ezb5NKwESqmp0+3yzxju+dKlPmRDoC5zvUqP/3j8KGrkU9
+RLPcrMZert5WxB3vAUe3gzt6Az2TW9ucr2kixVZTRoEbh0nL6MhJeDmtdQDxb6nX
+dw5Da4U9GKOKbfO/itG/cXLpTytbdpdSXfO4KI0+5DoRnOk+LhnhQ92RSO8Jga/c
+2gIBej6LPMCt5jBvf5U5bb6uzQriMI5RV185ly/oPqneuOJrH21VE1N2eK1US23W
+nStuG7vIWli1AokeUAPwFF4442W6370FGPzLd61aY6Ia3DohpbQ=
+=Bxn5
 -----END PGP SIGNATURE-----
