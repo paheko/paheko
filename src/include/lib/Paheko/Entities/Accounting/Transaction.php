@@ -1231,7 +1231,7 @@ class Transaction extends Entity
 			$source['type'] = constant(self::class . '::TYPE_' . strtoupper($source['type']));
 		}
 
-		if (isset($source['id_year'])) {
+		if (!$this->exists() && isset($source['id_year'])) {
 			$y = $source['id_year'];
 
 			if ($source['id_year'] === 'current') {
