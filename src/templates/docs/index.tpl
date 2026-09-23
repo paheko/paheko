@@ -4,6 +4,26 @@ $upload_here = $context_specific_root ? null : $dir->path;
 ?>
 {include file="_head.tpl" title=$title current="docs" hide_title=true upload_here=$upload_here}
 
+{if $_GET.browser}
+<iframe src="/dav/documents/"></iframe>
+<style type="text/css">
+{literal}
+body, html, main {
+	height: 100%;
+	overflow: hidden;
+}
+iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+main {
+	padding: 0;
+}
+{/literal}
+</style>
+{else}
+
 <nav class="tabs">
 	{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 		{size_meter
@@ -269,6 +289,8 @@ $upload_here = $context_specific_root ? null : $dir->path;
 	<p class="actions">
 		{linkbutton shape="help" href="./webdav.php" label="Accès avec une application" target="_dialog"}
 	</p>
+{/if}
+
 {/if}
 
 {include file="_foot.tpl"}

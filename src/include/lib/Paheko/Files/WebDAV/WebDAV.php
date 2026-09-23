@@ -19,6 +19,7 @@ class WebDAV extends KD2_WebDAV
 		if (null !== $out) {
 			$options = [
 				'wopi_discovery_cache_url' => WWW_URL . 'wopi/discovery.json',
+				'parent_window_url_prefix' => Utils::getLocalURL('!docs/?browser=1&p='),
 				'server_url' => WWW_URL,
 				'webdav_url' => WWW_URL . 'dav/',
 				'autosave'   => true,

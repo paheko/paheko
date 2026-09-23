@@ -1,8 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-C Implement\snew\sWOPI\sdiscovery\scache\sendpoint
-D 2026-09-23T12:25:53.674
+C Add\stest\sbrowser\sintegration
+D 2026-09-23T14:18:44.421
 F .editorconfig e6f131bd881371738fbc49cd771c470959e14df4b5baa398db781f21e2f98b34
 F .fossil-settings/allow-symlinks 5a9cb4b1795fdc8982e907994a2e80eca49b6daf329c826d86903016391506ce
 F .fossil-settings/ignore-glob 962019af50eb59ad515b3bdf7d4bc04b7a982a4b410d1d669a9561c095388772
@@ -168,7 +168,7 @@ F src/include/lib/Paheko/Files/WebDAV/NextCloud.php 8dfe776c0d08875f10140e2ca423
 F src/include/lib/Paheko/Files/WebDAV/Server.php 9715b3d91c6ceeab2fe3909c61e9f801a0aa067fc7d64404337f007a29c83918
 F src/include/lib/Paheko/Files/WebDAV/Session.php d23fa06d8a0b50422e978360d6d9d8cbd58ffdfcf8cd00f2960abf3bce981d17
 F src/include/lib/Paheko/Files/WebDAV/Storage.php d19b8e20b33247f899477f6535a25645d723017986d3f29f8c133e2e649de440
-F src/include/lib/Paheko/Files/WebDAV/WebDAV.php de9213e43153451be44aa4252e3dbf89e15b9f3475141a7553eaef9afbd537bd
+F src/include/lib/Paheko/Files/WebDAV/WebDAV.php 83db5c8c6c266b9da9db33a3de6b7d2f1c875e2ecf45f141ac46e7894022eb46
 F src/include/lib/Paheko/Form.php eb177f8ebbf1ef8a3af098b674b4ac1926d007bf1166090b9c8302f7af0e4367
 F src/include/lib/Paheko/Install.php ed6a0f9cea944870c679e49f9630a2b57514335d30d132e357dc059fc05d2789
 F src/include/lib/Paheko/Log.php 7d03b322ff07dd2cefdd9865357dff43ad9e7edfba7fe97712e32ae3c2fe5f69
@@ -402,7 +402,7 @@ F src/templates/docs/_nav.tpl 5a105b0bbd1162baa8a02e96ac2f768904b4409c63c17f1928
 F src/templates/docs/action_delete.tpl 85a65c16cbcfb058acf21dad9a0d0526eb4242d6aeadbf6f5f030221fb477fb9
 F src/templates/docs/action_move_to_transaction.tpl dcf7d068d3b12cfd50f66f15caac5bae93a6d208f98bffc16e8d2571b6f9e215
 F src/templates/docs/action_zip.tpl 114d5fbcba613fa60010bea0f5747072c8b7c1fb24aa19bd50851efa7857283c
-F src/templates/docs/index.tpl 9e04ade82f72407a0c7d07b2c99e725e9361869fd4a13d5c39c57290677ae7db
+F src/templates/docs/index.tpl 4f906e8f8eab1e5dca3b13d2817b27550f3f38f74f490f29cdf315bfc7d33e38
 F src/templates/docs/move.tpl 9d84f5c20e3c8f3ca78b9cb32058ea9adc20f49877b34ff3ee83730a6f762d71
 F src/templates/docs/new_dir.tpl efb439d26cd579114e13870c35c39e8a71abb66f1c60618b39465d4e7b3908cb
 F src/templates/docs/new_doc.tpl e3d068915a62388576862f801ceb860833490a4556b2b00dd434acfd4fa937f2
@@ -761,7 +761,7 @@ F src/www/admin/static/scripts/lib/prism/prism_editor.js f3f59db7dcdbb1047f7a346
 F src/www/admin/static/scripts/lib/query_builder.js c3698435f29a6d7494f73f72520cfb8d3a6d468ba164df0607802bcc033f4f6b
 F src/www/admin/static/scripts/lib/text_editor.js 753a77f49880b00419771b25a1166ff76819f3cd52ad48f2b752339caa64a5bd
 F src/www/admin/static/scripts/lib/unzipit.min.js 8729f4e48a77faee72b09d2503934f705fb5befab597262230c7c26836f52162
-F src/www/admin/static/scripts/lib/webdav.min.js 942d16b8ba92440e3e761ca24285f0268aa3110d4f814d9b615f65089fba1082
+F src/www/admin/static/scripts/lib/webdav.min.js 5b4cb161d46fee6787e8180b301aa750403bd949dd57d7181824af6887d699d0
 F src/www/admin/static/scripts/password.js 6b890f3fa7aaef7c69b83a52cd6fc271984159983b52bc35bd0ead7dcad604e1
 F src/www/admin/static/scripts/selector.js 51cbb5deb4f797c21f1ed849304ad9ef470305bf7e87a346eb8cbcd9feb88ff1
 F src/www/admin/static/scripts/service_form.js 34795ffd77f34bd609bbf3dba88f70039170593eb2a32cca2c71b7e0d05734f5
@@ -865,24 +865,24 @@ F tools/fossil_verify.sh b468f22c70f7c64bf52e654844862d2ad5406e578b91fcaacfc4f93
 F tools/mail_test_recipients.php 2503ac75be4b254dc080b47203671c2bf52c2a8ba170fd83cb193ba0c5e0d30c
 F tools/make_installer.php 8b0d272bf113a74dc9cce91213bc875229858010a8f1a3830151755af3520d7d
 F tools/plugin_check_0.8.php df13be68be836729f96a26ec5cb33133d5e6bbce
-P 7571d0f6fa518e8a0f8f06e12713ad0b6b1f518fa69398192078ae5cfb4ab4da
-R 9c9acfba0f4a109a7d291b0461dfc69c
+P 9b281f3795f29120ac0b167423b898d18f26c4706b3f81b8d96f856962673de5
+R a0dec6be5cc1eb2820d17aaf85e08ffe
 U bohwaz
-Z 4c3ed9e34ab157f3f9c4ca29cbfd3345
+Z 6c9257b2e826b5e6408bd9ded46f830f
 # Remove this line to create a well-formed Fossil manifest.
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqzxVEACgkQksnacbiI
-6jROaw//bQaVambpCpJ31f9aStjxGPpq2RLPwxz/LGtxs4UNMBUg6SLoD5vf3Lv0
-ENnbJsRAshv2X60kb7GhXBw4Ye6kvnU6C5EdPzoqE2OQb5lMBAWGuJluD2fMCn4h
-F0Ram5/3J6UttPsOsHTqBlKeDh0pipV8rjMvux7n1A6/cVQlzmpYJla9rWEPAZig
-02GClgWPy7A4CkUfrMvVY4xnfZ3oZ6cYJyX8awTcMUVGDNgOb8Z010H7uXLIr52n
-BXUJdsm/5A0S0alcozj6cUp3mQ57aeS658U/Yo8uK5uvMJZlQVVhfgOldQz6xIqE
-/jdj+5yq8Rb99+FejwMJZRAnwwV+iVroTgCVXg4MfI5xRzEMCqMEVYxuWU2dKgNR
-em3IJqco1yNp1s7il/Ezb5NKwESqmp0+3yzxju+dKlPmRDoC5zvUqP/3j8KGrkU9
-RLPcrMZert5WxB3vAUe3gzt6Az2TW9ucr2kixVZTRoEbh0nL6MhJeDmtdQDxb6nX
-dw5Da4U9GKOKbfO/itG/cXLpTytbdpdSXfO4KI0+5DoRnOk+LhnhQ92RSO8Jga/c
-2gIBej6LPMCt5jBvf5U5bb6uzQriMI5RV185ly/oPqneuOJrH21VE1N2eK1US23W
-nStuG7vIWli1AokeUAPwFF4442W6370FGPzLd61aY6Ia3DohpbQ=
-=Bxn5
+iQIzBAEBCgAdFiEExJkkebouil1CwYIBksnacbiI6jQFAmqz38QACgkQksnacbiI
+6jSP4w/9E6v6nNkkHxcScKGxn5r7nVki4gpiBfJ5Q7E2YW1OKGOZSrdIBOWsbywn
+HNXpiwmAcIVngBH/zYkuYoea7II0Jcm77DlVjqVtHu/8No/RLan5jEs8l3jQkskd
+meL0yz2r3XW1dXQMxiTUcp4caYsc+s+kebWVxrZ+Q7KJR8PlWrbBkBT2Vuf2Lfyl
+gshioniapXLgElepQJ6zejIVeWAXhOULY2mo9B3WClGYHXSMRiIAWaL3591vLO5L
+LvG62V97ogu4BxabAYtY/losK8c3p8ysR1Wm1gmA2nHLCz2SzHT9vM0r1CzHA8Tq
+JHIrUWYHAVV0DxRsJhJZ4Yp8dwbdgrL6sRbEqNlIhLYW9GHaWKltl3uzjLh11OUr
+Vq6cXS13jItwvbrNHURJ0Qp8UglPYnCk4jgRB1T/He2ykvu/DQNYJwjgktRQrs4P
+A3GH7x8pC8JDQvX/rzqYXuAwAxePMXI8oPJjH1hKlmX38wRD1rglITN918C6aJQ2
+VH6Ucjb/Mm9NHEjM8jIJuaInvcSAk2lghp1DDQof9MG/MJisJaAI527GQ0+TM+my
+GXdMXEjmcyi28RoXJ1rjqPW9qsLNkLOvpFfdc2SNfSjkwZCFc1hwnBX3kkTxjIg+
+KWzD1D3nd0TRRD3PRPuXYvYcLvl4OG/OZDw3qMDDc90kvmbM/WQ=
+=BWRd
 -----END PGP SIGNATURE-----
