@@ -1023,6 +1023,10 @@ class File extends Entity
 
 	public function isShared(): bool
 	{
+		if (!$this->exists()) {
+			return false;
+		}
+
 		return (bool) DB::getInstance()->firstColumn('SELECT 1 FROM files_shares
 			WHERE id_file = ? AND (expiry IS NULL OR expiry > ?) LIMIT 1;',
 			$this->id,
