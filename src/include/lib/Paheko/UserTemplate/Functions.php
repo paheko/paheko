@@ -276,8 +276,8 @@ class Functions
 				try {
 					$schemas[$validate] = JSONSchema::fromString($schema);
 				}
-				catch (\LogicException $e) {
-					throw new TemplateException($e->getMessage(), 0, $e);
+				catch (\InvalidArgumentException|\JsonException $e) {
+					throw new TemplateException('JSON Schema: ' . $e->getMessage(), 0, $e);
 				}
 			}
 
