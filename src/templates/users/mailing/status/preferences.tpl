@@ -13,7 +13,7 @@
 		</dl>
 		<p class="help">(*) Les cases décochées ne peuvent être ré-activées que par la personne destinataire, conformément au RGPD.<br />
 			Voici le lien à transmettre au destinataire pour qu'iel puisse se réinscrire aux envois :<br />
-			{input type="text" readonly=true copy=true default=$user_prefs_url name=""}
+			{input type="text" readonly=true copy=true default=$user_prefs_url name=""} {linkbutton href=$user_prefs_url target="_blank" label="Ouvrir le lien"}
 		</p>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
